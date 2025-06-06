@@ -35,7 +35,7 @@ export default function Splash() {
         easing: Easing.out(Easing.ease),
       });
     }, 400);
-  }, []);
+  }, [containerScale, imageScale, textOpacity, textTranslateY]);
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: containerScale.value }],
@@ -61,7 +61,7 @@ export default function Splash() {
       <Animated.View style={[styles.imageContainer, animatedContainerStyle]}>
         <Animated.Image
           style={[styles.image, animatedImageStyle]}
-          source={require("../assets/images/icon.png")}
+          source={require("../assets/images/splash.png")}
         />
       </Animated.View>
       <Animated.Text style={[styles.appName, animatedTextStyle]}>

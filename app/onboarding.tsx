@@ -1,60 +1,63 @@
+import { default as Icon1 } from "@/assets/images/onboarding1.svg";
+import { default as Icon2 } from "@/assets/images/onboarding2.svg";
+import { default as Icon3 } from "@/assets/images/onboarding3.svg";
+import { default as Icon4 } from "@/assets/images/onboarding4.svg";
+
 import { color, font } from "@/utils/constants";
-import { useNavigation } from "expo-router";
+import { router } from "expo-router";
 import { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-// import { onboardingData } from "./OnboardingData";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const onboardingData = [
   {
     id: 1,
-    icon: require("../assets/images/heart-icon.png"),
+    IconComponent: Icon1,
     title: "Love at first sight.",
     description:
       "Meet your soulmate in real life.\nForget swiping left and right.",
   },
   {
     id: 2,
-    icon: require("../assets/images/location-icon.png"),
+    IconComponent: Icon2,
     title: "Find nearby matches.",
     description:
       "Discover people around you who share\nyour interests and values.",
   },
   {
     id: 3,
-    icon: require("../assets/images/chat-icon.png"),
+    IconComponent: Icon3,
     title: "Start meaningful conversations.",
     description:
       "Connect through authentic conversations\nand build real relationships.",
   },
   {
     id: 4,
-    icon: require("../assets/images/date-icon.png"),
-    title: "Meet in person.",
-    description:
-      "Plan your first date and create\nunforgettable memories together.",
+    IconComponent: Icon4,
+    title: "Meet people on events",
+    description: "See if someone interesting is joinung the same event as you",
   },
 ];
 
 export default function OnboardingScreen() {
-  const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentData = onboardingData[currentIndex];
   const isLastScreen = currentIndex === onboardingData.length - 1;
 
   const handleContinue = () => {
     if (isLastScreen) {
-      // navigation.navigate("GetStarted");
+      router.push("/welcome");
     } else {
       setCurrentIndex(currentIndex + 1);
     }
   };
 
   const handleSkip = () => {
-    // navigation.navigate("GetStarted");
+    router.push("/welcome");
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Skip Button */}
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
         <Text style={styles.skipText}>Skip</Text>
@@ -64,7 +67,7 @@ export default function OnboardingScreen() {
       <View style={styles.contentContainer}>
         {/* Icon */}
         <View style={styles.iconContainer}>
-          <Image source={currentData.icon} style={styles.icon} />
+          <currentData.IconComponent />
         </View>
 
         {/* Title */}
@@ -99,7 +102,7 @@ export default function OnboardingScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -107,9 +110,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    paddingHorizontal: 24,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingHorizontal: 32,
   },
   skipButton: {
     alignSelf: "flex-end",
@@ -117,8 +118,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   skipText: {
-    fontSize: 16,
-    // color: color.gray,
+    fontSize: 14,
+    color: color.gray300,
     fontFamily: font.medium,
   },
   contentContainer: {
@@ -128,30 +129,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   iconContainer: {
-    width: 100,
-    height: 100,
-    backgroundColor: color.primary,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  icon: {
-    width: 50,
-    height: 50,
-    tintColor: color.white,
+    marginBottom: 32,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: font.bold,
-    // color: color.black,
+    color: color.black,
     textAlign: "center",
     marginBottom: 16,
   },
   description: {
     fontSize: 16,
     fontFamily: font.regular,
-    // color: color.gray,
+    color: color.gray300,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -166,12 +156,12 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    // backgroundColor: color.lightGray,
+    backgroundColor: color.gray100,
     marginHorizontal: 4,
   },
   activeIndicator: {
     backgroundColor: color.primary,
-    width: 24,
+    width: 8,
   },
   continueButton: {
     backgroundColor: color.primary,
