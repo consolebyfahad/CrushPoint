@@ -1,3 +1,5 @@
+import CustomButton from "@/components/custom_button";
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { FemaleIcon, MaleIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
@@ -5,46 +7,22 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Back Arrow Icon Component
-const BackArrowIcon = () => (
-  <View style={styles.backIcon}>
-    <Text style={styles.backArrowText}>←</Text>
-  </View>
-);
-
-// Info Icon Component
-const InfoIcon = () => (
-  <View style={styles.infoIcon}>
-    <Text style={styles.infoText}>i</Text>
-  </View>
-);
-
 export default function Interested() {
-  const [selectedInterest, setSelectedInterest] = useState("women"); // Default to women as shown in image
+  const [selectedInterest, setSelectedInterest] = useState("women");
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    }
-  };
-
-  const handleInterestSelect = (interest) => {
+  const handleInterestSelect = (interest: any) => {
     setSelectedInterest(interest);
   };
 
   const handleContinue = () => {
     console.log("Interested in:", selectedInterest);
-    // router.push("/auth/next-step");
+    router.push("/auth/about");
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header with Back Button */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <BackArrowIcon />
-        </TouchableOpacity>
-      </View>
+      <Header />
 
       {/* Content */}
       <View style={styles.content}>
@@ -52,7 +30,7 @@ export default function Interested() {
         <View style={styles.titleSection}>
           <Text style={styles.title}>Who are you interested in?</Text>
           <View style={styles.subtitleContainer}>
-            <InfoIcon />
+            {/* <InfoIcon /> */}
             <Text style={styles.subtitle}>
               This helps us show you relevant profiles nearby
             </Text>
@@ -72,10 +50,7 @@ export default function Interested() {
             onPress={() => handleInterestSelect("men")}
             activeOpacity={0.8}
           >
-            <MaleIcon
-              color={selectedInterest === "men" ? color.primary : color.gray300}
-              size={48}
-            />
+            <MaleIcon />
             <Text
               style={[
                 styles.interestText,
@@ -99,12 +74,7 @@ export default function Interested() {
             onPress={() => handleInterestSelect("women")}
             activeOpacity={0.8}
           >
-            <FemaleIcon
-              color={
-                selectedInterest === "women" ? color.primary : color.gray300
-              }
-              size={48}
-            />
+            <FemaleIcon />
             <Text
               style={[
                 styles.interestText,
@@ -145,14 +115,7 @@ export default function Interested() {
       </View>
 
       {/* Continue Button */}
-      <View style={styles.bottomSection}>
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={handleContinue}
-        >
-          <Text style={styles.continueButtonText}>Continue</Text>
-        </TouchableOpacity>
-      </View>
+      <CustomButton title="Continue" onPress={handleContinue} />
     </SafeAreaView>
   );
 }
@@ -163,35 +126,12 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     paddingHorizontal: 24,
   },
-  header: {
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: color.gray100,
-    borderRadius: 22,
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  backArrowText: {
-    fontSize: 20,
-    color: color.black,
-    fontFamily: font.medium,
-  },
   content: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 30,
   },
   titleSection: {
-    marginBottom: 60,
+    marginBottom: 40,
   },
   title: {
     fontSize: 24,
@@ -204,20 +144,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  infoIcon: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: color.gray300,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  infoText: {
-    fontSize: 10,
-    fontFamily: font.medium,
-    color: color.gray300,
-  },
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
@@ -229,7 +155,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   interestOption: {
-    paddingVertical: 32,
+    paddingVertical: 28,
     paddingHorizontal: 24,
     borderRadius: 16,
     borderWidth: 2,
@@ -238,7 +164,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   bothOption: {
-    paddingVertical: 24, // Slightly less padding since no icon
+    paddingVertical: 18, // Slightly less padding since no icon
   },
   selectedOption: {
     backgroundColor: "#E3F2FD", // Light blue background
@@ -261,20 +187,5 @@ const styles = StyleSheet.create({
   },
   unselectedText: {
     color: color.black,
-  },
-  bottomSection: {
-    paddingBottom: 40,
-  },
-  continueButton: {
-    backgroundColor: color.primary,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontFamily: font.semiBold,
-    color: color.white,
   },
 });

@@ -1,3 +1,5 @@
+import CustomButton from "@/components/custom_button";
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { FemaleIcon, MaleIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
@@ -5,45 +7,27 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Back Arrow Icon Component
-const BackArrowIcon = () => (
-  <View style={styles.backIcon}>
-    <Text style={styles.backArrowText}>←</Text>
-  </View>
-);
-
 export default function Gender() {
   const [selectedGender, setSelectedGender] = useState("male"); // Default to male as shown in image
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    }
-  };
-
-  const handleGenderSelect = (gender) => {
+  const handleGenderSelect = (gender: any) => {
     setSelectedGender(gender);
   };
 
   const handleContinue = () => {
     console.log("Selected gender:", selectedGender);
-    // router.push("/auth/next-step");
+    router.push("/auth/intrested");
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header with Back Button */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <BackArrowIcon />
-        </TouchableOpacity>
-      </View>
-
+      <Header />
       {/* Content */}
       <View style={styles.content}>
         {/* Title and Subtitle */}
         <View style={styles.titleSection}>
-          <Text style={styles.title}>What's your gender?</Text>
+          <Text style={styles.title}>{"What's your gender?"}</Text>
           <Text style={styles.subtitle}>
             This helps us create a better experience for you
           </Text>
@@ -62,10 +46,7 @@ export default function Gender() {
             onPress={() => handleGenderSelect("male")}
             activeOpacity={0.8}
           >
-            <MaleIcon
-              color={selectedGender === "male" ? color.primary : color.gray300}
-              size={48}
-            />
+            <MaleIcon />
             <Text
               style={[
                 styles.genderText,
@@ -89,12 +70,7 @@ export default function Gender() {
             onPress={() => handleGenderSelect("female")}
             activeOpacity={0.8}
           >
-            <FemaleIcon
-              color={
-                selectedGender === "female" ? color.primary : color.gray300
-              }
-              size={48}
-            />
+            <FemaleIcon />
             <Text
               style={[
                 styles.genderText,
@@ -110,14 +86,7 @@ export default function Gender() {
       </View>
 
       {/* Continue Button */}
-      <View style={styles.bottomSection}>
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={handleContinue}
-        >
-          <Text style={styles.continueButtonText}>Continue</Text>
-        </TouchableOpacity>
-      </View>
+      <CustomButton title="Continue" onPress={handleContinue} />
     </SafeAreaView>
   );
 }
@@ -127,29 +96,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
     paddingHorizontal: 24,
-  },
-  header: {
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: color.gray100,
-    borderRadius: 22,
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  backArrowText: {
-    fontSize: 20,
-    color: color.black,
-    fontFamily: font.medium,
   },
   content: {
     flex: 1,
@@ -199,63 +145,5 @@ const styles = StyleSheet.create({
   },
   unselectedText: {
     color: color.black,
-  },
-  bottomSection: {
-    paddingBottom: 40,
-  },
-  continueButton: {
-    backgroundColor: color.primary,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontFamily: font.semiBold,
-    color: color.white,
-  },
-  // Custom Gender Icon Styles
-  genderIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 3,
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  genderIconInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    position: "absolute",
-  },
-  // Male arrow (top-right diagonal)
-  maleArrow: {
-    position: "absolute",
-    top: -8,
-    right: -8,
-    width: 0,
-    height: 0,
-    borderBottomWidth: 8,
-    borderRightWidth: 8,
-    borderBottomColor: "transparent",
-    borderLeftColor: "transparent",
-    borderTopColor: "transparent",
-  },
-  // Female cross (bottom vertical line)
-  femaleCross: {
-    position: "absolute",
-    bottom: -12,
-    width: 2,
-    height: 8,
-  },
-  // Female cross (horizontal line)
-  femaleCrossVertical: {
-    position: "absolute",
-    bottom: -8,
-    width: 6,
-    height: 2,
   },
 });

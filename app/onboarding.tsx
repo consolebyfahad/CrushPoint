@@ -1,9 +1,7 @@
-import { default as Icon1 } from "@/assets/images/onboarding1.svg";
-import { default as Icon2 } from "@/assets/images/onboarding2.svg";
-import { default as Icon3 } from "@/assets/images/onboarding3.svg";
-import { default as Icon4 } from "@/assets/images/onboarding4.svg";
+import CustomButton from "@/components/custom_button";
 
 import { color, font } from "@/utils/constants";
+import { svgIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -12,28 +10,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export const onboardingData = [
   {
     id: 1,
-    IconComponent: Icon1,
+    IconComponent: svgIcon.Onboarding1,
     title: "Love at first sight.",
     description:
       "Meet your soulmate in real life.\nForget swiping left and right.",
   },
   {
     id: 2,
-    IconComponent: Icon2,
+    IconComponent: svgIcon.Onboarding2,
     title: "Find nearby matches.",
     description:
       "Discover people around you who share\nyour interests and values.",
   },
   {
     id: 3,
-    IconComponent: Icon3,
+    IconComponent: svgIcon.Onboarding3,
     title: "Start meaningful conversations.",
     description:
       "Connect through authentic conversations\nand build real relationships.",
   },
   {
     id: 4,
-    IconComponent: Icon4,
+    IconComponent: svgIcon.Onboarding4,
     title: "Meet people on events",
     description: "See if someone interesting is joinung the same event as you",
   },
@@ -66,9 +64,7 @@ export default function OnboardingScreen() {
       {/* Content Container */}
       <View style={styles.contentContainer}>
         {/* Icon */}
-        <View style={styles.iconContainer}>
-          <currentData.IconComponent />
-        </View>
+        <View style={styles.iconContainer}>{currentData.IconComponent}</View>
 
         {/* Title */}
         <Text style={styles.title}>{currentData.title}</Text>
@@ -93,14 +89,10 @@ export default function OnboardingScreen() {
         </View>
 
         {/* Continue Button */}
-        <TouchableOpacity
-          style={styles.continueButton}
+        <CustomButton
+          title={isLastScreen ? "Get Started" : "Continue"}
           onPress={handleContinue}
-        >
-          <Text style={styles.continueText}>
-            {isLastScreen ? "Get Started" : "Continue"}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
     </SafeAreaView>
   );
@@ -162,18 +154,5 @@ const styles = StyleSheet.create({
   activeIndicator: {
     backgroundColor: color.primary,
     width: 8,
-  },
-  continueButton: {
-    backgroundColor: color.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    width: "100%",
-    alignItems: "center",
-  },
-  continueText: {
-    fontSize: 16,
-    fontFamily: font.semiBold,
-    color: color.white,
   },
 });

@@ -1,4 +1,4 @@
-import { color, font } from "@/utils/constants";
+import { color, font, image } from "@/utils/constants";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
@@ -61,7 +61,7 @@ export default function Splash() {
       <Animated.View style={[styles.imageContainer, animatedContainerStyle]}>
         <Animated.Image
           style={[styles.image, animatedImageStyle]}
-          source={require("../assets/images/splash.png")}
+          source={image.splash}
         />
       </Animated.View>
       <Animated.Text style={[styles.appName, animatedTextStyle]}>

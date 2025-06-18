@@ -1,30 +1,18 @@
+import CustomButton from "@/components/custom_button";
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Animated, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-// Back Arrow Icon Component
-const BackArrowIcon = () => (
-  <View style={styles.backIcon}>
-    <Text style={styles.backArrowText}>←</Text>
-  </View>
-);
 
 export default function Verify() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
-  const [resendCountdown, setResendCountdown] = useState(50);
+  const [resendCountdown, setResendCountdown] = useState(59);
   const [canResend, setCanResend] = useState(false);
 
   // Create refs for each input
-  const inputRefs = useRef([]);
+  const inputRefs = useRef<(TextInput | null)[]>([]);
   const animatedValues = useRef(code.map(() => new Animated.Value(1))).current;
 
   // Phone number from previous screen (in real app, get from route params)
@@ -34,7 +22,7 @@ export default function Verify() {
     // Auto-focus first input when component mounts
     if (inputRefs.current[0]) {
       setTimeout(() => {
-        inputRefs.current[0].focus();
+        inputRefs.current[0]?.focus();
       }, 100);
     }
 
@@ -53,13 +41,7 @@ export default function Verify() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    }
-  };
-
-  const handleCodeChange = (text, index) => {
+  const handleCodeChange = (text: string, index: number) => {
     // Only allow single digit
     const digit = text.slice(-1);
 
@@ -99,14 +81,14 @@ export default function Verify() {
     }
   };
 
-  const handleKeyPress = (event, index) => {
+  const handleKeyPress = (event: any, index: number) => {
     // Handle backspace to move to previous input
     if (event.nativeEvent.key === "Backspace" && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-  const handleVerifyCode = (fullCode) => {
+  const handleVerifyCode = (fullCode: string) => {
     console.log("Verifying code:", fullCode);
     router.push("/auth/gender");
     // Add verification logic here
@@ -140,12 +122,7 @@ export default function Verify() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header with Back Button */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <BackArrowIcon />
-        </TouchableOpacity>
-      </View>
-
+      <Header />
       {/* Content */}
       <View style={styles.content}>
         {/* Title and Subtitle */}
@@ -169,7 +146,9 @@ export default function Verify() {
               ]}
             >
               <TextInput
-                ref={(ref) => (inputRefs.current[index] = ref)}
+                ref={(ref) => {
+                  inputRefs.current[index] = ref;
+                }}
                 style={[styles.pinBox, digit ? styles.pinBoxFilled : null]}
                 value={digit}
                 onChangeText={(text) => handleCodeChange(text, index)}
@@ -186,27 +165,13 @@ export default function Verify() {
         </View>
 
         {/* Resend Code Button */}
-        <View style={styles.resendSection}>
-          <TouchableOpacity
-            style={[
-              styles.resendButton,
-              canResend
-                ? styles.resendButtonActive
-                : styles.resendButtonDisabled,
-            ]}
-            onPress={handleResendCode}
-            disabled={!canResend}
-          >
-            <Text
-              style={[
-                styles.resendText,
-                canResend ? styles.resendTextActive : styles.resendTextDisabled,
-              ]}
-            >
-              {canResend ? "Resend code" : `Resend code in ${resendCountdown}s`}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <CustomButton
+          title={
+            canResend ? "Resend Code" : `Resend code in ${resendCountdown}s`
+          }
+          onPress={handleResendCode}
+          isDisabled={!canResend}
+        />
       </View>
     </SafeAreaView>
   );
@@ -217,29 +182,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
     paddingHorizontal: 24,
-  },
-  header: {
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: color.gray100,
-    borderRadius: 22,
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  backArrowText: {
-    fontSize: 20,
-    color: color.black,
-    fontFamily: font.medium,
   },
   content: {
     flex: 1,
@@ -286,31 +228,5 @@ const styles = StyleSheet.create({
   pinBoxFilled: {
     borderColor: color.primary,
     backgroundColor: color.white,
-  },
-  resendSection: {
-    alignItems: "center",
-  },
-  resendButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    minWidth: 200,
-    alignItems: "center",
-  },
-  resendButtonActive: {
-    backgroundColor: color.primary,
-  },
-  resendButtonDisabled: {
-    backgroundColor: color.gray100,
-  },
-  resendText: {
-    fontSize: 16,
-    fontFamily: font.medium,
-  },
-  resendTextActive: {
-    color: color.white,
-  },
-  resendTextDisabled: {
-    color: color.gray300,
   },
 });

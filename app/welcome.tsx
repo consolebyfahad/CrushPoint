@@ -1,3 +1,4 @@
+import CustomButton from "@/components/custom_button";
 import { color, font, image } from "@/utils/constants";
 import { AppleIcon, EmailIcon, GoogleIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
@@ -86,17 +87,23 @@ export default function Welcome() {
 
   const handlePhoneSignUp = () => {
     console.log("Continue with Phone");
-    router.push("/auth/login");
+    router.push({
+      pathname: "/auth/login",
+      params: { tab: "phone" },
+    });
   };
 
   const handleEmailSignUp = () => {
     console.log("Continue with Email");
-    router.push("/auth/login");
+    router.push({
+      pathname: "/auth/login",
+      params: { tab: "email" },
+    });
   };
 
   const handleLogin = () => {
     console.log("Navigate to Login");
-    router.push("/auth/login");
+    router.push("/auth/login?tab=phone");
   };
 
   return (
@@ -117,40 +124,36 @@ export default function Welcome() {
         {/* Sign Up Buttons */}
         <View style={styles.buttonContainer}>
           {/* Apple Button */}
-          <TouchableOpacity
-            style={[styles.button, styles.socialButton]}
+          <CustomButton
+            title="Continue with Apple"
             onPress={handleAppleSignUp}
-          >
-            <AppleIcon />
-            <Text style={[styles.buttonText]}>Continue with Apple</Text>
-          </TouchableOpacity>
+            icon={<AppleIcon />}
+            variant="secondary"
+          />
 
           {/* Google Button */}
-          <TouchableOpacity
-            style={[styles.button, styles.socialButton]}
+          <CustomButton
+            title="Continue with Google"
             onPress={handleGoogleSignUp}
-          >
-            <GoogleIcon />
-            <Text style={styles.buttonText}>Continue with Google</Text>
-          </TouchableOpacity>
+            icon={<GoogleIcon />}
+            variant="secondary"
+          />
 
           {/* Phone Button */}
-          <TouchableOpacity
-            style={[styles.button, styles.socialButton]}
+          <CustomButton
+            title="Continue with Phone"
             onPress={handlePhoneSignUp}
-          >
-            <PhoneIcon />
-            <Text style={styles.buttonText}>Continue with Phone</Text>
-          </TouchableOpacity>
+            icon={<PhoneIcon />}
+            variant="secondary"
+          />
 
           {/* Email Button */}
-          <TouchableOpacity
-            style={[styles.button, styles.socialButton]}
+          <CustomButton
+            title="Continue with Email"
             onPress={handleEmailSignUp}
-          >
-            <EmailIcon />
-            <Text style={styles.buttonText}>Continue with Email</Text>
-          </TouchableOpacity>
+            icon={<EmailIcon />}
+            variant="secondary"
+          />
         </View>
 
         {/* Login Link */}
@@ -209,30 +212,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     gap: 16,
   },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 12,
-  },
-  appleButton: {
-    backgroundColor: color.black,
-  },
-  socialButton: {
-    borderWidth: 1,
-    backgroundColor: color.white,
-    borderColor: color.gray100,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontFamily: font.medium,
-    color: color.gray400,
-  },
-  appleButtonText: {
-    color: color.white,
-  },
   loginSection: {
     flexDirection: "row",
     justifyContent: "center",
@@ -249,7 +228,6 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
     color: color.primary,
   },
-
   termsText: {
     fontSize: 12,
     fontFamily: font.regular,

@@ -1,6 +1,8 @@
+import CustomButton from "@/components/custom_button";
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -11,15 +13,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Back Arrow Icon Component
-const BackArrowIcon = () => (
-  <View style={styles.backIcon}>
-    <Text style={styles.backArrowText}>←</Text>
-  </View>
-);
-
 export default function Login() {
-  const [activeTab, setActiveTab] = useState("phone"); // "phone" or "email"
+  const tab = useLocalSearchParams();
+  console.log(tab);
+  const [activeTab, setActiveTab] = useState("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
 
@@ -27,9 +24,8 @@ export default function Login() {
     if (router.canGoBack()) {
       router.back();
     }
-    // Alternative: router.push("/welcome");
   };
-
+  console.log(activeTab);
   const handleContinue = () => {
     if (activeTab === "phone") {
       router.push("/auth/verify");
@@ -52,12 +48,7 @@ export default function Login() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header with Back Button */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <BackArrowIcon />
-        </TouchableOpacity>
-      </View>
-
+      <Header onPress={handleBack} />
       {/* Content */}
       <View style={styles.content}>
         {/* Title and Subtitle */}
@@ -83,11 +74,7 @@ export default function Login() {
             ]}
             onPress={() => setActiveTab("phone")}
           >
-            <PhoneIcon
-              width={20}
-              height={20}
-              fill={activeTab === "phone" ? color.black : color.gray300}
-            />
+            <PhoneIcon />
             <Text
               style={[
                 styles.tabText,
@@ -107,11 +94,7 @@ export default function Login() {
             ]}
             onPress={() => setActiveTab("email")}
           >
-            <EmailIcon
-              width={20}
-              height={20}
-              fill={activeTab === "email" ? color.black : color.gray300}
-            />
+            <EmailIcon />
             <Text
               style={[
                 styles.tabText,
@@ -133,11 +116,7 @@ export default function Login() {
 
           <View style={styles.inputContainer}>
             <View style={styles.inputIcon}>
-              {activeTab === "phone" ? (
-                <PhoneIcon width={20} height={20} fill={color.gray300} />
-              ) : (
-                <EmailIcon width={20} height={20} fill={color.gray300} />
-              )}
+              {activeTab === "phone" ? <PhoneIcon /> : <EmailIcon />}
             </View>
 
             <TextInput
@@ -158,27 +137,11 @@ export default function Login() {
         </View>
 
         {/* Continue Button */}
-        <TouchableOpacity
-          style={[
-            styles.continueButton,
-            isFormValid()
-              ? styles.continueButtonActive
-              : styles.continueButtonDisabled,
-          ]}
+        <CustomButton
+          title="Continue"
           onPress={handleContinue}
-          disabled={!isFormValid()}
-        >
-          <Text
-            style={[
-              styles.continueButtonText,
-              isFormValid()
-                ? styles.continueButtonTextActive
-                : styles.continueButtonTextDisabled,
-            ]}
-          >
-            Continue
-          </Text>
-        </TouchableOpacity>
+          isDisabled={!isFormValid()}
+        />
       </View>
     </SafeAreaView>
   );
@@ -189,29 +152,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
     paddingHorizontal: 24,
-  },
-  header: {
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: color.gray100,
-    borderRadius: 22,
-  },
-  backIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  backArrowText: {
-    fontSize: 20,
-    color: color.black,
-    fontFamily: font.medium,
   },
   content: {
     flex: 1,
