@@ -181,11 +181,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
+    paddingBottom: 24,
     backgroundColor: color.white,
     justifyContent: "space-between",
   },
   topSection: {
-    marginTop: 30,
+    marginTop: 120,
     alignItems: "center",
   },
   appName: {

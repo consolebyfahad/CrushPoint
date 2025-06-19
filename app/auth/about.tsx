@@ -1,12 +1,12 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
-import { color } from "@/utils/constants";
+import { color, font } from "@/utils/constants";
 import Octicons from "@expo/vector-icons/Octicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Platform,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -22,7 +22,7 @@ const About = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleContinue = () => {
-    // Handle continue action
+    router.push("/auth/looking_for");
     console.log("Continue pressed", { name, dateOfBirth });
   };
 
@@ -47,8 +47,6 @@ const About = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-
       {/* Header */}
       <Header />
 
@@ -80,6 +78,7 @@ const About = () => {
           <Text style={styles.label}>Date of Birth</Text>
           <TouchableOpacity onPress={handleDatePress} style={styles.dateInput}>
             <TextInput
+              style={styles.dateTextInput}
               placeholder="mm/dd/yyyy"
               placeholderTextColor="#999"
               value={dateOfBirth}
@@ -113,11 +112,13 @@ const About = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
     backgroundColor: color.white,
   },
   content: {
     flex: 1,
+    paddingTop: 40,
   },
   title: {
     fontSize: 28,
@@ -127,9 +128,9 @@ const styles = StyleSheet.create({
   },
   disclaimerContainer: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    // alignItems: "flex-start",
     marginBottom: 40,
-    paddingRight: 20,
+    // paddingRight: 20,
   },
   infoIcon: {
     marginRight: 8,
@@ -139,7 +140,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#888",
     lineHeight: 20,
-    flex: 1,
+    fontFamily: font.regular,
+    letterSpacing: 1,
+    // flex: 1,
     marginLeft: 4,
   },
   inputContainer: {
@@ -156,18 +159,17 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 12,
     fontSize: 16,
     color: "#000",
     backgroundColor: "#fff",
   },
   dateInput: {
-    flex: 1,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 4,
     fontSize: 16,
     color: "#000",
     backgroundColor: "#fff",
@@ -175,6 +177,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  dateTextInput: {},
 });
 
 export default About;

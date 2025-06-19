@@ -102,7 +102,7 @@ export default function Interested() {
             <Text
               style={[
                 styles.interestText,
-                styles.bothText,
+                styles.interestText,
                 selectedInterest === "both"
                   ? styles.selectedText
                   : styles.unselectedText,
@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
     paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   content: {
     flex: 1,
@@ -158,16 +159,16 @@ const styles = StyleSheet.create({
     paddingVertical: 28,
     paddingHorizontal: 24,
     borderRadius: 16,
-    borderWidth: 2,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
   },
   bothOption: {
-    paddingVertical: 18, // Slightly less padding since no icon
+    paddingVertical: 16,
   },
   selectedOption: {
-    backgroundColor: "#E3F2FD", // Light blue background
+    backgroundColor: "#E3F2FD",
     borderColor: color.primary,
   },
   unselectedOption: {
@@ -176,11 +177,7 @@ const styles = StyleSheet.create({
   },
   interestText: {
     fontSize: 18,
-    fontFamily: font.semiBold,
-  },
-  bothText: {
-    fontSize: 18,
-    fontFamily: font.semiBold,
+    fontFamily: font.medium,
   },
   selectedText: {
     color: color.primary,

@@ -1,7 +1,7 @@
 import CustomButton from "@/components/custom_button";
-
 import { color, font } from "@/utils/constants";
 import { svgIcon } from "@/utils/SvgIcons";
+import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -18,16 +18,14 @@ export const onboardingData = [
   {
     id: 2,
     IconComponent: svgIcon.Onboarding2,
-    title: "Find nearby matches.",
-    description:
-      "Discover people around you who share\nyour interests and values.",
+    title: "See who's around you",
+    description: "Discover interesting people nearby and connect in real life",
   },
   {
     id: 3,
     IconComponent: svgIcon.Onboarding3,
-    title: "Start meaningful conversations.",
-    description:
-      "Connect through authentic conversations\nand build real relationships.",
+    title: "Send a reaction",
+    description: "Express interest with fun emojis - no chat needed",
   },
   {
     id: 4,
@@ -92,6 +90,9 @@ export default function OnboardingScreen() {
         <CustomButton
           title={isLastScreen ? "Get Started" : "Continue"}
           onPress={handleContinue}
+          rightIcon={
+            <Feather name="arrow-right" size={18} color={color.white} />
+          }
         />
       </View>
     </SafeAreaView>
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
     paddingHorizontal: 32,
+    paddingBottom: 32,
   },
   skipButton: {
     alignSelf: "flex-end",

@@ -1,7 +1,7 @@
 import { color, font, image } from "@/utils/constants";
 import { router } from "expo-router";
-import { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -14,6 +14,7 @@ export default function Splash() {
   const imageScale = useSharedValue(0);
   const textOpacity = useSharedValue(0);
   const textTranslateY = useSharedValue(20);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     containerScale.value = withTiming(1, {
@@ -35,7 +36,7 @@ export default function Splash() {
         easing: Easing.out(Easing.ease),
       });
     }, 400);
-  }, [containerScale, imageScale, textOpacity, textTranslateY]);
+  }, []); // Removed dependencies to prevent infinite re-renders
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: containerScale.value }],
@@ -52,17 +53,27 @@ export default function Splash() {
 
   useEffect(() => {
     setTimeout(() => {
-      router.replace("/onboarding");
+      router.replace("/(tabs)");
     }, 2000);
   }, []);
 
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.imageContainer, animatedContainerStyle]}>
-        <Animated.Image
-          style={[styles.image, animatedImageStyle]}
-          source={image.splash}
-        />
+        {!imageError ? (
+          <Animated.Image
+            style={[styles.image, animatedImageStyle]}
+            source={image.splash}
+            onError={(error) => {
+              console.log("Image loading error:", error);
+              setImageError(true);
+            }}
+          />
+        ) : (
+          <Animated.View style={[styles.fallbackContainer, animatedImageStyle]}>
+            <Text style={styles.fallbackText}>CP</Text>
+          </Animated.View>
+        )}
       </Animated.View>
       <Animated.Text style={[styles.appName, animatedTextStyle]}>
         CrushPoint
@@ -91,6 +102,19 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     resizeMode: "cover",
+  },
+  fallbackContainer: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: color.primary,
+    borderRadius: 16,
+  },
+  fallbackText: {
+    fontSize: 24,
+    fontFamily: font.bold,
+    color: color.white,
   },
   appName: {
     fontSize: 28,

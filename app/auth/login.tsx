@@ -3,7 +3,7 @@ import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,11 +14,19 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
-  const tab = useLocalSearchParams();
-  console.log(tab);
+  const params = useLocalSearchParams();
+
   const [activeTab, setActiveTab] = useState("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    if (params.tab === "email") {
+      setActiveTab("email");
+    } else if (params.tab === "phone") {
+      setActiveTab("phone");
+    }
+  }, [params.tab]);
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -29,9 +37,13 @@ export default function Login() {
   const handleContinue = () => {
     if (activeTab === "phone") {
       router.push("/auth/verify");
+      setPhoneNumber("");
+
       console.log("Continue with phone:", phoneNumber);
       // router.push("/auth/verify-phone");
     } else {
+      router.push("/auth/verify");
+      setEmail("");
       console.log("Continue with email:", email);
       // router.push("/auth/verify-email");
     }
@@ -78,9 +90,9 @@ export default function Login() {
             <Text
               style={[
                 styles.tabText,
-                activeTab === "phone"
-                  ? styles.activeTabText
-                  : styles.inactiveTabText,
+                // activeTab === "phone"
+                //   ? styles.activeTabText
+                //   : styles.inactiveTabText,
               ]}
             >
               Phone
@@ -98,9 +110,9 @@ export default function Login() {
             <Text
               style={[
                 styles.tabText,
-                activeTab === "email"
-                  ? styles.activeTabText
-                  : styles.inactiveTabText,
+                // activeTab === "email"
+                //   ? styles.activeTabText
+                //   : styles.inactiveTabText,
               ]}
             >
               Email
@@ -205,13 +217,8 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    fontFamily: font.medium,
-  },
-  activeTabText: {
     color: color.black,
-  },
-  inactiveTabText: {
-    color: color.gray300,
+    fontFamily: font.medium,
   },
   inputSection: {
     marginBottom: 40,
@@ -240,28 +247,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.regular,
     color: color.black,
-    paddingVertical: 16,
-  },
-  continueButton: {
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  continueButtonActive: {
-    backgroundColor: color.primary,
-  },
-  continueButtonDisabled: {
-    backgroundColor: color.gray100,
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontFamily: font.semiBold,
-  },
-  continueButtonTextActive: {
-    color: color.white,
-  },
-  continueButtonTextDisabled: {
-    color: color.gray300,
+    // paddingVertical: 16,
   },
 });

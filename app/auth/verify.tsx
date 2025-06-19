@@ -91,6 +91,7 @@ export default function Verify() {
   const handleVerifyCode = (fullCode: string) => {
     console.log("Verifying code:", fullCode);
     router.push("/auth/gender");
+    // setCode(["", "", "", "", ""]);
     // Add verification logic here
     // router.push("/auth/success");
   };

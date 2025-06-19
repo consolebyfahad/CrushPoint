@@ -16,6 +16,7 @@ interface CustomButtonProps {
   isLoading?: boolean;
   variant?: "primary" | "secondary";
   icon?: React.ReactElement<{ color?: string }>;
+  rightIcon?: React.ReactElement<{ color?: string }>;
 }
 
 export default function CustomButton({
@@ -25,6 +26,7 @@ export default function CustomButton({
   isLoading = false,
   variant = "primary",
   icon,
+  rightIcon,
 }: CustomButtonProps) {
   const buttonDisabled =
     typeof isDisabled === "boolean" ? isDisabled || isLoading : isLoading;
@@ -75,6 +77,7 @@ export default function CustomButton({
             </View>
           )}
           <Text style={getTextStyle()}>{title}</Text>
+          {rightIcon && <View>{React.cloneElement(rightIcon)}</View>}
         </View>
       )}
     </TouchableOpacity>
@@ -98,6 +101,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonPressed: {
     backgroundColor: color.black,
+    borderWidth: 1,
     opacity: 1,
   },
   disabledButton: {
