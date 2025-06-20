@@ -1456,6 +1456,30 @@ PODS:
     - React-Core
   - react-native-safe-area-context (5.4.0):
     - React-Core
+  - react-native-slider (4.5.7):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-webview (13.13.5):
     - DoubleConversion
     - glog
@@ -2056,6 +2080,7 @@ DEPENDENCIES:
   - react-native-google-maps (from `/Users/axontechnologies/Desktop/CrushPoint/node_modules/react-native-maps`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
@@ -2230,6 +2255,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-maps"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-slider:
+    :path: "../node_modules/@react-native-community/slider"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -2373,6 +2400,7 @@ SPEC CHECKSUMS:
   react-native-google-maps: c4f5c5b2dda17e7cb2cb2b37a81f140b039b3e7e
   react-native-maps: 9febd31278b35cd21e4fad2cf6fa708993be5dab
   react-native-safe-area-context: 9d72abf6d8473da73033b597090a80b709c0b2f1
+  react-native-slider: 1eb938be71e43c6fa53ad5ccd4671b3c7cb57fec
   react-native-webview: 1b5778b306d4ed09d13829a6e7a6550e3c1a644a
   React-NativeModulesApple: 65b2735133d6ce8a3cb5f23215ef85e427b0139c
   React-oscompat: f26aa2a4adc84c34212ab12c07988fe19e9cf16a

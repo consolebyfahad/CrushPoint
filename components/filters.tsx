@@ -14,37 +14,100 @@ import {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-export default function Filters({ onClose }) {
-  const [selectedGender, setSelectedGender] = useState("Men");
-  const [ageFrom, setAgeFrom] = useState("18");
-  const [ageTo, setAgeTo] = useState("35");
-  const [distance, setDistance] = useState(100);
+export default function Filters({
+  onClose,
+  onNavigateToLookingFor,
+  onNavigateToHeight,
+  onNavigateToNationality,
+  onNavigateToReligion,
+  onNavigateToZodiac,
+  filterData,
+  setFilterData,
+}: any) {
+  const [selectedGender, setSelectedGender] = useState(
+    filterData.gender || "Men"
+  );
+  const [ageFrom, setAgeFrom] = useState(filterData.ageFrom || "18");
+  const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");
+  const [distance, setDistance] = useState(filterData.distance || 10);
 
   const genderOptions = ["Men", "Women", "All"];
+
   const expandableOptions = [
-    "Looking for",
-    "Height",
-    "Nationality",
-    "Religion",
-    "Zodiac Sign",
+    {
+      title: "Looking for",
+      hasNavigation: true,
+      value: filterData.lookingFor || null,
+      onPress: onNavigateToLookingFor,
+    },
+    {
+      title: "Height",
+      hasNavigation: true,
+      value: filterData.height
+        ? `${filterData.height.from}-${filterData.height.to}cm`
+        : null,
+      onPress: onNavigateToHeight,
+    },
+    {
+      title: "Nationality",
+      hasNavigation: true,
+      value: filterData.nationality || null,
+      onPress: onNavigateToNationality,
+    },
+    {
+      title: "Religion",
+      hasNavigation: true,
+      value: filterData.religion || null,
+      onPress: onNavigateToReligion,
+    },
+    {
+      title: "Zodiac Sign",
+      hasNavigation: true,
+      value: filterData.zodiacSign || null,
+      onPress: onNavigateToZodiac,
+    },
   ];
 
   const handleReset = () => {
     setSelectedGender("Men");
     setAgeFrom("18");
     setAgeTo("35");
-    setDistance(100);
+    setDistance(10);
+
+    // Reset all filter data
+    setFilterData({
+      gender: "Men",
+      ageFrom: "18",
+      ageTo: "35",
+      distance: 10,
+      lookingFor: null,
+      height: null,
+      nationality: null,
+      religion: null,
+      zodiacSign: null,
+    });
   };
 
   const handleApply = () => {
-    // Apply filters logic here
-    console.log("Applying filters:", {
+    // Update filter data with current selections
+    const updatedFilterData = {
+      ...filterData,
       gender: selectedGender,
       ageFrom,
       ageTo,
       distance,
-    });
+    };
+
+    setFilterData(updatedFilterData);
+
+    console.log("Applying filters:", updatedFilterData);
     onClose();
+  };
+
+  const handleExpandableItemPress = (item: any) => {
+    if (item.onPress) {
+      item.onPress();
+    }
   };
 
   return (
@@ -114,8 +177,9 @@ export default function Filters({ onClose }) {
         {/* Distance section */}
         <View style={styles.section}>
           <View style={styles.distanceHeader}>
-            <Text style={styles.sectionTitle}>Distance</Text>
-            <Text style={styles.distanceValue}>{distance} km</Text>
+            <Text style={styles.sectionTitle}>
+              Distance ({Math.round(distance)} km)
+            </Text>
           </View>
           <View style={styles.sliderContainer}>
             <Slider
@@ -125,9 +189,9 @@ export default function Filters({ onClose }) {
               value={distance}
               onValueChange={setDistance}
               step={1}
-              minimumTrackTintColor="#ECECEC"
+              minimumTrackTintColor={color.primary}
               maximumTrackTintColor="#ECECEC"
-              trackStyle={{ height: 10 }}
+              trackStyle={{ height: 6 }}
               thumbStyle={styles.sliderThumb}
             />
             <View style={styles.sliderLabels}>
@@ -141,15 +205,21 @@ export default function Filters({ onClose }) {
         <View style={styles.section}>
           {expandableOptions.map((option, index) => (
             <TouchableOpacity
-              key={option}
+              key={option.title}
               style={[
                 styles.expandableItem,
                 index === expandableOptions.length - 1 &&
                   styles.lastExpandableItem,
               ]}
+              onPress={() => handleExpandableItemPress(option)}
               activeOpacity={0.8}
             >
-              <Text style={styles.expandableText}>{option}</Text>
+              <View style={styles.expandableLeft}>
+                <Text style={styles.expandableText}>{option.title}</Text>
+                {option.value && (
+                  <Text style={styles.expandableValue}>{option.value}</Text>
+                )}
+              </View>
               <Ionicons
                 name="chevron-forward"
                 size={20}
@@ -187,7 +257,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     minHeight: SCREEN_HEIGHT * 0.9,
-    // maxHeight: SCREEN_HEIGHT * 0.9,
     paddingBottom: 34,
   },
   header: {
@@ -280,11 +349,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 16,
   },
-  distanceValue: {
-    fontSize: 14,
-    fontFamily: font.medium,
-    color: color.primary,
-  },
   sliderContainer: {
     paddingHorizontal: 4,
   },
@@ -318,10 +382,19 @@ const styles = StyleSheet.create({
   lastExpandableItem: {
     borderBottomWidth: 0,
   },
+  expandableLeft: {
+    flex: 1,
+  },
   expandableText: {
     fontSize: 16,
     fontFamily: font.medium,
     color: color.black,
+  },
+  expandableValue: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.primary,
+    marginTop: 2,
   },
   bottomButtons: {
     flexDirection: "row",

@@ -1,11 +1,18 @@
 import Filters from "@/components/filters";
+import Height from "@/components/height";
+import ListView from "@/components/list_view";
+import LookingFor from "@/components/looking_for";
+import MapView from "@/components/map_view";
+import Nationality from "@/components/nationality";
+import Religion from "@/components/religion";
+import ZodiacSign from "@/components/zodic";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Modal,
   SafeAreaView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,16 +20,33 @@ import {
 } from "react-native";
 
 export default function Index() {
+  // View state
   const [viewType, setViewType] = useState("Map");
+
+  // Modal states
   const [showFilters, setShowFilters] = useState(false);
-  const [mapRegion, setMapRegion] = useState({
-    latitude: 45.4408474,
-    longitude: 12.3155151,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.02,
+  const [showLookingFor, setShowLookingFor] = useState(false);
+  const [showHeight, setShowHeight] = useState(false);
+  const [showNationality, setShowNationality] = useState(false);
+  const [showReligion, setShowReligion] = useState(false);
+  const [showZodiac, setShowZodiac] = useState(false);
+
+  // Filter data state
+  const [filterData, setFilterData] = useState({
+    gender: "Men",
+    ageFrom: "18",
+    ageTo: "35",
+    distance: 10,
+    lookingFor: null,
+    height: null,
+    nationality: null,
+    religion: null,
+    zodiacSign: null,
   });
 
+  // Header handlers
   const handleNotifications = () => {
+    router.push("/notifications");
     console.log("Open notifications");
   };
 
@@ -30,53 +54,83 @@ export default function Index() {
     setShowFilters(true);
   };
 
-  const closeFilters = () => {
+  // Modal close handlers
+  const closeAllModals = () => {
     setShowFilters(false);
+    setShowLookingFor(false);
+    setShowHeight(false);
+    setShowNationality(false);
+    setShowReligion(false);
+    setShowZodiac(false);
+  };
+
+  // Navigation handlers
+  const handleNavigateToLookingFor = () => {
+    setShowFilters(false);
+    setShowLookingFor(true);
+  };
+
+  const handleNavigateToHeight = () => {
+    setShowFilters(false);
+    setShowHeight(true);
+  };
+
+  const handleNavigateToNationality = () => {
+    setShowFilters(false);
+    setShowNationality(true);
+  };
+
+  const handleNavigateToReligion = () => {
+    setShowFilters(false);
+    setShowReligion(true);
+  };
+
+  const handleNavigateToZodiac = () => {
+    setShowFilters(false);
+    setShowZodiac(true);
+  };
+
+  // Back to filters handler
+  const handleBackToFilters = () => {
+    closeAllModals();
+    setShowFilters(true);
+  };
+
+  // User interaction handlers
+  const handleViewProfile = (user: any) => {
+    console.log("View profile for:", user);
+    // Navigate to profile screen
+    // navigation.navigate('Profile', { user });
+  };
+
+  const handleBookmark = (user: any) => {
+    console.log("Bookmark user:", user);
+    // Handle bookmark logic
+  };
+
+  const handleUserPress = (user: any) => {
+    console.log("User pressed on map:", user);
+    // Handle map user press
+  };
+
+  // Render current view content
+  const renderContent = () => {
+    if (viewType === "List View") {
+      return (
+        <ListView
+          onViewProfile={handleViewProfile}
+          onBookmark={handleBookmark}
+        />
+      );
+    }
+
+    return <MapView onUserPress={handleUserPress} />;
   };
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="transparent"
-        translucent
-      />
-
-      {/* Map View */}
-      {/* <MapView
-        style={styles.map}
-        region={mapRegion}
-        onRegionChangeComplete={setMapRegion}
-        showsUserLocation={false}
-        showsMyLocationButton={false}
-        scrollEnabled={true}
-        zoomEnabled={true}
-        rotateEnabled={false}
-        pitchEnabled={false}
-      >
-        <Circle
-          center={{
-            latitude: mapRegion.latitude,
-            longitude: mapRegion.longitude,
-          }}
-          radius={500}
-          fillColor="rgba(99, 179, 206, 0.3)"
-          strokeColor={color.primary}
-          strokeWidth={2}
-        />
-
-        {nearbyUsers.map((user) => (
-          <Marker
-            key={user.id}
-            coordinate={user.coordinate}
-            onPress={() => handleUserProfile(user)}
-          >
-            <TouchableOpacity style={styles.userMarker} activeOpacity={0.8}>
-              <Image source={{ uri: user.image }} style={styles.userImage} />
-            </TouchableOpacity>
-          </Marker>
-        ))}
-      </MapView> */}
+      {/* Main Content */}
+      {renderContent()}
 
       {/* Top Header */}
       <SafeAreaView style={styles.topHeader}>
@@ -167,15 +221,134 @@ export default function Index() {
         visible={showFilters}
         transparent={true}
         animationType="slide"
-        onRequestClose={closeFilters}
+        onRequestClose={() => setShowFilters(false)}
       >
         <View style={styles.modalOverlay}>
           <TouchableOpacity
             style={styles.modalBackground}
             activeOpacity={1}
-            onPress={closeFilters}
+            onPress={() => setShowFilters(false)}
           />
-          <Filters onClose={closeFilters} />
+          <Filters
+            onClose={() => setShowFilters(false)}
+            onNavigateToLookingFor={handleNavigateToLookingFor}
+            onNavigateToHeight={handleNavigateToHeight}
+            onNavigateToNationality={handleNavigateToNationality}
+            onNavigateToReligion={handleNavigateToReligion}
+            onNavigateToZodiac={handleNavigateToZodiac}
+            filterData={filterData}
+            setFilterData={setFilterData}
+          />
+        </View>
+      </Modal>
+
+      {/* Looking For Modal */}
+      <Modal
+        visible={showLookingFor}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowLookingFor(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowLookingFor(false)}
+          />
+          <LookingFor
+            onClose={() => setShowLookingFor(false)}
+            onBack={handleBackToFilters}
+            filterData={filterData}
+            setFilterData={setFilterData}
+          />
+        </View>
+      </Modal>
+
+      {/* Height Modal */}
+      <Modal
+        visible={showHeight}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowHeight(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowHeight(false)}
+          />
+          <Height
+            onClose={() => setShowHeight(false)}
+            onBack={handleBackToFilters}
+            filterData={filterData}
+            setFilterData={setFilterData}
+          />
+        </View>
+      </Modal>
+
+      {/* Nationality Modal */}
+      <Modal
+        visible={showNationality}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowNationality(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowNationality(false)}
+          />
+          <Nationality
+            onClose={() => setShowNationality(false)}
+            onBack={handleBackToFilters}
+            filterData={filterData}
+            setFilterData={setFilterData}
+          />
+        </View>
+      </Modal>
+
+      {/* Religion Modal */}
+      <Modal
+        visible={showReligion}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowReligion(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowReligion(false)}
+          />
+          <Religion
+            onClose={() => setShowReligion(false)}
+            onBack={handleBackToFilters}
+            filterData={filterData}
+            setFilterData={setFilterData}
+          />
+        </View>
+      </Modal>
+
+      {/* Zodiac Sign Modal */}
+      <Modal
+        visible={showZodiac}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowZodiac(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowZodiac(false)}
+          />
+          <ZodiacSign
+            onClose={() => setShowZodiac(false)}
+            onBack={handleBackToFilters}
+            filterData={filterData}
+            setFilterData={setFilterData}
+          />
         </View>
       </Modal>
     </View>
@@ -184,10 +357,6 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: color.white,
-  },
-  map: {
     flex: 1,
   },
   topHeader: {
@@ -266,26 +435,6 @@ const styles = StyleSheet.create({
   },
   inactiveToggleText: {
     color: color.gray400,
-  },
-  userMarker: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 3,
-    borderColor: color.white,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  userImage: {
-    width: "100%",
-    height: "100%",
   },
   modalOverlay: {
     flex: 1,

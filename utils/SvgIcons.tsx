@@ -17,35 +17,35 @@ export const GoogleIcon = () => (
     <Path
       d="M10.0003 18.3337C14.6027 18.3337 18.3337 14.6027 18.3337 10.0003C18.3337 5.39795 14.6027 1.66699 10.0003 1.66699C5.39795 1.66699 1.66699 5.39795 1.66699 10.0003C1.66699 14.6027 5.39795 18.3337 10.0003 18.3337Z"
       stroke="#4285F4"
-      stroke-width="1.66667"
+      strokeWidth="1.66667"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <Path
       d="M10.0003 13.3337C11.8413 13.3337 13.3337 11.8413 13.3337 10.0003C13.3337 8.15938 11.8413 6.66699 10.0003 6.66699C8.15938 6.66699 6.66699 8.15938 6.66699 10.0003C6.66699 11.8413 8.15938 13.3337 10.0003 13.3337Z"
       stroke="#4285F4"
-      stroke-width="1.66667"
+      strokeWidth="1.66667"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <Path
       d="M17.6417 6.66699H10"
       stroke="#4285F4"
-      stroke-width="1.66667"
+      strokeWidth="1.66667"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <Path
       d="M3.29199 5.0498L7.11699 11.6665"
       stroke="#4285F4"
-      stroke-width="1.66667"
+      strokeWidth="1.66667"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <Path
       d="M9.06641 18.2837L12.8831 11.667"
       stroke="#4285F4"
-      stroke-width="1.66667"
+      strokeWidth="1.66667"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -78,14 +78,14 @@ export const EmailIcon = () => (
     <Path
       d="M16.667 3.3335H3.33366C2.41318 3.3335 1.66699 4.07969 1.66699 5.00016V15.0002C1.66699 15.9206 2.41318 16.6668 3.33366 16.6668H16.667C17.5875 16.6668 18.3337 15.9206 18.3337 15.0002V5.00016C18.3337 4.07969 17.5875 3.3335 16.667 3.3335Z"
       stroke="#49ADBE"
-      stroke-width="1.66667"
+      strokeWidth="1.66667"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <Path
       d="M18.3337 5.8335L10.8587 10.5835C10.6014 10.7447 10.3039 10.8302 10.0003 10.8302C9.69673 10.8302 9.39927 10.7447 9.14199 10.5835L1.66699 5.8335"
       stroke="#49ADBE"
-      stroke-width="1.66667"
+      strokeWidth="1.66667"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -98,7 +98,7 @@ export const PhoneIcon = () => (
     <Path
       d="M18.3332 14.0999V16.5999C18.3341 16.832 18.2866 17.0617 18.1936 17.2744C18.1006 17.487 17.9643 17.6779 17.7933 17.8348C17.6222 17.9917 17.4203 18.1112 17.2005 18.1855C16.9806 18.2599 16.7477 18.2875 16.5165 18.2666C13.9522 17.988 11.489 17.1117 9.32486 15.7083C7.31139 14.4288 5.60431 12.7217 4.32486 10.7083C2.91651 8.53426 2.04007 6.05908 1.76653 3.48325C1.7457 3.25281 1.77309 3.02055 1.84695 2.80127C1.9208 2.58199 2.03951 2.38049 2.1955 2.2096C2.3515 2.03871 2.54137 1.90218 2.75302 1.80869C2.96468 1.7152 3.19348 1.6668 3.42486 1.66658H5.92486C6.32928 1.6626 6.72136 1.80582 7.028 2.06953C7.33464 2.33324 7.53493 2.69946 7.59153 3.09992C7.69705 3.89997 7.89274 4.68552 8.17486 5.44158C8.28698 5.73985 8.31125 6.06401 8.24478 6.37565C8.17832 6.68729 8.02392 6.97334 7.79986 7.19992L6.74153 8.25825C7.92783 10.3445 9.65524 12.072 11.7415 13.2583L12.7999 12.1999C13.0264 11.9759 13.3125 11.8215 13.6241 11.755C13.9358 11.6885 14.2599 11.7128 14.5582 11.8249C15.3143 12.107 16.0998 12.3027 16.8999 12.4083C17.3047 12.4654 17.6744 12.6693 17.9386 12.9812C18.2029 13.2931 18.3433 13.6912 18.3332 14.0999Z"
       stroke="#49ADBE"
-      stroke-width="1.66667"
+      strokeWidth="1.66667"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -112,7 +112,7 @@ export const AngleDown = () => (
     <Path
       d="M15.8359 7.91667L10.0026 13.75L4.16927 7.91667"
       stroke="#595959"
-      stroke-width="1.5"
+      strokeWidth="1.5"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -198,21 +198,21 @@ export const UploadIcon = () => (
     <Path
       d="M21 15.6699V19.6699C21 20.2004 20.7893 20.7091 20.4142 21.0841C20.0391 21.4592 19.5304 21.6699 19 21.6699H5C4.46957 21.6699 3.96086 21.4592 3.58579 21.0841C3.21071 20.7091 3 20.2004 3 19.6699V15.6699"
       stroke="#CFCFCF"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <Path
       d="M17 8.66992L12 3.66992L7 8.66992"
       stroke="#CFCFCF"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
     <Path
       d="M12 3.66992V15.6699"
       stroke="#CFCFCF"
-      stroke-width="2"
+      strokeWidth="2"
       stroke-linecap="round"
       stroke-linejoin="round"
     />
@@ -233,14 +233,14 @@ export const CurrentLocationIcon = () => (
       cy="25.4044"
       r="24.8092"
       fill="#49ADBE"
-      fill-opacity="0.24"
+      fillOpacity="0.24"
     />
     <Circle
       cx="25.5193"
       cy="25.4041"
       r="14.8855"
       fill="#49ADBE"
-      fill-opacity="0.24"
+      fillOpacity="0.24"
     />
     <Circle cx="25.5188" cy="25.4041" r="6.94656" fill="#49ADBE" />
   </Svg>
