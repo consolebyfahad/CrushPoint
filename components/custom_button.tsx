@@ -5,8 +5,10 @@ import {
   GestureResponderEvent,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from "react-native";
 
 interface CustomButtonProps {
@@ -17,6 +19,8 @@ interface CustomButtonProps {
   variant?: "primary" | "secondary";
   icon?: React.ReactElement<{ color?: string }>;
   rightIcon?: React.ReactElement<{ color?: string }>;
+  style?: ViewStyle;
+  fontstyle?: TextStyle;
 }
 
 export default function CustomButton({
@@ -27,6 +31,8 @@ export default function CustomButton({
   variant = "primary",
   icon,
   rightIcon,
+  style,
+  fontstyle,
 }: CustomButtonProps) {
   const buttonDisabled =
     typeof isDisabled === "boolean" ? isDisabled || isLoading : isLoading;
@@ -56,6 +62,7 @@ export default function CustomButton({
         styles.buttonBase,
         getButtonStyle(),
         buttonDisabled && styles.disabledButton,
+        style,
       ]}
     >
       {isLoading ? (
@@ -76,7 +83,7 @@ export default function CustomButton({
               })}
             </View>
           )}
-          <Text style={getTextStyle()}>{title}</Text>
+          <Text style={[getTextStyle(), fontstyle]}>{title}</Text>
           {rightIcon && <View>{React.cloneElement(rightIcon)}</View>}
         </View>
       )}

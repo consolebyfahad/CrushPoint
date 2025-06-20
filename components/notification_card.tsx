@@ -1,5 +1,6 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -12,22 +13,35 @@ export default function NotificationCard({
     switch (type) {
       case "reaction":
         return {
-          name: "chatbubble",
-          color: "#60A5FA",
-          backgroundColor: "#EFF6FF",
+          library: "Ionicons",
+          name: "chatbubble-outline",
+          color: "#49adbe",
+          backgroundColor: "#dbeff2",
         };
       case "match":
-        return { name: "heart", color: "#F87171", backgroundColor: "#FEF2F2" };
+        return {
+          library: "Ionicons",
+          name: "heart-outline",
+          color: "#e04134",
+          backgroundColor: "#f9d9d6",
+        };
       case "profile_view":
-        return { name: "person", color: "#A78BFA", backgroundColor: "#F3F4F6" };
+        return {
+          library: "Feather",
+          name: "user",
+          color: "#A78BFA",
+          backgroundColor: "#F3F4F6",
+        };
       case "event":
         return {
+          library: "Feather",
           name: "calendar",
           color: "#34D399",
           backgroundColor: "#ECFDF5",
         };
       default:
         return {
+          library: "Ionicons",
           name: "notifications",
           color: "#6B7280",
           backgroundColor: "#F9FAFB",
@@ -50,7 +64,6 @@ export default function NotificationCard({
       console.log("Delete notification:", notification.title);
     }
   };
-
   const iconConfig = getNotificationIcon(notification.type);
 
   return (
@@ -66,11 +79,15 @@ export default function NotificationCard({
           { backgroundColor: iconConfig.backgroundColor },
         ]}
       >
-        <Ionicons
-          name={iconConfig.name as any}
-          size={20}
-          color={iconConfig.color}
-        />
+        {iconConfig.library === "Feather" ? (
+          <Feather name={iconConfig.name} size={20} color={iconConfig.color} />
+        ) : (
+          <Ionicons
+            name={iconConfig.name as any}
+            size={20}
+            color={iconConfig.color}
+          />
+        )}
       </View>
 
       {/* Content */}
@@ -86,7 +103,7 @@ export default function NotificationCard({
         onPress={handleDelete}
         activeOpacity={0.7}
       >
-        <Ionicons name="trash-outline" size={18} color={color.gray400} />
+        <Feather name="trash-2" size={18} color={color.gray200} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -101,14 +118,14 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 6,
-    shadowColor: "#000",
+    shadowColor: color.gray300,
     shadowOffset: {
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.9,
+    shadowRadius: 6,
+    elevation: 4,
     borderWidth: 1,
     borderColor: "#F5F5F5",
   },

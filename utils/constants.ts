@@ -8,6 +8,12 @@ export const color = {
   gray200: "#AFAFAF",
   gray300: "#8C8C8C",
   gray400: "#232323",
+  gray500: "#EFEFEF",
+  gray600: "#E5E7EB",
+  gray700: "#696969",
+  gray800: "##E9E9E9",
+
+  success: "#40AF53",
 };
 
 export const font = {

@@ -1,16 +1,19 @@
 import { color, font } from "@/utils/constants";
+import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
+import CustomButton from "./custom_button";
 export default function MatchCard({ match, onViewProfile, onOptions }: any) {
   const getMatchEmoji = (timeAgo: string) => {
     if (timeAgo.includes("hours")) {
-      return "🔥"; // Fire for recent matches
+      return svgIcon.Fire;
     } else if (timeAgo.includes("1 day")) {
-      return "😊"; // Smile for day-old matches
+      return svgIcon.Blink;
     } else {
-      return "🤝"; // Handshake for older matches
+      return svgIcon.Hi;
     }
   };
 
@@ -32,51 +35,45 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
 
   return (
     <View style={styles.container}>
-      {/* Profile Image */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: match.image }} style={styles.profileImage} />
         {match.isOnline && <View style={styles.onlineIndicator} />}
       </View>
+      <View style={styles.infoContainer}>
+        {/* Match Info */}
+        <View style={styles.matchInfo}>
+          <View style={styles.matchHeader}>
+            <View style={styles.nameRow}>
+              <Text style={styles.userName}>
+                {match.name}, {match.age}
+              </Text>
+              {match.isVerified && (
+                <Feather
+                  name="user"
+                  size={16}
+                  color={color.success}
+                  style={styles.verifiedIcon}
+                />
+                // <Ionicons
+                //   name="checkmark-circle"
+                //   size={16}
+                //   color="#10B981"
+                //   style={styles.verifiedIcon}
+                // />
+              )}
+            </View>
 
-      {/* Match Info */}
-      <View style={styles.matchInfo}>
-        <View style={styles.nameRow}>
-          <Text style={styles.userName}>
-            {match.name}, {match.age}
-          </Text>
-          {match.isVerified && (
-            <Ionicons
-              name="checkmark-circle"
-              size={16}
-              color="#10B981"
-              style={styles.verifiedIcon}
-            />
-          )}
-        </View>
+            <View style={styles.detailsRow}>
+              <SimpleLineIcons
+                name="location-pin"
+                size={14}
+                color={color.gray200}
+              />
 
-        <View style={styles.detailsRow}>
-          <Ionicons name="location-outline" size={14} color={color.gray400} />
-          <Text style={styles.distance}>{match.distance}</Text>
-          <View style={styles.separator} />
-          <Text style={styles.timeAgo}>{match.timeAgo}</Text>
-        </View>
-      </View>
-
-      {/* Action Buttons */}
-      <View style={styles.actionContainer}>
-        <TouchableOpacity
-          style={styles.viewProfileButton}
-          onPress={handleViewProfile}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.viewProfileText}>View Profile</Text>
-        </TouchableOpacity>
-
-        <View style={styles.rightActions}>
-          <View style={styles.emojiContainer}>
-            <Text style={styles.matchEmoji}>
-              {getMatchEmoji(match.timeAgo)}
-            </Text>
+              <Text style={styles.distance}>{match.distance}</Text>
+              <View style={styles.separator} />
+              <Text style={styles.timeAgo}>{match.timeAgo}</Text>
+            </View>
           </View>
 
           <TouchableOpacity
@@ -87,9 +84,24 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
             <Ionicons
               name="ellipsis-vertical"
               size={16}
-              color={color.gray400}
+              color={color.gray300}
             />
           </TouchableOpacity>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionContainer}>
+          <CustomButton
+            title="View Profile"
+            style={{ width: "80%", paddingVertical: 8 }}
+            fontstyle={{ fontSize: 14, fontFamily: font.medium }}
+          />
+
+          <View style={styles.emojiContainer}>
+            <Text style={styles.matchEmoji}>
+              {getMatchEmoji(match.timeAgo)}
+            </Text>
+          </View>
         </View>
       </View>
     </View>
@@ -98,31 +110,34 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: color.white,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 6,
-    shadowColor: "#000",
+    shadowColor: color.gray300,
     shadowOffset: {
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.09,
+    shadowRadius: 8,
+    elevation: 4,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: color.gray100,
   },
   imageContainer: {
     position: "relative",
-    alignSelf: "flex-start",
     marginBottom: 12,
   },
   profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 99,
     resizeMode: "cover",
   },
   onlineIndicator: {
@@ -136,8 +151,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: color.white,
   },
+  infoContainer: {
+    flex: 1,
+    // flexDirection: "row",
+  },
   matchInfo: {
-    marginBottom: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  matchHeader: {
+    // flexDirection: "row",
   },
   nameRow: {
     flexDirection: "row",
@@ -145,8 +169,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   userName: {
-    fontSize: 18,
-    fontFamily: font.semiBold,
+    fontSize: 16,
+    fontFamily: font.medium,
     color: color.black,
   },
   verifiedIcon: {
@@ -159,20 +183,20 @@ const styles = StyleSheet.create({
   distance: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray200,
     marginLeft: 4,
   },
   separator: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: color.gray400,
+    backgroundColor: color.gray200,
     marginHorizontal: 8,
   },
   timeAgo: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray200,
   },
   actionContainer: {
     flexDirection: "row",
@@ -193,28 +217,19 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     color: color.white,
   },
-  rightActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   emojiContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F9FAFB",
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: color.gray500,
     alignItems: "center",
     justifyContent: "center",
   },
   matchEmoji: {
+    opacity: 1,
     fontSize: 18,
   },
   optionsButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F9FAFB",
-    alignItems: "center",
-    justifyContent: "center",
+    padding: 8,
   },
 });

@@ -17,9 +17,7 @@ export default function LookingFor({
   filterData,
   setFilterData,
 }: any) {
-  const [selectedOption, setSelectedOption] = useState(
-    filterData.lookingFor || "Casual Dating"
-  );
+  const [selectedOption, setSelectedOption] = useState(filterData.lookingFor);
 
   const lookingForOptions = [
     {
@@ -48,12 +46,11 @@ export default function LookingFor({
     },
   ];
 
-  const handleOptionSelect = (optionId: string) => {
+  const handleOptionSelect = (optionId: any) => {
     setSelectedOption(optionId);
   };
 
   const handleSave = () => {
-    // Save the selected option logic here
     setFilterData({
       ...filterData,
       lookingFor: selectedOption,

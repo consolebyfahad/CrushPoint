@@ -4,8 +4,8 @@ import { color, font } from "@/utils/constants";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import MapView, { Circle, Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 export default function PrivateSpot() {
   const [selectedRadius, setSelectedRadius] = useState("100m");
   const [mapRegion, setMapRegion] = useState({
@@ -65,7 +65,7 @@ export default function PrivateSpot() {
         {/* Map Container */}
         <View style={styles.mapContainer}>
           {/* <MapView style={styles.map} /> */}
-          {/* <MapView
+          <MapView
             style={styles.map}
             region={mapRegion}
             onRegionChangeComplete={handleMapRegionChange}
@@ -98,7 +98,7 @@ export default function PrivateSpot() {
                 <View style={styles.markerInner} />
               </View>
             </Marker>
-          </MapView> */}
+          </MapView>
         </View>
 
         {/* Privacy Radius Section */}

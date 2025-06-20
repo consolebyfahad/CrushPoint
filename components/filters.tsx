@@ -181,7 +181,7 @@ export default function Filters({
               Distance ({Math.round(distance)} km)
             </Text>
           </View>
-          <View style={styles.sliderContainer}>
+          <View>
             <Slider
               style={styles.slider}
               minimumValue={1}
@@ -223,7 +223,7 @@ export default function Filters({
               <Ionicons
                 name="chevron-forward"
                 size={20}
-                color={color.gray400}
+                color={color.gray100}
               />
             </TouchableOpacity>
           ))}
@@ -257,16 +257,16 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     minHeight: SCREEN_HEIGHT * 0.9,
-    paddingBottom: 34,
+    paddingBottom: 24,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    borderBottomColor: color.gray500,
   },
   title: {
     fontSize: 20,
@@ -281,39 +281,39 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    marginTop: 16,
     paddingHorizontal: 20,
   },
   section: {
-    marginTop: 24,
+    marginTop: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: font.semiBold,
     color: color.black,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   genderContainer: {
     flexDirection: "row",
-    gap: 12,
+    gap: 14,
   },
   genderButton: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#E5E5E5",
+    borderColor: color.gray600,
     alignItems: "center",
-    backgroundColor: color.white,
   },
   selectedGenderButton: {
     borderColor: color.primary,
-    backgroundColor: "#F0F9FF",
+    backgroundColor: color.primary100,
   },
   genderText: {
     fontSize: 14,
     fontFamily: font.medium,
-    color: color.gray600,
+    color: color.black,
   },
   selectedGenderText: {
     color: color.primary,
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   ageContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: 18,
   },
   ageInputContainer: {
     flex: 1,
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     borderColor: "#E5E5E5",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 4,
     backgroundColor: color.white,
   },
   ageInput: {
@@ -339,18 +339,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   ageToText: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: font.medium,
-    color: color.gray600,
+    color: color.black,
   },
   distanceHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  sliderContainer: {
-    paddingHorizontal: 4,
   },
   slider: {
     width: "100%",
@@ -364,12 +360,12 @@ const styles = StyleSheet.create({
   sliderLabels: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
+    marginTop: 4,
   },
   sliderLabel: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray300,
   },
   expandableItem: {
     flexDirection: "row",
@@ -384,6 +380,9 @@ const styles = StyleSheet.create({
   },
   expandableLeft: {
     flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   expandableText: {
     fontSize: 16,

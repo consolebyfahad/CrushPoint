@@ -1,7 +1,12 @@
+import Blink from "@/assets/images/blink.svg";
+import Fire from "@/assets/images/fire.svg";
+import Hi from "@/assets/images/hi.svg";
+import Like from "@/assets/images/like.svg";
 import Onboarding1 from "@/assets/images/onboarding1.svg";
 import Onboarding2 from "@/assets/images/onboarding2.svg";
 import Onboarding3 from "@/assets/images/onboarding3.svg";
 import Onboarding4 from "@/assets/images/onboarding4.svg";
+import Tea from "@/assets/images/tea.svg";
 import React from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 
@@ -10,6 +15,11 @@ export const svgIcon = {
   Onboarding2: <Onboarding2 />,
   Onboarding3: <Onboarding3 />,
   Onboarding4: <Onboarding4 />,
+  Fire: <Fire />,
+  Blink: <Blink />,
+  Like: <Like />,
+  Tea: <Tea />,
+  Hi: <Hi />,
 };
 // Google Icon SVG
 export const GoogleIcon = () => (
@@ -186,7 +196,7 @@ export const FemaleIcon = () => (
   </Svg>
 );
 export const BellIcon = () => (
-  <Svg width="19" height="19" viewBox="0 0 19 19" fill="none">
+  <Svg width="24" height="24" viewBox="0 0 19 19" fill="none">
     <Path
       d="M15.8164 13.2612H17.3164V14.7612H2.31641V13.2612H3.81641V8.01123C3.81641 4.69752 6.5027 2.01123 9.81641 2.01123C13.1301 2.01123 15.8164 4.69752 15.8164 8.01123V13.2612ZM14.3164 13.2612V8.01123C14.3164 5.52595 12.3017 3.51123 9.81641 3.51123C7.33112 3.51123 5.31641 5.52595 5.31641 8.01123V13.2612H14.3164ZM7.56641 16.2612H12.0664V17.7612H7.56641V16.2612Z"
       fill="#49ADBE"

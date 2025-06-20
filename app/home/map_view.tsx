@@ -1,10 +1,9 @@
 import { color } from "@/utils/constants";
 import { router } from "expo-router";
-import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import MapView, { Circle, Marker } from "react-native-maps";
 
-export default function MapView({ onUserPress }: any) {
-  // Sample users data with coordinates - replace with your actual data
+export default function Map({ onUserPress }: any) {
   const nearbyUsers = [
     {
       id: "1",
@@ -66,7 +65,7 @@ export default function MapView({ onUserPress }: any) {
   const handleUserProfile = (user: any) => {
     if (onUserPress) {
       onUserPress(user);
-      router.push("/(tabs)/profile/user_profile");
+      router.push("/profile/user_profile");
     } else {
       console.log("User pressed:", user.name);
     }
@@ -74,8 +73,7 @@ export default function MapView({ onUserPress }: any) {
 
   return (
     <View style={styles.container}>
-      {/* Replace this with actual MapView when you uncomment it */}
-      {/* <MapView
+      <MapView
         style={styles.map}
         region={{
           latitude: 45.4408474,
@@ -112,66 +110,7 @@ export default function MapView({ onUserPress }: any) {
             </TouchableOpacity>
           </Marker>
         ))}
-      </MapView> */}
-
-      {/* Temporary placeholder - remove when MapView is enabled */}
-      <View style={styles.mapPlaceholder}>
-        {/* Simulated user markers for demonstration */}
-        <TouchableOpacity
-          style={[styles.userMarker, { top: 100, left: 150 }]}
-          onPress={() => handleUserProfile(nearbyUsers[0])}
-          activeOpacity={0.8}
-        >
-          <Image
-            source={{ uri: nearbyUsers[0].image }}
-            style={styles.userImage}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.userMarker, { top: 200, right: 100 }]}
-          onPress={() => handleUserProfile(nearbyUsers[1])}
-          activeOpacity={0.8}
-        >
-          <Image
-            source={{ uri: nearbyUsers[1].image }}
-            style={styles.userImage}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.userMarker, { bottom: 150, left: 80 }]}
-          onPress={() => handleUserProfile(nearbyUsers[2])}
-          activeOpacity={0.8}
-        >
-          <Image
-            source={{ uri: nearbyUsers[2].image }}
-            style={styles.userImage}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.userMarker, { bottom: 200, right: 150 }]}
-          onPress={() => handleUserProfile(nearbyUsers[3])}
-          activeOpacity={0.8}
-        >
-          <Image
-            source={{ uri: nearbyUsers[3].image }}
-            style={styles.userImage}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.userMarker, { top: 300, left: 200 }]}
-          onPress={() => handleUserProfile(nearbyUsers[4])}
-          activeOpacity={0.8}
-        >
-          <Image
-            source={{ uri: nearbyUsers[4].image }}
-            style={styles.userImage}
-          />
-        </TouchableOpacity>
-      </View>
+      </MapView>
     </View>
   );
 }

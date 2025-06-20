@@ -1,35 +1,53 @@
+import ListView from "@/app/home/list_view";
+import MapView from "@/app/home/map_view";
+import AccessLocation from "@/components/enable_location";
 import Filters from "@/components/filters";
 import Height from "@/components/height";
-import ListView from "@/components/list_view";
 import LookingFor from "@/components/looking_for";
-import MapView from "@/components/map_view";
 import Nationality from "@/components/nationality";
 import Religion from "@/components/religion";
 import ZodiacSign from "@/components/zodic";
 import { color, font } from "@/utils/constants";
+import { requestUserLocation } from "@/utils/location";
+import { BellIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as Location from "expo-location";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import {
-  Modal,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
+import { useEffect, useState } from "react";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
-  // View state
   const [viewType, setViewType] = useState("Map");
-
-  // Modal states
   const [showFilters, setShowFilters] = useState(false);
   const [showLookingFor, setShowLookingFor] = useState(false);
   const [showHeight, setShowHeight] = useState(false);
   const [showNationality, setShowNationality] = useState(false);
   const [showReligion, setShowReligion] = useState(false);
   const [showZodiac, setShowZodiac] = useState(false);
+  const [locationPermissionGranted, setLocationPermissionGranted] =
+    useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      if (status === "granted") {
+        setLocationPermissionGranted(true);
+        setShowLocationModal(false);
+      }
+    })();
+  }, []);
+
+  const handleAllowLocation = async () => {
+    const location = await requestUserLocation();
+    if (location) {
+      console.log("User location:", location);
+      setLocationPermissionGranted(true);
+      setShowLocationModal(false);
+    }
+  };
 
   // Filter data state
   const [filterData, setFilterData] = useState({
@@ -113,24 +131,23 @@ export default function Index() {
     // Handle map user press
   };
 
-  // Render current view content
-  const renderContent = () => {
-    if (viewType === "List View") {
-      return (
-        <ListView
-          onViewProfile={handleViewProfile}
-          onBookmark={handleBookmark}
-        />
-      );
-    }
-
-    return <MapView onUserPress={handleUserPress} />;
+  const handleClose = () => {
+    setShowHeight(false);
+    setShowLookingFor(false);
+    setShowFilters(true);
   };
 
   return (
     <View style={styles.container}>
       {/* Main Content */}
-      {renderContent()}
+      {viewType === "ListView" ? (
+        <ListView
+          onViewProfile={handleViewProfile}
+          onBookmark={handleBookmark}
+        />
+      ) : (
+        <MapView onUserPress={handleUserPress} />
+      )}
 
       {/* Top Header */}
       <SafeAreaView style={styles.topHeader}>
@@ -141,11 +158,7 @@ export default function Index() {
             onPress={handleNotifications}
             activeOpacity={0.8}
           >
-            <Ionicons
-              name="notifications-outline"
-              size={24}
-              color={color.black}
-            />
+            <BellIcon />
           </TouchableOpacity>
 
           {/* Map/List Toggle */}
@@ -153,18 +166,12 @@ export default function Index() {
             <TouchableOpacity
               style={[
                 styles.toggleButton,
-                viewType === "Map"
-                  ? styles.activeToggle
-                  : styles.inactiveToggle,
+                viewType === "Map" && styles.activeToggle,
               ]}
               onPress={() => setViewType("Map")}
               activeOpacity={0.8}
             >
-              <Ionicons
-                name="map"
-                size={18}
-                color={viewType === "Map" ? color.black : color.gray400}
-              />
+              <Feather name="map" size={18} color="black" />
               <Text
                 style={[
                   styles.toggleText,
@@ -180,9 +187,7 @@ export default function Index() {
             <TouchableOpacity
               style={[
                 styles.toggleButton,
-                viewType === "List View"
-                  ? styles.activeToggle
-                  : styles.inactiveToggle,
+                viewType === "List View" && styles.activeToggle,
               ]}
               onPress={() => setViewType("List View")}
               activeOpacity={0.8}
@@ -211,7 +216,7 @@ export default function Index() {
             onPress={handleFilters}
             activeOpacity={0.8}
           >
-            <Ionicons name="options-outline" size={24} color={color.black} />
+            <MaterialIcons name="filter-list" size={24} color={color.primary} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -256,7 +261,7 @@ export default function Index() {
             onPress={() => setShowLookingFor(false)}
           />
           <LookingFor
-            onClose={() => setShowLookingFor(false)}
+            onClose={handleClose}
             onBack={handleBackToFilters}
             filterData={filterData}
             setFilterData={setFilterData}
@@ -278,7 +283,7 @@ export default function Index() {
             onPress={() => setShowHeight(false)}
           />
           <Height
-            onClose={() => setShowHeight(false)}
+            onClose={handleClose}
             onBack={handleBackToFilters}
             filterData={filterData}
             setFilterData={setFilterData}
@@ -351,6 +356,11 @@ export default function Index() {
           />
         </View>
       </Modal>
+
+      <AccessLocation
+        visible={showLocationModal && !locationPermissionGranted}
+        onAllow={handleAllowLocation}
+      />
     </View>
   );
 }
@@ -381,7 +391,9 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    borderWidth: 1,
+    borderColor: color.gray200,
+    shadowColor: color.gray300,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -392,10 +404,10 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     flexDirection: "row",
-    backgroundColor: color.white,
-    borderRadius: 25,
+    backgroundColor: color.gray500,
+    borderRadius: 99,
     padding: 4,
-    shadowColor: "#000",
+    shadowColor: color.gray300,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -414,27 +426,25 @@ const styles = StyleSheet.create({
   },
   activeToggle: {
     backgroundColor: color.white,
-    shadowColor: "#000",
+    shadowColor: color.gray300,
     shadowOffset: {
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 2,
     elevation: 2,
   },
-  inactiveToggle: {
-    backgroundColor: "transparent",
-  },
+
   toggleText: {
     fontSize: 14,
-    fontFamily: font.medium,
+    fontFamily: font.semiBold,
   },
   activeToggleText: {
     color: color.black,
   },
   inactiveToggleText: {
-    color: color.gray400,
+    color: color.black,
   },
   modalOverlay: {
     flex: 1,

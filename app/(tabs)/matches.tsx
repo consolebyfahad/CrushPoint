@@ -8,14 +8,15 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+import Feather from "@expo/vector-icons/Feather";
 export default function Matches({ navigation }: any) {
   const [searchText, setSearchText] = useState("");
   const [showProfileOptions, setShowProfileOptions] = useState(false);
@@ -162,18 +163,19 @@ export default function Matches({ navigation }: any) {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Ionicons
+          <Feather
             name="search"
             size={20}
-            color={color.gray400}
+            color={color.gray300}
             style={styles.searchIcon}
           />
+
           <TextInput
             style={styles.searchInput}
             value={searchText}
             onChangeText={setSearchText}
             placeholder="Search matches"
-            placeholderTextColor={color.gray400}
+            placeholderTextColor={color.gray300}
           />
           {searchText.length > 0 && (
             <TouchableOpacity
@@ -243,13 +245,12 @@ export default function Matches({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: color.white,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: 16,
+    paddingTop: 10,
     paddingBottom: 16,
-    backgroundColor: color.white,
   },
   titleContainer: {
     flexDirection: "row",
@@ -257,29 +258,24 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontFamily: font.bold,
     color: color.black,
   },
   matchCount: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray300,
   },
   searchContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: color.white,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    padding: 16,
   },
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
-    borderRadius: 12,
+    backgroundColor: color.gray500,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 12,
   },
   searchIcon: {
     marginRight: 12,
@@ -295,7 +291,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingTop: 16,
-    paddingBottom: 100, // Space for bottom tab bar
+    paddingBottom: 100,
   },
   emptyContainer: {
     alignItems: "center",

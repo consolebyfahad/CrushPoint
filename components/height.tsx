@@ -18,10 +18,8 @@ export default function Height({
   filterData,
   setFilterData,
 }: any) {
-  const [fromHeight, setFromHeight] = useState(
-    filterData.height?.from || "150"
-  );
-  const [toHeight, setToHeight] = useState(filterData.height?.to || "180");
+  const [fromHeight, setFromHeight] = useState(filterData.height?.from);
+  const [toHeight, setToHeight] = useState(filterData.height?.to);
 
   const handleConfirm = () => {
     // Save the height range logic here
@@ -65,7 +63,7 @@ export default function Height({
               keyboardType="numeric"
               maxLength={3}
               placeholder="150"
-              placeholderTextColor={color.gray400}
+              placeholderTextColor={color.gray200}
             />
           </View>
         </View>
@@ -81,7 +79,7 @@ export default function Height({
               keyboardType="numeric"
               maxLength={3}
               placeholder="180"
-              placeholderTextColor={color.gray400}
+              placeholderTextColor={color.gray200}
             />
           </View>
         </View>
@@ -106,8 +104,8 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    minHeight: SCREEN_HEIGHT * 0.4,
-    paddingBottom: 34,
+    minHeight: SCREEN_HEIGHT * 0.5,
+    paddingBottom: 24,
   },
   header: {
     flexDirection: "row",

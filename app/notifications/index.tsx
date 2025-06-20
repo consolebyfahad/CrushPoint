@@ -5,12 +5,12 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Notifications({ navigation }: any) {
   const [notifications, setNotifications] = useState([
@@ -110,7 +110,6 @@ export default function Notifications({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Notifications</Text>
         <TouchableOpacity
@@ -138,7 +137,7 @@ export default function Notifications({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: color.white,
   },
   header: {
     flexDirection: "row",
@@ -146,9 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: color.white,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
   },
   title: {
     fontSize: 24,
