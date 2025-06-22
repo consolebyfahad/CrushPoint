@@ -1,7 +1,9 @@
 import Blink from "@/assets/images/blink.svg";
 import Fire from "@/assets/images/fire.svg";
+import Heart from "@/assets/images/heart.svg";
 import Hi from "@/assets/images/hi.svg";
 import Like from "@/assets/images/like.svg";
+import Lovely from "@/assets/images/lovely.svg";
 import Onboarding1 from "@/assets/images/onboarding1.svg";
 import Onboarding2 from "@/assets/images/onboarding2.svg";
 import Onboarding3 from "@/assets/images/onboarding3.svg";
@@ -20,6 +22,8 @@ export const svgIcon = {
   Like: <Like />,
   Tea: <Tea />,
   Hi: <Hi />,
+  Heart: <Heart width={50} />,
+  Lovely: <Lovely />,
 };
 // Google Icon SVG
 export const GoogleIcon = () => (
@@ -253,5 +257,134 @@ export const CurrentLocationIcon = () => (
       fillOpacity="0.24"
     />
     <Circle cx="25.5188" cy="25.4041" r="6.94656" fill="#49ADBE" />
+  </Svg>
+);
+export const Calender = () => (
+  <Svg width="21" height="21" viewBox="0 0 21 21" fill="none">
+    <Path
+      d="M16.3275 3.8335H4.66081C3.74033 3.8335 2.99414 4.57969 2.99414 5.50016V17.1668C2.99414 18.0873 3.74033 18.8335 4.66081 18.8335H16.3275C17.2479 18.8335 17.9941 18.0873 17.9941 17.1668V5.50016C17.9941 4.57969 17.2479 3.8335 16.3275 3.8335Z"
+      stroke="white"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M13.8281 2.1665V5.49984"
+      stroke="white"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M7.16016 2.1665V5.49984"
+      stroke="white"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M2.99414 8.8335H17.9941"
+      stroke="white"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </Svg>
+);
+export const Users = () => (
+  <Svg width="21" height="21" viewBox="0 0 21 21" fill="none">
+    <Path
+      d="M14.1139 18.25V16.5833C14.1139 15.6993 13.7627 14.8514 13.1376 14.2263C12.5125 13.6012 11.6647 13.25 10.7806 13.25H5.7806C4.89654 13.25 4.0487 13.6012 3.42358 14.2263C2.79846 14.8514 2.44727 15.6993 2.44727 16.5833V18.25"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M8.2806 9.91667C10.1215 9.91667 11.6139 8.42428 11.6139 6.58333C11.6139 4.74238 10.1215 3.25 8.2806 3.25C6.43965 3.25 4.94727 4.74238 4.94727 6.58333C4.94727 8.42428 6.43965 9.91667 8.2806 9.91667Z"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M19.1152 18.2501V16.5834C19.1147 15.8448 18.8689 15.1274 18.4164 14.5437C17.9639 13.9599 17.3303 13.543 16.6152 13.3584"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M14.1152 3.3584C14.8322 3.54198 15.4678 3.95898 15.9216 4.54366C16.3754 5.12833 16.6218 5.84742 16.6218 6.58757C16.6218 7.32771 16.3754 8.0468 15.9216 8.63147C15.4678 9.21615 14.8322 9.63315 14.1152 9.81673"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </Svg>
+);
+export const AddCalender = () => (
+  <Svg width="21" height="21" viewBox="0 0 21 21" fill="none">
+    <Path
+      d="M18.2793 11.5835V5.75016C18.2793 5.30814 18.1037 4.88421 17.7911 4.57165C17.4786 4.25909 17.0547 4.0835 16.6126 4.0835H4.94596C4.50394 4.0835 4.08001 4.25909 3.76745 4.57165C3.45489 4.88421 3.2793 5.30814 3.2793 5.75016V17.4168C3.2793 17.8589 3.45489 18.2828 3.76745 18.5953C4.08001 18.9079 4.50394 19.0835 4.94596 19.0835H11.6126"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M14.1133 2.4165V5.74984"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M7.44531 2.4165V5.74984"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M3.2793 9.0835H18.2793"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M16.6133 14.0835V19.0835"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M14.1133 16.5835H19.1133"
+      stroke="black"
+      stroke-width="1.66667"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </Svg>
+);
+export const MarkerIcon = () => (
+  <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+    <Circle
+      cx="24.8092"
+      cy="24.8092"
+      r="24.8092"
+      fill="#49ADBE"
+      fillOpacity="0.24"
+    />
+    <Circle
+      cx="24.8093"
+      cy="24.8088"
+      r="14.8855"
+      fill="#49ADBE"
+      fillOpacity="0.24"
+    />
+    <Circle cx="24.8089" cy="24.8089" r="6.94656" fill="#49ADBE" />
   </Svg>
 );

@@ -1,22 +1,20 @@
+import CustomButton from "@/components/custom_button";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Settings({ navigation }: any) {
   const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    } else {
-      console.log("Go back");
-    }
+    router.back();
   };
 
   const handleLogOut = () => {
@@ -42,31 +40,23 @@ export default function Settings({ navigation }: any) {
       icon: "person-outline",
       hasChevron: true,
       onPress: () => {
-        if (navigation) {
-          navigation.navigate("AccountSettings");
-        } else {
-          console.log("Account Settings");
-        }
+        router.push("/profile/account_setting");
       },
     },
-    {
-      id: "change_password",
-      title: "Change Password",
-      icon: "lock-closed-outline",
-      hasChevron: true,
-      onPress: () => console.log("Change Password"),
-    },
+    // {
+    //   id: "change_password",
+    //   title: "Change Password",
+    //   icon: "lock-closed-outline",
+    //   hasChevron: true,
+    //   onPress: () => console.log("Change Password"),
+    // },
     {
       id: "notifications",
       title: "Notifications",
       icon: "notifications-outline",
       hasChevron: true,
       onPress: () => {
-        if (navigation) {
-          navigation.navigate("NotificationSettings");
-        } else {
-          console.log("Notifications");
-        }
+        router.push("/profile/notification_setting");
       },
     },
     {
@@ -75,11 +65,7 @@ export default function Settings({ navigation }: any) {
       icon: "shield-checkmark-outline",
       hasChevron: true,
       onPress: () => {
-        if (navigation) {
-          navigation.navigate("VerificationStatus");
-        } else {
-          console.log("Verification Status");
-        }
+        router.push("/profile/verification_status");
       },
     },
     {
@@ -88,20 +74,16 @@ export default function Settings({ navigation }: any) {
       icon: "ban-outline",
       hasChevron: true,
       onPress: () => {
-        if (navigation) {
-          navigation.navigate("BlockedUsers");
-        } else {
-          console.log("Blocked Users");
-        }
+        router.push("/profile/blocked_user");
       },
     },
-    {
-      id: "app_language",
-      title: "App Language",
-      icon: "globe-outline",
-      hasChevron: true,
-      onPress: () => console.log("App Language"),
-    },
+    // {
+    //   id: "app_language",
+    //   title: "App Language",
+    //   icon: "globe-outline",
+    //   hasChevron: true,
+    //   onPress: () => console.log("App Language"),
+    // },
   ];
 
   const connectSettings = [
@@ -129,6 +111,36 @@ export default function Settings({ navigation }: any) {
       hasExternal: true,
       onPress: () => console.log("Community Guidelines"),
     },
+    // {
+    //   id: "terms",
+    //   title: "Terms of Service",
+    //   icon: "document-text-outline",
+    //   hasExternal: true,
+    //   onPress: () => console.log("Terms of Service"),
+    // },
+    // {
+    //   id: "privacy",
+    //   title: "Privacy Policy",
+    //   icon: "shield-outline",
+    //   hasExternal: true,
+    //   onPress: () => console.log("Privacy Policy"),
+    // },
+    // {
+    //   id: "support",
+    //   title: "Contact Support",
+    //   icon: "help-circle-outline",
+    //   hasChevron: true,
+    //   onPress: () => {
+    //     if (navigation) {
+    //       navigation.navigate("ContactSupport");
+    //     } else {
+    //       console.log("Contact Support");
+    //     }
+    //   },
+    // },
+  ];
+
+  const otherSettings = [
     {
       id: "terms",
       title: "Terms of Service",
@@ -149,11 +161,7 @@ export default function Settings({ navigation }: any) {
       icon: "help-circle-outline",
       hasChevron: true,
       onPress: () => {
-        if (navigation) {
-          navigation.navigate("ContactSupport");
-        } else {
-          console.log("Contact Support");
-        }
+        router.push("/profile/contact_support");
       },
     },
   ];
@@ -169,7 +177,7 @@ export default function Settings({ navigation }: any) {
         <Ionicons
           name={item.icon as any}
           size={20}
-          color="#5FB3D4"
+          color={color.primary}
           style={styles.settingIcon}
         />
         <View style={styles.settingTextContainer}>
@@ -189,11 +197,12 @@ export default function Settings({ navigation }: any) {
     </TouchableOpacity>
   );
 
-  const renderSection = (title: string, items: any[]) => (
+  const renderSection = (title?: string, items?: any[]) => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.sectionContent}>
-        {items.map((item, index) => (
+      {title && <Text style={styles.sectionTitle}>{title}</Text>}
+      {title && <View style={styles.separator} />}
+      <View>
+        {items?.map((item, index) => (
           <View key={item.id}>
             {renderSettingItem(item)}
             {index < items.length - 1 && <View style={styles.separator} />}
@@ -227,6 +236,7 @@ export default function Settings({ navigation }: any) {
 
         {/* Connect Section */}
         {renderSection("Connect", connectSettings)}
+        {renderSection(undefined, otherSettings)}
 
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
@@ -234,13 +244,12 @@ export default function Settings({ navigation }: any) {
 
       {/* Log Out Button */}
       <View style={styles.logoutContainer}>
-        <TouchableOpacity
-          style={styles.logoutButton}
+        <CustomButton
+          title="Log Out"
+          style={{ backgroundColor: color.gray500 }}
+          fontstyle={{ color: color.black }}
           onPress={handleLogOut}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
+        />
       </View>
     </SafeAreaView>
   );
@@ -249,17 +258,15 @@ export default function Settings({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: color.white,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: color.white,
+    gap: 8,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    borderBottomColor: color.gray100,
   },
   backButton: {
     width: 40,
@@ -277,36 +284,27 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    padding: 16,
   },
   section: {
-    marginTop: 24,
-    paddingHorizontal: 20,
+    marginBottom: 14,
+    backgroundColor: color.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.15)",
+    overflow: "hidden",
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: font.semiBold,
+    fontFamily: font.medium,
     color: color.gray400,
-    marginBottom: 12,
-  },
-  sectionContent: {
-    backgroundColor: color.white,
-    borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    padding: 16,
   },
   settingItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    padding: 16,
   },
   settingContent: {
     flexDirection: "row",
@@ -321,40 +319,23 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    fontFamily: font.medium,
+    fontFamily: font.regular,
     color: color.black,
   },
   settingSubtitle: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray300,
     marginTop: 2,
   },
   separator: {
     height: 1,
-    backgroundColor: "#F5F5F5",
-    marginLeft: 52, // Aligns with text after icon
+    backgroundColor: color.gray500,
   },
   bottomSpacing: {
-    height: 100,
+    height: 20,
   },
   logoutContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 34,
-    backgroundColor: color.white,
-    borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
-  },
-  logoutButton: {
-    backgroundColor: "#F5F5F5",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  logoutText: {
-    fontSize: 16,
-    fontFamily: font.medium,
-    color: "#EF4444",
+    paddingHorizontal: 16,
   },
 });

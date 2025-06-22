@@ -10,11 +10,11 @@ export default function LookingFor() {
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   const options = [
-    { id: "serious", emoji: "💙", label: "Serious relationship" },
+    { id: "serious", emoji: "🩵", label: "Serious relationship" },
     { id: "casual", emoji: "😘", label: "Casual dating" },
     { id: "friendship", emoji: "🤝", label: "Friendship" },
     { id: "open", emoji: "🔥", label: "Open to possibilities" },
-    { id: "prefer-not", emoji: "🤐", label: "Prefer not to say" },
+    { id: "prefer-not", emoji: "🤫", label: "Prefer not to say" },
   ];
 
   const handleOptionSelect = (optionId: any) => {
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionsContainer: {
-    gap: 16,
+    gap: 12,
   },
   optionButton: {
     paddingVertical: 20,
@@ -140,7 +140,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    justifyContent: "center",
+    gap: 8,
   },
   selectedOption: {
     backgroundColor: "#E3F2FD",
@@ -156,7 +157,6 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 18,
     fontFamily: font.medium,
-    flex: 1,
   },
   selectedText: {
     color: color.primary,

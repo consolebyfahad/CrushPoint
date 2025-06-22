@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import CustomButton from "./custom_button";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -94,14 +95,6 @@ export default function InviteMatches({
     setSelectedMatches([]);
     setSearchText("");
     onClose();
-  };
-
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      onClose();
-    }
   };
 
   const renderMatchItem = ({ item }: any) => {
@@ -202,18 +195,11 @@ export default function InviteMatches({
               {selectedMatches.length !== 1 ? "es" : ""} selected
             </Text>
 
-            {/* Send Invites Button */}
-            <TouchableOpacity
-              style={[
-                styles.sendButton,
-                selectedMatches.length === 0 && styles.sendButtonDisabled,
-              ]}
+            <CustomButton
+              title="Send Invites"
               onPress={handleSendInvites}
-              activeOpacity={0.8}
-              disabled={selectedMatches.length === 0}
-            >
-              <Text style={styles.sendButtonText}>Send Invites</Text>
-            </TouchableOpacity>
+              isDisabled={selectedMatches.length === 0}
+            />
           </View>
         </View>
       </View>
@@ -299,8 +285,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
   },
   matchContent: {
     flexDirection: "row",
@@ -343,12 +327,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   checkboxSelected: {
-    backgroundColor: "#5FB3D4",
-    borderColor: "#5FB3D4",
+    backgroundColor: color.primary,
+    borderColor: color.primary,
   },
   bottomSection: {
     paddingHorizontal: 20,
     paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: color.gray500,
   },
   selectionCount: {
     fontSize: 14,

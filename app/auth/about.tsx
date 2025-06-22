@@ -65,7 +65,10 @@ const About = () => {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Your Name</Text>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              Platform.OS === "ios" && { paddingVertical: 14 },
+            ]}
             placeholder="Enter your name"
             placeholderTextColor="#999"
             value={name}
@@ -78,33 +81,35 @@ const About = () => {
           <Text style={styles.label}>Date of Birth</Text>
           <TouchableOpacity onPress={handleDatePress} style={styles.dateInput}>
             <TextInput
-              style={styles.dateTextInput}
+              style={[
+                styles.dateTextInput,
+                Platform.OS === "ios" && { paddingVertical: 14 },
+              ]}
               placeholder="mm/dd/yyyy"
               placeholderTextColor="#999"
               value={dateOfBirth}
               onChangeText={setDateOfBirth}
               editable={false}
             />
+
             <Octicons name="calendar" size={18} color={color.gray300} />
           </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode="date"
+              is24Hour={true}
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onDateChange}
+              maximumDate={new Date()}
+            />
+          )}
         </View>
       </View>
 
       {/* Continue Button */}
       <CustomButton title="Continue" onPress={handleContinue} />
-
-      {/* Date Picker */}
-      {showDatePicker && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={date}
-          mode="date"
-          is24Hour={true}
-          display="default"
-          onChange={onDateChange}
-          maximumDate={new Date()} // Prevents future dates
-        />
-      )}
     </SafeAreaView>
   );
 };
@@ -113,7 +118,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    // paddingBottom: 24,
     backgroundColor: color.white,
   },
   content: {
@@ -159,7 +164,6 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
     fontSize: 16,
     color: "#000",
     backgroundColor: "#fff",

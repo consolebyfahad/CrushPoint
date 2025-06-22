@@ -1,15 +1,10 @@
 import NotificationCard from "@/components/notification_card";
+import { NotificationsTabsHeader } from "@/components/tabs_header";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Notifications({ navigation }: any) {
@@ -49,7 +44,7 @@ export default function Notifications({ navigation }: any) {
   ]);
 
   const handleClose = () => {
-    router.push("/(tabs)");
+    router.back();
   };
 
   const handleNotificationPress = (notification: any) => {
@@ -110,16 +105,12 @@ export default function Notifications({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Notifications</Text>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={handleClose}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="close" size={24} color={color.black} />
-        </TouchableOpacity>
-      </View>
+      <NotificationsTabsHeader
+        title="Notifications"
+        notifications={notifications}
+        close={handleClose}
+        // onClose={handleClose}
+      />
 
       {/* Notifications List */}
       <FlatList

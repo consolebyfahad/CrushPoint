@@ -62,10 +62,8 @@ const AnimatedLogo = () => {
       ]}
     >
       <Image
-        source={image.icon}
+        source={image.splash}
         style={{
-          height: 100,
-          width: 140,
           resizeMode: "cover",
           marginBottom: 0,
         }}

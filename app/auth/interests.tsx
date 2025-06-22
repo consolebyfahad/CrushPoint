@@ -1,7 +1,8 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
-import { router } from "expo-router";
+import Feather from "@expo/vector-icons/Feather";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -41,6 +42,8 @@ const allInterests = [
 ];
 
 export default function Interests() {
+  const { fromEdit } = useLocalSearchParams();
+  const isEdit = fromEdit === "true";
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredInterests, setFilteredInterests] = useState(allInterests);
@@ -113,7 +116,7 @@ export default function Interests() {
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchIcon}>
-            <Text style={styles.searchIconText}>🔍</Text>
+            <Feather name="search" size={20} color={color.gray300} />
           </View>
           <TextInput
             style={styles.searchInput}
@@ -160,19 +163,26 @@ export default function Interests() {
       </View>
 
       {/* Bottom Section */}
-      <View style={styles.bottomSection}>
-        {/* Selected Count */}
-        <Text style={styles.selectedCount}>
-          Selected: {selectedInterests.length} (minimum 3)
-        </Text>
-
-        {/* Continue Button */}
-        <CustomButton
-          title="Continue"
-          onPress={handleContinue}
-          isDisabled={isButtonDisabled}
-        />
-      </View>
+      {!isEdit ? (
+        <View style={styles.bottomSection}>
+          <Text style={styles.selectedCount}>
+            Selected: {selectedInterests.length} (minimum 3)
+          </Text>
+          <CustomButton
+            title="Continue"
+            onPress={handleContinue}
+            isDisabled={isButtonDisabled}
+          />
+        </View>
+      ) : (
+        <View style={styles.buttonContainer}>
+          <CustomButton
+            title="Save Changes"
+            onPress={handleContinue}
+            isDisabled={selectedInterests.length === 0}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -187,11 +197,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 30,
     paddingHorizontal: 16,
   },
   titleSection: {
-    marginBottom: 32,
+    marginBottom: 28,
   },
   title: {
     fontSize: 24,
@@ -218,8 +228,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 32,
+    paddingVertical: 16,
+    marginBottom: 24,
     gap: 12,
     overflow: "hidden",
   },
@@ -241,15 +251,15 @@ const styles = StyleSheet.create({
   interestsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
-    paddingBottom: 24,
+    gap: 8,
+    paddingBottom: 12,
   },
   interestTag: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 28,
+    borderRadius: 99,
     borderWidth: 1,
     gap: 6,
   },
@@ -278,9 +288,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     paddingTop: 16,
     borderColor: color.gray100,
-    paddingBottom: 24,
+    // paddingBottom: 24,
     gap: 16,
     paddingHorizontal: 16,
+  },
+  buttonContainer: {
+    padding: 16,
   },
   selectedCount: {
     fontSize: 16,

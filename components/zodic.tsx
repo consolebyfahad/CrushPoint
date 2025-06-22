@@ -17,6 +17,7 @@ export default function ZodiacSign({
   onBack,
   filterData,
   setFilterData,
+  onSelect,
 }: any) {
   const [selectedZodiac, setSelectedZodiac] = useState(
     filterData.zodiacSign || "Cancer"
@@ -46,7 +47,7 @@ export default function ZodiacSign({
     });
     setTimeout(() => {
       console.log("Selected zodiac sign:", zodiac);
-      onClose();
+      onSelect();
     }, 200);
   };
 

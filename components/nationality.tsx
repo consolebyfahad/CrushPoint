@@ -15,6 +15,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function Nationality({
   onClose,
+  onSelect,
   onBack,
   filterData,
   setFilterData,
@@ -60,7 +61,7 @@ export default function Nationality({
     });
     setTimeout(() => {
       console.log("Selected nationality:", nationality);
-      onClose();
+      onSelect();
     }, 200);
   };
 

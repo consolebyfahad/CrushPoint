@@ -1,6 +1,7 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
+import Feather from "@expo/vector-icons/Feather";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -78,7 +79,7 @@ export default function AddPhotos() {
 
   const handleContinue = () => {
     console.log("Selected photos:", selectedPhotos);
-    router.push("/(tabs)"); // Update with your next route
+    router.push("/auth/verification"); // Update with your next route
   };
 
   const isButtonDisabled = selectedPhotos.length < minPhotos;
@@ -109,7 +110,7 @@ export default function AddPhotos() {
         activeOpacity={0.8}
       >
         <View style={styles.uploadIcon}>
-          <Text style={styles.uploadIconText}>⬆</Text>
+          <Feather name="upload" size={24} color={color.gray900} />
         </View>
       </TouchableOpacity>
     );
@@ -131,7 +132,7 @@ export default function AddPhotos() {
             <Text style={styles.title}>Add your best photos</Text>
             <View style={styles.subtitleContainer}>
               <View style={styles.infoIcon}>
-                <Text style={styles.infoIconText}>ⓘ</Text>
+                <Feather name="info" size={16} color={color.gray300} />
               </View>
               <Text style={styles.subtitle}>
                 Photos should be clear and show your face. Add at least 2 photos
@@ -147,9 +148,7 @@ export default function AddPhotos() {
             activeOpacity={0.8}
           >
             <View style={styles.uploadContent}>
-              <View style={styles.cameraIcon}>
-                <Text style={styles.cameraIconText}>📷</Text>
-              </View>
+              <Feather name="camera" size={32} color={color.gray900} />
               <Text style={styles.uploadText}>
                 Drag & drop photos here, or click to select
               </Text>
@@ -180,13 +179,11 @@ export default function AddPhotos() {
       </ScrollView>
 
       {/* Continue Button */}
-      <View style={styles.buttonContainer}>
-        <CustomButton
-          title="Continue"
-          onPress={handleContinue}
-          isDisabled={isButtonDisabled}
-        />
-      </View>
+      <CustomButton
+        title="Continue"
+        onPress={handleContinue}
+        isDisabled={isButtonDisabled}
+      />
     </SafeAreaView>
   );
 }
@@ -221,19 +218,13 @@ const styles = StyleSheet.create({
   infoIcon: {
     width: 20,
     height: 20,
-    borderRadius: 10,
-    backgroundColor: color.gray200,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 2,
   },
-  infoIconText: {
-    fontSize: 12,
-    color: color.gray400,
-    fontFamily: font.medium,
-  },
+
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: font.regular,
     color: color.gray300,
     lineHeight: 22,
@@ -241,41 +232,30 @@ const styles = StyleSheet.create({
   },
   mainUploadArea: {
     borderWidth: 2,
-    borderColor: color.gray200,
+    borderColor: color.gray100,
     borderStyle: "dashed",
     borderRadius: 12,
-    paddingVertical: 48,
+    paddingVertical: 28,
     paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
-    backgroundColor: color.gray50,
   },
   uploadContent: {
     alignItems: "center",
     gap: 12,
   },
-  cameraIcon: {
-    width: 48,
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  cameraIconText: {
-    fontSize: 32,
-    opacity: 0.6,
-  },
   uploadText: {
     fontSize: 16,
-    fontFamily: font.medium,
-    color: color.gray400,
+    fontFamily: font.regular,
+    lineHeight: 24,
+    color: color.gray300,
     textAlign: "center",
   },
   fileSizeText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray200,
   },
   photoGrid: {
     gap: 16,
@@ -294,12 +274,11 @@ const styles = StyleSheet.create({
     flex: 1,
     aspectRatio: 1,
     borderWidth: 2,
-    borderColor: color.gray200,
+    borderColor: color.gray100,
     borderStyle: "dashed",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: color.gray50,
   },
   uploadedPhoto: {
     flex: 1,
@@ -338,8 +317,5 @@ const styles = StyleSheet.create({
     color: color.gray300,
     textAlign: "center",
     marginBottom: 16,
-  },
-  buttonContainer: {
-    paddingBottom: 24,
   },
 });

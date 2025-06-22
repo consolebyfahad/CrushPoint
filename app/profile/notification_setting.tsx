@@ -1,8 +1,8 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Switch,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationSettings({ navigation }: any) {
   const [notificationSettings, setNotificationSettings] = useState({
@@ -25,11 +26,7 @@ export default function NotificationSettings({ navigation }: any) {
   });
 
   const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    } else {
-      console.log("Go back");
-    }
+    router.back();
   };
 
   const toggleNotification = (key: string) => {
@@ -106,7 +103,7 @@ export default function NotificationSettings({ navigation }: any) {
       <Switch
         value={item.enabled}
         onValueChange={() => toggleNotification(item.key)}
-        trackColor={{ false: "#E5E7EB", true: "#5FB3D4" }}
+        trackColor={{ false: "#E5E7EB", true: color.primary }}
         thumbColor={item.enabled ? "#FFFFFF" : "#FFFFFF"}
         ios_backgroundColor="#E5E7EB"
         style={styles.switch}

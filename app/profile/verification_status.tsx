@@ -1,15 +1,16 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function VerificationStatus({ navigation }: any) {
   const [verificationState, setVerificationState] = useState({
@@ -18,55 +19,51 @@ export default function VerificationStatus({ navigation }: any) {
   });
 
   const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    } else {
-      console.log("Go back");
-    }
+    router.back();
   };
 
   const handleTryAgain = () => {
     console.log("Starting verification process...");
-
+    router.push("/auth/verification");
     // Update status to pending
-    setVerificationState((prev) => ({
-      ...prev,
-      status: "pending",
-    }));
+    // setVerificationState((prev) => ({
+    //   ...prev,
+    //   status: "pending",
+    // }));
 
-    // Simulate verification process
-    Alert.alert(
-      "Verification Started",
-      "Please follow the camera instructions to verify your identity.",
-      [
-        {
-          text: "OK",
-          onPress: () => {
-            // For demo, we'll simulate a random result after a delay
-            setTimeout(() => {
-              const success = Math.random() > 0.5;
-              setVerificationState((prev) => ({
-                ...prev,
-                status: success ? "verified" : "failed",
-                lastAttempt: new Date(),
-              }));
+    // // Simulate verification process
+    // Alert.alert(
+    //   "Verification Started",
+    //   "Please follow the camera instructions to verify your identity.",
+    //   [
+    //     {
+    //       text: "OK",
+    //       onPress: () => {
+    //         // For demo, we'll simulate a random result after a delay
+    //         setTimeout(() => {
+    //           const success = Math.random() > 0.5;
+    //           setVerificationState((prev) => ({
+    //             ...prev,
+    //             status: success ? "verified" : "failed",
+    //             lastAttempt: new Date(),
+    //           }));
 
-              if (success) {
-                Alert.alert(
-                  "Verification Successful",
-                  "Your account has been verified!"
-                );
-              } else {
-                Alert.alert(
-                  "Verification Failed",
-                  "Please try again following the guidelines."
-                );
-              }
-            }, 2000);
-          },
-        },
-      ]
-    );
+    //           if (success) {
+    //             Alert.alert(
+    //               "Verification Successful",
+    //               "Your account has been verified!"
+    //             );
+    //           } else {
+    //             Alert.alert(
+    //               "Verification Failed",
+    //               "Please try again following the guidelines."
+    //             );
+    //           }
+    //         }, 2000);
+    //       },
+    //     },
+    //   ]
+    // );
   };
 
   const handleWhyVerify = () => {

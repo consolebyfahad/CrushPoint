@@ -2,7 +2,11 @@ import BlockConfirmation from "@/components/block_option";
 import ProfileOptions from "@/components/profile_options";
 import ReportUser from "@/components/report_user";
 import { color, font } from "@/utils/constants";
+import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Dimensions,
@@ -30,7 +34,6 @@ export default function UserProfile({ route, navigation }: any) {
     religion: "Christian",
     zodiac: "Leo",
     images: [
-      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop&crop=face",
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop&crop=face",
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=600&fit=crop&crop=face",
       "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=600&fit=crop&crop=face",
@@ -45,11 +48,7 @@ export default function UserProfile({ route, navigation }: any) {
   const [showReportUser, setShowReportUser] = useState(false);
 
   const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    } else {
-      console.log("Go back");
-    }
+    router.back();
   };
 
   const handleOptions = () => {
@@ -110,14 +109,17 @@ export default function UserProfile({ route, navigation }: any) {
   };
 
   const actionEmojis = [
-    { emoji: "💙", action: "like", color: "#3B82F6" },
-    { emoji: "🔥", action: "super_like", color: "#F59E0B" },
-    { emoji: "😊", action: "smile", color: "#10B981" },
-    { emoji: "💬", action: "message", color: "#8B5CF6" },
-    { emoji: "🤝", action: "friend", color: "#F97316" },
+    { emoji: svgIcon.Like, action: "like", color: "#3B82F6" },
+    { emoji: svgIcon.Fire, action: "super_like", color: "#F59E0B" },
+    { emoji: svgIcon.Blink, action: "smile", color: "#10B981" },
+    { emoji: svgIcon.Tea, action: "message", color: "#8B5CF6" },
+    { emoji: svgIcon.Hi, action: "friend", color: "#F97316" },
   ];
 
   const handleEmojiAction = (action: string) => {
+    if (action === "like") {
+      router.push("/profile/match");
+    }
     console.log("Emoji action:", action);
   };
 
@@ -168,20 +170,27 @@ export default function UserProfile({ route, navigation }: any) {
             onPress={handleBack}
             activeOpacity={0.8}
           >
-            <Ionicons name="arrow-back" size={24} color={color.white} />
+            <Ionicons name="arrow-back" size={20} color={color.white} />
           </TouchableOpacity>
-
+          {/* Image Indicators */}
+          <View style={styles.imageIndicators}>
+            {user.images.map((_: any, index: number) => (
+              <View
+                key={index}
+                style={[
+                  styles.indicator,
+                  index === currentImageIndex && styles.activeIndicator,
+                ]}
+              />
+            ))}
+          </View>
           {/* Options Button */}
           <TouchableOpacity
             style={styles.optionsButton}
             onPress={handleOptions}
             activeOpacity={0.8}
           >
-            <Ionicons
-              name="ellipsis-horizontal"
-              size={24}
-              color={color.white}
-            />
+            <Ionicons name="ellipsis-vertical" size={20} color={color.white} />
           </TouchableOpacity>
         </View>
 
@@ -196,19 +205,6 @@ export default function UserProfile({ route, navigation }: any) {
           onPress={handleNextImage}
           activeOpacity={0.1}
         />
-
-        {/* Image Indicators */}
-        <View style={styles.imageIndicators}>
-          {user.images.map((_: any, index: number) => (
-            <View
-              key={index}
-              style={[
-                styles.indicator,
-                index === currentImageIndex && styles.activeIndicator,
-              ]}
-            />
-          ))}
-        </View>
 
         {/* Action Emojis */}
         <View style={styles.actionEmojis}>
@@ -236,17 +232,18 @@ export default function UserProfile({ route, navigation }: any) {
             <Text style={styles.userName}>
               {user.name}, {user.age}
             </Text>
-            <View style={styles.distanceContainer}>
-              <Ionicons
-                name="location-outline"
-                size={16}
-                color={color.gray400}
-              />
-              <Text style={styles.distance}>{user.distance}</Text>
-            </View>
+          </View>
+          <View style={styles.distanceContainer}>
+            <SimpleLineIcons
+              name="location-pin"
+              size={14}
+              color={color.gray300}
+            />
+            <Text style={styles.distance}>{user.distance}</Text>
           </View>
           <TouchableOpacity style={styles.bookmarkButton}>
-            <Ionicons name="bookmark-outline" size={20} color={color.black} />
+            <Feather name="map" size={20} color="black" />
+            {/* <Ionicons name="bookmark-outline" size={20} color={color.black} /> */}
           </TouchableOpacity>
         </View>
 
@@ -392,16 +389,16 @@ const styles = StyleSheet.create({
   },
   imageIndicators: {
     position: "absolute",
-    top: 110,
-    left: 20,
-    right: 20,
+    top: 20,
+    left: 120,
+    right: 120,
     flexDirection: "row",
     gap: 6,
     zIndex: 5,
   },
   indicator: {
     flex: 1,
-    height: 3,
+    height: 6,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 2,
   },
@@ -446,7 +443,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 24,
+    marginBottom: 18,
   },
   nameRow: {
     flex: 1,
@@ -460,12 +457,13 @@ const styles = StyleSheet.create({
   distanceContainer: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
   },
   distance: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
-    marginLeft: 4,
+    color: color.gray300,
+    marginRight: 8,
   },
   bookmarkButton: {
     width: 44,
@@ -482,7 +480,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: font.semiBold,
+    fontFamily: font.medium,
     color: color.black,
     marginBottom: 12,
   },
@@ -536,9 +534,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: color.white300,
   },
   infoLabel: {
     fontSize: 16,

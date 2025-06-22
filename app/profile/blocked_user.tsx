@@ -1,16 +1,17 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
   FlatList,
   Image,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BlockedUsers({ navigation }: any) {
   const [blockedUsers, setBlockedUsers] = useState([
@@ -33,11 +34,7 @@ export default function BlockedUsers({ navigation }: any) {
   ]);
 
   const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    } else {
-      console.log("Go back");
-    }
+    router.back();
   };
 
   const handleUnblock = (user: any) => {

@@ -1,21 +1,26 @@
+import CustomButton from "@/components/custom_button";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
+import { Dropdown } from "react-native-element-dropdown";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BasicInfo({ route, navigation }: any) {
   // Get initial data from route params or use defaults
   const initialData = route?.params?.basicInfo || {
     interestedIn: "Men",
     relationshipGoals: ["Serious relationship", "Friendship"],
-    height: "120 cm",
+    height: "170",
     nationality: "American",
     religion: "Christianity",
     zodiacSign: "Cancer",
@@ -23,76 +28,84 @@ export default function BasicInfo({ route, navigation }: any) {
 
   const [basicInfo, setBasicInfo] = useState(initialData);
 
-  // Options for dropdowns
-  const interestedInOptions = ["Men", "Women", "Everyone"];
+  // States for dropdown pickers
+  const [relationshipGoalsOpen, setRelationshipGoalsOpen] = useState(false);
+  const [relationshipGoalsValue, setRelationshipGoalsValue] = useState(
+    initialData.relationshipGoals
+  );
 
-  const relationshipGoalOptions = [
-    "Serious relationship",
-    "Casual dating",
-    "Friendship",
-    "Something casual",
-    "Don't know yet",
-    "Marriage",
-    "Long-term relationship",
+  // Options for dropdowns
+  const interestedInOptions = [
+    { label: "Men", value: "Men" },
+    { label: "Women", value: "Women" },
+    { label: "Both", value: "Both" },
   ];
 
-  const heightOptions = Array.from({ length: 81 }, (_, i) => `${120 + i} cm`);
+  const relationshipGoalOptions = [
+    { label: "Serious relationship", value: "Serious relationship" },
+    { label: "Casual dating", value: "Casual dating" },
+    { label: "Friendship", value: "Friendship" },
+    { label: "Something casual", value: "Something casual" },
+    { label: "Don't know yet", value: "Don't know yet" },
+    { label: "Marriage", value: "Marriage" },
+    { label: "Long-term relationship", value: "Long-term relationship" },
+  ];
 
   const nationalityOptions = [
-    "American",
-    "Canadian",
-    "British",
-    "Australian",
-    "German",
-    "French",
-    "Italian",
-    "Spanish",
-    "Japanese",
-    "Chinese",
-    "Indian",
-    "Brazilian",
-    "Mexican",
-    "Russian",
-    "Korean",
+    { label: "American", value: "American" },
+    { label: "Canadian", value: "Canadian" },
+    { label: "British", value: "British" },
+    { label: "Australian", value: "Australian" },
+    { label: "German", value: "German" },
+    { label: "French", value: "French" },
+    { label: "Italian", value: "Italian" },
+    { label: "Spanish", value: "Spanish" },
+    { label: "Japanese", value: "Japanese" },
+    { label: "Chinese", value: "Chinese" },
+    { label: "Indian", value: "Indian" },
+    { label: "Brazilian", value: "Brazilian" },
+    { label: "Mexican", value: "Mexican" },
+    { label: "Russian", value: "Russian" },
+    { label: "Korean", value: "Korean" },
   ];
 
   const religionOptions = [
-    "Christianity",
-    "Islam",
-    "Judaism",
-    "Hinduism",
-    "Buddhism",
-    "Atheist",
-    "Agnostic",
-    "Other",
-    "Prefer not to say",
+    { label: "Christianity", value: "Christianity" },
+    { label: "Islam", value: "Islam" },
+    { label: "Judaism", value: "Judaism" },
+    { label: "Hinduism", value: "Hinduism" },
+    { label: "Buddhism", value: "Buddhism" },
+    { label: "Atheist", value: "Atheist" },
+    { label: "Agnostic", value: "Agnostic" },
+    { label: "Other", value: "Other" },
+    { label: "Prefer not to say", value: "Prefer not to say" },
   ];
 
   const zodiacOptions = [
-    "Aries",
-    "Taurus",
-    "Gemini",
-    "Cancer",
-    "Leo",
-    "Virgo",
-    "Libra",
-    "Scorpio",
-    "Sagittarius",
-    "Capricorn",
-    "Aquarius",
-    "Pisces",
+    { label: "Aries", value: "Aries" },
+    { label: "Taurus", value: "Taurus" },
+    { label: "Gemini", value: "Gemini" },
+    { label: "Cancer", value: "Cancer" },
+    { label: "Leo", value: "Leo" },
+    { label: "Virgo", value: "Virgo" },
+    { label: "Libra", value: "Libra" },
+    { label: "Scorpio", value: "Scorpio" },
+    { label: "Sagittarius", value: "Sagittarius" },
+    { label: "Capricorn", value: "Capricorn" },
+    { label: "Aquarius", value: "Aquarius" },
+    { label: "Pisces", value: "Pisces" },
   ];
 
   const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    } else {
-      console.log("Go back");
-    }
+    router.back();
   };
 
   const handleSave = () => {
-    console.log("Saving basic info:", basicInfo);
+    const updatedBasicInfo = {
+      ...basicInfo,
+      relationshipGoals: relationshipGoalsValue,
+    };
+    console.log("Saving basic info:", updatedBasicInfo);
     // Save the changes to backend/storage
     // Navigate back with updated data
     if (navigation) {
@@ -105,30 +118,6 @@ export default function BasicInfo({ route, navigation }: any) {
       ...prev,
       [field]: value,
     }));
-  };
-
-  const toggleRelationshipGoal = (goal: string) => {
-    setBasicInfo((prev) => ({
-      ...prev,
-      relationshipGoals: prev.relationshipGoals.includes(goal)
-        ? prev.relationshipGoals.filter((g) => g !== goal)
-        : [...prev.relationshipGoals, goal],
-    }));
-  };
-
-  const getRelationshipGoalIcon = (goal: string) => {
-    switch (goal.toLowerCase()) {
-      case "serious relationship":
-        return "💙";
-      case "friendship":
-        return "🤝";
-      case "casual dating":
-        return "😊";
-      case "marriage":
-        return "💍";
-      default:
-        return "💫";
-    }
   };
 
   const getReligionIcon = (religion: string) => {
@@ -166,28 +155,6 @@ export default function BasicInfo({ route, navigation }: any) {
     return zodiacEmojis[sign.toLowerCase()] || "⭐";
   };
 
-  const DropdownField = ({ label, value, options, onSelect, icon }: any) => (
-    <View style={styles.fieldContainer}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TouchableOpacity
-        style={styles.dropdown}
-        onPress={() => {
-          // For demo purposes, we'll cycle through options
-          const currentIndex = options.indexOf(value);
-          const nextIndex = (currentIndex + 1) % options.length;
-          onSelect(options[nextIndex]);
-        }}
-        activeOpacity={0.7}
-      >
-        <View style={styles.dropdownContent}>
-          {icon && <Text style={styles.fieldIcon}>{icon}</Text>}
-          <Text style={styles.dropdownText}>{value}</Text>
-        </View>
-        <Ionicons name="chevron-down" size={20} color={color.gray400} />
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -205,74 +172,150 @@ export default function BasicInfo({ route, navigation }: any) {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Interested in */}
-        <DropdownField
-          label="Interested in"
-          value={basicInfo.interestedIn}
-          options={interestedInOptions}
-          onSelect={(value: string) => updateField("interestedIn", value)}
-        />
-
-        {/* Relationship Goals */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Relationship Goals</Text>
-          <TouchableOpacity
+          <Text style={styles.fieldLabel}>Interested in</Text>
+          <Dropdown
             style={styles.dropdown}
-            onPress={() => {
-              // For demo, toggle between selected goals
-              toggleRelationshipGoal("Marriage");
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            iconStyle={styles.iconStyle}
+            data={interestedInOptions}
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Select interested in"
+            value={basicInfo.interestedIn}
+            onChange={(item) => {
+              updateField("interestedIn", item.value);
             }}
-            activeOpacity={0.7}
-          >
-            <View style={styles.relationshipGoalsContent}>
-              {basicInfo.relationshipGoals
-                .slice(0, 2)
-                .map((goal: string, index: number) => (
-                  <View key={goal} style={styles.goalTag}>
-                    <Text style={styles.goalIcon}>
-                      {getRelationshipGoalIcon(goal)}
-                    </Text>
-                    <Text style={styles.goalText}>{goal}</Text>
-                  </View>
-                ))}
-            </View>
-            <Ionicons name="chevron-down" size={20} color={color.gray400} />
-          </TouchableOpacity>
+            renderRightIcon={() => (
+              <Ionicons name="chevron-down" size={20} color={color.gray300} />
+            )}
+          />
         </View>
 
-        {/* Height */}
-        <DropdownField
-          label="Height (cm)"
-          value={basicInfo.height}
-          options={heightOptions}
-          onSelect={(value: string) => updateField("height", value)}
-        />
+        {/* Relationship Goals - Multi Select */}
+        <View style={[styles.fieldContainer, { zIndex: 9 }]}>
+          <Text style={styles.fieldLabel}>Relationship Goals</Text>
+          <DropDownPicker
+            open={relationshipGoalsOpen}
+            value={relationshipGoalsValue}
+            items={relationshipGoalOptions}
+            setOpen={setRelationshipGoalsOpen}
+            setValue={setRelationshipGoalsValue}
+            multiple={true}
+            mode="BADGE"
+            badgeDotColors={[
+              "#e76f51",
+              "#00b4d8",
+              "#0077b6",
+              "#90e0ef",
+              "#00f5ff",
+            ]}
+            style={styles.multiSelectDropdown}
+            dropDownContainerStyle={styles.dropDownContainer}
+            textStyle={styles.dropdownTextStyle}
+            placeholder="Select relationship goals"
+            searchable={false}
+            listMode="SCROLLVIEW"
+            scrollViewProps={{
+              nestedScrollEnabled: true,
+            }}
+          />
+        </View>
+
+        {/* Height - Text Input */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.fieldLabel}>Height (cm)</Text>
+          <TextInput
+            style={styles.textInput}
+            value={basicInfo.height}
+            onChangeText={(text) => updateField("height", text)}
+            placeholder="Enter height in cm"
+            keyboardType="numeric"
+            maxLength={3}
+          />
+        </View>
 
         {/* Nationality */}
-        <DropdownField
-          label="Nationality"
-          value={basicInfo.nationality}
-          options={nationalityOptions}
-          onSelect={(value: string) => updateField("nationality", value)}
-          icon="🇺🇸"
-        />
+        <View style={styles.fieldContainer}>
+          <Text style={styles.fieldLabel}>Nationality</Text>
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            iconStyle={styles.iconStyle}
+            data={nationalityOptions}
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Select nationality"
+            value={basicInfo.nationality}
+            onChange={(item) => {
+              updateField("nationality", item.value);
+            }}
+            renderLeftIcon={() => <Text style={styles.fieldIcon}>🇺🇸</Text>}
+            renderRightIcon={() => (
+              <Ionicons name="chevron-down" size={20} color={color.gray300} />
+            )}
+          />
+        </View>
 
         {/* Religion */}
-        <DropdownField
-          label="Religion"
-          value={basicInfo.religion}
-          options={religionOptions}
-          onSelect={(value: string) => updateField("religion", value)}
-          icon={getReligionIcon(basicInfo.religion)}
-        />
+        <View style={styles.fieldContainer}>
+          <Text style={styles.fieldLabel}>Religion</Text>
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            iconStyle={styles.iconStyle}
+            data={religionOptions}
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Select religion"
+            value={basicInfo.religion}
+            onChange={(item) => {
+              updateField("religion", item.value);
+            }}
+            renderLeftIcon={() => (
+              <Text style={styles.fieldIcon}>
+                {getReligionIcon(basicInfo.religion)}
+              </Text>
+            )}
+            renderRightIcon={() => (
+              <Ionicons name="chevron-down" size={20} color={color.gray300} />
+            )}
+          />
+        </View>
 
         {/* Zodiac Sign */}
-        <DropdownField
-          label="Zodiac Sign"
-          value={basicInfo.zodiacSign}
-          options={zodiacOptions}
-          onSelect={(value: string) => updateField("zodiacSign", value)}
-          icon={getZodiacIcon(basicInfo.zodiacSign)}
-        />
+        <View style={styles.fieldContainer}>
+          <Text style={styles.fieldLabel}>Zodiac Sign</Text>
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            iconStyle={styles.iconStyle}
+            data={zodiacOptions}
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Select zodiac sign"
+            value={basicInfo.zodiacSign}
+            onChange={(item) => {
+              updateField("zodiacSign", item.value);
+            }}
+            renderLeftIcon={() => (
+              <Text style={styles.fieldIcon}>
+                {getZodiacIcon(basicInfo.zodiacSign)}
+              </Text>
+            )}
+            renderRightIcon={() => (
+              <Ionicons name="chevron-down" size={20} color={color.gray300} />
+            )}
+          />
+        </View>
 
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
@@ -280,13 +323,7 @@ export default function BasicInfo({ route, navigation }: any) {
 
       {/* Save Button */}
       <View style={styles.saveContainer}>
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={handleSave}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.saveButtonText}>Save Changes</Text>
-        </TouchableOpacity>
+        <CustomButton title="Save Changes" onPress={handleSave} />
       </View>
     </SafeAreaView>
   );
@@ -326,25 +363,38 @@ const styles = StyleSheet.create({
   },
   fieldContainer: {
     marginTop: 24,
+    zIndex: 1,
   },
   fieldLabel: {
     fontSize: 16,
-    fontFamily: font.regular,
-    color: color.gray400,
+    fontFamily: font.medium,
+    color: color.gray700,
     marginBottom: 8,
   },
   dropdown: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#F8F9FA",
+    borderWidth: 1,
+    borderColor: color.gray600,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    backgroundColor: color.white,
   },
-  dropdownContent: {
+  placeholderStyle: {
+    fontSize: 16,
+    color: color.gray400,
+    fontFamily: font.medium,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+    color: color.black,
+    fontFamily: font.medium,
+    flex: 1,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  dropdownLabel: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
@@ -359,40 +409,45 @@ const styles = StyleSheet.create({
     color: color.black,
     flex: 1,
   },
-  relationshipGoalsContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    flexWrap: "wrap",
-    gap: 8,
+  // Multi-select dropdown styles
+  multiSelectDropdown: {
+    borderWidth: 1,
+    borderColor: color.gray600,
+    borderRadius: 12,
+    // backgroundColor: color.white,
+    minHeight: 50,
+    zIndex: 9,
   },
-  goalTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E0F2FE",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 16,
+  dropDownContainer: {
+    borderWidth: 1,
+    borderColor: color.gray600,
+    borderRadius: 12,
+    maxHeight: 200,
+    zIndex: 9,
   },
-  goalIcon: {
-    fontSize: 12,
-    marginRight: 4,
-  },
-  goalText: {
-    fontSize: 12,
+  dropdownTextStyle: {
+    fontSize: 16,
+    // backgroundColor: color.white,
     fontFamily: font.medium,
-    color: "#0284C7",
+    color: color.black,
+  },
+  // Text input styles
+  textInput: {
+    borderWidth: 1,
+    borderColor: color.gray600,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.black,
+    backgroundColor: color.white,
   },
   bottomSpacing: {
     height: 100,
   },
   saveContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 34,
-    backgroundColor: color.white,
-    borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    paddingHorizontal: 16,
   },
   saveButton: {
     backgroundColor: "#5FB3D4",

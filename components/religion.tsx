@@ -17,6 +17,7 @@ export default function Religion({
   onBack,
   filterData,
   setFilterData,
+  onSelect,
 }: any) {
   const [selectedReligion, setSelectedReligion] = useState(
     filterData.religion || "Christianity"
@@ -41,7 +42,7 @@ export default function Religion({
     });
     setTimeout(() => {
       console.log("Selected religion:", religion);
-      onClose();
+      onSelect();
     }, 200);
   };
 

@@ -117,8 +117,7 @@ export default function Index() {
   // User interaction handlers
   const handleViewProfile = (user: any) => {
     console.log("View profile for:", user);
-    // Navigate to profile screen
-    // navigation.navigate('Profile', { user });
+    router.push("/profile/user_profile");
   };
 
   const handleBookmark = (user: any) => {
@@ -128,6 +127,7 @@ export default function Index() {
 
   const handleUserPress = (user: any) => {
     console.log("User pressed on map:", user);
+    router.push("/profile/user_profile");
     // Handle map user press
   };
 
@@ -137,16 +137,23 @@ export default function Index() {
     setShowFilters(true);
   };
 
+  const handleSelect = () => {
+    setShowNationality(false);
+    setShowReligion(false);
+    setShowZodiac(false);
+    setShowFilters(true);
+  };
+
   return (
     <View style={styles.container}>
       {/* Main Content */}
-      {viewType === "ListView" ? (
+      {viewType === "List View" ? (
         <ListView
           onViewProfile={handleViewProfile}
           onBookmark={handleBookmark}
         />
       ) : (
-        <MapView onUserPress={handleUserPress} />
+        <MapView onUserPress={handleViewProfile} />
       )}
 
       {/* Top Header */}
@@ -309,6 +316,7 @@ export default function Index() {
             onBack={handleBackToFilters}
             filterData={filterData}
             setFilterData={setFilterData}
+            onSelect={handleSelect}
           />
         </View>
       </Modal>
@@ -331,6 +339,7 @@ export default function Index() {
             onBack={handleBackToFilters}
             filterData={filterData}
             setFilterData={setFilterData}
+            onSelect={handleSelect}
           />
         </View>
       </Modal>
@@ -353,6 +362,7 @@ export default function Index() {
             onBack={handleBackToFilters}
             filterData={filterData}
             setFilterData={setFilterData}
+            onSelect={handleSelect}
           />
         </View>
       </Modal>

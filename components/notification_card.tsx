@@ -36,14 +36,14 @@ export default function NotificationCard({
         return {
           library: "Feather",
           name: "calendar",
-          color: "#34D399",
-          backgroundColor: "#ECFDF5",
+          color: "#40AF53",
+          backgroundColor: "#d9efdd",
         };
       default:
         return {
           library: "Ionicons",
           name: "notifications",
-          color: "#6B7280",
+          color: "#40AF53",
           backgroundColor: "#F9FAFB",
         };
     }
@@ -123,11 +123,11 @@ const styles = StyleSheet.create({
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.9,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: "rgba(230, 230, 230, 0.40)",
   },
   iconContainer: {
     width: 44,
@@ -150,14 +150,14 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray300,
     lineHeight: 18,
     marginBottom: 6,
   },
   timeAgo: {
     fontSize: 12,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray200,
   },
   deleteButton: {
     width: 32,

@@ -83,7 +83,15 @@ export default function CustomButton({
               })}
             </View>
           )}
-          <Text style={[getTextStyle(), fontstyle]}>{title}</Text>
+          <Text
+            style={[
+              getTextStyle(),
+              buttonDisabled && styles.disabledText,
+              fontstyle,
+            ]}
+          >
+            {title}
+          </Text>
           {rightIcon && <View>{React.cloneElement(rightIcon)}</View>}
         </View>
       )}
@@ -94,7 +102,7 @@ export default function CustomButton({
 const styles = StyleSheet.create({
   buttonBase: {
     paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingHorizontal: 16,
     borderRadius: 12,
     width: "100%",
     alignItems: "center",
@@ -112,16 +120,19 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   disabledButton: {
-    backgroundColor: color.gray100,
+    backgroundColor: color.gray500,
+  },
+  disabledText: {
+    color: color.gray900,
   },
   primaryText: {
     fontSize: 16,
-    fontFamily: font.semiBold,
+    fontFamily: font.medium,
     color: color.white,
   },
   secondaryText: {
     fontSize: 16,
-    fontFamily: font.semiBold,
+    fontFamily: font.medium,
     color: color.gray400,
   },
   secondaryTextPressed: {

@@ -1,9 +1,9 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ContactSupport({ navigation }: any) {
   const [formData, setFormData] = useState({
@@ -30,11 +31,7 @@ export default function ContactSupport({ navigation }: any) {
   ];
 
   const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    } else {
-      console.log("Go back");
-    }
+    router.back();
   };
 
   const handleInputChange = (field: string, value: string) => {

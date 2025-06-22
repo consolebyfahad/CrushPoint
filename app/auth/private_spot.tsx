@@ -1,6 +1,7 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
+import { MarkerIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -9,9 +10,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function PrivateSpot() {
   const [selectedRadius, setSelectedRadius] = useState("100m");
   const [mapRegion, setMapRegion] = useState({
-    latitude: 45.4408474, // Default coordinates (appears to be Italy from the screenshot)
+    latitude: 45.4408474,
     longitude: 12.3155151,
-    latitudeDelta: 0.005, // For 100m view
+    latitudeDelta: 0.005,
     longitudeDelta: 0.005,
   });
   console.log("first");
@@ -82,9 +83,9 @@ export default function PrivateSpot() {
                 longitude: mapRegion.longitude,
               }}
               radius={getRadiusInMeters()}
-              fillColor="rgba(99, 179, 206, 0.3)"
+              fillColor="rgba(99, 179, 206, 0.2)"
               strokeColor={color.primary}
-              strokeWidth={2}
+              strokeWidth={1}
             />
 
             <Marker
@@ -94,9 +95,10 @@ export default function PrivateSpot() {
               }}
               anchor={{ x: 0.5, y: 0.5 }}
             >
-              <View style={styles.customMarker}>
+              {/* <View style={styles.customMarker}>
                 <View style={styles.markerInner} />
-              </View>
+              </View> */}
+              <MarkerIcon />
             </Marker>
           </MapView>
         </View>
@@ -247,10 +249,10 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   radiusTitle: {
-    fontSize: 18,
-    fontFamily: font.semiBold,
-    color: color.black,
-    marginBottom: 16,
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray700,
+    marginBottom: 8,
   },
   radiusButtons: {
     flexDirection: "row",
@@ -284,6 +286,6 @@ const styles = StyleSheet.create({
     color: color.black,
   },
   buttonContainer: {
-    paddingBottom: 24,
+    // paddingBottom: 24,
   },
 });

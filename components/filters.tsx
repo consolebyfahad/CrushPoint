@@ -4,6 +4,7 @@ import Slider from "@react-native-community/slider";
 import React, { useState } from "react";
 import {
   Dimensions,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -154,7 +155,10 @@ export default function Filters({
           <View style={styles.ageContainer}>
             <View style={styles.ageInputContainer}>
               <TextInput
-                style={styles.ageInput}
+                style={[
+                  styles.ageInput,
+                  Platform.OS === "ios" && { paddingVertical: 12 },
+                ]}
                 value={ageFrom}
                 onChangeText={setAgeFrom}
                 keyboardType="numeric"
@@ -164,7 +168,10 @@ export default function Filters({
             <Text style={styles.ageToText}>to</Text>
             <View style={styles.ageInputContainer}>
               <TextInput
-                style={styles.ageInput}
+                style={[
+                  styles.ageInput,
+                  Platform.OS === "ios" && { paddingVertical: 12 },
+                ]}
                 value={ageTo}
                 onChangeText={setAgeTo}
                 keyboardType="numeric"

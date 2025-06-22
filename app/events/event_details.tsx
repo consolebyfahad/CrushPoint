@@ -1,19 +1,22 @@
+import CustomButton from "@/components/custom_button";
 import InviteMatches from "@/components/invite";
 import { color, font } from "@/utils/constants";
+import { AddCalender, Calender, Users } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Dimensions,
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+import { SafeAreaView } from "react-native-safe-area-context";
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function EventDetails({ route, navigation }: any) {
   const event = route?.params?.event || {
@@ -60,11 +63,7 @@ export default function EventDetails({ route, navigation }: any) {
   const [showInviteMatches, setShowInviteMatches] = useState(false);
 
   const handleBack = () => {
-    // if (navigation) {
-    //   navigation.goBack();
-    // } else {
-    //   console.log("Go back");
-    // }
+    router.back();
   };
 
   const handleShare = () => {
@@ -144,7 +143,8 @@ export default function EventDetails({ route, navigation }: any) {
               onPress={handleShare}
               activeOpacity={0.8}
             >
-              <Ionicons name="share-outline" size={24} color={color.white} />
+              <Feather name="share-2" size={24} color={color.white} />
+              {/* <Ionicons name="share-outline" size={24} color={color.white} /> */}
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -199,7 +199,7 @@ export default function EventDetails({ route, navigation }: any) {
                 <Text style={styles.organizerName}>{event.organizer.name}</Text>
                 {event.organizer.verified && (
                   <Ionicons
-                    name="checkmark-circle"
+                    name="checkmark"
                     size={16}
                     color="#10B981"
                     style={styles.verifiedIcon}
@@ -219,9 +219,9 @@ export default function EventDetails({ route, navigation }: any) {
         {/* Who's Going Section */}
         <View style={styles.section}>
           <View style={styles.attendeesHeader}>
-            <Text style={styles.sectionTitle}>Who's going</Text>
+            <Text style={styles.sectionTitle}>{"Who's going"}</Text>
             <View style={styles.attendeesCount}>
-              <Ionicons name="people-outline" size={16} color={color.gray400} />
+              <Feather name="users" size={16} color={color.gray300} />
               <Text style={styles.attendeesCountText}>
                 {event.totalAttendees} attending
               </Text>
@@ -250,15 +250,30 @@ export default function EventDetails({ route, navigation }: any) {
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.secondaryButton}
             onPress={handleAddToCalendar}
             activeOpacity={0.8}
           >
             <Ionicons name="calendar-outline" size={18} color={color.black} />
             <Text style={styles.secondaryButtonText}>Add to Calendar</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
+          <CustomButton
+            title="Add to Calendar"
+            variant="secondary"
+            style={{ width: "48%" }}
+            icon={<AddCalender />}
+            onPress={handleAddToCalendar}
+          />
+          <CustomButton
+            title="Invite Matches"
+            variant="secondary"
+            style={{ width: "48%" }}
+            icon={<Users />}
+            onPress={handleInviteMatches}
+          />
+          {/* 
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={handleInviteMatches}
@@ -266,7 +281,7 @@ export default function EventDetails({ route, navigation }: any) {
           >
             <Ionicons name="person-add-outline" size={18} color={color.black} />
             <Text style={styles.secondaryButtonText}>Invite Matches</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Bottom Spacing */}
@@ -275,21 +290,11 @@ export default function EventDetails({ route, navigation }: any) {
 
       {/* RSVP Button */}
       <View style={styles.rsvpContainer}>
-        <TouchableOpacity
-          style={[styles.rsvpButton, isAttending && styles.rsvpButtonActive]}
+        <CustomButton
+          title={isAttending ? "Going" : "RSVP Now"}
+          icon={<Calender />}
           onPress={handleRSVP}
-          activeOpacity={0.8}
-        >
-          <Ionicons
-            name="calendar"
-            size={18}
-            color={color.white}
-            style={styles.rsvpIcon}
-          />
-          <Text style={styles.rsvpButtonText}>
-            {isAttending ? "Going" : "RSVP Now"}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
 
       {/* Invite Matches Modal */}
@@ -340,8 +345,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: color.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
     marginTop: -20,
   },
   titleSection: {
@@ -361,7 +364,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   categoryBadge: {
-    backgroundColor: "#E0F2FE",
+    backgroundColor: color.primary100,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -369,7 +372,7 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 12,
     fontFamily: font.medium,
-    color: "#0284C7",
+    color: color.primary,
   },
   infoSection: {
     paddingHorizontal: 20,
@@ -386,18 +389,18 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     fontFamily: font.medium,
-    color: color.black,
+    color: color.gray300,
   },
   infoSubtext: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray600,
+    color: color.gray300,
     marginTop: 2,
   },
   directionsText: {
     fontSize: 14,
     fontFamily: font.medium,
-    color: "#5FB3D4",
+    color: color.primary,
     marginTop: 4,
   },
   organizerRow: {
@@ -416,7 +419,7 @@ const styles = StyleSheet.create({
   organizerLabel: {
     fontSize: 12,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray300,
     marginBottom: 2,
   },
   organizerNameRow: {
@@ -443,7 +446,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray600,
+    color: color.gray300,
     lineHeight: 20,
   },
   attendeesHeader: {
@@ -459,7 +462,7 @@ const styles = StyleSheet.create({
   attendeesCountText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray300,
     marginLeft: 4,
   },
   attendeesRow: {
@@ -481,11 +484,12 @@ const styles = StyleSheet.create({
   viewAllText: {
     fontSize: 14,
     fontFamily: font.medium,
-    color: "#5FB3D4",
+    color: color.primary,
   },
   actionButtons: {
     flexDirection: "row",
     paddingHorizontal: 20,
+    paddingBottom: 20,
     gap: 12,
   },
   secondaryButton: {
@@ -515,10 +519,8 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: color.white,
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingBottom: 34,
-    borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
   },
   rsvpButton: {
     flexDirection: "row",

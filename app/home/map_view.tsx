@@ -1,17 +1,19 @@
 import { color } from "@/utils/constants";
+import { MarkerIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import MapView, { Circle, Marker } from "react-native-maps";
+import { useState } from "react";
+import { Image, StyleSheet, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
-export default function Map({ onUserPress }: any) {
+export default function Map({ onViewProfile }: any) {
   const nearbyUsers = [
     {
       id: "1",
       name: "Alex",
       age: 25,
       coordinate: {
-        latitude: 45.4408474,
-        longitude: 12.3155151,
+        latitude: 45.431457,
+        longitude: 12.320171,
       },
       image:
         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&crop=face",
@@ -21,8 +23,8 @@ export default function Map({ onUserPress }: any) {
       name: "Sam",
       age: 28,
       coordinate: {
-        latitude: 45.4420474,
-        longitude: 12.3165151,
+        latitude: 45.431859,
+        longitude: 12.312867,
       },
       image:
         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face",
@@ -32,19 +34,19 @@ export default function Map({ onUserPress }: any) {
       name: "Julia",
       age: 24,
       coordinate: {
-        latitude: 45.4398474,
-        longitude: 12.3145151,
+        latitude: 45.446474,
+        longitude: 12.31835,
       },
       image:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=500&fit=crop&crop=face",
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop&crop=face",
     },
     {
       id: "4",
       name: "Mike",
       age: 30,
       coordinate: {
-        latitude: 45.4418474,
-        longitude: 12.3135151,
+        latitude: 45.442625,
+        longitude: 12.30952,
       },
       image:
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop&crop=face",
@@ -62,13 +64,14 @@ export default function Map({ onUserPress }: any) {
     },
   ];
 
+  const [mapRegion] = useState({
+    latitude: 45.4408474,
+    longitude: 12.3155151,
+  });
+
   const handleUserProfile = (user: any) => {
-    if (onUserPress) {
-      onUserPress(user);
-      router.push("/profile/user_profile");
-    } else {
-      console.log("User pressed:", user.name);
-    }
+    console.log("first");
+    router.push("/profile/user_profile");
   };
 
   return (
@@ -81,35 +84,36 @@ export default function Map({ onUserPress }: any) {
           latitudeDelta: 0.02,
           longitudeDelta: 0.02,
         }}
-        showsUserLocation={false}
-        showsMyLocationButton={false}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
         scrollEnabled={true}
         zoomEnabled={true}
         rotateEnabled={false}
         pitchEnabled={false}
       >
-        <Circle
-          center={{
-            latitude: 45.4408474,
-            longitude: 12.3155151,
-          }}
-          radius={500}
-          fillColor="rgba(99, 179, 206, 0.3)"
-          strokeColor={color.primary}
-          strokeWidth={2}
-        />
-
         {nearbyUsers.map((user) => (
           <Marker
             key={user.id}
             coordinate={user.coordinate}
             onPress={() => handleUserProfile(user)}
           >
-            <TouchableOpacity style={styles.userMarker} activeOpacity={0.8}>
+            <View style={styles.userMarker}>
               <Image source={{ uri: user.image }} style={styles.userImage} />
-            </TouchableOpacity>
+            </View>
           </Marker>
         ))}
+        <Marker
+          coordinate={{
+            latitude: mapRegion.latitude,
+            longitude: mapRegion.longitude,
+          }}
+          anchor={{ x: 0.5, y: 0.5 }}
+        >
+          {/* <View style={styles.customMarker}>
+                <View style={styles.markerInner} />
+              </View> */}
+          <MarkerIcon />
+        </Marker>
       </MapView>
     </View>
   );

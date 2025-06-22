@@ -1,6 +1,7 @@
 import UserCard from "@/components/user_card";
 import React from "react";
-import { FlatList, SafeAreaView, StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ListView({ onViewProfile, onBookmark }: any) {
   // Sample users data - replace with your actual data
@@ -87,8 +88,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
+    // marginBottom: 24,
   },
   listContainer: {
-    paddingVertical: 10,
+    paddingTop: 60,
   },
 });

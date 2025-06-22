@@ -5,6 +5,7 @@ import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -132,7 +133,10 @@ export default function Login() {
             </View>
 
             <TextInput
-              style={styles.textInput}
+              style={[
+                styles.textInput,
+                Platform.OS === "ios" && { paddingVertical: 16 },
+              ]}
               placeholder={
                 activeTab === "phone" ? "+1 (555) 000-0000" : "you@example.com"
               }
@@ -247,6 +251,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.regular,
     color: color.black,
+
     // paddingVertical: 16,
   },
 });

@@ -13,7 +13,9 @@
       "bundleIdentifier": "com.fahadurrehman.CrushPoint",
       "config": {
         "googleMapsApiKey": "AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y"
-      }
+      },
+      "NSCameraUsageDescription": "This app uses the camera for face verification.",
+      "NSFaceIDUsageDescription": "This app uses Face ID for secure authentication."
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +27,11 @@
           "apiKey": "AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y"
         }
       },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.USE_BIOMETRIC"
+      ],
       "edgeToEdgeEnabled": true,
       "package": "com.fahadurrehman.CrushPoint"
     },
@@ -49,7 +56,14 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
-      ]
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera for face verification."
+        }
+      ],
+      "react-native-vision-camera"
     ],
     "experiments": {
       "typedRoutes": true

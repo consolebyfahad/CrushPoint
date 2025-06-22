@@ -64,7 +64,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
         </Text>
 
         <View style={styles.locationRow}>
-          <Ionicons name="location-outline" size={14} color={color.gray400} />
+          <Ionicons name="location-outline" size={14} color={color.gray200} />
           <Text style={styles.locationText} numberOfLines={1}>
             {event.location}
           </Text>
@@ -81,12 +81,12 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           activeOpacity={0.7}
         >
           <View style={styles.attendeesInfo}>
-            <Ionicons name="people-outline" size={14} color={color.gray400} />
+            <Ionicons name="people-outline" size={14} color={color.gray200} />
             <Text style={styles.attendeesText}>
               {event.attendees} attending
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color={color.gray400} />
+          <Ionicons name="chevron-forward" size={16} color={color.gray200} />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -99,12 +99,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 16,
     marginVertical: 8,
-    shadowColor: "#000",
+    shadowColor: color.gray300,
+    borderWidth: 1,
+    borderColor: color.gray100,
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.8,
     shadowRadius: 8,
     elevation: 5,
     overflow: "hidden",
@@ -128,14 +130,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    shadowColor: "#000",
+    shadowColor: color.gray300,
     shadowOffset: {
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.9,
+    shadowRadius: 9,
+    elevation: 5,
   },
   calendarIcon: {
     marginRight: 4,
@@ -176,14 +178,14 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray200,
     marginLeft: 4,
     flex: 1,
   },
   description: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray300,
     lineHeight: 20,
     marginBottom: 16,
   },
@@ -199,7 +201,7 @@ const styles = StyleSheet.create({
   attendeesText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray200,
     marginLeft: 4,
   },
 });

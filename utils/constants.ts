@@ -3,6 +3,8 @@ export const color = {
   primary100: "49ADBE",
   white: "#FFFFFF",
   white100: "#F5F7FA",
+  white200: "#EDF8FA",
+  white300: "#F7F7F7",
   black: "#000000",
   gray100: "#DFDFDF",
   gray200: "#AFAFAF",
@@ -12,6 +14,8 @@ export const color = {
   gray600: "#E5E7EB",
   gray700: "#696969",
   gray800: "##E9E9E9",
+  gray900: "#BFBFBF",
+  gray1000: "#DADADA",
 
   success: "#40AF53",
 };
@@ -27,4 +31,5 @@ export const font = {
 export const image = {
   icon: require("@/assets/images/icon.png"),
   splash: require("@/assets/images/splash.png"),
+  welcome: require("@/assets/images/welcome.png"),
 };

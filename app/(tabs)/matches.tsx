@@ -4,19 +4,12 @@ import MatchCard from "@/components/match_card";
 import ProfileOptions from "@/components/profile_options";
 import RemoveMatch from "@/components/remove_match";
 import { color, font } from "@/utils/constants";
-import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Feather from "@expo/vector-icons/Feather";
+import CustomSearchBar from "@/components/custom_search";
+import { MatchesTabsHeader } from "@/components/tabs_header";
 export default function Matches({ navigation }: any) {
   const [searchText, setSearchText] = useState("");
   const [showProfileOptions, setShowProfileOptions] = useState(false);
@@ -153,40 +146,14 @@ export default function Matches({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Your Matches</Text>
-          <Text style={styles.matchCount}>{matches.length} matches</Text>
-        </View>
-      </View>
+      <MatchesTabsHeader title="Your Matches" matches={matches} />
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Feather
-            name="search"
-            size={20}
-            color={color.gray300}
-            style={styles.searchIcon}
-          />
-
-          <TextInput
-            style={styles.searchInput}
-            value={searchText}
-            onChangeText={setSearchText}
-            placeholder="Search matches"
-            placeholderTextColor={color.gray300}
-          />
-          {searchText.length > 0 && (
-            <TouchableOpacity
-              onPress={() => setSearchText("")}
-              style={styles.clearButton}
-            >
-              <Ionicons name="close-circle" size={20} color={color.gray400} />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+      <CustomSearchBar
+        searchText={searchText}
+        onChangeText={setSearchText}
+        placeholder="Search matches"
+      />
 
       {/* Matches List */}
       <FlatList

@@ -1,8 +1,9 @@
 import { color, font } from "@/utils/constants";
-import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
+import CustomButton from "./custom_button";
 export default function UserCard({ user, onViewProfile, onBookmark }: any) {
   const defaultUser = {
     id: "1",
@@ -58,7 +59,7 @@ export default function UserCard({ user, onViewProfile, onBookmark }: any) {
 
   const getLookingForIcon = (lookingFor: string) => {
     if (lookingFor.toLowerCase().includes("serious")) {
-      return "💙";
+      return "🩵";
     } else if (lookingFor.toLowerCase().includes("casual")) {
       return "😊";
     } else if (lookingFor.toLowerCase().includes("friendship")) {
@@ -93,7 +94,11 @@ export default function UserCard({ user, onViewProfile, onBookmark }: any) {
             {defaultUser.name}, {defaultUser.age}
           </Text>
           <View style={styles.distanceContainer}>
-            <Ionicons name="location-outline" size={16} color={color.gray400} />
+            <SimpleLineIcons
+              name="location-pin"
+              size={16}
+              color={color.gray300}
+            />
             <Text style={styles.distance}>{defaultUser.distance}</Text>
           </View>
         </View>
@@ -122,20 +127,25 @@ export default function UserCard({ user, onViewProfile, onBookmark }: any) {
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.viewProfileButton}
             onPress={handleViewProfile}
             activeOpacity={0.8}
           >
             <Text style={styles.viewProfileText}>View Profile</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          <CustomButton
+            title="View Profile"
+            style={{ width: "80%", paddingVertical: 8 }}
+            onPress={handleViewProfile}
+          />
 
           <TouchableOpacity
             style={styles.bookmarkButton}
             onPress={handleBookmark}
             activeOpacity={0.8}
           >
-            <Ionicons name="bookmark-outline" size={20} color={color.black} />
+            <Feather name="map" size={18} color="black" />
           </TouchableOpacity>
         </View>
       </View>
@@ -149,6 +159,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: 20,
     marginVertical: 8,
+    borderWidth: 1,
+    borderColor: color.gray1000,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -193,16 +205,16 @@ const styles = StyleSheet.create({
     color: color.white,
   },
   userInfo: {
-    padding: 20,
+    padding: 16,
   },
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   userName: {
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: font.semiBold,
     color: color.black,
   },
@@ -213,13 +225,16 @@ const styles = StyleSheet.create({
   distance: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray300,
     marginLeft: 4,
   },
   lookingForContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignSelf: "flex-start",
     marginBottom: 16,
+    backgroundColor: color.white200,
+    padding: 12,
+    borderRadius: 99,
   },
   lookingForIcon: {
     fontSize: 16,
@@ -228,7 +243,7 @@ const styles = StyleSheet.create({
   lookingForText: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: "#5FB3D4",
+    color: color.primary,
   },
   interestsContainer: {
     flexDirection: "row",
@@ -239,7 +254,7 @@ const styles = StyleSheet.create({
   interestTag: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: color.gray500,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -250,32 +265,19 @@ const styles = StyleSheet.create({
   },
   interestText: {
     fontSize: 14,
-    fontFamily: font.medium,
+    fontFamily: font.regular,
     color: color.black,
   },
   actionButtons: {
     flexDirection: "row",
     gap: 12,
   },
-  viewProfileButton: {
-    flex: 1,
-    backgroundColor: "#5FB3D4",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  viewProfileText: {
-    fontSize: 16,
-    fontFamily: font.semiBold,
-    color: color.white,
-  },
   bookmarkButton: {
-    width: 52,
-    height: 52,
+    width: 42,
+    height: 42,
     borderRadius: 12,
-    backgroundColor: color.white,
     borderWidth: 1,
-    borderColor: "#E5E5E5",
+    borderColor: color.gray100,
     alignItems: "center",
     justifyContent: "center",
   },
