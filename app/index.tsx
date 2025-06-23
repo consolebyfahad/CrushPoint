@@ -53,7 +53,7 @@ export default function Splash() {
 
   useEffect(() => {
     setTimeout(() => {
-      router.replace("/(tabs)");
+      router.replace("/auth/private_spot");
     }, 2000);
   }, []);
 

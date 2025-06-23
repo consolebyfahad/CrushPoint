@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Camera, CameraView } from "expo-camera";
-import React, { useEffect, useRef, useState } from "react";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import React, { useRef, useState } from "react";
 import {
   Dimensions,
   StatusBar,
@@ -22,58 +22,50 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
   onBack,
   onStartScan,
 }) => {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [faceDetected, setFaceDetected] = useState(false);
-  const [faceData, setFaceData] = useState<any>(null);
+  const [permission, requestPermission] = useCameraPermissions();
+  const [isScanning, setIsScanning] = useState(false);
   const cameraRef = useRef<CameraView>(null);
 
-  useEffect(() => {
-    requestCameraPermission();
-  }, []);
+  const handleStartScan = async () => {
+    if (isScanning) return;
 
-  const requestCameraPermission = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    setHasPermission(status === "granted");
-  };
+    setIsScanning(true);
 
-  const handleFacesDetected = ({ faces }: { faces: any[] }) => {
-    if (faces.length > 0) {
-      setFaceDetected(true);
-      setFaceData(faces[0]);
-    } else {
-      setFaceDetected(false);
-      setFaceData(null);
+    try {
+      if (cameraRef.current) {
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8,
+          base64: true,
+          exif: false,
+        });
+
+        console.log("Photo captured:", {
+          uri: photo.uri,
+          width: photo.width,
+          height: photo.height,
+          base64: photo.base64 ? "Base64 data available" : "No base64",
+        });
+
+        // Here you would typically send the photo to a face detection service
+        // For example: AWS Rekognition, Google Cloud Vision, or Azure Face API
+
+        // Simulate face detection processing
+        setTimeout(() => {
+          // Navigate to next screen
+          // router.push('/next-screen'); // Replace with your actual route
+
+          // Or call the onStartScan prop if provided
+          onStartScan?.();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error taking picture:", error);
+    } finally {
+      setIsScanning(false);
     }
   };
 
-  const getFaceOverlayStyle = () => {
-    if (!faceData) return { display: "none" };
-
-    const { bounds } = faceData;
-    const faceX = bounds.origin.x;
-    const faceY = bounds.origin.y;
-    const faceWidth = bounds.size.width;
-    const faceHeight = bounds.size.height;
-
-    // Calculate center point and radius for circular overlay
-    const centerX = faceX + faceWidth / 2;
-    const centerY = faceY + faceHeight / 2;
-    const radius = Math.max(faceWidth, faceHeight) / 2 + 20;
-
-    return {
-      position: "absolute" as const,
-      left: centerX - radius,
-      top: centerY - radius,
-      width: radius * 2,
-      height: radius * 2,
-      borderRadius: radius,
-      borderWidth: 3,
-      borderColor: "#4ECDC4",
-      backgroundColor: "transparent",
-    };
-  };
-
-  if (hasPermission === null) {
+  if (!permission) {
     return (
       <View style={styles.permissionContainer}>
         <Text style={styles.permissionText}>
@@ -83,12 +75,18 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
     );
   }
 
-  if (hasPermission === false) {
+  if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
         <Text style={styles.permissionText}>
           Camera permission is required for face verification
         </Text>
+        <TouchableOpacity
+          style={styles.permissionButton}
+          onPress={requestPermission}
+        >
+          <Text style={styles.permissionButtonText}>Grant Permission</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -120,34 +118,36 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
       {/* Camera Container */}
       <View style={styles.cameraContainer}>
         <View style={styles.cameraFrame}>
-          {/* <CameraView
-            ref={cameraRef}
-            style={styles.camera}
-            facing="front"
-            onFacesDetected={handleFacesDetected}
-            faceDetectorSettings={{
-              mode: FaceDetector.FaceDetectorMode.fast,
-              detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-              runClassifications: FaceDetector.FaceDetectorClassifications.none,
-              minDetectionInterval: 100,
-              tracking: true,
-            }}
-          >
-            {faceDetected && faceData && <View style={getFaceOverlayStyle()} />}
-          </CameraView> */}
+          <CameraView ref={cameraRef} style={styles.camera} facing="front">
+            {/* Face guide overlay */}
+            <View style={styles.faceGuide} />
+
+            {/* Instructions overlay */}
+            <View style={styles.instructionsOverlay}>
+              <Text style={styles.overlayText}>
+                Align your face with the oval
+              </Text>
+            </View>
+          </CameraView>
         </View>
       </View>
 
       {/* Start Scan Button */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.startScanButton} onPress={onStartScan}>
+        <TouchableOpacity
+          style={[styles.startScanButton, isScanning && styles.disabledButton]}
+          onPress={handleStartScan}
+          disabled={isScanning}
+        >
           <Ionicons
-            name="camera"
+            name={isScanning ? "scan" : "camera"}
             size={20}
             color="white"
             style={styles.buttonIcon}
           />
-          <Text style={styles.startScanText}>Start Scan</Text>
+          <Text style={styles.startScanText}>
+            {isScanning ? "Scanning..." : "Start Scan"}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -170,6 +170,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
     textAlign: "center",
+    marginBottom: 20,
+  },
+  permissionButton: {
+    backgroundColor: "#4ECDC4",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  permissionButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
   header: {
     paddingHorizontal: 20,
@@ -227,6 +239,36 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
+  faceGuide: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 200,
+    height: 240,
+    marginTop: -120,
+    marginLeft: -100,
+    borderWidth: 3,
+    borderColor: "#4ECDC4",
+    borderRadius: 100,
+    backgroundColor: "transparent",
+  },
+  instructionsOverlay: {
+    position: "absolute",
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  overlayText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
   buttonContainer: {
     paddingHorizontal: 20,
     paddingVertical: 32,
@@ -246,6 +288,10 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+  },
+  disabledButton: {
+    backgroundColor: "#C7C7CC",
+    shadowColor: "#C7C7CC",
   },
   buttonIcon: {
     marginRight: 8,

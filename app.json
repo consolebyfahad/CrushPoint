@@ -63,7 +63,8 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera for face verification."
         }
       ],
-      "react-native-vision-camera"
+      "react-native-vision-camera",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
