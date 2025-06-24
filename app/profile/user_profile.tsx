@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
-    backgroundColor: color.white300,
+    backgroundColor: color.gray97,
   },
   infoLabel: {
     fontSize: 16,

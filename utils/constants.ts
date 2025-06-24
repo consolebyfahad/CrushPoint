@@ -1,10 +1,11 @@
 export const color = {
   primary: "#49ADBE",
-  primary100: "49ADBE",
+  primary100: "#CFECF2",
+
   white: "#FFFFFF",
   white100: "#F5F7FA",
   gray95: "#EDF8FA",
-  white300: "#F7F7F7",
+  gray97: "#F7F7F7",
   black: "#000000",
   gray87: "#DFDFDF",
   gray69: "#AFAFAF",
@@ -18,6 +19,8 @@ export const color = {
   gray870: "#DADADA",
 
   success: "#40AF53",
+  error: "#E04134",
+  error100: "#FFECEB",
 };
 
 export const font = {

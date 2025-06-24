@@ -53,7 +53,7 @@ export default function Splash() {
 
   useEffect(() => {
     setTimeout(() => {
-      router.replace("/onboarding");
+      router.replace("/(tabs)");
     }, 2000);
   }, []);
 

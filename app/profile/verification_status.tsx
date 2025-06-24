@@ -1,5 +1,8 @@
+import CustomButton from "@/components/custom_button";
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -82,7 +85,7 @@ export default function VerificationStatus({ navigation }: any) {
           description: "Your account is verified",
           iconName: "checkmark-circle",
           iconColor: "#10B981",
-          backgroundColor: "#ECFDF5",
+          backgroundColor: color.primary100,
           showTryAgain: false,
         };
       case "pending":
@@ -91,7 +94,7 @@ export default function VerificationStatus({ navigation }: any) {
           description: "We're reviewing your submission",
           iconName: "time",
           iconColor: "#F59E0B",
-          backgroundColor: "#FFFBEB",
+          backgroundColor: color.primary100,
           showTryAgain: false,
         };
       case "failed":
@@ -99,9 +102,9 @@ export default function VerificationStatus({ navigation }: any) {
         return {
           title: "Verification Failed",
           description: "Please try verifying again",
-          iconName: "warning",
+          iconName: "warning-outline",
           iconColor: "#EF4444",
-          backgroundColor: "#E0F2FE",
+          backgroundColor: color.primary100,
           showTryAgain: true,
         };
     }
@@ -127,17 +130,7 @@ export default function VerificationStatus({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={24} color={color.black} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Verification Status</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <Header title={"Verification Status"} divider={true} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Status Card */}
@@ -216,19 +209,11 @@ export default function VerificationStatus({ navigation }: any) {
       {/* Try Again Button - Only show if verification failed */}
       {statusInfo.showTryAgain && (
         <View style={styles.tryAgainContainer}>
-          <TouchableOpacity
-            style={styles.tryAgainButton}
+          <CustomButton
+            title="Try Again"
             onPress={handleTryAgain}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name="camera"
-              size={18}
-              color={color.white}
-              style={styles.tryAgainIcon}
-            />
-            <Text style={styles.tryAgainText}>Try Again</Text>
-          </TouchableOpacity>
+            icon={<Feather name="camera" size={18} color="white" />}
+          />
         </View>
       )}
     </SafeAreaView>
@@ -239,29 +224,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontFamily: font.semiBold,
-    color: color.black,
-  },
-  placeholder: {
-    width: 40,
   },
   content: {
     flex: 1,
@@ -277,7 +239,7 @@ const styles = StyleSheet.create({
   statusIcon: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 12,
     backgroundColor: color.white,
     alignItems: "center",
     justifyContent: "center",
@@ -317,7 +279,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   issueItem: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: color.gray97,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -374,12 +336,9 @@ const styles = StyleSheet.create({
     height: 100,
   },
   tryAgainContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 34,
-    backgroundColor: color.white,
+    padding: 16,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderColor: color.gray95,
   },
   tryAgainButton: {
     flexDirection: "row",

@@ -1,9 +1,12 @@
+import CustomButton from "@/components/custom_button";
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,10 +25,8 @@ export default function AccountSettings({ route, navigation }: any) {
   });
 
   const [isChanged, setIsChanged] = useState(false);
-
-  const handleBack = () => {
-    router.back();
-  };
+  const [date, setDate] = useState(new Date(1994, 10, 17));
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setAccountData((prev) => ({
@@ -69,29 +70,30 @@ export default function AccountSettings({ route, navigation }: any) {
     );
   };
 
-  const openDatePicker = () => {
-    console.log("Open date picker");
-    // For demo, we'll just cycle through some sample dates
-    const sampleDates = ["11/17/1994", "05/22/1992", "03/15/1996"];
-    const currentIndex = sampleDates.indexOf(accountData.dateOfBirth);
-    const nextIndex = (currentIndex + 1) % sampleDates.length;
-    handleInputChange("dateOfBirth", sampleDates[nextIndex]);
+  const handleDatePress = () => {
+    setShowDatePicker(true);
+  };
+
+  const onDateChange = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(Platform.OS === "ios");
+    setDate(currentDate);
+
+    // Format date as mm/dd/yyyy
+    const formattedDate = `${(currentDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}/${currentDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}/${currentDate.getFullYear()}`;
+
+    handleInputChange("dateOfBirth", formattedDate);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={24} color={color.black} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Account Settings</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <Header title={"Account Settings"} divider={true} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Full Name */}
@@ -112,12 +114,29 @@ export default function AccountSettings({ route, navigation }: any) {
           <Text style={styles.fieldLabel}>Date of Birth</Text>
           <TouchableOpacity
             style={styles.dateInput}
-            onPress={openDatePicker}
+            onPress={handleDatePress}
             activeOpacity={0.7}
           >
-            <Text style={styles.dateText}>{accountData.dateOfBirth}</Text>
+            <TextInput
+              style={styles.dateTextInput}
+              value={accountData.dateOfBirth}
+              placeholder="mm/dd/yyyy"
+              placeholderTextColor={color.gray14}
+              editable={false}
+            />
             <Ionicons name="calendar-outline" size={20} color={color.gray14} />
           </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode="date"
+              is24Hour={true}
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onDateChange}
+              maximumDate={new Date()}
+            />
+          )}
           <Text style={styles.fieldNote}>Changeable only once in 6 months</Text>
         </View>
 
@@ -154,24 +173,14 @@ export default function AccountSettings({ route, navigation }: any) {
 
       {/* Action Buttons */}
       <View style={styles.actionContainer}>
-        {/* Delete Account Button */}
-        <TouchableOpacity
-          style={styles.deleteButton}
+        <CustomButton
+          title="Delete My Account"
+          variant="secondary"
+          style={{ borderColor: color.error }}
+          fontstyle={{ color: color.error }}
           onPress={handleDeleteAccount}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.deleteButtonText}>Delete My Account</Text>
-        </TouchableOpacity>
-
-        {/* Save Changes Button */}
-        <TouchableOpacity
-          style={[styles.saveButton, !isChanged && styles.saveButtonDisabled]}
-          onPress={handleSaveChanges}
-          activeOpacity={0.8}
-          disabled={!isChanged}
-        >
-          <Text style={styles.saveButtonText}>Save Changes</Text>
-        </TouchableOpacity>
+        />
+        <CustomButton title="Save Changes" onPress={handleSaveChanges} />
       </View>
     </SafeAreaView>
   );
@@ -182,20 +191,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
+  fieldContainer: {
+    marginBottom: 16,
   },
   title: {
     fontSize: 20,
@@ -207,10 +204,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-  },
-  fieldContainer: {
-    marginTop: 24,
+    padding: 16,
   },
   fieldLabel: {
     fontSize: 16,
@@ -219,7 +213,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   textInput: {
-    backgroundColor: "#F8F9FA",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
@@ -227,23 +220,22 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
     color: color.black,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: color.gray87,
   },
   dateInput: {
-    backgroundColor: "#F8F9FA",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: color.gray87,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  dateText: {
+  dateTextInput: {
     fontSize: 16,
     fontFamily: font.medium,
     color: color.black,
+    flex: 1,
   },
   fieldNote: {
     fontSize: 14,
@@ -262,32 +254,5 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#F5F5F5",
     gap: 12,
-  },
-  deleteButton: {
-    backgroundColor: color.white,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#EF4444",
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontFamily: font.medium,
-    color: "#EF4444",
-  },
-  saveButton: {
-    backgroundColor: "#5FB3D4",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  saveButtonDisabled: {
-    backgroundColor: color.gray14,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontFamily: font.semiBold,
-    color: color.white,
   },
 });

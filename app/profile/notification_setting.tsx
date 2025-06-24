@@ -1,15 +1,7 @@
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationSettings({ navigation }: any) {
@@ -25,12 +17,8 @@ export default function NotificationSettings({ navigation }: any) {
     offersPromotions: false,
   });
 
-  const handleBack = () => {
-    router.back();
-  };
-
-  const toggleNotification = (key: string) => {
-    setNotificationSettings((prev) => ({
+  const toggleNotification = (key: any) => {
+    setNotificationSettings((prev: any) => ({
       ...prev,
       [key]: !prev[key],
     }));
@@ -103,9 +91,9 @@ export default function NotificationSettings({ navigation }: any) {
       <Switch
         value={item.enabled}
         onValueChange={() => toggleNotification(item.key)}
-        trackColor={{ false: "#E5E7EB", true: color.primary }}
+        trackColor={{ false: "#DFDFDF", true: color.primary }}
         thumbColor={item.enabled ? "#FFFFFF" : "#FFFFFF"}
-        ios_backgroundColor="#E5E7EB"
+        ios_backgroundColor="#DFDFDF"
         style={styles.switch}
       />
     </View>
@@ -114,24 +102,11 @@ export default function NotificationSettings({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={24} color={color.black} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Notifications</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <Header title={"Notifications"} divider={true} />
 
       {/* Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {notificationOptions.map(renderNotificationItem)}
-
-        {/* Bottom Spacing */}
-        <View style={styles.bottomSpacing} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -142,40 +117,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontFamily: font.semiBold,
-    color: color.black,
-  },
-  placeholder: {
-    width: 40,
-  },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    padding: 16,
   },
   notificationItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
   },
   notificationContent: {
     flex: 1,
@@ -183,20 +133,17 @@ const styles = StyleSheet.create({
   },
   notificationTitle: {
     fontSize: 18,
-    fontFamily: font.semiBold,
+    fontFamily: font.medium,
     color: color.black,
     marginBottom: 4,
   },
   notificationDescription: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray14,
+    color: color.gray69,
     lineHeight: 18,
   },
   switch: {
     transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }],
-  },
-  bottomSpacing: {
-    height: 20,
   },
 });

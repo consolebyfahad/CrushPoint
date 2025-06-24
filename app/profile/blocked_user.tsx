@@ -1,3 +1,4 @@
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -94,7 +95,7 @@ export default function BlockedUsers({ navigation }: any) {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconContainer}>
-        <Ionicons name="ban-outline" size={64} color={color.gray14} />
+        <Ionicons name="ban-outline" size={64} color={color.error} />
       </View>
       <Text style={styles.emptyTitle}>No blocked users</Text>
       <Text style={styles.emptyText}>
@@ -105,18 +106,7 @@ export default function BlockedUsers({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={24} color={color.black} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Blocked Users</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <Header title={"Blocked Users"} divider={true} />
 
       {/* Content */}
       <FlatList
@@ -164,16 +154,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    padding: 16,
   },
   userItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    marginBottom: 8,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: color.gray87,
   },
   userContent: {
     flexDirection: "row",
@@ -198,7 +189,7 @@ const styles = StyleSheet.create({
   blockedDate: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray14,
+    color: color.gray69,
   },
   unblockButton: {
     paddingHorizontal: 16,
@@ -209,7 +200,7 @@ const styles = StyleSheet.create({
   unblockText: {
     fontSize: 16,
     fontFamily: font.medium,
-    color: "#5FB3D4",
+    color: color.primary,
   },
   emptyContainer: {
     alignItems: "center",
@@ -221,7 +212,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: color.error100,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
