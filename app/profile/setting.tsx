@@ -189,10 +189,10 @@ export default function Settings({ navigation }: any) {
       </View>
 
       {item.hasChevron && (
-        <Ionicons name="chevron-forward" size={20} color={color.gray400} />
+        <Ionicons name="chevron-forward" size={20} color={color.gray14} />
       )}
       {item.hasExternal && (
-        <Ionicons name="open-outline" size={20} color={color.gray400} />
+        <Ionicons name="open-outline" size={20} color={color.gray14} />
       )}
     </TouchableOpacity>
   );
@@ -246,7 +246,7 @@ export default function Settings({ navigation }: any) {
       <View style={styles.logoutContainer}>
         <CustomButton
           title="Log Out"
-          style={{ backgroundColor: color.gray500 }}
+          style={{ backgroundColor: color.gray94 }}
           fontstyle={{ color: color.black }}
           onPress={handleLogOut}
         />
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: color.gray100,
+    borderBottomColor: color.gray87,
   },
   backButton: {
     width: 40,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: font.medium,
-    color: color.gray400,
+    color: color.gray14,
     padding: 16,
   },
   settingItem: {
@@ -325,12 +325,12 @@ const styles = StyleSheet.create({
   settingSubtitle: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     marginTop: 2,
   },
   separator: {
     height: 1,
-    backgroundColor: color.gray500,
+    backgroundColor: color.gray94,
   },
   bottomSpacing: {
     height: 20,

@@ -2,13 +2,13 @@ import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { FemaleIcon, MaleIcon } from "@/utils/SvgIcons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 export default function Gender() {
-  const [selectedGender, setSelectedGender] = useState("male"); // Default to male as shown in image
+  const [selectedGender, setSelectedGender] = useState("male");
 
   const handleGenderSelect = (gender: any) => {
     setSelectedGender(gender);
@@ -21,21 +21,17 @@ export default function Gender() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Back Button */}
-      <Header />
-      {/* Content */}
       <View style={styles.content}>
-        {/* Title and Subtitle */}
+        <Header />
         <View style={styles.titleSection}>
           <Text style={styles.title}>{"What's your gender?"}</Text>
           <Text style={styles.subtitle}>
-            This helps us create a better experience for you
+            <Octicons name="info" size={14} color={color.gray55} /> This helps
+            us create a better experience for you
           </Text>
         </View>
 
-        {/* Gender Selection Options */}
         <View style={styles.optionsContainer}>
-          {/* Male Option */}
           <TouchableOpacity
             style={[
               styles.genderOption,
@@ -59,7 +55,6 @@ export default function Gender() {
             </Text>
           </TouchableOpacity>
 
-          {/* Female Option */}
           <TouchableOpacity
             style={[
               styles.genderOption,
@@ -85,8 +80,9 @@ export default function Gender() {
         </View>
       </View>
 
-      {/* Continue Button */}
-      <CustomButton title="Continue" onPress={handleContinue} />
+      <View style={styles.buttonContainer}>
+        <CustomButton title="Continue" onPress={handleContinue} />
+      </View>
     </SafeAreaView>
   );
 }
@@ -95,15 +91,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    paddingHorizontal: 24,
-    // paddingBottom: 24,
   },
   content: {
     flex: 1,
-    paddingTop: 40,
+    padding: 16,
   },
   titleSection: {
-    marginBottom: 60,
+    paddingTop: 40,
+    marginBottom: 32,
   },
   title: {
     fontSize: 24,
@@ -114,28 +109,27 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 22,
   },
   optionsContainer: {
     gap: 16,
   },
   genderOption: {
-    paddingVertical: 32,
-    paddingHorizontal: 24,
-    borderRadius: 16,
+    padding: 32,
+    borderRadius: 12,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: 16,
+    gap: 14,
   },
   selectedOption: {
-    backgroundColor: "#E3F2FD",
+    backgroundColor: color.gray95,
     borderColor: color.primary,
   },
   unselectedOption: {
     backgroundColor: color.white,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
   },
   genderText: {
     fontSize: 18,
@@ -146,5 +140,10 @@ const styles = StyleSheet.create({
   },
   unselectedText: {
     color: color.black,
+  },
+  buttonContainer: {
+    borderTopWidth: 1,
+    padding: 16,
+    borderColor: color.gray95,
   },
 });

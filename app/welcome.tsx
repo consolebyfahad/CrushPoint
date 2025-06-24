@@ -14,32 +14,29 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Animated Heart Logo Component
 const AnimatedLogo = () => {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Scale animation
     Animated.timing(scaleAnim, {
       toValue: 1,
-      duration: 800,
+      duration: 400,
       easing: Easing.elastic(1.2),
       useNativeDriver: true,
     }).start();
 
-    // Subtle rotation animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(rotateAnim, {
           toValue: 1,
-          duration: 3000,
+          duration: 2000,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
         Animated.timing(rotateAnim, {
           toValue: 0,
-          duration: 3000,
+          duration: 2000,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
@@ -75,12 +72,10 @@ const AnimatedLogo = () => {
 export default function Welcome() {
   const handleAppleSignUp = () => {
     console.log("Continue with Apple");
-    // Implement Apple Sign-In
   };
 
   const handleGoogleSignUp = () => {
     console.log("Continue with Google");
-    // Implement Google Sign-In
   };
 
   const handlePhoneSignUp = () => {
@@ -106,64 +101,60 @@ export default function Welcome() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Section with Logo */}
       <View style={styles.topSection}>
-        <AnimatedLogo />
+        <View style={styles.logo}>
+          <AnimatedLogo />
+        </View>
         <Text style={styles.appName}>CrushPoint</Text>
-      </View>
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>Create Your Account</Text>
+          <Text style={styles.subtitle}>
+            Choose your preferred sign up method
+          </Text>
 
-      {/* Content Section */}
-      <View>
-        <Text style={styles.title}>Create Your Account</Text>
-        <Text style={styles.subtitle}>
-          Choose your preferred sign up method
-        </Text>
+          <View style={styles.buttonContainer}>
+            {/* Apple Button */}
+            <CustomButton
+              title="Continue with Apple"
+              onPress={handleAppleSignUp}
+              icon={<AppleIcon />}
+              variant="secondary"
+            />
 
-        {/* Sign Up Buttons */}
-        <View style={styles.buttonContainer}>
-          {/* Apple Button */}
-          <CustomButton
-            title="Continue with Apple"
-            onPress={handleAppleSignUp}
-            icon={<AppleIcon />}
-            variant="secondary"
-          />
+            {/* Google Button */}
+            <CustomButton
+              title="Continue with Google"
+              onPress={handleGoogleSignUp}
+              icon={<GoogleIcon />}
+              variant="secondary"
+            />
 
-          {/* Google Button */}
-          <CustomButton
-            title="Continue with Google"
-            onPress={handleGoogleSignUp}
-            icon={<GoogleIcon />}
-            variant="secondary"
-          />
+            {/* Phone Button */}
+            <CustomButton
+              title="Continue with Phone"
+              onPress={handlePhoneSignUp}
+              icon={<PhoneIcon />}
+              variant="secondary"
+            />
 
-          {/* Phone Button */}
-          <CustomButton
-            title="Continue with Phone"
-            onPress={handlePhoneSignUp}
-            icon={<PhoneIcon />}
-            variant="secondary"
-          />
+            {/* Email Button */}
+            <CustomButton
+              title="Continue with Email"
+              onPress={handleEmailSignUp}
+              icon={<EmailIcon />}
+              variant="secondary"
+            />
+          </View>
 
-          {/* Email Button */}
-          <CustomButton
-            title="Continue with Email"
-            onPress={handleEmailSignUp}
-            icon={<EmailIcon />}
-            variant="secondary"
-          />
-        </View>
-
-        {/* Login Link */}
-        <View style={styles.loginSection}>
-          <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity onPress={handleLogin}>
-            <Text style={styles.loginLink}>Log In</Text>
-          </TouchableOpacity>
+          <View style={styles.loginSection}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={handleLogin}>
+              <Text style={styles.loginLink}>Log In</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
-      {/* Bottom Section */}
       <View>
         <Text style={styles.termsText}>
           By signing up, you agree to our{" "}
@@ -178,13 +169,14 @@ export default function Welcome() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    padding: 16,
     backgroundColor: color.white,
     justifyContent: "space-between",
   },
   topSection: {
-    marginTop: 120,
+    marginTop: 80,
+  },
+  logo: {
     alignItems: "center",
   },
   appName: {
@@ -194,17 +186,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 4,
   },
+  contentContainer: {
+    marginTop: 60,
+  },
   title: {
     fontSize: 24,
     fontFamily: font.bold,
-    color: color.gray400,
+    color: color.gray14,
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     textAlign: "center",
     marginBottom: 16,
   },
@@ -220,7 +215,7 @@ const styles = StyleSheet.create({
   loginText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
   },
   loginLink: {
     fontSize: 14,
@@ -230,9 +225,10 @@ const styles = StyleSheet.create({
   termsText: {
     fontSize: 12,
     fontFamily: font.regular,
-    color: color.gray200,
+    color: color.gray69,
     textAlign: "center",
     lineHeight: 18,
+    letterSpacing: 0.9,
   },
   linkText: {
     textDecorationLine: "underline",

@@ -47,21 +47,17 @@ const About = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <Header />
-
-      {/* Content */}
       <View style={styles.content}>
-        <Text style={styles.title}>Tell us about you</Text>
+        <Header />
 
-        <View style={styles.disclaimerContainer}>
-          <Octicons name="info" size={16} color={color.gray300} />
+        <View style={styles.titleSection}>
+          <Text style={styles.title}>Tell us about you</Text>
           <Text style={styles.disclaimerText}>
+            <Octicons name="info" size={14} color={color.gray55} />{" "}
             {"We don't display your age publicly without your consent"}
           </Text>
         </View>
 
-        {/* Name Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Your Name</Text>
           <TextInput
@@ -76,7 +72,6 @@ const About = () => {
           />
         </View>
 
-        {/* Date of Birth Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Date of Birth</Text>
           <TouchableOpacity onPress={handleDatePress} style={styles.dateInput}>
@@ -92,7 +87,7 @@ const About = () => {
               editable={false}
             />
 
-            <Octicons name="calendar" size={18} color={color.gray300} />
+            <Octicons name="calendar" size={18} color={color.gray55} />
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
@@ -109,7 +104,9 @@ const About = () => {
       </View>
 
       {/* Continue Button */}
-      <CustomButton title="Continue" onPress={handleContinue} />
+      <View style={styles.buttonContainer}>
+        <CustomButton title="Continue" onPress={handleContinue} />
+      </View>
     </SafeAreaView>
   );
 };
@@ -117,37 +114,28 @@ const About = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    // paddingBottom: 24,
     backgroundColor: color.white,
   },
   content: {
     flex: 1,
+    padding: 16,
+  },
+  titleSection: {
     paddingTop: 40,
+    marginBottom: 32,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 16,
-  },
-  disclaimerContainer: {
-    flexDirection: "row",
-    // alignItems: "flex-start",
-    marginBottom: 40,
-    // paddingRight: 20,
-  },
-  infoIcon: {
-    marginRight: 8,
-    marginTop: 2,
+    fontSize: 24,
+    fontFamily: font.bold,
+    color: color.black,
+    marginBottom: 12,
   },
   disclaimerText: {
     fontSize: 14,
-    color: "#888",
+    color: color.gray55,
     lineHeight: 20,
     fontFamily: font.regular,
-    letterSpacing: 1,
-    // flex: 1,
+    letterSpacing: 0.6,
     marginLeft: 4,
   },
   inputContainer: {
@@ -155,33 +143,37 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "500",
-    color: "#000",
+    fontFamily: font.medium,
+    color: color.black,
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: color.gray87,
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: "#000",
-    backgroundColor: "#fff",
+    color: color.black,
   },
   dateInput: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: color.gray87,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 4,
     fontSize: 16,
-    color: "#000",
-    backgroundColor: "#fff",
+    color: color.black,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  dateTextInput: {},
+  dateTextInput: {
+    color: color.black,
+  },
+  buttonContainer: {
+    borderTopWidth: 1,
+    padding: 16,
+    borderColor: color.gray95,
+  },
 });
 
 export default About;

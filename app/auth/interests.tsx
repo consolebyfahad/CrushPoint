@@ -2,9 +2,11 @@ import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import Feather from "@expo/vector-icons/Feather";
+import Octicons from "@expo/vector-icons/Octicons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -65,7 +67,7 @@ export default function Interests() {
         );
         setFilteredInterests(filtered);
       }
-    }, 3000);
+    }, 2000);
 
     setSearchTimeout(newTimeout);
 
@@ -96,38 +98,38 @@ export default function Interests() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Back Button */}
-      <View style={styles.header}>
-        <Header />
-      </View>
-
-      {/* Content */}
       <View style={styles.content}>
-        {/* Title and Subtitle */}
+        <Header />
+
         <View style={styles.titleSection}>
           <Text style={styles.title}>What are your interests?</Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>
-              Select at least 3 interests to help us find better matches for you
+              <Octicons name="info" size={14} color={color.gray55} />
+              {""} Select at least 3 interests to help us find better matches
+              for you
             </Text>
           </View>
         </View>
 
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
+        <View
+          style={[
+            styles.searchContainer,
+            Platform.OS === "ios" && { paddingVertical: 14 },
+          ]}
+        >
           <View style={styles.searchIcon}>
-            <Feather name="search" size={20} color={color.gray300} />
+            <Feather name="search" size={20} color={color.gray55} />
           </View>
           <TextInput
             style={styles.searchInput}
             placeholder="Search interests..."
-            placeholderTextColor={color.gray300}
+            placeholderTextColor={color.gray55}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
         </View>
 
-        {/* Interests List */}
         <ScrollView
           style={styles.interestsScrollView}
           showsVerticalScrollIndicator={false}
@@ -162,7 +164,6 @@ export default function Interests() {
         </ScrollView>
       </View>
 
-      {/* Bottom Section */}
       {!isEdit ? (
         <View style={styles.bottomSection}>
           <Text style={styles.selectedCount}>
@@ -192,16 +193,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
   },
-  header: {
-    paddingHorizontal: 16,
-  },
   content: {
     flex: 1,
-    paddingTop: 30,
-    paddingHorizontal: 16,
+    padding: 16,
   },
   titleSection: {
-    marginBottom: 28,
+    paddingTop: 40,
+    marginBottom: 32,
   },
   title: {
     fontSize: 24,
@@ -217,18 +215,17 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 22,
     flex: 1,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderColor: color.gray100,
+    borderColor: color.gray87,
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 16,
     marginBottom: 24,
     gap: 12,
     overflow: "hidden",
@@ -264,12 +261,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   selectedTag: {
-    backgroundColor: "#E3F2FD",
+    backgroundColor: color.gray95,
     borderColor: color.primary,
   },
   unselectedTag: {
     backgroundColor: color.white,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
   },
   emoji: {
     fontSize: 14,
@@ -286,11 +283,9 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     borderTopWidth: 1,
-    paddingTop: 16,
-    borderColor: color.gray100,
-    // paddingBottom: 24,
-    gap: 16,
-    paddingHorizontal: 16,
+    padding: 16,
+    borderColor: color.gray87,
+    gap: 12,
   },
   buttonContainer: {
     padding: 16,
@@ -298,7 +293,7 @@ const styles = StyleSheet.create({
   selectedCount: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     textAlign: "center",
   },
 });

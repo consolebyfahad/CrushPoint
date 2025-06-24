@@ -91,8 +91,7 @@ export default function Verify() {
   const handleVerifyCode = (fullCode: string) => {
     console.log("Verifying code:", fullCode);
     router.push("/auth/gender");
-    // setCode(["", "", "", "", ""]);
-    // Add verification logic here
+    setCode(["", "", "", "", "", ""]);
     // router.push("/auth/success");
   };
 
@@ -102,11 +101,9 @@ export default function Verify() {
       setResendCountdown(50);
       setCanResend(false);
 
-      // Clear current code
       setCode(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
 
-      // Restart countdown
       const timer = setInterval(() => {
         setResendCountdown((prev) => {
           if (prev <= 1) {
@@ -122,11 +119,8 @@ export default function Verify() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Back Button */}
       <Header />
-      {/* Content */}
       <View style={styles.content}>
-        {/* Title and Subtitle */}
         <View style={styles.titleSection}>
           <Text style={styles.title}>Verify your phone</Text>
           <Text style={styles.subtitle}>
@@ -182,14 +176,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    paddingHorizontal: 24,
+    padding: 16,
   },
   content: {
     flex: 1,
     paddingTop: 40,
   },
   titleSection: {
-    marginBottom: 60,
+    marginBottom: 42,
   },
   title: {
     fontSize: 24,
@@ -200,14 +194,13 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 22,
   },
   pinContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 60,
-    paddingHorizontal: 8,
   },
   pinBoxContainer: {
     flex: 1,
@@ -216,7 +209,7 @@ const styles = StyleSheet.create({
   pinBox: {
     height: 56,
     borderWidth: 1,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
     borderRadius: 12,
     fontSize: 20,
     fontFamily: font.semiBold,

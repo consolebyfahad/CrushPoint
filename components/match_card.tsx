@@ -67,7 +67,7 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
               <SimpleLineIcons
                 name="location-pin"
                 size={14}
-                color={color.gray200}
+                color={color.gray69}
               />
 
               <Text style={styles.distance}>{match.distance}</Text>
@@ -81,11 +81,7 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
             onPress={handleOptions}
             activeOpacity={0.8}
           >
-            <Ionicons
-              name="ellipsis-vertical"
-              size={16}
-              color={color.gray300}
-            />
+            <Ionicons name="ellipsis-vertical" size={16} color={color.gray55} />
           </TouchableOpacity>
         </View>
 
@@ -119,7 +115,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 6,
-    shadowColor: color.gray300,
+    shadowColor: color.gray55,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -128,7 +124,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
   },
   imageContainer: {
     position: "relative",
@@ -183,20 +179,20 @@ const styles = StyleSheet.create({
   distance: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray200,
+    color: color.gray69,
     marginLeft: 4,
   },
   separator: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: color.gray200,
+    backgroundColor: color.gray69,
     marginHorizontal: 8,
   },
   timeAgo: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray200,
+    color: color.gray69,
   },
   actionContainer: {
     flexDirection: "row",
@@ -221,7 +217,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: color.gray500,
+    backgroundColor: color.gray94,
     alignItems: "center",
     justifyContent: "center",
   },

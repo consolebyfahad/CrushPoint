@@ -100,7 +100,7 @@ export default function Nationality({
           <Ionicons
             name="search"
             size={20}
-            color={color.gray400}
+            color={color.gray14}
             style={styles.searchIcon}
           />
           <TextInput
@@ -108,7 +108,7 @@ export default function Nationality({
             value={searchText}
             onChangeText={setSearchText}
             placeholder="Search nationality"
-            placeholderTextColor={color.gray400}
+            placeholderTextColor={color.gray14}
           />
         </View>
       </View>

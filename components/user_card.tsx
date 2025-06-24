@@ -97,7 +97,7 @@ export default function UserCard({ user, onViewProfile, onBookmark }: any) {
             <SimpleLineIcons
               name="location-pin"
               size={16}
-              color={color.gray300}
+              color={color.gray55}
             />
             <Text style={styles.distance}>{defaultUser.distance}</Text>
           </View>
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 8,
     borderWidth: 1,
-    borderColor: color.gray1000,
+    borderColor: color.gray870,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -225,14 +225,14 @@ const styles = StyleSheet.create({
   distance: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     marginLeft: 4,
   },
   lookingForContainer: {
     flexDirection: "row",
     alignSelf: "flex-start",
     marginBottom: 16,
-    backgroundColor: color.white200,
+    backgroundColor: color.gray95,
     padding: 12,
     borderRadius: 99,
   },
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   interestTag: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: color.gray500,
+    backgroundColor: color.gray94,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -102,7 +102,7 @@ export default function AccountSettings({ route, navigation }: any) {
             value={accountData.fullName}
             onChangeText={(value) => handleInputChange("fullName", value)}
             placeholder="Enter your full name"
-            placeholderTextColor={color.gray400}
+            placeholderTextColor={color.gray14}
           />
           <Text style={styles.fieldNote}>Changeable only once in 6 months</Text>
         </View>
@@ -116,7 +116,7 @@ export default function AccountSettings({ route, navigation }: any) {
             activeOpacity={0.7}
           >
             <Text style={styles.dateText}>{accountData.dateOfBirth}</Text>
-            <Ionicons name="calendar-outline" size={20} color={color.gray400} />
+            <Ionicons name="calendar-outline" size={20} color={color.gray14} />
           </TouchableOpacity>
           <Text style={styles.fieldNote}>Changeable only once in 6 months</Text>
         </View>
@@ -129,7 +129,7 @@ export default function AccountSettings({ route, navigation }: any) {
             value={accountData.phoneNumber}
             onChangeText={(value) => handleInputChange("phoneNumber", value)}
             placeholder="Enter your phone number"
-            placeholderTextColor={color.gray400}
+            placeholderTextColor={color.gray14}
             keyboardType="phone-pad"
           />
         </View>
@@ -142,7 +142,7 @@ export default function AccountSettings({ route, navigation }: any) {
             value={accountData.email}
             onChangeText={(value) => handleInputChange("email", value)}
             placeholder="Enter your email"
-            placeholderTextColor={color.gray400}
+            placeholderTextColor={color.gray14}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     marginBottom: 8,
   },
   textInput: {
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   fieldNote: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     marginTop: 8,
   },
   bottomSpacing: {
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   saveButtonDisabled: {
-    backgroundColor: color.gray400,
+    backgroundColor: color.gray14,
   },
   saveButtonText: {
     fontSize: 16,

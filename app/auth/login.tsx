@@ -60,11 +60,8 @@ export default function Login() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Back Button */}
-      <Header onPress={handleBack} />
-      {/* Content */}
+      <Header />
       <View style={styles.content}>
-        {/* Title and Subtitle */}
         <View style={styles.titleSection}>
           <Text style={styles.title}>
             {activeTab === "phone"
@@ -88,16 +85,7 @@ export default function Login() {
             onPress={() => setActiveTab("phone")}
           >
             <PhoneIcon />
-            <Text
-              style={[
-                styles.tabText,
-                // activeTab === "phone"
-                //   ? styles.activeTabText
-                //   : styles.inactiveTabText,
-              ]}
-            >
-              Phone
-            </Text>
+            <Text style={styles.tabText}>Phone</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -108,16 +96,7 @@ export default function Login() {
             onPress={() => setActiveTab("email")}
           >
             <EmailIcon />
-            <Text
-              style={[
-                styles.tabText,
-                // activeTab === "email"
-                //   ? styles.activeTabText
-                //   : styles.inactiveTabText,
-              ]}
-            >
-              Email
-            </Text>
+            <Text style={styles.tabText}>Email</Text>
           </TouchableOpacity>
         </View>
 
@@ -140,7 +119,7 @@ export default function Login() {
               placeholder={
                 activeTab === "phone" ? "+1 (555) 000-0000" : "you@example.com"
               }
-              placeholderTextColor={color.gray200}
+              placeholderTextColor={color.gray69}
               value={activeTab === "phone" ? phoneNumber : email}
               onChangeText={activeTab === "phone" ? setPhoneNumber : setEmail}
               keyboardType={
@@ -167,14 +146,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    paddingHorizontal: 24,
+    padding: 16,
   },
   content: {
     flex: 1,
     paddingTop: 40,
   },
   titleSection: {
-    marginBottom: 40,
+    marginBottom: 32,
   },
   title: {
     fontSize: 24,
@@ -185,12 +164,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 22,
   },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: color.gray100,
+    backgroundColor: color.gray87,
     borderRadius: 12,
     padding: 4,
     marginBottom: 32,
@@ -230,14 +209,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontFamily: font.medium,
-    color: color.gray400,
+    color: color.gray14,
     marginBottom: 12,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 4,

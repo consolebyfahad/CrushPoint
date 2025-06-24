@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   matchCount: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
   },
   searchContainer: {
     padding: 16,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: color.gray500,
+    backgroundColor: color.gray94,
     borderRadius: 14,
     paddingHorizontal: 16,
   },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     textAlign: "center",
     lineHeight: 24,
   },

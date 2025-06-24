@@ -152,7 +152,7 @@ export default function InviteMatches({
               <Ionicons
                 name="search"
                 size={20}
-                color={color.gray400}
+                color={color.gray14}
                 style={styles.searchIcon}
               />
               <TextInput
@@ -160,7 +160,7 @@ export default function InviteMatches({
                 value={searchText}
                 onChangeText={setSearchText}
                 placeholder="Search matches..."
-                placeholderTextColor={color.gray400}
+                placeholderTextColor={color.gray14}
               />
               {searchText.length > 0 && (
                 <TouchableOpacity
@@ -170,7 +170,7 @@ export default function InviteMatches({
                   <Ionicons
                     name="close-circle"
                     size={20}
-                    color={color.gray400}
+                    color={color.gray14}
                   />
                 </TouchableOpacity>
               )}
@@ -334,12 +334,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: color.gray500,
+    borderTopColor: color.gray94,
   },
   selectionCount: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     textAlign: "center",
     marginBottom: 16,
   },
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sendButtonDisabled: {
-    backgroundColor: color.gray400,
+    backgroundColor: color.gray14,
   },
   sendButtonText: {
     fontSize: 16,

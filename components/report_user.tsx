@@ -171,7 +171,7 @@ export default function ReportUser({
                 value={additionalDetails}
                 onChangeText={setAdditionalDetails}
                 placeholder="Please provide more information..."
-                placeholderTextColor={color.gray400}
+                placeholderTextColor={color.gray14}
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   reasonDescription: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     lineHeight: 18,
   },
   checkmark: {
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   submitButtonDisabled: {
-    backgroundColor: color.gray400,
+    backgroundColor: color.gray14,
   },
   submitIcon: {
     marginRight: 8,

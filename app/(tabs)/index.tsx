@@ -202,7 +202,7 @@ export default function Index() {
               <Ionicons
                 name="list"
                 size={18}
-                color={viewType === "List View" ? color.black : color.gray400}
+                color={viewType === "List View" ? color.black : color.gray14}
               />
               <Text
                 style={[
@@ -402,8 +402,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: color.gray200,
-    shadowColor: color.gray300,
+    borderColor: color.gray69,
+    shadowColor: color.gray55,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -414,10 +414,10 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     flexDirection: "row",
-    backgroundColor: color.gray500,
+    backgroundColor: color.gray94,
     borderRadius: 99,
     padding: 4,
-    shadowColor: color.gray300,
+    shadowColor: color.gray55,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   },
   activeToggle: {
     backgroundColor: color.white,
-    shadowColor: color.gray300,
+    shadowColor: color.gray55,
     shadowOffset: {
       width: 0,
       height: 1,

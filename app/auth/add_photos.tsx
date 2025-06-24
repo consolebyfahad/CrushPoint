@@ -2,6 +2,7 @@ import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import Feather from "@expo/vector-icons/Feather";
+import Octicons from "@expo/vector-icons/Octicons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -119,7 +120,6 @@ export default function AddPhotos() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header with Back Button */}
-      <Header />
 
       <ScrollView
         style={styles.scrollView}
@@ -127,16 +127,15 @@ export default function AddPhotos() {
       >
         {/* Content */}
         <View style={styles.content}>
+          <Header />
           {/* Title and Subtitle */}
           <View style={styles.titleSection}>
             <Text style={styles.title}>Add your best photos</Text>
             <View style={styles.subtitleContainer}>
-              <View style={styles.infoIcon}>
-                <Feather name="info" size={16} color={color.gray300} />
-              </View>
               <Text style={styles.subtitle}>
-                Photos should be clear and show your face. Add at least 2 photos
-                to continue.
+                <Octicons name="info" size={14} color={color.gray55} /> Photos
+                should be clear and show your face. Add at least 2 photos to
+                continue.
               </Text>
             </View>
           </View>
@@ -179,11 +178,13 @@ export default function AddPhotos() {
       </ScrollView>
 
       {/* Continue Button */}
-      <CustomButton
-        title="Continue"
-        onPress={handleContinue}
-        isDisabled={isButtonDisabled}
-      />
+      <View style={styles.buttonContainer}>
+        <CustomButton
+          title="Continue"
+          onPress={handleContinue}
+          isDisabled={isButtonDisabled}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -192,16 +193,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    paddingHorizontal: 24,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingTop: 30,
+    padding: 16,
     paddingBottom: 20,
   },
   titleSection: {
+    paddingTop: 40,
     marginBottom: 32,
   },
   title: {
@@ -226,13 +227,13 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 22,
     flex: 1,
   },
   mainUploadArea: {
     borderWidth: 2,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
     borderStyle: "dashed",
     borderRadius: 12,
     paddingVertical: 28,
@@ -249,13 +250,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.regular,
     lineHeight: 24,
-    color: color.gray300,
+    color: color.gray55,
     textAlign: "center",
   },
   fileSizeText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray200,
+    color: color.gray69,
   },
   photoGrid: {
     gap: 16,
@@ -274,7 +275,7 @@ const styles = StyleSheet.create({
     flex: 1,
     aspectRatio: 1,
     borderWidth: 2,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
     borderStyle: "dashed",
     borderRadius: 12,
     alignItems: "center",
@@ -292,7 +293,7 @@ const styles = StyleSheet.create({
   },
   uploadIconText: {
     fontSize: 24,
-    color: color.gray300,
+    color: color.gray55,
   },
   removeButton: {
     position: "absolute",
@@ -314,8 +315,13 @@ const styles = StyleSheet.create({
   photoCount: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     textAlign: "center",
     marginBottom: 16,
+  },
+  buttonContainer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: color.gray87,
   },
 });

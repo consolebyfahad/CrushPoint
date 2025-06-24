@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   matchInfo: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     marginTop: 2,
   },
   closeButton: {

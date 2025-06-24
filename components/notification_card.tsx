@@ -103,7 +103,7 @@ export default function NotificationCard({
         onPress={handleDelete}
         activeOpacity={0.7}
       >
-        <Feather name="trash-2" size={18} color={color.gray200} />
+        <Feather name="trash-2" size={18} color={color.gray69} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 6,
-    shadowColor: color.gray300,
+    shadowColor: color.gray55,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -150,14 +150,14 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 18,
     marginBottom: 6,
   },
   timeAgo: {
     fontSize: 12,
     fontFamily: font.regular,
-    color: color.gray200,
+    color: color.gray69,
   },
   deleteButton: {
     width: 32,

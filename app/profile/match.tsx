@@ -476,11 +476,7 @@ export default function MatchScreen({ route, navigation }: any) {
           </Text>
         </Text>
         <Text style={styles.distanceText}>
-          <SimpleLineIcons
-            name="location-pin"
-            size={14}
-            color={color.gray300}
-          />{" "}
+          <SimpleLineIcons name="location-pin" size={14} color={color.gray55} />{" "}
           {matchData.matchedUser.distance}
         </Text>
         <CustomButton
@@ -641,7 +637,7 @@ const styles = StyleSheet.create({
   distanceText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     marginBottom: 22,
   },
   viewProfileButton: {

@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   confirmationText: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     textAlign: "center",
     lineHeight: 22,
     paddingHorizontal: 8,

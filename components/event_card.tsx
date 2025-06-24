@@ -64,7 +64,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
         </Text>
 
         <View style={styles.locationRow}>
-          <Ionicons name="location-outline" size={14} color={color.gray200} />
+          <Ionicons name="location-outline" size={14} color={color.gray69} />
           <Text style={styles.locationText} numberOfLines={1}>
             {event.location}
           </Text>
@@ -81,12 +81,12 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           activeOpacity={0.7}
         >
           <View style={styles.attendeesInfo}>
-            <Ionicons name="people-outline" size={14} color={color.gray200} />
+            <Ionicons name="people-outline" size={14} color={color.gray69} />
             <Text style={styles.attendeesText}>
               {event.attendees} attending
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color={color.gray200} />
+          <Ionicons name="chevron-forward" size={16} color={color.gray69} />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -99,9 +99,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 16,
     marginVertical: 8,
-    shadowColor: color.gray300,
+    shadowColor: color.gray55,
     borderWidth: 1,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    shadowColor: color.gray300,
+    shadowColor: color.gray55,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -178,14 +178,14 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray200,
+    color: color.gray69,
     marginLeft: 4,
     flex: 1,
   },
   description: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 20,
     marginBottom: 16,
   },
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   attendeesText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray200,
+    color: color.gray69,
     marginLeft: 4,
   },
 });

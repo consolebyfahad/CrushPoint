@@ -1,11 +1,11 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
+import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 export default function LookingFor() {
   const [selectedOptions, setSelectedOptions] = useState([]);
 
@@ -34,22 +34,18 @@ export default function LookingFor() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Back Button */}
-      <Header />
-
-      {/* Content */}
       <View style={styles.content}>
-        {/* Title and Subtitle */}
+        <Header />
         <View style={styles.titleSection}>
           <Text style={styles.title}>What are you looking for?</Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>
-              This helps others understand your intentions
+              <Octicons name="info" size={14} color={color.gray55} /> This helps
+              others understand your intentions
             </Text>
           </View>
         </View>
 
-        {/* Options Container */}
         <View style={styles.optionsContainer}>
           {options.map((option) => (
             <TouchableOpacity
@@ -79,8 +75,13 @@ export default function LookingFor() {
         </View>
       </View>
 
-      {/* Continue Button */}
-      <CustomButton title="Continue" onPress={handleContinue} />
+      <View style={styles.buttonContainer}>
+        <CustomButton
+          title="Continue"
+          onPress={handleContinue}
+          isDisabled={selectedOptions.length === 0}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -89,15 +90,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
   },
   content: {
     flex: 1,
-    paddingTop: 30,
+    padding: 16,
   },
   titleSection: {
-    marginBottom: 40,
+    paddingTop: 40,
+    marginBottom: 32,
   },
   title: {
     fontSize: 24,
@@ -114,19 +114,19 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: color.gray200,
+    backgroundColor: color.gray69,
     alignItems: "center",
     justifyContent: "center",
   },
   infoIconText: {
     fontSize: 12,
-    color: color.gray400,
+    color: color.gray14,
     fontFamily: font.medium,
   },
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 22,
     flex: 1,
   },
@@ -144,12 +144,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   selectedOption: {
-    backgroundColor: "#E3F2FD",
+    backgroundColor: color.gray95,
     borderColor: color.primary,
   },
   unselectedOption: {
     backgroundColor: color.white,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
   },
   emoji: {
     fontSize: 20,
@@ -163,5 +163,10 @@ const styles = StyleSheet.create({
   },
   unselectedText: {
     color: color.black,
+  },
+  buttonContainer: {
+    borderTopWidth: 1,
+    padding: 16,
+    borderColor: color.gray95,
   },
 });

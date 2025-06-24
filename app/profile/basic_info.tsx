@@ -189,7 +189,7 @@ export default function BasicInfo({ route, navigation }: any) {
               updateField("interestedIn", item.value);
             }}
             renderRightIcon={() => (
-              <Ionicons name="chevron-down" size={20} color={color.gray300} />
+              <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
           />
         </View>
@@ -256,7 +256,7 @@ export default function BasicInfo({ route, navigation }: any) {
             }}
             renderLeftIcon={() => <Text style={styles.fieldIcon}>🇺🇸</Text>}
             renderRightIcon={() => (
-              <Ionicons name="chevron-down" size={20} color={color.gray300} />
+              <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
           />
         </View>
@@ -284,7 +284,7 @@ export default function BasicInfo({ route, navigation }: any) {
               </Text>
             )}
             renderRightIcon={() => (
-              <Ionicons name="chevron-down" size={20} color={color.gray300} />
+              <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
           />
         </View>
@@ -312,7 +312,7 @@ export default function BasicInfo({ route, navigation }: any) {
               </Text>
             )}
             renderRightIcon={() => (
-              <Ionicons name="chevron-down" size={20} color={color.gray300} />
+              <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
           />
         </View>
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   placeholderStyle: {
     fontSize: 16,
-    color: color.gray400,
+    color: color.gray14,
     fontFamily: font.medium,
   },
   selectedTextStyle: {

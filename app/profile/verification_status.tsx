@@ -168,7 +168,7 @@ export default function VerificationStatus({ navigation }: any) {
           <Ionicons
             name="information-circle-outline"
             size={20}
-            color={color.gray400}
+            color={color.gray14}
           />
         </TouchableOpacity>
 
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   statusDescription: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     textAlign: "center",
   },
   whyVerifySection: {
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   issueDescription: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     lineHeight: 18,
   },
   successSection: {

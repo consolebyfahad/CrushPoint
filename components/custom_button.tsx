@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     borderWidth: 1,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
   },
   secondaryButtonPressed: {
     backgroundColor: color.black,
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   disabledButton: {
-    backgroundColor: color.gray500,
+    backgroundColor: color.gray94,
   },
   disabledText: {
     color: color.gray900,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   secondaryText: {
     fontSize: 16,
     fontFamily: font.medium,
-    color: color.gray400,
+    color: color.gray14,
   },
   secondaryTextPressed: {
     fontSize: 16,

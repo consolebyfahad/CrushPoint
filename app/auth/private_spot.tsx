@@ -2,6 +2,7 @@ import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { MarkerIcon } from "@/utils/SvgIcons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -46,16 +47,13 @@ export default function PrivateSpot() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Back Button */}
-      <Header />
-
-      {/* Content */}
       <View style={styles.content}>
-        {/* Title and Subtitle */}
         <View style={styles.titleSection}>
+          <Header />
           <Text style={styles.title}>Set Your Private Spot</Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>
+              <Octicons name="info" size={14} color={color.gray55} />{" "}
               {
                 "Choose an area on the map where you don't want to be visible to others"
               }
@@ -65,7 +63,6 @@ export default function PrivateSpot() {
 
         {/* Map Container */}
         <View style={styles.mapContainer}>
-          {/* <MapView style={styles.map} /> */}
           <MapView
             style={styles.map}
             region={mapRegion}
@@ -95,15 +92,11 @@ export default function PrivateSpot() {
               }}
               anchor={{ x: 0.5, y: 0.5 }}
             >
-              {/* <View style={styles.customMarker}>
-                <View style={styles.markerInner} />
-              </View> */}
               <MarkerIcon />
             </Marker>
           </MapView>
         </View>
 
-        {/* Privacy Radius Section */}
         <View style={styles.radiusSection}>
           <Text style={styles.radiusTitle}>Privacy Radius</Text>
           <View style={styles.radiusButtons}>
@@ -154,7 +147,6 @@ export default function PrivateSpot() {
         </View>
       </View>
 
-      {/* Save & Continue Button */}
       <View style={styles.buttonContainer}>
         <CustomButton title="Save & Continue" onPress={handleSaveAndContinue} />
       </View>
@@ -170,16 +162,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    paddingHorizontal: 24,
   },
   content: {
     flex: 1,
-    paddingTop: 30,
   },
   titleSection: {
     marginBottom: 32,
+    paddingHorizontal: 16,
   },
   title: {
+    paddingTop: 40,
     fontSize: 24,
     fontFamily: font.bold,
     color: color.black,
@@ -194,32 +186,27 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: color.gray200,
+    backgroundColor: color.gray69,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 2,
   },
   infoIconText: {
     fontSize: 12,
-    color: color.gray400,
+    color: color.gray14,
     fontFamily: font.medium,
   },
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 22,
     flex: 1,
   },
   mapContainer: {
     flex: 1,
-    borderRadius: 16,
     overflow: "hidden",
-    marginBottom: 24,
     position: "relative",
-  },
-  map: {
-    flex: 1,
   },
   customMarker: {
     width: 20,
@@ -246,7 +233,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
   },
   radiusSection: {
-    marginBottom: 32,
+    padding: 24,
   },
   radiusTitle: {
     fontSize: 16,
@@ -261,19 +248,18 @@ const styles = StyleSheet.create({
   radiusButton: {
     flex: 1,
     paddingVertical: 16,
-    paddingHorizontal: 24,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   selectedRadiusButton: {
-    backgroundColor: "#E3F2FD",
+    backgroundColor: color.gray95,
     borderColor: color.primary,
   },
   unselectedRadiusButton: {
     backgroundColor: color.white,
-    borderColor: color.gray100,
+    borderColor: color.gray87,
   },
   radiusButtonText: {
     fontSize: 16,
@@ -286,6 +272,8 @@ const styles = StyleSheet.create({
     color: color.black,
   },
   buttonContainer: {
-    // paddingBottom: 24,
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: color.gray87,
   },
 });

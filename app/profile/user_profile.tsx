@@ -237,7 +237,7 @@ export default function UserProfile({ route, navigation }: any) {
             <SimpleLineIcons
               name="location-pin"
               size={14}
-              color={color.gray300}
+              color={color.gray55}
             />
             <Text style={styles.distance}>{user.distance}</Text>
           </View>
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   distance: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     marginRight: 8,
   },
   bookmarkButton: {

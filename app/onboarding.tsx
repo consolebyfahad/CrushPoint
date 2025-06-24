@@ -54,26 +54,17 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Skip Button */}
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
 
-      {/* Content Container */}
       <View style={styles.contentContainer}>
-        {/* Icon */}
         <View style={styles.iconContainer}>{currentData.IconComponent}</View>
-
-        {/* Title */}
         <Text style={styles.title}>{currentData.title}</Text>
-
-        {/* Description */}
         <Text style={styles.description}>{currentData.description}</Text>
       </View>
 
-      {/* Bottom Section */}
       <View style={styles.bottomContainer}>
-        {/* Page Indicators */}
         <View style={styles.indicatorContainer}>
           {onboardingData.map((_, index) => (
             <View
@@ -86,7 +77,6 @@ export default function OnboardingScreen() {
           ))}
         </View>
 
-        {/* Continue Button */}
         <CustomButton
           title={isLastScreen ? "Get Started" : "Continue"}
           onPress={handleContinue}
@@ -103,8 +93,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    paddingHorizontal: 32,
-    paddingBottom: 32,
+    padding: 16,
   },
   skipButton: {
     alignSelf: "flex-end",
@@ -113,7 +102,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 14,
-    color: color.gray300,
+    color: color.gray55,
     fontFamily: font.medium,
   },
   contentContainer: {
@@ -135,7 +124,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -150,7 +139,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: color.gray100,
+    backgroundColor: color.gray87,
     marginHorizontal: 4,
   },
   activeIndicator: {

@@ -148,7 +148,7 @@ export default function ContactSupport({ navigation }: any) {
             value={formData.name}
             onChangeText={(value) => handleInputChange("name", value)}
             placeholder="Enter your name"
-            placeholderTextColor={color.gray400}
+            placeholderTextColor={color.gray14}
           />
         </View>
 
@@ -160,7 +160,7 @@ export default function ContactSupport({ navigation }: any) {
             value={formData.email}
             onChangeText={(value) => handleInputChange("email", value)}
             placeholder="Enter your email"
-            placeholderTextColor={color.gray400}
+            placeholderTextColor={color.gray14}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -182,7 +182,7 @@ export default function ContactSupport({ navigation }: any) {
             value={formData.message}
             onChangeText={(value) => handleInputChange("message", value)}
             placeholder="How can we help?"
-            placeholderTextColor={color.gray400}
+            placeholderTextColor={color.gray14}
             multiline
             numberOfLines={6}
             textAlignVertical="top"
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   helpDescription: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     textAlign: "center",
     lineHeight: 20,
   },
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   characterCount: {
     fontSize: 12,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     textAlign: "right",
     marginTop: 8,
   },
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   sendButtonDisabled: {
-    backgroundColor: color.gray400,
+    backgroundColor: color.gray14,
   },
   sendIcon: {
     marginRight: 8,

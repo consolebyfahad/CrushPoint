@@ -165,7 +165,7 @@ export default function EventDetails({ route, navigation }: any) {
         {/* Date and Time */}
         <View style={styles.infoSection}>
           <View style={styles.infoRow}>
-            <Ionicons name="calendar-outline" size={20} color={color.gray400} />
+            <Ionicons name="calendar-outline" size={20} color={color.gray14} />
             <View style={styles.infoContent}>
               <Text style={styles.infoText}>{formatDate(event.date)}</Text>
               <Text style={styles.infoSubtext}>{formatTime(event.date)}</Text>
@@ -176,7 +176,7 @@ export default function EventDetails({ route, navigation }: any) {
         {/* Location */}
         <View style={styles.infoSection}>
           <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={20} color={color.gray400} />
+            <Ionicons name="location-outline" size={20} color={color.gray14} />
             <View style={styles.infoContent}>
               <Text style={styles.infoText}>{event.location}</Text>
               <TouchableOpacity onPress={handleGetDirections}>
@@ -221,7 +221,7 @@ export default function EventDetails({ route, navigation }: any) {
           <View style={styles.attendeesHeader}>
             <Text style={styles.sectionTitle}>{"Who's going"}</Text>
             <View style={styles.attendeesCount}>
-              <Feather name="users" size={16} color={color.gray300} />
+              <Feather name="users" size={16} color={color.gray55} />
               <Text style={styles.attendeesCountText}>
                 {event.totalAttendees} attending
               </Text>
@@ -389,12 +389,12 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     fontFamily: font.medium,
-    color: color.gray300,
+    color: color.gray55,
   },
   infoSubtext: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     marginTop: 2,
   },
   directionsText: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   organizerLabel: {
     fontSize: 12,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     marginBottom: 2,
   },
   organizerNameRow: {
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     lineHeight: 20,
   },
   attendeesHeader: {
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   attendeesCountText: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
     marginLeft: 4,
   },
   attendeesRow: {

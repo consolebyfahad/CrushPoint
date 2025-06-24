@@ -28,7 +28,7 @@ export default function CustomSearchBar({
       <Feather
         name="search"
         size={20}
-        color={color.gray300}
+        color={color.gray55}
         style={styles.searchIcon}
       />
       <TextInput
@@ -36,14 +36,14 @@ export default function CustomSearchBar({
         value={searchText}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={color.gray300}
+        placeholderTextColor={color.gray55}
       />
       {searchText.length > 0 && (
         <TouchableOpacity
           onPress={() => onChangeText("")}
           style={styles.clearButton}
         >
-          <Ionicons name="close-circle" size={20} color={color.gray400} />
+          <Ionicons name="close-circle" size={20} color={color.gray14} />
         </TouchableOpacity>
       )}
     </View>
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: color.gray500,
+    backgroundColor: color.gray94,
     borderRadius: 14,
     paddingHorizontal: 16,
     marginHorizontal: 16,

@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   notificationDescription: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     lineHeight: 18,
   },
   switch: {

@@ -63,7 +63,7 @@ export default function Events({ navigation }: any) {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconContainer}>
-        <Ionicons name="calendar-outline" size={64} color={color.gray400} />
+        <Ionicons name="calendar-outline" size={64} color={color.gray14} />
       </View>
       <Text style={styles.emptyTitle}>No events found</Text>
       <Text style={styles.emptyText}>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray400,
+    color: color.gray14,
     textAlign: "center",
     lineHeight: 24,
   },

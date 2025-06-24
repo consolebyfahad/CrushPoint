@@ -227,11 +227,7 @@ export default function Filters({
                   <Text style={styles.expandableValue}>{option.value}</Text>
                 )}
               </View>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={color.gray100}
-              />
+              <Ionicons name="chevron-forward" size={20} color={color.gray87} />
             </TouchableOpacity>
           ))}
         </View>
@@ -273,7 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: color.gray500,
+    borderBottomColor: color.gray94,
   },
   title: {
     fontSize: 20,
@@ -372,7 +368,7 @@ const styles = StyleSheet.create({
   sliderLabel: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
   },
   expandableItem: {
     flexDirection: "row",

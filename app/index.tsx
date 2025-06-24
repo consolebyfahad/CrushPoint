@@ -36,7 +36,7 @@ export default function Splash() {
         easing: Easing.out(Easing.ease),
       });
     }, 400);
-  }, []); // Removed dependencies to prevent infinite re-renders
+  }, []);
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: containerScale.value }],
@@ -53,7 +53,7 @@ export default function Splash() {
 
   useEffect(() => {
     setTimeout(() => {
-      router.replace("/auth/private_spot");
+      router.replace("/onboarding");
     }, 2000);
   }, []);
 

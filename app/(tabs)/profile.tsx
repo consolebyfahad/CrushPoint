@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     // borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: color.gray500,
+    backgroundColor: color.gray94,
   },
   infoContainer: {
     gap: 16,
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray300,
+    color: color.gray55,
   },
   infoValue: {
     fontSize: 16,
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
   additionalGoals: {
     fontSize: 16,
     fontFamily: font.medium,
-    color: color.gray400,
+    color: color.gray14,
   },
   interestsContainer: {
     flexDirection: "row",

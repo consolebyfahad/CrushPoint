@@ -63,7 +63,7 @@ export default function Height({
               keyboardType="numeric"
               maxLength={3}
               placeholder="150"
-              placeholderTextColor={color.gray200}
+              placeholderTextColor={color.gray69}
             />
           </View>
         </View>
@@ -79,7 +79,7 @@ export default function Height({
               keyboardType="numeric"
               maxLength={3}
               placeholder="180"
-              placeholderTextColor={color.gray200}
+              placeholderTextColor={color.gray69}
             />
           </View>
         </View>
