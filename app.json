@@ -14,8 +14,10 @@
       "config": {
         "googleMapsApiKey": "AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y"
       },
-      "NSCameraUsageDescription": "This app uses the camera for face verification.",
-      "NSFaceIDUsageDescription": "This app uses Face ID for secure authentication."
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera for scanning and face detection.",
+        "NSFaceIDUsageDescription": "This app uses Face ID for secure login."
+      }
     },
     "android": {
       "adaptiveIcon": {

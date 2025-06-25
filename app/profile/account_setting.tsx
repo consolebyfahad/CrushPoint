@@ -71,7 +71,7 @@ export default function AccountSettings({ route, navigation }: any) {
   };
 
   const handleDatePress = () => {
-    setShowDatePicker(true);
+    setShowDatePicker(!showDatePicker);
   };
 
   const onDateChange = (event: any, selectedDate: any) => {
@@ -118,7 +118,10 @@ export default function AccountSettings({ route, navigation }: any) {
             activeOpacity={0.7}
           >
             <TextInput
-              style={styles.dateTextInput}
+              style={[
+                styles.dateTextInput,
+                Platform.OS === "ios" && { paddingVertical: 16 },
+              ]}
               value={accountData.dateOfBirth}
               placeholder="mm/dd/yyyy"
               placeholderTextColor={color.gray14}
@@ -132,6 +135,7 @@ export default function AccountSettings({ route, navigation }: any) {
               value={date}
               mode="date"
               is24Hour={true}
+              themeVariant="light"
               display={Platform.OS === "ios" ? "spinner" : "default"}
               onChange={onDateChange}
               maximumDate={new Date()}
