@@ -10,7 +10,7 @@
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fahadurrehman.CrushPoint",
+      "bundleIdentifier": "com.dating.CrushPoint",
       "config": {
         "googleMapsApiKey": "AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y"
       },
@@ -35,7 +35,7 @@
         "android.permission.USE_BIOMETRIC"
       ],
       "edgeToEdgeEnabled": true,
-      "package": "com.fahadurrehman.CrushPoint"
+      "package": "com.dating.CrushPoint"
     },
     "web": {
       "bundler": "metro",
