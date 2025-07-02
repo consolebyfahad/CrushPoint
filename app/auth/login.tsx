@@ -1,6 +1,8 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import { formatPhoneNumber } from "@/utils/formatPhone";
 import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -18,7 +20,7 @@ export default function Login() {
   const params = useLocalSearchParams();
 
   const [activeTab, setActiveTab] = useState("phone");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("+1");
   const [email, setEmail] = useState("");
 
   useEffect(() => {
@@ -29,30 +31,36 @@ export default function Login() {
     }
   }, [params.tab]);
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    }
-  };
-  console.log(activeTab);
-  const handleContinue = () => {
-    if (activeTab === "phone") {
-      router.push("/auth/verify");
-      setPhoneNumber("");
+  const handleContinue = async () => {
+    const formData = new FormData();
+    formData.append("type", "register");
+    formData.append("reg_type", activeTab);
 
-      console.log("Continue with phone:", phoneNumber);
-      // router.push("/auth/verify-phone");
+    if (activeTab === "phone") {
+      const cleanedPhone = phoneNumber.replace(/\s/g, "");
+      formData.append("phone", cleanedPhone);
     } else {
+      formData.append("email", email);
+    }
+
+    try {
+      const response = await apiCall(formData);
+      console.log("🚀 API Success:", response);
+
       router.push("/auth/verify");
+
+      setPhoneNumber("+");
       setEmail("");
-      console.log("Continue with email:", email);
-      // router.push("/auth/verify-email");
+    } catch (error) {
+      console.error("❌ API Error:", error);
     }
   };
 
   const isFormValid = () => {
     if (activeTab === "phone") {
-      return phoneNumber.length >= 10;
+      // Minimum 10 digits after +
+      const digits = phoneNumber.replace(/\D/g, "");
+      return phoneNumber.startsWith("+") && digits.length >= 11;
     } else {
       return email.includes("@") && email.includes(".");
     }
@@ -117,11 +125,22 @@ export default function Login() {
                 Platform.OS === "ios" && { paddingVertical: 16 },
               ]}
               placeholder={
-                activeTab === "phone" ? "+1 (555) 000-0000" : "you@example.com"
+                activeTab === "phone" ? "+92 300 1234567" : "you@example.com"
               }
               placeholderTextColor={color.gray69}
               value={activeTab === "phone" ? phoneNumber : email}
-              onChangeText={activeTab === "phone" ? setPhoneNumber : setEmail}
+              onChangeText={(text) => {
+                if (activeTab === "phone") {
+                  const raw = text.replace(/\s/g, ""); // remove all spaces
+                  const withPlus = raw.startsWith("+")
+                    ? raw
+                    : "+" + raw.replace(/^\+?/, "");
+                  const formatted = formatPhoneNumber(withPlus);
+                  setPhoneNumber(formatted);
+                } else {
+                  setEmail(text);
+                }
+              }}
               keyboardType={
                 activeTab === "phone" ? "phone-pad" : "email-address"
               }
@@ -230,7 +249,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.regular,
     color: color.black,
-
-    // paddingVertical: 16,
   },
 });

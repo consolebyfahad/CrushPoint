@@ -1,22 +1,35 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useToast } from "@/components/toast_provider";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Animated,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Verify() {
+  const params = useLocalSearchParams();
+  const { user } = useAppContext();
+  const { showToast } = useToast();
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [resendCountdown, setResendCountdown] = useState(59);
   const [canResend, setCanResend] = useState(false);
+  const contactType = params.type || "phone";
+  const contactInfo = params.contact || "+155 (500) 000-00";
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Create refs for each input
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const animatedValues = useRef(code.map(() => new Animated.Value(1))).current;
-
-  // Phone number from previous screen (in real app, get from route params)
-  const phoneNumber = "+155 (500) 000-00";
 
   useEffect(() => {
     // Auto-focus first input when component mounts
@@ -88,86 +101,164 @@ export default function Verify() {
     }
   };
 
-  const handleVerifyCode = (fullCode: string) => {
-    console.log("Verifying code:", fullCode);
-    router.push("/auth/gender");
-    setCode(["", "", "", "", "", ""]);
-    // router.push("/auth/success");
+  const handleVerifyCode = async (fullCode: string) => {
+    if (!user?.user_id) {
+      showToast("User session expired. Please login again.", "error");
+      router.push("/welcome");
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      console.log("Verifying code:", fullCode);
+
+      const formData = new FormData();
+      formData.append("type", "verify_otp");
+      formData.append("user_id", user.user_id);
+      formData.append("code", fullCode);
+
+      const response = await apiCall(formData);
+
+      if (response.success) {
+        console.log("Verification response:", response);
+        showToast("Verification successful!", "success");
+
+        // Clear the code
+        setCode(["", "", "", "", "", ""]);
+
+        // Navigate to next screen
+        router.push("/auth/gender");
+      } else {
+        showToast(response.message || "Invalid verification code", "error");
+        console.error("Verification Error:", response.message);
+
+        // Clear the code on error so user can try again
+        setCode(["", "", "", "", "", ""]);
+
+        // Focus back to first input
+        setTimeout(() => {
+          inputRefs.current[0]?.focus();
+        }, 100);
+      }
+    } catch (error) {
+      showToast("Something went wrong. Please try again.", "error");
+      console.error("Verification Error:", error);
+
+      // Clear the code on error
+      setCode(["", "", "", "", "", ""]);
+
+      // Focus back to first input
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
-  const handleResendCode = () => {
-    if (canResend) {
+  const handleResendCode = async () => {
+    if (!canResend || !user?.user_id) return;
+
+    try {
       console.log("Resending code...");
-      setResendCountdown(50);
-      setCanResend(false);
 
-      setCode(["", "", "", "", "", ""]);
-      inputRefs.current[0]?.focus();
+      const formData = new FormData();
+      formData.append("type", "resend_otp");
+      formData.append("user_id", user.user_id);
+      // formData.append("contact_type", contactType);
 
-      const timer = setInterval(() => {
-        setResendCountdown((prev) => {
-          if (prev <= 1) {
-            setCanResend(true);
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      const response = await apiCall(formData);
+
+      if (response.success) {
+        showToast("Verification code sent!", "success");
+
+        // Reset countdown and state
+        setResendCountdown(59);
+        setCanResend(false);
+        setCode(["", "", "", "", "", ""]);
+        inputRefs.current[0]?.focus();
+
+        // Start new countdown timer
+        const timer = setInterval(() => {
+          setResendCountdown((prev) => {
+            if (prev <= 1) {
+              setCanResend(true);
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        showToast(response.message || "Failed to resend code", "error");
+      }
+    } catch (error) {
+      showToast("Failed to resend code. Please try again.", "error");
+      console.error("Resend Error:", error);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Header />
-      <View style={styles.content}>
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>Verify your phone</Text>
-          <Text style={styles.subtitle}>
-            Enter the 6-digit code we sent to {phoneNumber}
-          </Text>
+      {isVerifying ? (
+        <View>
+          <ActivityIndicator size="large" color={color.primary} />
         </View>
+      ) : (
+        <View style={styles.content}>
+          <View style={styles.titleSection}>
+            <Text style={styles.title}>
+              Verify your {contactType === "phone" ? "phone" : "email"}
+            </Text>
+            <Text style={styles.subtitle}>
+              Enter the 6-digit code we sent to {contactInfo}
+            </Text>
+          </View>
 
-        {/* PIN Input Boxes */}
-        <View style={styles.pinContainer}>
-          {code.map((digit, index) => (
-            <Animated.View
-              key={index}
-              style={[
-                styles.pinBoxContainer,
-                {
-                  transform: [{ scale: animatedValues[index] }],
-                },
-              ]}
-            >
-              <TextInput
-                ref={(ref) => {
-                  inputRefs.current[index] = ref;
-                }}
-                style={[styles.pinBox, digit ? styles.pinBoxFilled : null]}
-                value={digit}
-                onChangeText={(text) => handleCodeChange(text, index)}
-                onKeyPress={(event) => handleKeyPress(event, index)}
-                keyboardType="numeric"
-                maxLength={1}
-                selectTextOnFocus
-                textAlign="center"
-                editable={true}
-                caretHidden={false}
-              />
-            </Animated.View>
-          ))}
+          {/* PIN Input Boxes */}
+          <View style={styles.pinContainer}>
+            {code.map((digit, index) => (
+              <Animated.View
+                key={index}
+                style={[
+                  styles.pinBoxContainer,
+                  {
+                    transform: [{ scale: animatedValues[index] }],
+                  },
+                ]}
+              >
+                <TextInput
+                  ref={(ref) => {
+                    inputRefs.current[index] = ref;
+                  }}
+                  style={[styles.pinBox, digit ? styles.pinBoxFilled : null]}
+                  value={digit}
+                  onChangeText={(text) => handleCodeChange(text, index)}
+                  onKeyPress={(event) => handleKeyPress(event, index)}
+                  keyboardType="numeric"
+                  maxLength={1}
+                  selectTextOnFocus
+                  textAlign="center"
+                  editable={!isVerifying}
+                  caretHidden={false}
+                />
+              </Animated.View>
+            ))}
+          </View>
+
+          {/* Resend Code Button */}
+          <CustomButton
+            title={
+              canResend ? "Resend Code" : `Resend code in ${resendCountdown}s`
+            }
+            onPress={handleResendCode}
+            isDisabled={!canResend || isVerifying}
+            isLoading={false}
+          />
         </View>
-
-        {/* Resend Code Button */}
-        <CustomButton
-          title={
-            canResend ? "Resend Code" : `Resend code in ${resendCountdown}s`
-          }
-          onPress={handleResendCode}
-          isDisabled={!canResend}
-        />
-      </View>
+      )}
     </SafeAreaView>
   );
 }

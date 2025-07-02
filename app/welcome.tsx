@@ -1,8 +1,11 @@
 import CustomButton from "@/components/custom_button";
+import { useToast } from "@/components/toast_provider";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font, image } from "@/utils/constants";
 import { AppleIcon, EmailIcon, GoogleIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -70,12 +73,83 @@ const AnimatedLogo = () => {
 };
 
 export default function Welcome() {
-  const handleAppleSignUp = () => {
-    console.log("Continue with Apple");
+  const { setIsLoggedIn, setUser } = useAppContext();
+  const { showToast } = useToast();
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleAppleSignUp = async () => {
+    setAppleLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "social_login");
+      formData.append("token", "1");
+
+      const response = await apiCall(formData);
+
+      if (response.success) {
+        console.log("response", response);
+
+        const userData = {
+          user_id: response.user_id,
+          email: response.email,
+          name: response.name,
+          image: response.image,
+          created: response.created,
+        };
+
+        setUser(userData);
+        setIsLoggedIn(true);
+
+        showToast("Login successful!", "success");
+
+        router.push("/auth/verify");
+      } else {
+        showToast(response.message || "Login failed", "error");
+        console.error("Login Error:", response.message);
+      }
+    } catch (error) {
+      showToast("Something went wrong. Please try again.", "error");
+      console.error("Login Error:", error);
+    } finally {
+      setAppleLoading(false);
+    }
   };
 
-  const handleGoogleSignUp = () => {
-    console.log("Continue with Google");
+  const handleGoogleSignUp = async () => {
+    setGoogleLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "social_login");
+      formData.append("token", "2");
+
+      const response = await apiCall(formData);
+
+      if (response.success) {
+        console.log("response", response);
+
+        const userData = {
+          user_id: response.user_id,
+          email: response.email,
+          name: response.name,
+          image: response.image,
+          created: response.created,
+        };
+
+        setUser(userData);
+        setIsLoggedIn(true);
+        showToast("Login successful!", "success");
+        router.push("/auth/verify");
+      } else {
+        showToast(response.message || "Login failed", "error");
+        console.error("Login Error:", response.message);
+      }
+    } catch (error) {
+      showToast("Something went wrong. Please try again.", "error");
+      console.error("Login Error:", error);
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handlePhoneSignUp = () => {
@@ -119,6 +193,8 @@ export default function Welcome() {
               onPress={handleAppleSignUp}
               icon={<AppleIcon />}
               variant="secondary"
+              isLoading={appleLoading}
+              isDisabled={googleLoading}
             />
 
             {/* Google Button */}
@@ -127,6 +203,8 @@ export default function Welcome() {
               onPress={handleGoogleSignUp}
               icon={<GoogleIcon />}
               variant="secondary"
+              isLoading={googleLoading}
+              isDisabled={appleLoading}
             />
 
             {/* Phone Button */}
