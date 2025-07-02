@@ -56,7 +56,7 @@ export default function Splash() {
   useEffect(() => {
     setTimeout(() => {
       if (isLoggedIn) {
-        router.replace("/auth/gender");
+        router.replace("/(tabs)");
       } else {
         router.replace("/onboarding");
       }

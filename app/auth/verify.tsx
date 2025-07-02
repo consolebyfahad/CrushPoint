@@ -195,9 +195,7 @@ export default function Verify() {
       ) : (
         <View style={styles.content}>
           <View style={styles.titleSection}>
-            <Text style={styles.title}>
-              Verify your {contactType === "phone" ? "phone" : "email"}
-            </Text>
+            <Text style={styles.title}>Verify your {contactType}</Text>
             <Text style={styles.subtitle}>
               Enter the 6-digit code we sent to {contactInfo}
             </Text>
@@ -253,7 +251,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    padding: 16,
   },
   loadingContainer: {
     flex: 1,
@@ -261,6 +258,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    padding: 16,
     paddingTop: 40,
   },
   titleSection: {

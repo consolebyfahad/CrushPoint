@@ -20,7 +20,9 @@
         "NSFaceIDUsageDescription": "This app uses Face ID for secure login.",
         "UIBackgroundModes": ["remote-notification"]
       },
-
+      "entitlements": {
+        "aps-environment": "production"
+      },
       "appleTeamId": "K9443K94RA"
     },
     "android": {
@@ -52,6 +54,8 @@
     },
     "plugins": [
       "expo-router",
+      "expo-web-browser",
+      "@react-native-firebase/app",
       [
         "expo-splash-screen",
         {
@@ -73,7 +77,14 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera for face verification."
         }
       ],
-      "expo-web-browser"
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

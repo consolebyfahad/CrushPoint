@@ -49,9 +49,8 @@ const About = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header />
       <View style={styles.content}>
-        <Header />
-
         <View style={styles.titleSection}>
           <Text style={styles.title}>Tell us about you</Text>
           <Text style={styles.disclaimerText}>

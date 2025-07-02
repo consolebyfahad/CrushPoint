@@ -183,10 +183,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-    padding: 16,
   },
   content: {
     flex: 1,
+    padding: 16,
     paddingTop: 40,
   },
   titleSection: {

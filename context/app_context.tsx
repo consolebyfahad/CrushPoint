@@ -39,6 +39,7 @@ type AppContextType = {
   addUserImage: (fileName: string) => void;
   removeUserImage: (fileName: string) => void;
   clearUserImages: () => void;
+  logout: () => Promise<boolean>;
 };
 
 const defaultUserData: UserData = {
@@ -120,6 +121,22 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setUserImages([]);
   };
 
+  const logout = async () => {
+    try {
+      setIsLoggedIn(false);
+      setUser(null);
+      setUserData(defaultUserData);
+      setUserImages([]);
+
+      await AsyncStorage.removeItem(STORAGE_KEY);
+
+      return true;
+    } catch (error) {
+      console.error("Logout error:", error);
+      return false;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -134,6 +151,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         addUserImage,
         removeUserImage,
         clearUserImages,
+        logout,
       }}
     >
       {children}

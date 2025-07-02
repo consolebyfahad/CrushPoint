@@ -5,15 +5,104 @@ import { color, font } from "@/utils/constants";
 import { FemaleIcon, MaleIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 export default function Gender() {
   const { updateUserData, user } = useAppContext();
   console.log("isLoggedIn", user);
+
   const [selectedGender, setSelectedGender] = useState("male");
 
+  // Animated values for both options
+  const maleScaleAnim = useRef(new Animated.Value(1)).current;
+  const femaleScaleAnim = useRef(new Animated.Value(1)).current;
+  const maleOpacityAnim = useRef(new Animated.Value(1)).current;
+  const femaleOpacityAnim = useRef(new Animated.Value(0.7)).current;
+
+  // Animate selection changes
+  useEffect(() => {
+    if (selectedGender === "male") {
+      // Animate male to selected state
+      Animated.parallel([
+        Animated.spring(maleScaleAnim, {
+          toValue: 1.02,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 10,
+        }),
+        Animated.timing(maleOpacityAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        // Animate female to unselected state
+        Animated.spring(femaleScaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 10,
+        }),
+        Animated.timing(femaleOpacityAnim, {
+          toValue: 0.7,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Animate female to selected state
+      Animated.parallel([
+        Animated.spring(femaleScaleAnim, {
+          toValue: 1.02,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 10,
+        }),
+        Animated.timing(femaleOpacityAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        // Animate male to unselected state
+        Animated.spring(maleScaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 10,
+        }),
+        Animated.timing(maleOpacityAnim, {
+          toValue: 0.7,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [selectedGender]);
+
   const handleGenderSelect = (gender: any) => {
+    // Add a quick press animation
+    const scaleAnim = gender === "male" ? maleScaleAnim : femaleScaleAnim;
+
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: gender === selectedGender ? 1.02 : 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     setSelectedGender(gender);
   };
 
@@ -24,8 +113,8 @@ export default function Gender() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header />
       <View style={styles.content}>
-        <Header />
         <View style={styles.titleSection}>
           <Text style={styles.title}>{"What's your gender?"}</Text>
           <Text style={styles.subtitle}>
@@ -36,49 +125,63 @@ export default function Gender() {
 
         <View style={styles.optionsContainer}>
           <TouchableOpacity
-            style={[
-              styles.genderOption,
-              selectedGender === "male"
-                ? styles.selectedOption
-                : styles.unselectedOption,
-            ]}
             onPress={() => handleGenderSelect("male")}
-            activeOpacity={0.8}
+            activeOpacity={1}
           >
-            <MaleIcon />
-            <Text
+            <Animated.View
               style={[
-                styles.genderText,
+                styles.genderOption,
                 selectedGender === "male"
-                  ? styles.selectedText
-                  : styles.unselectedText,
+                  ? styles.selectedOption
+                  : styles.unselectedOption,
+                {
+                  transform: [{ scale: maleScaleAnim }],
+                  opacity: maleOpacityAnim,
+                },
               ]}
             >
-              Male
-            </Text>
+              <MaleIcon />
+              <Text
+                style={[
+                  styles.genderText,
+                  selectedGender === "male"
+                    ? styles.selectedText
+                    : styles.unselectedText,
+                ]}
+              >
+                Male
+              </Text>
+            </Animated.View>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.genderOption,
-              selectedGender === "female"
-                ? styles.selectedOption
-                : styles.unselectedOption,
-            ]}
             onPress={() => handleGenderSelect("female")}
-            activeOpacity={0.8}
+            activeOpacity={1}
           >
-            <FemaleIcon />
-            <Text
+            <Animated.View
               style={[
-                styles.genderText,
+                styles.genderOption,
                 selectedGender === "female"
-                  ? styles.selectedText
-                  : styles.unselectedText,
+                  ? styles.selectedOption
+                  : styles.unselectedOption,
+                {
+                  transform: [{ scale: femaleScaleAnim }],
+                  opacity: femaleOpacityAnim,
+                },
               ]}
             >
-              Female
-            </Text>
+              <FemaleIcon />
+              <Text
+                style={[
+                  styles.genderText,
+                  selectedGender === "female"
+                    ? styles.selectedText
+                    : styles.unselectedText,
+                ]}
+              >
+                Female
+              </Text>
+            </Animated.View>
           </TouchableOpacity>
         </View>
       </View>
