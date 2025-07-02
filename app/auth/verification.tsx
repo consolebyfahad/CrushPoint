@@ -1,5 +1,8 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useToast } from "@/components/toast_provider";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -18,12 +21,97 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
   onBack,
   onStartScan,
 }) => {
+  const { userData, user, userImages } = useAppContext();
+  const { showToast } = useToast();
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const cameraRef = useRef<CameraView>(null);
+  console.log("userData", userData);
+  const submitAllData = async () => {
+    if (!user?.user_id) {
+      showToast("User session expired. Please login again.", "error");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const submissionData = new FormData();
+      submissionData.append("type", "update_data");
+      submissionData.append("id", user.user_id);
+      submissionData.append("table_name", "users");
+      submissionData.append("gender", userData.gender);
+      submissionData.append("gender_interest", userData.gender_interest);
+      submissionData.append("interests", JSON.stringify(userData.interests));
+      submissionData.append("name", userData.name);
+      submissionData.append("dob", userData.dob);
+      submissionData.append("images", JSON.stringify(userImages));
+      submissionData.append(
+        "looking_for",
+        JSON.stringify(userData.looking_for)
+      );
+      submissionData.append("radius", userData.radius.toString());
+      // submissionData.append("latitude", userData.latitude.toString());
+      // submissionData.append("longitude", userData.longitude.toString());
+
+      // Optional fields - only add if they have values
+      if (userData.height) submissionData.append("height", userData.height);
+      if (userData.nationality)
+        submissionData.append("nationality", userData.nationality);
+      if (userData.religion)
+        submissionData.append("religion", userData.religion);
+      if (userData.zodiac) submissionData.append("zodiac", userData.zodiac);
+
+      console.log("Submitting profile data:", submissionData);
+
+      const response = await apiCall(submissionData);
+
+      if (response.result) {
+        showToast("Profile created successfully!", "success");
+        router.push("/(tabs)");
+      } else {
+        showToast(response.message || "Failed to create profile", "error");
+      }
+    } catch (error) {
+      showToast("Something went wrong. Please try again.", "error");
+      console.error("Submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const validateData = () => {
+    const requiredFields = {
+      gender: userData.gender,
+      gender_interest: userData.gender_interest,
+      name: userData.name,
+      dob: userData.dob,
+      interests: userData.interests.length > 0,
+      looking_for: userData.looking_for.length > 0,
+      images: userImages.length >= 2,
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([key, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      showToast(
+        `Missing required fields: ${missingFields.join(", ")}`,
+        "error"
+      );
+      return false;
+    }
+
+    return true;
+  };
 
   const handleStartScan = async () => {
-    if (isScanning) return;
+    if (isScanning || isSubmitting) return;
+
+    if (!validateData()) {
+      return;
+    }
 
     setIsScanning(true);
 
@@ -35,19 +123,15 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
           exif: false,
         });
 
-        console.log("Photo captured:", {
-          uri: photo.uri,
-          width: photo.width,
-          height: photo.height,
-          base64: photo.base64 ? "Base64 data available" : "No base64",
-        });
-        setTimeout(() => {
-          router.push("/(tabs)");
-          onStartScan?.();
-        }, 1000);
+        console.log("Photo captured for verification");
+
+        await submitAllData();
+
+        onStartScan?.();
       }
     } catch (error) {
       console.error("Error taking picture:", error);
+      showToast("Failed to capture photo. Please try again.", "error");
     } finally {
       setIsScanning(false);
     }
@@ -100,9 +184,16 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
       {/* Start Scan Button */}
       <View style={styles.buttonContainer}>
         <CustomButton
-          title={isScanning ? "Scanning..." : "Start Scan"}
+          title={
+            isSubmitting
+              ? "Creating Profile..."
+              : isScanning
+              ? "Scanning..."
+              : "Start Scan"
+          }
           onPress={handleStartScan}
-          isDisabled={isScanning}
+          isDisabled={isScanning || isSubmitting}
+          isLoading={isScanning || isSubmitting}
           icon={<Feather name="camera" size={20} color="white" />}
         />
       </View>

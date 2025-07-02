@@ -11,12 +11,17 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dating.CrushPoint",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "config": {
         "googleMapsApiKey": "AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y"
       },
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera for scanning and face detection.",
-        "NSFaceIDUsageDescription": "This app uses Face ID for secure login."
+        "NSFaceIDUsageDescription": "This app uses Face ID for secure login.",
+        "UIBackgroundModes": ["remote-notification"]
+      },
+      "entitlements": {
+        "aps-environment": "production"
       }
     },
     "android": {
@@ -35,7 +40,8 @@
         "android.permission.USE_BIOMETRIC"
       ],
       "edgeToEdgeEnabled": true,
-      "package": "com.dating.CrushPoint"
+      "package": "com.dating.CrushPoint",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -66,6 +72,7 @@
         }
       ],
       "react-native-vision-camera",
+      "@react-native-firebase/app",
       "expo-web-browser"
     ],
     "experiments": {

@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import Octicons from "@expo/vector-icons/Octicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -16,14 +17,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const About = () => {
+  const { updateUserData } = useAppContext();
   const [name, setName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleContinue = () => {
+    updateUserData({ name: name, dob: dateOfBirth });
     router.push("/auth/looking_for");
-    console.log("Continue pressed", { name, dateOfBirth });
   };
 
   const handleDatePress = () => {

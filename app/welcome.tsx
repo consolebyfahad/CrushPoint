@@ -101,8 +101,6 @@ export default function Welcome() {
         setUser(userData);
         setIsLoggedIn(true);
 
-        showToast("Login successful!", "success");
-
         router.push("/auth/verify");
       } else {
         showToast(response.message || "Login failed", "error");
@@ -138,7 +136,6 @@ export default function Welcome() {
 
         setUser(userData);
         setIsLoggedIn(true);
-        showToast("Login successful!", "success");
         router.push("/auth/verify");
       } else {
         showToast(response.message || "Login failed", "error");
@@ -153,7 +150,6 @@ export default function Welcome() {
   };
 
   const handlePhoneSignUp = () => {
-    console.log("Continue with Phone");
     router.push({
       pathname: "/auth/login",
       params: { tab: "phone" },
@@ -161,7 +157,6 @@ export default function Welcome() {
   };
 
   const handleEmailSignUp = () => {
-    console.log("Continue with Email");
     router.push({
       pathname: "/auth/login",
       params: { tab: "email" },
@@ -169,7 +164,6 @@ export default function Welcome() {
   };
 
   const handleLogin = () => {
-    console.log("Navigate to Login");
     router.push("/auth/login?tab=phone");
   };
 
@@ -213,6 +207,7 @@ export default function Welcome() {
               onPress={handlePhoneSignUp}
               icon={<PhoneIcon />}
               variant="secondary"
+              isDisabled={appleLoading || googleLoading}
             />
 
             {/* Email Button */}
@@ -221,6 +216,7 @@ export default function Welcome() {
               onPress={handleEmailSignUp}
               icon={<EmailIcon />}
               variant="secondary"
+              isDisabled={appleLoading || googleLoading}
             />
           </View>
 

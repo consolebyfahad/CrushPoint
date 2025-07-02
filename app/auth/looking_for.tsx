@@ -1,13 +1,16 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 export default function LookingFor() {
-  const [selectedOptions, setSelectedOptions] = useState([]);
+  const { updateUserData } = useAppContext();
+  const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
 
   const options = [
     { id: "serious", emoji: "🩵", label: "Serious relationship" },
@@ -18,9 +21,9 @@ export default function LookingFor() {
   ];
 
   const handleOptionSelect = (optionId: any) => {
-    setSelectedOptions((prev) => {
+    setSelectedOptions((prev: any) => {
       if (prev.includes(optionId)) {
-        return prev.filter((id) => id !== optionId);
+        return prev.filter((id: any) => id !== optionId);
       } else {
         return [...prev, optionId];
       }
@@ -28,7 +31,7 @@ export default function LookingFor() {
   };
 
   const handleContinue = () => {
-    console.log("Looking for:", selectedOptions);
+    updateUserData({ looking_for: selectedOptions });
     router.push("/auth/interests");
   };
 

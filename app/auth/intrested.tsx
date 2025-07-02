@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { FemaleIcon, MaleIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -9,6 +10,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interested() {
+  const { updateUserData } = useAppContext();
   const [selectedInterest, setSelectedInterest] = useState("women");
 
   const handleInterestSelect = (interest: any) => {
@@ -16,7 +18,7 @@ export default function Interested() {
   };
 
   const handleContinue = () => {
-    console.log("Interested in:", selectedInterest);
+    updateUserData({ gender_interest: selectedInterest });
     router.push("/auth/about");
   };
 

@@ -1,5 +1,7 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -7,6 +9,7 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   ScrollView,
@@ -17,8 +20,19 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+type UploadedPhoto = {
+  id: string;
+  uri: string;
+  width: number;
+  height: number;
+  fileName?: string;
+  serverUrl?: string;
+  isUploading?: boolean;
+};
+
 export default function AddPhotos() {
-  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const { user, addUserImage, removeUserImage } = useAppContext();
+  const [selectedPhotos, setSelectedPhotos] = useState<UploadedPhoto[]>([]);
   const maxPhotos = 6;
   const minPhotos = 2;
 
@@ -33,6 +47,61 @@ export default function AddPhotos() {
       return false;
     }
     return true;
+  };
+
+  const uploadImageToServer = async (imageUri: string, photoId: string) => {
+    if (!user?.user_id) {
+      Alert.alert("Error", "User ID not found. Please login again.");
+      return null;
+    }
+
+    try {
+      // Mark photo as uploading
+      setSelectedPhotos((prev) =>
+        prev.map((photo) =>
+          photo.id === photoId ? { ...photo, isUploading: true } : photo
+        )
+      );
+
+      const formData = new FormData();
+      formData.append("type", "upload_data");
+      formData.append("user_id", user.user_id);
+      formData.append("file", {
+        uri: imageUri,
+        type: "image/jpeg",
+        name: "image.jpg",
+      } as any);
+
+      const response = await apiCall(formData);
+
+      if (response.result && response.file_name) {
+        addUserImage(response.file_name);
+
+        setSelectedPhotos((prev) =>
+          prev.map((photo) =>
+            photo.id === photoId
+              ? {
+                  ...photo,
+                  fileName: response.file_name,
+                  serverUrl: response.url,
+                  isUploading: false,
+                }
+              : photo
+          )
+        );
+
+        return response;
+      } else {
+        throw new Error(response.message || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+
+      setSelectedPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
+
+      Alert.alert("Upload Error", "Failed to upload image. Please try again.");
+      return null;
+    }
   };
 
   const pickImage = async () => {
@@ -50,23 +119,29 @@ export default function AddPhotos() {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
-        selectionLimit: maxPhotos - selectedPhotos.length,
+        allowsMultipleSelection: false,
         quality: 0.8,
         aspect: [1, 1],
       });
 
       if (!result.canceled && result.assets) {
-        const newPhotos = result.assets.map((asset) => ({
-          id: Date.now() + Math.random(),
+        const newPhotos: UploadedPhoto[] = result.assets.map((asset) => ({
+          id: Date.now() + Math.random() + "",
           uri: asset.uri,
           width: asset.width,
           height: asset.height,
+          isUploading: false,
         }));
 
+        // Add photos to state first
         setSelectedPhotos((prev) =>
           [...prev, ...newPhotos].slice(0, maxPhotos)
         );
+
+        // Upload each photo to server
+        newPhotos.forEach(async (photo) => {
+          await uploadImageToServer(photo.uri, photo.id);
+        });
       }
     } catch (error) {
       Alert.alert("Error", "Failed to pick images. Please try again.");
@@ -74,24 +149,65 @@ export default function AddPhotos() {
     }
   };
 
-  const removePhoto = (photoId: any) => {
+  const removePhoto = (photoId: string) => {
+    const photoToRemove = selectedPhotos.find((photo) => photo.id === photoId);
+
+    // Remove from server/context if it was uploaded
+    if (photoToRemove?.fileName) {
+      removeUserImage(photoToRemove.fileName);
+    }
+
+    // Remove from local state
     setSelectedPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
   };
 
   const handleContinue = () => {
+    const uploadedPhotos = selectedPhotos.filter(
+      (photo) => photo.fileName && !photo.isUploading
+    );
+
+    if (uploadedPhotos.length < minPhotos) {
+      Alert.alert(
+        "Not enough photos",
+        `Please upload at least ${minPhotos} photos to continue.`
+      );
+      return;
+    }
+
     console.log("Selected photos:", selectedPhotos);
-    router.push("/auth/verification"); // Update with your next route
+    console.log(
+      "Uploaded file names:",
+      uploadedPhotos.map((p) => p.fileName)
+    );
+    router.push("/auth/verification");
   };
 
-  const isButtonDisabled = selectedPhotos.length < minPhotos;
+  const isButtonDisabled =
+    selectedPhotos.filter((photo) => photo.fileName && !photo.isUploading)
+      .length < minPhotos;
 
-  const renderPhotoSlot = (index: any) => {
+  const renderPhotoSlot = (index: number) => {
     const photo = selectedPhotos[index];
 
     if (photo) {
       return (
         <View key={index} style={styles.photoSlot}>
           <Image source={{ uri: photo.uri }} style={styles.uploadedPhoto} />
+
+          {/* Loading indicator for uploading photos */}
+          {photo.isUploading && (
+            <View style={styles.uploadingOverlay}>
+              <ActivityIndicator size="small" color={color.white} />
+            </View>
+          )}
+
+          {/* Success indicator for uploaded photos */}
+          {photo.fileName && !photo.isUploading && (
+            <View style={styles.successIndicator}>
+              <Feather name="check" size={16} color={color.white} />
+            </View>
+          )}
+
           <TouchableOpacity
             style={styles.removeButton}
             onPress={() => removePhoto(photo.id)}
@@ -117,18 +233,21 @@ export default function AddPhotos() {
     );
   };
 
+  const uploadedCount = selectedPhotos.filter(
+    (photo) => photo.fileName && !photo.isUploading
+  ).length;
+  const uploadingCount = selectedPhotos.filter(
+    (photo) => photo.isUploading
+  ).length;
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Back Button */}
-
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Content */}
         <View style={styles.content}>
           <Header />
-          {/* Title and Subtitle */}
           <View style={styles.titleSection}>
             <Text style={styles.title}>Add your best photos</Text>
             <View style={styles.subtitleContainer}>
@@ -171,8 +290,9 @@ export default function AddPhotos() {
 
           {/* Photo Count */}
           <Text style={styles.photoCount}>
-            {selectedPhotos.length} of {maxPhotos} photos uploaded (minimum{" "}
-            {minPhotos})
+            {uploadedCount} of {maxPhotos} photos uploaded
+            {uploadingCount > 0 && ` (${uploadingCount} uploading)`}
+            (minimum {minPhotos})
           </Text>
         </View>
       </ScrollView>
@@ -216,14 +336,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 8,
   },
-  infoIcon: {
-    width: 20,
-    height: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 2,
-  },
-
   subtitle: {
     fontSize: 14,
     fontFamily: font.regular,
@@ -291,10 +403,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  uploadIconText: {
-    fontSize: 24,
-    color: color.gray55,
-  },
   removeButton: {
     position: "absolute",
     top: 8,
@@ -311,6 +419,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: font.bold,
     lineHeight: 16,
+  },
+  uploadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+  },
+  successIndicator: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(34, 197, 94, 0.9)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   photoCount: {
     fontSize: 16,

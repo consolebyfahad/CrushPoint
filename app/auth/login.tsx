@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { formatPhoneNumber } from "@/utils/formatPhone";
@@ -18,11 +19,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
   const params = useLocalSearchParams();
+  const { setIsLoggedIn, setUser } = useAppContext();
 
   const [activeTab, setActiveTab] = useState("phone");
   const [phoneNumber, setPhoneNumber] = useState("+1");
   const [email, setEmail] = useState("");
-
+  const [loginLoading, setLoginLoading] = useState(false);
   useEffect(() => {
     if (params.tab === "email") {
       setActiveTab("email");
@@ -32,6 +34,7 @@ export default function Login() {
   }, [params.tab]);
 
   const handleContinue = async () => {
+    setLoginLoading(true);
     const formData = new FormData();
     formData.append("type", "register");
     formData.append("reg_type", activeTab);
@@ -45,7 +48,15 @@ export default function Login() {
 
     try {
       const response = await apiCall(formData);
-      console.log("🚀 API Success:", response);
+      const userData = {
+        user_id: response?.user_id,
+        email: response?.email,
+        name: response?.name,
+        image: response?.image,
+        created: response?.created,
+      };
+      setUser(userData);
+      setIsLoggedIn(true);
 
       router.push("/auth/verify");
 
@@ -53,12 +64,13 @@ export default function Login() {
       setEmail("");
     } catch (error) {
       console.error("❌ API Error:", error);
+    } finally {
+      setLoginLoading(false);
     }
   };
 
   const isFormValid = () => {
     if (activeTab === "phone") {
-      // Minimum 10 digits after +
       const digits = phoneNumber.replace(/\D/g, "");
       return phoneNumber.startsWith("+") && digits.length >= 11;
     } else {
@@ -131,7 +143,7 @@ export default function Login() {
               value={activeTab === "phone" ? phoneNumber : email}
               onChangeText={(text) => {
                 if (activeTab === "phone") {
-                  const raw = text.replace(/\s/g, ""); // remove all spaces
+                  const raw = text.replace(/\s/g, "");
                   const withPlus = raw.startsWith("+")
                     ? raw
                     : "+" + raw.replace(/^\+?/, "");
@@ -155,6 +167,7 @@ export default function Login() {
           title="Continue"
           onPress={handleContinue}
           isDisabled={!isFormValid()}
+          isLoading={loginLoading}
         />
       </View>
     </SafeAreaView>

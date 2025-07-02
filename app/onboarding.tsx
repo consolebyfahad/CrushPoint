@@ -1,10 +1,12 @@
 import CustomButton from "@/components/custom_button";
 import { color, font } from "@/utils/constants";
+import { requestUserLocation } from "@/utils/location";
+import { requestFCMPermission } from "@/utils/notification";
 import { svgIcon } from "@/utils/SvgIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const onboardingData = [
@@ -20,6 +22,7 @@ export const onboardingData = [
     IconComponent: svgIcon.Onboarding2,
     title: "See who's around you",
     description: "Discover interesting people nearby and connect in real life",
+    requiresPermission: "location",
   },
   {
     id: 3,
@@ -31,16 +34,78 @@ export const onboardingData = [
     id: 4,
     IconComponent: svgIcon.Onboarding4,
     title: "Meet people on events",
-    description: "See if someone interesting is joinung the same event as you",
+    description: "See if someone interesting is joining the same event as you",
+    requiresPermission: "notification",
   },
 ];
 
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState({
+    location: false,
+    notification: false,
+  });
+
   const currentData = onboardingData[currentIndex];
   const isLastScreen = currentIndex === onboardingData.length - 1;
 
-  const handleContinue = () => {
+  const requestLocationPermission = async () => {
+    setIsRequestingPermission(true);
+    try {
+      const location = await requestUserLocation();
+      if (location) {
+        setPermissionsGranted((prev) => ({ ...prev, location: true }));
+        return true;
+      } else {
+        Alert.alert(
+          "Location Permission",
+          "Location access is needed to show you people nearby. You can enable it later in settings.",
+          [{ text: "OK" }]
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error("Location permission error:", error);
+      return false;
+    } finally {
+      setIsRequestingPermission(false);
+    }
+  };
+
+  const requestNotificationPermission = async () => {
+    setIsRequestingPermission(true);
+    try {
+      const granted = await requestFCMPermission();
+      if (granted) {
+        setPermissionsGranted((prev) => ({ ...prev, notification: true }));
+        return true;
+      } else {
+        Alert.alert(
+          "Notification Permission",
+          "Notifications help you stay updated on matches and messages. You can enable them later in settings.",
+          [{ text: "OK" }]
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error("Notification permission error:", error);
+      return false;
+    } finally {
+      setIsRequestingPermission(false);
+    }
+  };
+
+  const handleContinue = async () => {
+    // Handle permission requests based on current step
+    if (currentData.requiresPermission === "location") {
+      const granted = await requestLocationPermission();
+      // Continue regardless of permission result
+    } else if (currentData.requiresPermission === "notification") {
+      const granted = await requestNotificationPermission();
+      // Continue regardless of permission result
+    }
+
     if (isLastScreen) {
       router.push("/welcome");
     } else {
@@ -50,6 +115,26 @@ export default function OnboardingScreen() {
 
   const handleSkip = () => {
     router.push("/welcome");
+  };
+
+  const getButtonTitle = () => {
+    if (isRequestingPermission) {
+      return "Requesting...";
+    }
+
+    if (currentData.requiresPermission === "location") {
+      return "Enable Location";
+    }
+
+    if (currentData.requiresPermission === "notification") {
+      return "Enable Notifications";
+    }
+
+    if (isLastScreen) {
+      return "Get Started";
+    }
+
+    return "Continue";
   };
 
   return (
@@ -62,6 +147,26 @@ export default function OnboardingScreen() {
         <View style={styles.iconContainer}>{currentData.IconComponent}</View>
         <Text style={styles.title}>{currentData.title}</Text>
         <Text style={styles.description}>{currentData.description}</Text>
+
+        {/* Show permission status if applicable */}
+        {currentData.requiresPermission && (
+          <View style={styles.permissionStatus}>
+            {permissionsGranted[
+              currentData.requiresPermission as keyof typeof permissionsGranted
+            ] ? (
+              <View style={styles.permissionGranted}>
+                <Feather name="check-circle" size={16} color={color.primary} />
+                <Text style={styles.permissionText}>Permission granted!</Text>
+              </View>
+            ) : (
+              <Text style={styles.permissionPrompt}>
+                {currentData.requiresPermission === "location"
+                  ? "We need location access to show you people nearby"
+                  : "We need notification permission to keep you updated"}
+              </Text>
+            )}
+          </View>
+        )}
       </View>
 
       <View style={styles.bottomContainer}>
@@ -78,10 +183,15 @@ export default function OnboardingScreen() {
         </View>
 
         <CustomButton
-          title={isLastScreen ? "Get Started" : "Continue"}
+          title={getButtonTitle()}
           onPress={handleContinue}
+          isDisabled={isRequestingPermission}
           rightIcon={
-            <Feather name="arrow-right" size={18} color={color.white} />
+            <Feather
+              name="arrow-right"
+              size={18}
+              color={isRequestingPermission ? color.gray55 : color.white}
+            />
           }
         />
       </View>
@@ -127,6 +237,31 @@ const styles = StyleSheet.create({
     color: color.gray55,
     textAlign: "center",
     lineHeight: 24,
+  },
+  permissionStatus: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+  permissionGranted: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: color.primary + "20", // 20% opacity
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  permissionText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: color.primary,
+    fontFamily: font.medium,
+  },
+  permissionPrompt: {
+    fontSize: 14,
+    color: color.gray55,
+    fontFamily: font.regular,
+    textAlign: "center",
+    lineHeight: 20,
   },
   bottomContainer: {
     alignItems: "center",

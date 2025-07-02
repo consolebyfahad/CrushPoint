@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { FemaleIcon, MaleIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -8,6 +9,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function Gender() {
+  const { updateUserData } = useAppContext();
   const [selectedGender, setSelectedGender] = useState("male");
 
   const handleGenderSelect = (gender: any) => {
@@ -15,7 +17,7 @@ export default function Gender() {
   };
 
   const handleContinue = () => {
-    console.log("Selected gender:", selectedGender);
+    updateUserData({ gender: selectedGender });
     router.push("/auth/intrested");
   };
 

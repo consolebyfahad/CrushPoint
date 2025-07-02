@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -44,12 +45,14 @@ const allInterests = [
 ];
 
 export default function Interests() {
+  const { updateUserData } = useAppContext();
   const { fromEdit } = useLocalSearchParams();
   const isEdit = fromEdit === "true";
-  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [selectedInterests, setSelectedInterests] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredInterests, setFilteredInterests] = useState(allInterests);
-  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [filteredInterests, setFilteredInterests] =
+    useState<any[]>(allInterests);
+  const [searchTimeout, setSearchTimeout] = useState<any>(null);
 
   useEffect(() => {
     // Clear previous timeout
@@ -79,10 +82,10 @@ export default function Interests() {
     };
   }, [searchQuery]);
 
-  const handleInterestToggle = (interestId) => {
-    setSelectedInterests((prev) => {
+  const handleInterestToggle = (interestId: any) => {
+    setSelectedInterests((prev: any) => {
       if (prev.includes(interestId)) {
-        return prev.filter((id) => id !== interestId);
+        return prev.filter((id: any) => id !== interestId);
       } else {
         return [...prev, interestId];
       }
@@ -90,7 +93,7 @@ export default function Interests() {
   };
 
   const handleContinue = () => {
-    console.log("Selected interests:", selectedInterests);
+    updateUserData({ interests: selectedInterests });
     router.push("/auth/private_spot");
   };
 

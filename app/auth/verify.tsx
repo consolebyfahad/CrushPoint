@@ -27,12 +27,11 @@ export default function Verify() {
   const contactInfo = params.contact || "+155 (500) 000-00";
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Create refs for each input
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const animatedValues = useRef(code.map(() => new Animated.Value(1))).current;
 
   useEffect(() => {
-    // Auto-focus first input when component mounts
+    console.log("user", user);
     if (inputRefs.current[0]) {
       setTimeout(() => {
         inputRefs.current[0]?.focus();
@@ -55,11 +54,10 @@ export default function Verify() {
   }, []);
 
   const handleCodeChange = (text: string, index: number) => {
-    // Only allow single digit
     const digit = text.slice(-1);
 
     if (digit && !/^\d$/.test(digit)) {
-      return; // Only allow digits
+      return;
     }
 
     const newCode = [...code];
@@ -80,12 +78,10 @@ export default function Verify() {
       }),
     ]).start();
 
-    // Move to next input if digit entered
     if (digit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Check if code is complete
     if (digit && index === 5) {
       const fullCode = newCode.join("");
       if (fullCode.length === 6) {
@@ -95,7 +91,6 @@ export default function Verify() {
   };
 
   const handleKeyPress = (event: any, index: number) => {
-    // Handle backspace to move to previous input
     if (event.nativeEvent.key === "Backspace" && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -104,7 +99,7 @@ export default function Verify() {
   const handleVerifyCode = async (fullCode: string) => {
     if (!user?.user_id) {
       showToast("User session expired. Please login again.", "error");
-      router.push("/welcome");
+      // router.push("/welcome");
       return;
     }
 
@@ -115,28 +110,20 @@ export default function Verify() {
 
       const formData = new FormData();
       formData.append("type", "verify_otp");
-      formData.append("user_id", user.user_id);
+      formData.append("user_id", user?.user_id);
       formData.append("code", fullCode);
-
+      console.log(formData);
       const response = await apiCall(formData);
 
-      if (response.success) {
-        console.log("Verification response:", response);
-        showToast("Verification successful!", "success");
-
-        // Clear the code
+      if (response.result) {
         setCode(["", "", "", "", "", ""]);
-
-        // Navigate to next screen
         router.push("/auth/gender");
       } else {
         showToast(response.message || "Invalid verification code", "error");
         console.error("Verification Error:", response.message);
 
-        // Clear the code on error so user can try again
         setCode(["", "", "", "", "", ""]);
 
-        // Focus back to first input
         setTimeout(() => {
           inputRefs.current[0]?.focus();
         }, 100);
@@ -145,10 +132,8 @@ export default function Verify() {
       showToast("Something went wrong. Please try again.", "error");
       console.error("Verification Error:", error);
 
-      // Clear the code on error
       setCode(["", "", "", "", "", ""]);
 
-      // Focus back to first input
       setTimeout(() => {
         inputRefs.current[0]?.focus();
       }, 100);
@@ -203,7 +188,7 @@ export default function Verify() {
     <SafeAreaView style={styles.container}>
       <Header />
       {isVerifying ? (
-        <View>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={color.primary} />
         </View>
       ) : (
@@ -268,6 +253,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
     padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    paddingTop: 100,
   },
   content: {
     flex: 1,

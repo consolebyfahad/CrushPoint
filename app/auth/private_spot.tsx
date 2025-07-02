@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { MarkerIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -8,7 +9,9 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 export default function PrivateSpot() {
+  const { updateUserData } = useAppContext();
   const [selectedRadius, setSelectedRadius] = useState("100m");
   const [mapRegion, setMapRegion] = useState({
     latitude: 45.4408474,
@@ -17,7 +20,7 @@ export default function PrivateSpot() {
     longitudeDelta: 0.005,
   });
   console.log("first");
-  const handleRadiusSelect = (radius) => {
+  const handleRadiusSelect = (radius: any) => {
     setSelectedRadius(radius);
 
     // Adjust map zoom based on radius
@@ -29,15 +32,20 @@ export default function PrivateSpot() {
     }));
   };
 
-  const handleMapRegionChange = (region) => {
+  const handleMapRegionChange = (region: any) => {
     // Keep the same zoom level but allow map movement
     setMapRegion(region);
   };
 
   const handleSaveAndContinue = () => {
+    updateUserData({
+      radius: selectedRadius === "100m" ? 100 : 200,
+      latitude: mapRegion.latitude,
+      longitude: mapRegion.longitude,
+    });
     console.log("Private spot location:", mapRegion);
     console.log("Privacy radius:", selectedRadius);
-    router.push("/auth/add_photos"); // Update with your next route
+    router.push("/auth/add_photos");
   };
 
   // Calculate radius in meters for the circle
