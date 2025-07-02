@@ -2,10 +2,13 @@ import CustomButton from "@/components/custom_button";
 import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
+import { requestFullCameraAccess } from "@/utils/camera";
 import { color, font, image } from "@/utils/constants";
+import { requestUserLocation } from "@/utils/location";
 import { AppleIcon, EmailIcon, GoogleIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+// import { requestFCMPermission } from "@/utils/notification";
 import {
   Animated,
   Easing,
@@ -111,6 +114,40 @@ export default function Welcome() {
   const { showToast } = useToast();
   const [appleLoading, setAppleLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      try {
+        // Request notification permission first
+        // const notificationGranted = await requestFCMPermission();
+        // if (notificationGranted) {
+        //   console.log("✅ Notification permission granted");
+        // } else {
+        //   console.log("❌ Notification permission denied");
+        // }
+
+        // Then request location permission
+        const location = await requestUserLocation();
+        if (location) {
+          console.log("✅ Location permission granted:", location);
+        } else {
+          console.log("❌ Location permission denied");
+        }
+
+        // Finally request camera permissions
+        const cameraPermissions = await requestFullCameraAccess();
+        if (cameraPermissions.camera && cameraPermissions.mediaLibrary) {
+          console.log("✅ All camera permissions granted");
+        } else {
+          console.log("❌ Some camera permissions denied:", cameraPermissions);
+        }
+      } catch (error) {
+        console.error("Error requesting permissions:", error);
+      }
+    };
+
+    requestPermissions();
+  }, []);
 
   const handleAppleSignUp = async () => {
     setAppleLoading(true);

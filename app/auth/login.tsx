@@ -57,7 +57,13 @@ export default function Login() {
       };
       setUser(userData);
 
-      router.push("/auth/verify");
+      router.push({
+        pathname: "/auth/verify",
+        params: {
+          type: activeTab,
+          contact: activeTab === "phone" ? phoneNumber : email,
+        },
+      });
 
       setPhoneNumber("+");
       setEmail("");

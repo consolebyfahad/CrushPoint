@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "247710361352",
+    "project_id": "crush-point",
+    "storage_bucket": "crush-point.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247710361352:android:a228f66df7cc55f60daebd",
+        "android_client_info": {
+          "package_name": "com.dating.CrushPoint"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsHEQCjZMNYiXkSfPX4g0SA24_G7e7Xe8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

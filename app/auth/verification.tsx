@@ -67,7 +67,6 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
       const response = await apiCall(submissionData);
 
       if (response.result) {
-        showToast("Profile created successfully!", "success");
         router.push("/(tabs)");
       } else {
         showToast(response.message || "Failed to create profile", "error");

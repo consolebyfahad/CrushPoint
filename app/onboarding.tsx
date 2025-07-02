@@ -1,8 +1,5 @@
 import CustomButton from "@/components/custom_button";
-import { requestFullCameraAccess } from "@/utils/camera";
 import { color, font } from "@/utils/constants";
-import { requestUserLocation } from "@/utils/location";
-// import { requestFCMPermission } from "@/utils/notification";
 import { svgIcon } from "@/utils/SvgIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
@@ -101,40 +98,6 @@ export default function OnboardingScreen() {
 
     return () => clearTimeout(timer);
   }, [currentIndex]);
-
-  useEffect(() => {
-    const requestPermissions = async () => {
-      try {
-        // Request notification permission first
-        // const notificationGranted = await requestFCMPermission();
-        // if (notificationGranted) {
-        //   console.log("✅ Notification permission granted");
-        // } else {
-        //   console.log("❌ Notification permission denied");
-        // }
-
-        // Then request location permission
-        const location = await requestUserLocation();
-        if (location) {
-          console.log("✅ Location permission granted:", location);
-        } else {
-          console.log("❌ Location permission denied");
-        }
-
-        // Finally request camera permissions
-        const cameraPermissions = await requestFullCameraAccess();
-        if (cameraPermissions.camera && cameraPermissions.mediaLibrary) {
-          console.log("✅ All camera permissions granted");
-        } else {
-          console.log("❌ Some camera permissions denied:", cameraPermissions);
-        }
-      } catch (error) {
-        console.error("Error requesting permissions:", error);
-      }
-    };
-
-    requestPermissions();
-  }, []);
 
   const handleContinue = () => {
     if (isAnimating) return;
