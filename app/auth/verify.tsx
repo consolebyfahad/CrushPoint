@@ -18,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Verify() {
   const params = useLocalSearchParams();
-  const { user } = useAppContext();
+  const { user, setIsLoggedIn } = useAppContext();
   const { showToast } = useToast();
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [resendCountdown, setResendCountdown] = useState(59);
@@ -99,7 +99,7 @@ export default function Verify() {
   const handleVerifyCode = async (fullCode: string) => {
     if (!user?.user_id) {
       showToast("User session expired. Please login again.", "error");
-      // router.push("/welcome");
+      router.push("/welcome");
       return;
     }
 
@@ -116,6 +116,7 @@ export default function Verify() {
       const response = await apiCall(formData);
 
       if (response.result) {
+        setIsLoggedIn(true);
         setCode(["", "", "", "", "", ""]);
         router.push("/auth/gender");
       } else {

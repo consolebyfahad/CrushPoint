@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 type User = {
   user_id: string;
@@ -57,6 +58,8 @@ const defaultUserData: UserData = {
   longitude: 0,
 };
 
+const STORAGE_KEY = "@AppContext";
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
@@ -64,6 +67,38 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData>(defaultUserData);
   const [userImages, setUserImages] = useState<string[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Hydrate state from AsyncStorage
+  useEffect(() => {
+    (async () => {
+      const saved = await AsyncStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setIsLoggedIn(parsed.isLoggedIn ?? false);
+          setUser(parsed.user ?? null);
+          setUserData(parsed.userData ?? defaultUserData);
+          setUserImages(parsed.userImages ?? []);
+        } catch (e) {
+          console.warn("Failed to parse context state:", e);
+        }
+      }
+      setIsHydrated(true);
+    })();
+  }, []);
+
+  // Save state to AsyncStorage whenever it changes
+  useEffect(() => {
+    if (!isHydrated) return; // Avoid saving before hydration
+    const data = {
+      isLoggedIn,
+      user,
+      userData,
+      userImages,
+    };
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(console.warn);
+  }, [isLoggedIn, user, userData, userImages, isHydrated]);
 
   const updateUserData = (data: Partial<UserData>) => {
     setUserData((prev) => ({ ...prev, ...data }));

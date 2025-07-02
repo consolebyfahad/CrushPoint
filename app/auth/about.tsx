@@ -100,6 +100,7 @@ const About = () => {
               display={Platform.OS === "ios" ? "spinner" : "default"}
               onChange={onDateChange}
               maximumDate={new Date()}
+              themeVariant="light"
             />
           )}
         </View>
@@ -107,7 +108,11 @@ const About = () => {
 
       {/* Continue Button */}
       <View style={styles.buttonContainer}>
-        <CustomButton title="Continue" onPress={handleContinue} />
+        <CustomButton
+          title="Continue"
+          onPress={handleContinue}
+          isDisabled={!name.trim() || !dateOfBirth.trim()}
+        />
       </View>
     </SafeAreaView>
   );

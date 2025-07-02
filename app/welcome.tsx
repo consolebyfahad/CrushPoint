@@ -17,18 +17,48 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+// Just replace your existing AnimatedLogo component with this enhanced version:
+
 const AnimatedLogo = () => {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
+  const bounceAnim = useRef(new Animated.Value(0)).current; // ADD THIS LINE
 
   useEffect(() => {
-    Animated.timing(scaleAnim, {
-      toValue: 1,
-      duration: 400,
-      easing: Easing.elastic(1.2),
-      useNativeDriver: true,
-    }).start();
+    // Enhanced entrance animation
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.2, // Slightly bigger first
+        duration: 400,
+        easing: Easing.elastic(1.2),
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1, // Then settle to normal size
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
+    // ADD THIS - Gentle bounce animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bounceAnim, {
+          toValue: 1,
+          duration: 1500,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(bounceAnim, {
+          toValue: 0,
+          duration: 1500,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Existing rotation animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(rotateAnim, {
@@ -45,21 +75,25 @@ const AnimatedLogo = () => {
         }),
       ])
     ).start();
-  }, [rotateAnim, scaleAnim]);
+  }, [rotateAnim, scaleAnim, bounceAnim]); // ADD bounceAnim here
 
   const scale = scaleAnim;
   const rotation = rotateAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "5deg"],
+    outputRange: ["0deg", "9deg"],
+  });
+
+  // ADD THIS - Gentle vertical bounce
+  const translateY = bounceAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -8],
   });
 
   return (
     <Animated.View
-      style={[
-        {
-          transform: [{ scale }, { rotate: rotation }],
-        },
-      ]}
+      style={{
+        transform: [{ scale }, { rotate: rotation }, { translateY }],
+      }}
     >
       <Image
         source={image.splash}
@@ -73,7 +107,7 @@ const AnimatedLogo = () => {
 };
 
 export default function Welcome() {
-  const { setIsLoggedIn, setUser } = useAppContext();
+  const { setUser } = useAppContext();
   const { showToast } = useToast();
   const [appleLoading, setAppleLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -99,7 +133,6 @@ export default function Welcome() {
         };
 
         setUser(userData);
-        setIsLoggedIn(true);
 
         router.push("/auth/verify");
       } else {
@@ -135,7 +168,6 @@ export default function Welcome() {
         };
 
         setUser(userData);
-        setIsLoggedIn(true);
         router.push("/auth/verify");
       } else {
         showToast(response.message || "Login failed", "error");

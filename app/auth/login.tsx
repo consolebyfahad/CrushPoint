@@ -19,7 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
   const params = useLocalSearchParams();
-  const { setIsLoggedIn, setUser } = useAppContext();
+  const { setUser } = useAppContext();
 
   const [activeTab, setActiveTab] = useState("phone");
   const [phoneNumber, setPhoneNumber] = useState("+1");
@@ -56,7 +56,6 @@ export default function Login() {
         created: response?.created,
       };
       setUser(userData);
-      setIsLoggedIn(true);
 
       router.push("/auth/verify");
 

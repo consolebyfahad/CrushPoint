@@ -9,7 +9,8 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function Gender() {
-  const { updateUserData } = useAppContext();
+  const { updateUserData, user } = useAppContext();
+  console.log("isLoggedIn", user);
   const [selectedGender, setSelectedGender] = useState("male");
 
   const handleGenderSelect = (gender: any) => {

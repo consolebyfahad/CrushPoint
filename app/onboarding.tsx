@@ -1,12 +1,23 @@
 import CustomButton from "@/components/custom_button";
+import { requestFullCameraAccess } from "@/utils/camera";
 import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
-import { requestFCMPermission } from "@/utils/notification";
+// import { requestFCMPermission } from "@/utils/notification";
 import { svgIcon } from "@/utils/SvgIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
-import { useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  FadeIn,
+  runOnJS,
+  SlideInRight,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const onboardingData = [
@@ -22,7 +33,6 @@ export const onboardingData = [
     IconComponent: svgIcon.Onboarding2,
     title: "See who's around you",
     description: "Discover interesting people nearby and connect in real life",
-    requiresPermission: "location",
   },
   {
     id: 3,
@@ -35,81 +45,108 @@ export const onboardingData = [
     IconComponent: svgIcon.Onboarding4,
     title: "Meet people on events",
     description: "See if someone interesting is joining the same event as you",
-    requiresPermission: "notification",
   },
 ];
 
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
-  const [permissionsGranted, setPermissionsGranted] = useState({
-    location: false,
-    notification: false,
-  });
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Animation values
+  const slideOffset = useSharedValue(0);
+  const iconScale = useSharedValue(0);
+  const iconOpacity = useSharedValue(0);
+  const titleOpacity = useSharedValue(0);
+  const descriptionOpacity = useSharedValue(0);
 
   const currentData = onboardingData[currentIndex];
   const isLastScreen = currentIndex === onboardingData.length - 1;
 
-  const requestLocationPermission = async () => {
-    setIsRequestingPermission(true);
-    try {
-      const location = await requestUserLocation();
-      if (location) {
-        setPermissionsGranted((prev) => ({ ...prev, location: true }));
-        return true;
-      } else {
-        Alert.alert(
-          "Location Permission",
-          "Location access is needed to show you people nearby. You can enable it later in settings.",
-          [{ text: "OK" }]
-        );
-        return false;
-      }
-    } catch (error) {
-      console.error("Location permission error:", error);
-      return false;
-    } finally {
-      setIsRequestingPermission(false);
-    }
+  // Animate content entrance
+  const animateContentIn = () => {
+    // Reset values
+    iconScale.value = 0;
+    iconOpacity.value = 0;
+    titleOpacity.value = 0;
+    descriptionOpacity.value = 0;
+
+    // Animate icon
+    iconScale.value = withSpring(1, {
+      damping: 15,
+      stiffness: 150,
+    });
+    iconOpacity.value = withTiming(1, { duration: 300 });
+
+    // Animate title with delay
+    titleOpacity.value = withDelay(200, withTiming(1, { duration: 400 }));
+
+    // Animate description with more delay
+    descriptionOpacity.value = withDelay(400, withTiming(1, { duration: 400 }));
   };
 
-  const requestNotificationPermission = async () => {
-    setIsRequestingPermission(true);
-    try {
-      const granted = await requestFCMPermission();
-      if (granted) {
-        setPermissionsGranted((prev) => ({ ...prev, notification: true }));
-        return true;
-      } else {
-        Alert.alert(
-          "Notification Permission",
-          "Notifications help you stay updated on matches and messages. You can enable them later in settings.",
-          [{ text: "OK" }]
-        );
-        return false;
-      }
-    } catch (error) {
-      console.error("Notification permission error:", error);
-      return false;
-    } finally {
-      setIsRequestingPermission(false);
-    }
+  // Animate content exit
+  const animateContentOut = (callback: any) => {
+    iconOpacity.value = withTiming(0, { duration: 200 });
+    titleOpacity.value = withTiming(0, { duration: 200 });
+    descriptionOpacity.value = withTiming(0, { duration: 200 }, () => {
+      runOnJS(callback)();
+    });
   };
 
-  const handleContinue = async () => {
-    // Handle permission requests based on current step
-    if (currentData.requiresPermission === "location") {
-      const granted = await requestLocationPermission();
-      // Continue regardless of permission result
-    } else if (currentData.requiresPermission === "notification") {
-      const granted = await requestNotificationPermission();
-      // Continue regardless of permission result
-    }
+  useEffect(() => {
+    // Animate in content when component mounts or index changes
+    const timer = setTimeout(() => {
+      animateContentIn();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      try {
+        // Request notification permission first
+        // const notificationGranted = await requestFCMPermission();
+        // if (notificationGranted) {
+        //   console.log("✅ Notification permission granted");
+        // } else {
+        //   console.log("❌ Notification permission denied");
+        // }
+
+        // Then request location permission
+        const location = await requestUserLocation();
+        if (location) {
+          console.log("✅ Location permission granted:", location);
+        } else {
+          console.log("❌ Location permission denied");
+        }
+
+        // Finally request camera permissions
+        const cameraPermissions = await requestFullCameraAccess();
+        if (cameraPermissions.camera && cameraPermissions.mediaLibrary) {
+          console.log("✅ All camera permissions granted");
+        } else {
+          console.log("❌ Some camera permissions denied:", cameraPermissions);
+        }
+      } catch (error) {
+        console.error("Error requesting permissions:", error);
+      }
+    };
+
+    requestPermissions();
+  }, []);
+
+  const handleContinue = () => {
+    if (isAnimating) return;
 
     if (isLastScreen) {
       router.push("/welcome");
     } else {
-      setCurrentIndex(currentIndex + 1);
+      setIsAnimating(true);
+      animateContentOut(() => {
+        setCurrentIndex(currentIndex + 1);
+        setIsAnimating(false);
+      });
     }
   };
 
@@ -117,63 +154,65 @@ export default function OnboardingScreen() {
     router.push("/welcome");
   };
 
-  const getButtonTitle = () => {
-    if (isRequestingPermission) {
-      return "Requesting...";
-    }
+  // Animated styles
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: iconScale.value }],
+    opacity: iconOpacity.value,
+  }));
 
-    if (currentData.requiresPermission === "location") {
-      return "Enable Location";
-    }
+  const titleAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: titleOpacity.value,
+    transform: [
+      {
+        translateY: withTiming(titleOpacity.value === 1 ? 0 : 20, {
+          duration: 400,
+        }),
+      },
+    ],
+  }));
 
-    if (currentData.requiresPermission === "notification") {
-      return "Enable Notifications";
-    }
-
-    if (isLastScreen) {
-      return "Get Started";
-    }
-
-    return "Continue";
-  };
+  const descriptionAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: descriptionOpacity.value,
+    transform: [
+      {
+        translateY: withTiming(descriptionOpacity.value === 1 ? 0 : 20, {
+          duration: 400,
+        }),
+      },
+    ],
+  }));
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-        <Text style={styles.skipText}>Skip</Text>
-      </TouchableOpacity>
+      <Animated.View entering={FadeIn.duration(300)} style={styles.skipButton}>
+        <TouchableOpacity onPress={handleSkip}>
+          <Text style={styles.skipText}>Skip</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
       <View style={styles.contentContainer}>
-        <View style={styles.iconContainer}>{currentData.IconComponent}</View>
-        <Text style={styles.title}>{currentData.title}</Text>
-        <Text style={styles.description}>{currentData.description}</Text>
+        <Animated.View style={[styles.iconContainer, iconAnimatedStyle]}>
+          {currentData.IconComponent}
+        </Animated.View>
 
-        {/* Show permission status if applicable */}
-        {currentData.requiresPermission && (
-          <View style={styles.permissionStatus}>
-            {permissionsGranted[
-              currentData.requiresPermission as keyof typeof permissionsGranted
-            ] ? (
-              <View style={styles.permissionGranted}>
-                <Feather name="check-circle" size={16} color={color.primary} />
-                <Text style={styles.permissionText}>Permission granted!</Text>
-              </View>
-            ) : (
-              <Text style={styles.permissionPrompt}>
-                {currentData.requiresPermission === "location"
-                  ? "We need location access to show you people nearby"
-                  : "We need notification permission to keep you updated"}
-              </Text>
-            )}
-          </View>
-        )}
+        <Animated.Text style={[styles.title, titleAnimatedStyle]}>
+          {currentData.title}
+        </Animated.Text>
+
+        <Animated.Text style={[styles.description, descriptionAnimatedStyle]}>
+          {currentData.description}
+        </Animated.Text>
       </View>
 
-      <View style={styles.bottomContainer}>
+      <Animated.View
+        entering={SlideInRight.delay(600).springify()}
+        style={styles.bottomContainer}
+      >
         <View style={styles.indicatorContainer}>
           {onboardingData.map((_, index) => (
-            <View
+            <Animated.View
               key={index}
+              entering={FadeIn.delay(700 + index * 100)}
               style={[
                 styles.indicator,
                 index === currentIndex && styles.activeIndicator,
@@ -182,19 +221,20 @@ export default function OnboardingScreen() {
           ))}
         </View>
 
-        <CustomButton
-          title={getButtonTitle()}
-          onPress={handleContinue}
-          isDisabled={isRequestingPermission}
-          rightIcon={
-            <Feather
-              name="arrow-right"
-              size={18}
-              color={isRequestingPermission ? color.gray55 : color.white}
-            />
-          }
-        />
-      </View>
+        <Animated.View
+          entering={SlideInRight.delay(800).springify()}
+          style={styles.buttonContainer}
+        >
+          <CustomButton
+            title={isLastScreen ? "Get Started" : "Continue"}
+            onPress={handleContinue}
+            isDisabled={isAnimating}
+            rightIcon={
+              <Feather name="arrow-right" size={18} color={color.white} />
+            }
+          />
+        </Animated.View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -238,31 +278,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 24,
   },
-  permissionStatus: {
-    marginTop: 24,
-    alignItems: "center",
-  },
-  permissionGranted: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: color.primary + "20", // 20% opacity
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  permissionText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: color.primary,
-    fontFamily: font.medium,
-  },
-  permissionPrompt: {
-    fontSize: 14,
-    color: color.gray55,
-    fontFamily: font.regular,
-    textAlign: "center",
-    lineHeight: 20,
-  },
   bottomContainer: {
     alignItems: "center",
   },
@@ -280,5 +295,8 @@ const styles = StyleSheet.create({
   activeIndicator: {
     backgroundColor: color.primary,
     width: 8,
+  },
+  buttonContainer: {
+    width: "100%",
   },
 });

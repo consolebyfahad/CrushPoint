@@ -1,3 +1,4 @@
+import { useAppContext } from "@/context/app_context";
 import { color, font, image } from "@/utils/constants";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function Splash() {
+  const { isLoggedIn, userData, user } = useAppContext();
   const containerScale = useSharedValue(0);
   const imageScale = useSharedValue(0);
   const textOpacity = useSharedValue(0);
@@ -50,12 +52,16 @@ export default function Splash() {
     opacity: textOpacity.value,
     transform: [{ translateY: textTranslateY.value }],
   }));
-
+  console.log("isLoggedIn", isLoggedIn, user);
   useEffect(() => {
     setTimeout(() => {
-      router.replace("/onboarding");
+      if (isLoggedIn) {
+        router.replace("/auth/gender");
+      } else {
+        router.replace("/onboarding");
+      }
     }, 2000);
-  }, []);
+  }, [isLoggedIn]);
 
   return (
     <View style={styles.container}>
