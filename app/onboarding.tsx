@@ -8,7 +8,6 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   FadeIn,
   runOnJS,
-  SlideInRight,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -49,8 +48,6 @@ export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Animation values
-  const slideOffset = useSharedValue(0);
   const iconScale = useSharedValue(0);
   const iconOpacity = useSharedValue(0);
   const titleOpacity = useSharedValue(0);
@@ -59,7 +56,6 @@ export default function OnboardingScreen() {
   const currentData = onboardingData[currentIndex];
   const isLastScreen = currentIndex === onboardingData.length - 1;
 
-  // Animate content entrance
   const animateContentIn = () => {
     // Reset values
     iconScale.value = 0;
@@ -81,7 +77,6 @@ export default function OnboardingScreen() {
     descriptionOpacity.value = withDelay(400, withTiming(1, { duration: 400 }));
   };
 
-  // Animate content exit
   const animateContentOut = (callback: any) => {
     iconOpacity.value = withTiming(0, { duration: 200 });
     titleOpacity.value = withTiming(0, { duration: 200 });
@@ -91,7 +86,6 @@ export default function OnboardingScreen() {
   };
 
   useEffect(() => {
-    // Animate in content when component mounts or index changes
     const timer = setTimeout(() => {
       animateContentIn();
     }, 100);
@@ -167,10 +161,7 @@ export default function OnboardingScreen() {
         </Animated.Text>
       </View>
 
-      <Animated.View
-        entering={SlideInRight.delay(600).springify()}
-        style={styles.bottomContainer}
-      >
+      <Animated.View style={styles.bottomContainer}>
         <View style={styles.indicatorContainer}>
           {onboardingData.map((_, index) => (
             <Animated.View
@@ -184,10 +175,7 @@ export default function OnboardingScreen() {
           ))}
         </View>
 
-        <Animated.View
-          entering={SlideInRight.delay(800).springify()}
-          style={styles.buttonContainer}
-        >
+        <Animated.View style={styles.buttonContainer}>
           <CustomButton
             title={isLastScreen ? "Get Started" : "Continue"}
             onPress={handleContinue}
@@ -243,6 +231,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     alignItems: "center",
+    paddingBottom: 0,
   },
   indicatorContainer: {
     flexDirection: "row",

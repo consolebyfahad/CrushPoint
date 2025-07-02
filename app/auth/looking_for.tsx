@@ -1,3 +1,4 @@
+import AnimatedSelectionList from "@/components/AnimatedSelectionList";
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { useAppContext } from "@/context/app_context";
@@ -5,12 +6,12 @@ import { color, font } from "@/utils/constants";
 import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LookingFor() {
   const { updateUserData } = useAppContext();
-  const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const options = [
     { id: "serious", emoji: "🩵", label: "Serious relationship" },
@@ -20,14 +21,8 @@ export default function LookingFor() {
     { id: "prefer-not", emoji: "🤫", label: "Prefer not to say" },
   ];
 
-  const handleOptionSelect = (optionId: any) => {
-    setSelectedOptions((prev: any) => {
-      if (prev.includes(optionId)) {
-        return prev.filter((id: any) => id !== optionId);
-      } else {
-        return [...prev, optionId];
-      }
-    });
+  const handleSelectionChange = (newSelection: string[]) => {
+    setSelectedOptions(newSelection);
   };
 
   const handleContinue = () => {
@@ -37,8 +32,8 @@ export default function LookingFor() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header />
       <View style={styles.content}>
-        <Header />
         <View style={styles.titleSection}>
           <Text style={styles.title}>What are you looking for?</Text>
           <View style={styles.subtitleContainer}>
@@ -49,33 +44,15 @@ export default function LookingFor() {
           </View>
         </View>
 
-        <View style={styles.optionsContainer}>
-          {options.map((option) => (
-            <TouchableOpacity
-              key={option.id}
-              style={[
-                styles.optionButton,
-                selectedOptions.includes(option.id)
-                  ? styles.selectedOption
-                  : styles.unselectedOption,
-              ]}
-              onPress={() => handleOptionSelect(option.id)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.emoji}>{option.emoji}</Text>
-              <Text
-                style={[
-                  styles.optionText,
-                  selectedOptions.includes(option.id)
-                    ? styles.selectedText
-                    : styles.unselectedText,
-                ]}
-              >
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <AnimatedSelectionList
+          options={options}
+          selectedOptions={selectedOptions}
+          onSelectionChange={handleSelectionChange}
+          multiSelect={true}
+          staggerAnimation={true}
+          staggerDelay={80}
+          containerStyle={styles.optionsContainer}
+        />
       </View>
 
       <View style={styles.buttonContainer}>
@@ -113,19 +90,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  infoIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: color.gray69,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  infoIconText: {
-    fontSize: 12,
-    color: color.gray14,
-    fontFamily: font.medium,
-  },
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
@@ -134,38 +98,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionsContainer: {
-    gap: 12,
-  },
-  optionButton: {
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  selectedOption: {
-    backgroundColor: color.gray95,
-    borderColor: color.primary,
-  },
-  unselectedOption: {
-    backgroundColor: color.white,
-    borderColor: color.gray87,
-  },
-  emoji: {
-    fontSize: 20,
-  },
-  optionText: {
-    fontSize: 18,
-    fontFamily: font.medium,
-  },
-  selectedText: {
-    color: color.primary,
-  },
-  unselectedText: {
-    color: color.black,
+    paddingHorizontal: 0,
   },
   buttonContainer: {
     borderTopWidth: 1,

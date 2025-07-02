@@ -8,7 +8,7 @@ export const requestCameraPermission = async (): Promise<boolean> => {
     const { status } = await requestPermission();
 
     if (status === "granted") {
-      console.log("📷 Camera permission granted");
+      // console.log("📷 Camera permission granted");
       return true;
     } else {
       console.warn("❌ Camera permission denied");
@@ -45,14 +45,14 @@ export const requestImagePickerPermissions = async (): Promise<{
     const mediaResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     const mediaGranted = mediaResult.status === "granted";
 
-    console.log(
-      `📷 Camera permission: ${cameraGranted ? "✅ granted" : "❌ denied"}`
-    );
-    console.log(
-      `📱 Media library permission: ${
-        mediaGranted ? "✅ granted" : "❌ denied"
-      }`
-    );
+    // console.log(
+    //   `📷 Camera permission: ${cameraGranted ? "✅ granted" : "❌ denied"}`
+    // );
+    // console.log(
+    //   `📱 Media library permission: ${
+    //     mediaGranted ? "✅ granted" : "❌ denied"
+    //   }`
+    // );
 
     return {
       camera: cameraGranted,
@@ -94,12 +94,10 @@ export const requestFullCameraAccess = async (): Promise<{
   mediaLibrary: boolean;
 }> => {
   try {
-    console.log("🔍 Requesting camera and media library permissions...");
-
     const permissions = await requestImagePickerPermissions();
 
     if (permissions.camera && permissions.mediaLibrary) {
-      console.log("🎉 All camera permissions granted!");
+      // console.log("🎉 All camera permissions granted!");
     } else if (permissions.camera) {
       console.log(
         "📷 Camera permission granted, but media library access denied"

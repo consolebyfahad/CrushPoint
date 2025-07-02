@@ -24,8 +24,8 @@ export default function Interested() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header />
       <View style={styles.content}>
-        <Header />
         <View style={styles.titleSection}>
           <Text style={styles.title}>Who are you interested in?</Text>
           <View style={styles.subtitleContainer}>

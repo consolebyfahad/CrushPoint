@@ -1,18 +1,22 @@
 import CustomButton from "@/components/custom_button";
 import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
+import { AnimatedLogo } from "@/utils//animations";
 import { apiCall } from "@/utils/api";
 import { requestFullCameraAccess } from "@/utils/camera";
-import { color, font, image } from "@/utils/constants";
+import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
-import { AppleIcon, EmailIcon, GoogleIcon, PhoneIcon } from "@/utils/SvgIcons";
-import { router } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-// import { requestFCMPermission } from "@/utils/notification";
 import {
-  Animated,
-  Easing,
-  Image,
+  getFCMToken,
+  requestFCMPermission,
+  setupNotificationListeners,
+} from "@/utils/notification";
+import { AppleIcon, EmailIcon, GoogleIcon, PhoneIcon } from "@/utils/SvgIcons";
+import * as Device from "expo-device";
+import { router, Stack } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -20,116 +24,79 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Just replace your existing AnimatedLogo component with this enhanced version:
-
-const AnimatedLogo = () => {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-  const bounceAnim = useRef(new Animated.Value(0)).current; // ADD THIS LINE
-
-  useEffect(() => {
-    // Enhanced entrance animation
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 1.2, // Slightly bigger first
-        duration: 400,
-        easing: Easing.elastic(1.2),
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1, // Then settle to normal size
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // ADD THIS - Gentle bounce animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(bounceAnim, {
-          toValue: 1,
-          duration: 1500,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(bounceAnim, {
-          toValue: 0,
-          duration: 1500,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Existing rotation animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: 2000,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(rotateAnim, {
-          toValue: 0,
-          duration: 2000,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, [rotateAnim, scaleAnim, bounceAnim]); // ADD bounceAnim here
-
-  const scale = scaleAnim;
-  const rotation = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "9deg"],
-  });
-
-  // ADD THIS - Gentle vertical bounce
-  const translateY = bounceAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -8],
-  });
-
-  return (
-    <Animated.View
-      style={{
-        transform: [{ scale }, { rotate: rotation }, { translateY }],
-      }}
-    >
-      <Image
-        source={image.splash}
-        style={{
-          resizeMode: "cover",
-          marginBottom: 0,
-        }}
-      />
-    </Animated.View>
-  );
-};
-
 export default function Welcome() {
-  const { setUser } = useAppContext();
+  const { setUser, user } = useAppContext();
   const { showToast } = useToast();
   const [appleLoading, setAppleLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const getDeviceInfo = async () => {
+    try {
+      let deviceModel = "unknown";
+      if (Device.modelName) {
+        deviceModel = Device.modelName;
+      }
+
+      return {
+        platform: Platform.OS || "",
+        model: deviceModel,
+      };
+    } catch (error) {
+      console.error("Error getting device info:", error);
+      return {
+        platform: Platform.OS || "",
+        model: "unknown",
+        brand: "unknown",
+        osVersion: "unknown",
+      };
+    }
+  };
+
+  // useEffect(() => {
+  //   const backHandler = BackHandler.addEventListener(
+  //     "hardwareBackPress",
+  //     () => true
+  //   );
+  //   return () => backHandler.remove();
+  // }, []);
+
   useEffect(() => {
+    const setupNotifications = async () => {
+      try {
+        const permissionGranted = await requestFCMPermission();
+        if (permissionGranted) {
+          const token = await getFCMToken();
+          const deviceInfo = await getDeviceInfo();
+          const formData = new FormData();
+          formData.append("type", "update_noti");
+          formData.append("user_id", user?.user_id ? user?.user_id : "");
+          formData.append("devicePlatform", deviceInfo.platform);
+          formData.append("deviceRid", token || "");
+          formData.append("deviceModel", deviceInfo.model);
+          try {
+            const response = await apiCall(formData);
+            console.log("FCM registration response:", response);
+          } catch (error) {
+            console.error("FCM registration failed:", error);
+          }
+        } else {
+          console.log("FCM permission not granted");
+        }
+      } catch (error) {
+        console.error("Error setting up notifications:", error);
+      }
+    };
+    setupNotifications();
+
     const requestPermissions = async () => {
       try {
-        // Request notification permission first
-        // const notificationGranted = await requestFCMPermission();
-        // if (notificationGranted) {
-        //   console.log("✅ Notification permission granted");
-        // } else {
-        //   console.log("❌ Notification permission denied");
-        // }
-
         // Then request location permission
         const location = await requestUserLocation();
         if (location) {
-          console.log("✅ Location permission granted:", location);
+          const userData = {
+            lat: location?.latitude,
+            lng: location.longitude,
+          };
         } else {
           console.log("❌ Location permission denied");
         }
@@ -137,7 +104,7 @@ export default function Welcome() {
         // Finally request camera permissions
         const cameraPermissions = await requestFullCameraAccess();
         if (cameraPermissions.camera && cameraPermissions.mediaLibrary) {
-          console.log("✅ All camera permissions granted");
+          // console.log("✅ All camera permissions granted");
         } else {
           console.log("❌ Some camera permissions denied:", cameraPermissions);
         }
@@ -145,8 +112,15 @@ export default function Welcome() {
         console.error("Error requesting permissions:", error);
       }
     };
-
     requestPermissions();
+
+    const handleNotificationPress = (data: any) => {
+      console.log("🔔 Notification Pressed:", data);
+    };
+    const unsubscribe = setupNotificationListeners(handleNotificationPress);
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleAppleSignUp = async () => {
@@ -171,7 +145,13 @@ export default function Welcome() {
 
         setUser(userData);
 
-        router.push("/auth/verify");
+        router.push({
+          pathname: "/auth/verify",
+          params: {
+            type: "apple account",
+            contact: "apple account",
+          },
+        });
       } else {
         showToast(response.message || "Login failed", "error");
         console.error("Login Error:", response.message);
@@ -205,7 +185,13 @@ export default function Welcome() {
         };
 
         setUser(userData);
-        router.push("/auth/verify");
+        router.push({
+          pathname: "/auth/verify",
+          params: {
+            type: "google account",
+            contact: "google account",
+          },
+        });
       } else {
         showToast(response.message || "Login failed", "error");
         console.error("Login Error:", response.message);
@@ -237,75 +223,83 @@ export default function Welcome() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.topSection}>
-        <View style={styles.logo}>
-          <AnimatedLogo />
+    <>
+      <Stack.Screen
+        options={{
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+      />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.topSection}>
+          <View style={styles.logo}>
+            <AnimatedLogo />
+          </View>
+          <Text style={styles.appName}>CrushPoint</Text>
+          <View style={styles.contentContainer}>
+            <Text style={styles.title}>Create Your Account</Text>
+            <Text style={styles.subtitle}>
+              Choose your preferred sign up method
+            </Text>
+
+            <View style={styles.buttonContainer}>
+              {/* Apple Button */}
+              <CustomButton
+                title="Continue with Apple"
+                onPress={handleAppleSignUp}
+                icon={<AppleIcon />}
+                variant="secondary"
+                isLoading={appleLoading}
+                isDisabled={googleLoading}
+              />
+
+              {/* Google Button */}
+              <CustomButton
+                title="Continue with Google"
+                onPress={handleGoogleSignUp}
+                icon={<GoogleIcon />}
+                variant="secondary"
+                isLoading={googleLoading}
+                isDisabled={appleLoading}
+              />
+
+              {/* Phone Button */}
+              <CustomButton
+                title="Continue with Phone"
+                onPress={handlePhoneSignUp}
+                icon={<PhoneIcon />}
+                variant="secondary"
+                isDisabled={appleLoading || googleLoading}
+              />
+
+              {/* Email Button */}
+              <CustomButton
+                title="Continue with Email"
+                onPress={handleEmailSignUp}
+                icon={<EmailIcon />}
+                variant="secondary"
+                isDisabled={appleLoading || googleLoading}
+              />
+            </View>
+
+            <View style={styles.loginSection}>
+              <Text style={styles.loginText}>Already have an account? </Text>
+              <TouchableOpacity onPress={handleLogin}>
+                <Text style={styles.loginLink}>Log In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-        <Text style={styles.appName}>CrushPoint</Text>
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>Create Your Account</Text>
-          <Text style={styles.subtitle}>
-            Choose your preferred sign up method
+
+        <View>
+          <Text style={styles.termsText}>
+            By signing up, you agree to our{" "}
+            <Text style={styles.linkText}>Terms</Text> and{" "}
+            <Text style={styles.linkText}>Privacy Policy</Text>
           </Text>
-
-          <View style={styles.buttonContainer}>
-            {/* Apple Button */}
-            <CustomButton
-              title="Continue with Apple"
-              onPress={handleAppleSignUp}
-              icon={<AppleIcon />}
-              variant="secondary"
-              isLoading={appleLoading}
-              isDisabled={googleLoading}
-            />
-
-            {/* Google Button */}
-            <CustomButton
-              title="Continue with Google"
-              onPress={handleGoogleSignUp}
-              icon={<GoogleIcon />}
-              variant="secondary"
-              isLoading={googleLoading}
-              isDisabled={appleLoading}
-            />
-
-            {/* Phone Button */}
-            <CustomButton
-              title="Continue with Phone"
-              onPress={handlePhoneSignUp}
-              icon={<PhoneIcon />}
-              variant="secondary"
-              isDisabled={appleLoading || googleLoading}
-            />
-
-            {/* Email Button */}
-            <CustomButton
-              title="Continue with Email"
-              onPress={handleEmailSignUp}
-              icon={<EmailIcon />}
-              variant="secondary"
-              isDisabled={appleLoading || googleLoading}
-            />
-          </View>
-
-          <View style={styles.loginSection}>
-            <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity onPress={handleLogin}>
-              <Text style={styles.loginLink}>Log In</Text>
-            </TouchableOpacity>
-          </View>
         </View>
-      </View>
-
-      <View>
-        <Text style={styles.termsText}>
-          By signing up, you agree to our{" "}
-          <Text style={styles.linkText}>Terms</Text> and{" "}
-          <Text style={styles.linkText}>Privacy Policy</Text>
-        </Text>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 }
 

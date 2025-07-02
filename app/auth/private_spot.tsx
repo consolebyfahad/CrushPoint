@@ -55,9 +55,9 @@ export default function PrivateSpot() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header />
       <View style={styles.content}>
         <View style={styles.titleSection}>
-          <Header />
           <Text style={styles.title}>Set Your Private Spot</Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>

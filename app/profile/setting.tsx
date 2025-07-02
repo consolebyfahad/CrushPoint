@@ -1,9 +1,12 @@
 import CustomButton from "@/components/custom_button";
+import { useToast } from "@/components/toast_provider";
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,14 +15,34 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Settings({ navigation }: any) {
+export default function Settings() {
+  const { logout } = useAppContext();
+  const { showToast } = useToast();
   const handleBack = () => {
     router.back();
   };
 
-  const handleLogOut = () => {
-    console.log("Log out");
-    // Handle logout functionality
+  const handleLogOut = async () => {
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          const success = await logout();
+
+          if (success) {
+            showToast("Logged out successfully", "success");
+            router.replace("/welcome");
+          } else {
+            showToast("Error logging out. Please try again.", "error");
+          }
+        },
+      },
+    ]);
   };
 
   // Settings sections data

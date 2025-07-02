@@ -159,8 +159,8 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header />
       <View style={styles.content}>
-        <Header />
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Verify Your Identity</Text>
           <Text style={styles.instructionText}>

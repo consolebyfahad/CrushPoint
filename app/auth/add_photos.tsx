@@ -246,8 +246,8 @@ export default function AddPhotos() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
+        <Header />
         <View style={styles.content}>
-          <Header />
           <View style={styles.titleSection}>
             <Text style={styles.title}>Add your best photos</Text>
             <View style={styles.subtitleContainer}>
