@@ -54,12 +54,6 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
                   color={color.success}
                   style={styles.verifiedIcon}
                 />
-                // <Ionicons
-                //   name="checkmark-circle"
-                //   size={16}
-                //   color="#10B981"
-                //   style={styles.verifiedIcon}
-                // />
               )}
             </View>
 

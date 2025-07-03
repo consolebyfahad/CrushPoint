@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
-export default function Map({ onViewProfile }: any) {
+export default function Map() {
   const nearbyUsers = [
     {
       id: "1",

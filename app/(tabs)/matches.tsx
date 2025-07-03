@@ -5,12 +5,16 @@ import ProfileOptions from "@/components/profile_options";
 import RemoveMatch from "@/components/remove_match";
 import { color, font } from "@/utils/constants";
 import React, { useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomSearchBar from "@/components/custom_search";
 import { MatchesTabsHeader } from "@/components/tabs_header";
-export default function Matches({ navigation }: any) {
+import { useAppContext } from "@/context/app_context";
+import useGetUsers from "@/hooks/useGetUsers";
+import { apiCall } from "@/utils/api";
+export default function Matches() {
+  const { user } = useAppContext();
   const [searchText, setSearchText] = useState("");
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
@@ -18,44 +22,47 @@ export default function Matches({ navigation }: any) {
   const [showRemoveMatch, setShowRemoveMatch] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
 
-  const [matches, setMatches] = useState([
-    {
-      id: "1",
-      name: "Alex",
-      age: 25,
-      distance: "0.5 km",
-      timeAgo: "2 hours ago",
-      isOnline: true,
-      isVerified: true,
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-    },
-    {
-      id: "2",
-      name: "Sophia",
-      age: 28,
-      distance: "1.2 km",
-      timeAgo: "1 day ago",
-      isOnline: false,
-      isVerified: true,
-      image:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
-    },
-    {
-      id: "3",
-      name: "Julia",
-      age: 24,
-      distance: "2.1 km",
-      timeAgo: "3 days ago",
-      isOnline: true,
-      isVerified: false,
-      image:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
-    },
-  ]);
+  // const [matches, setMatches] = useState([
+  //   {
+  //     id: "1",
+  //     name: "Alex",
+  //     age: 25,
+  //     distance: "0.5 km",
+  //     timeAgo: "2 hours ago",
+  //     isOnline: true,
+  //     isVerified: true,
+  //     image:
+  //       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+  //   },
+  //   {
+  //     id: "2",
+  //     name: "Sophia",
+  //     age: 28,
+  //     distance: "1.2 km",
+  //     timeAgo: "1 day ago",
+  //     isOnline: false,
+  //     isVerified: true,
+  //     image:
+  //       "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
+  //   },
+  //   {
+  //     id: "3",
+  //     name: "Julia",
+  //     age: 24,
+  //     distance: "2.1 km",
+  //     timeAgo: "3 days ago",
+  //     isOnline: true,
+  //     isVerified: false,
+  //     image:
+  //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+  //   },
+  // ]);
 
   // Filter matches based on search text
-  const filteredMatches = matches.filter((match) =>
+
+  const { users, loading, error, refetch } = useGetUsers();
+
+  const filteredMatches = users.filter((match) =>
     match.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -107,16 +114,28 @@ export default function Matches({ navigation }: any) {
     setSelectedMatch(null);
   };
 
-  const handleConfirmBlock = () => {
-    console.log("Block user:", selectedMatch?.name);
-    // Block logic here - also remove from matches
-    if (selectedMatch) {
-      setMatches((prevMatches) =>
-        prevMatches.filter((match) => match.id !== selectedMatch.id)
-      );
+  const handleConfirmBlock = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data");
+      formData.append("user_id", user?.user_id ? user?.user_id : "");
+      formData.append("table_name", "blocked_users");
+      formData.append("block_id", selectedMatch?.id);
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        if (selectedMatch) {
+          setMatches((prevMatches) =>
+            prevMatches.filter((match) => match.id !== selectedMatch.id)
+          );
+        }
+        setShowBlockConfirmation(false);
+        setSelectedMatch(null);
+      }
+    } catch (error) {
+      console.error("Block Error:", response.message);
     }
-    setShowBlockConfirmation(false);
-    setSelectedMatch(null);
   };
 
   const handleSubmitReport = (reportData: any) => {
@@ -146,7 +165,7 @@ export default function Matches({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <MatchesTabsHeader title="Your Matches" matches={matches} />
+      <MatchesTabsHeader title="Your Matches" matches={users} />
 
       {/* Search Bar */}
       <CustomSearchBar
@@ -163,6 +182,13 @@ export default function Matches({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={renderEmptyState}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refetch}
+            colors={[color.primary]}
+          />
+        }
       />
 
       {/* Profile Options Modal */}
