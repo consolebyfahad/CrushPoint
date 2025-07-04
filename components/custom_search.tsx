@@ -10,13 +10,21 @@ import {
   View,
 } from "react-native";
 
+type CustomSearchBarProps = {
+  searchText: any;
+  onChangeText: (text: string) => void;
+  placeholder?: string;
+  containerStyle?: any;
+  inputContainerStyle?: any;
+};
+
 export default function CustomSearchBar({
   searchText,
   onChangeText,
   placeholder = "Search",
   containerStyle,
   inputContainerStyle,
-}) {
+}: CustomSearchBarProps) {
   return (
     <View
       style={[

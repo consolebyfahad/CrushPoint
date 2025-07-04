@@ -1,16 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-type User = {
+export interface User {
   user_id: string;
   email: string;
   phone?: string;
   name: string;
   image: string | null;
   created: boolean;
-};
+}
 
-type UserData = {
+export interface UserData {
   gender: string;
   gender_interest: string;
   interests: string[];
@@ -25,22 +25,32 @@ type UserData = {
   zodiac: string;
   latitude: number;
   longitude: number;
-};
+}
 
-type AppContextType = {
+interface AppContextType {
+  // Authentication
   isLoggedIn: boolean;
   setIsLoggedIn: (val: boolean) => void;
+
+  // User profile
   user: User | null;
   setUser: (user: User | null) => void;
+
+  // User data
   userData: UserData;
   updateUserData: (data: Partial<UserData>) => void;
   clearUserData: () => void;
+
+  // User images
   userImages: string[];
   addUserImage: (fileName: string) => void;
   removeUserImage: (fileName: string) => void;
   clearUserImages: () => void;
+
+  // Utilities
   logout: () => Promise<boolean>;
-};
+  isHydrated: boolean;
+}
 
 const defaultUserData: UserData = {
   gender: "",
@@ -70,35 +80,47 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [userImages, setUserImages] = useState<string[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Hydrate state from AsyncStorage
+  // Hydrate state from AsyncStorage on app start
   useEffect(() => {
-    (async () => {
-      const saved = await AsyncStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
+    const hydrateContext = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved) {
           const parsed = JSON.parse(saved);
           setIsLoggedIn(parsed.isLoggedIn ?? false);
           setUser(parsed.user ?? null);
           setUserData(parsed.userData ?? defaultUserData);
           setUserImages(parsed.userImages ?? []);
-        } catch (e) {
-          console.warn("Failed to parse context state:", e);
         }
+      } catch (error) {
+        console.warn("Failed to parse context state:", error);
+      } finally {
+        setIsHydrated(true);
       }
-      setIsHydrated(true);
-    })();
+    };
+
+    hydrateContext();
   }, []);
 
-  // Save state to AsyncStorage whenever it changes
+  // Save state to AsyncStorage whenever it changes (after hydration)
   useEffect(() => {
-    if (!isHydrated) return; // Avoid saving before hydration
-    const data = {
-      isLoggedIn,
-      user,
-      userData,
-      userImages,
+    if (!isHydrated) return;
+
+    const saveContext = async () => {
+      try {
+        const data = {
+          isLoggedIn,
+          user,
+          userData,
+          userImages,
+        };
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (error) {
+        console.warn("Failed to save context state:", error);
+      }
     };
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(console.warn);
+
+    saveContext();
   }, [isLoggedIn, user, userData, userImages, isHydrated]);
 
   const updateUserData = (data: Partial<UserData>) => {
@@ -110,7 +132,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addUserImage = (fileName: string) => {
-    setUserImages((prev) => [...prev, fileName]);
+    setUserImages((prev) => {
+      if (prev.includes(fileName)) return prev;
+      return [...prev, fileName];
+    });
   };
 
   const removeUserImage = (fileName: string) => {
@@ -121,46 +146,47 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setUserImages([]);
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<boolean> => {
     try {
       setIsLoggedIn(false);
       setUser(null);
-      setUserData(defaultUserData);
-      setUserImages([]);
+      clearUserData();
+      clearUserImages();
 
       await AsyncStorage.removeItem(STORAGE_KEY);
-
+      console.log("✅ User logged out successfully");
       return true;
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("❌ Logout error:", error);
       return false;
     }
   };
 
+  const contextValue: AppContextType = {
+    isLoggedIn,
+    setIsLoggedIn,
+    user,
+    setUser,
+    userData,
+    updateUserData,
+    clearUserData,
+    userImages,
+    addUserImage,
+    removeUserImage,
+    clearUserImages,
+    logout,
+    isHydrated,
+  };
+
   return (
-    <AppContext.Provider
-      value={{
-        isLoggedIn,
-        setIsLoggedIn,
-        user,
-        setUser,
-        userData,
-        updateUserData,
-        clearUserData,
-        userImages,
-        addUserImage,
-        removeUserImage,
-        clearUserImages,
-        logout,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
   );
 };
 
-export const useAppContext = () => {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error("useAppContext must be used within AppProvider");
-  return ctx;
+export const useAppContext = (): AppContextType => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error("useAppContext must be used within AppProvider");
+  }
+  return context;
 };

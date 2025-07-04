@@ -1,11 +1,10 @@
 import { color } from "@/utils/constants";
 import { MarkerIcon } from "@/utils/SvgIcons";
-import { router } from "expo-router";
 import { useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
-export default function Map() {
+export default function Map({ onUserPress }: any) {
   const nearbyUsers = [
     {
       id: "1",
@@ -69,11 +68,6 @@ export default function Map() {
     longitude: 12.3155151,
   });
 
-  const handleUserProfile = (user: any) => {
-    console.log("first");
-    router.push("/profile/user_profile");
-  };
-
   return (
     <View style={styles.container}>
       <MapView
@@ -95,7 +89,7 @@ export default function Map() {
           <Marker
             key={user.id}
             coordinate={user.coordinate}
-            onPress={() => handleUserProfile(user)}
+            onPress={() => onUserPress(user)}
           >
             <View style={styles.userMarker}>
               <Image source={{ uri: user.image }} style={styles.userImage} />

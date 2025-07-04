@@ -2,7 +2,6 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-  Dimensions,
   Image,
   Modal,
   StyleSheet,
@@ -10,8 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function ProfileOptions({
   visible,

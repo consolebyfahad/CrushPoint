@@ -33,9 +33,7 @@ export default function Settings() {
         style: "destructive",
         onPress: async () => {
           const success = await logout();
-
           if (success) {
-            showToast("Logged out successfully", "success");
             router.replace("/welcome");
           } else {
             showToast("Error logging out. Please try again.", "error");
@@ -66,13 +64,6 @@ export default function Settings() {
         router.push("/profile/account_setting");
       },
     },
-    // {
-    //   id: "change_password",
-    //   title: "Change Password",
-    //   icon: "lock-closed-outline",
-    //   hasChevron: true,
-    //   onPress: () => console.log("Change Password"),
-    // },
     {
       id: "notifications",
       title: "Notifications",
@@ -100,13 +91,6 @@ export default function Settings() {
         router.push("/profile/blocked_user");
       },
     },
-    // {
-    //   id: "app_language",
-    //   title: "App Language",
-    //   icon: "globe-outline",
-    //   hasChevron: true,
-    //   onPress: () => console.log("App Language"),
-    // },
   ];
 
   const connectSettings = [
@@ -134,33 +118,6 @@ export default function Settings() {
       hasExternal: true,
       onPress: () => console.log("Community Guidelines"),
     },
-    // {
-    //   id: "terms",
-    //   title: "Terms of Service",
-    //   icon: "document-text-outline",
-    //   hasExternal: true,
-    //   onPress: () => console.log("Terms of Service"),
-    // },
-    // {
-    //   id: "privacy",
-    //   title: "Privacy Policy",
-    //   icon: "shield-outline",
-    //   hasExternal: true,
-    //   onPress: () => console.log("Privacy Policy"),
-    // },
-    // {
-    //   id: "support",
-    //   title: "Contact Support",
-    //   icon: "help-circle-outline",
-    //   hasChevron: true,
-    //   onPress: () => {
-    //     if (navigation) {
-    //       navigation.navigate("ContactSupport");
-    //     } else {
-    //       console.log("Contact Support");
-    //     }
-    //   },
-    // },
   ];
 
   const otherSettings = [
@@ -359,6 +316,6 @@ const styles = StyleSheet.create({
     height: 20,
   },
   logoutContainer: {
-    paddingHorizontal: 16,
+    padding: 16,
   },
 });

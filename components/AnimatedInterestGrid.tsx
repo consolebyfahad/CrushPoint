@@ -11,8 +11,11 @@ import AnimatedInterestItem from "./AnimatedInterestItem";
 
 interface InterestOption {
   id: string;
-  emoji: string;
-  label: string;
+  name: string;
+  distance: number;
+  date: string;
+  time: string;
+  image_url: string;
 }
 
 interface AnimatedInterestGridProps {
@@ -64,7 +67,7 @@ export default function AnimatedInterestGrid({
       searchQuery.trim() === ""
         ? interests
         : interests.filter((interest) =>
-            interest.label.toLowerCase().includes(searchQuery.toLowerCase())
+            interest.name.toLowerCase().includes(searchQuery.toLowerCase())
           );
 
     // Trigger search animation
@@ -162,6 +165,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 0, // Gap is handled by individual items
+    gap: 0,
   },
 });

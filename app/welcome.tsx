@@ -5,7 +5,6 @@ import { AnimatedLogo } from "@/utils//animations";
 import { apiCall } from "@/utils/api";
 import { requestFullCameraAccess } from "@/utils/camera";
 import { color, font } from "@/utils/constants";
-import { requestUserLocation } from "@/utils/location";
 import {
   getFCMToken,
   requestFCMPermission,
@@ -16,6 +15,7 @@ import * as Device from "expo-device";
 import { router, Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  BackHandler,
   Platform,
   StyleSheet,
   Text,
@@ -32,109 +32,112 @@ export default function Welcome() {
 
   const getDeviceInfo = async () => {
     try {
-      let deviceModel = "unknown";
-      if (Device.modelName) {
-        deviceModel = Device.modelName;
-      }
-
       return {
         platform: Platform.OS || "",
-        model: deviceModel,
+        model: Device.modelName || "unknown",
       };
     } catch (error) {
       console.error("Error getting device info:", error);
       return {
         platform: Platform.OS || "",
         model: "unknown",
-        brand: "unknown",
-        osVersion: "unknown",
       };
     }
   };
 
-  // useEffect(() => {
-  //   const backHandler = BackHandler.addEventListener(
-  //     "hardwareBackPress",
-  //     () => true
-  //   );
-  //   return () => backHandler.remove();
-  // }, []);
+  const requestPermissionsSequentially = async () => {
+    try {
+      await requestNotificationPermissions();
+      await requestCameraPermissions();
+    } catch (error) {
+      console.error("Error in permission flow:", error);
+    }
+  };
+
+  const requestNotificationPermissions = async () => {
+    try {
+      console.log("🔔 Requesting notification permissions...");
+      const permissionGranted = await requestFCMPermission();
+
+      if (permissionGranted) {
+        console.log("✅ Notification permission granted");
+        await registerFCMToken();
+      } else {
+        console.log("❌ Notification permission denied");
+      }
+    } catch (error) {
+      console.error("Error requesting notification permissions:", error);
+    }
+  };
+
+  const registerFCMToken = async () => {
+    try {
+      const token = await getFCMToken();
+      if (!token || !user?.user_id) return;
+
+      const deviceInfo = await getDeviceInfo();
+      const formData = new FormData();
+      formData.append("type", "update_noti");
+      formData.append("user_id", user.user_id);
+      formData.append("devicePlatform", deviceInfo.platform);
+      formData.append("deviceRid", token);
+      formData.append("deviceModel", deviceInfo.model);
+
+      const response = await apiCall(formData);
+      console.log("✅ FCM token registered:", response.success);
+    } catch (error) {
+      console.error("❌ FCM registration failed:", error);
+    }
+  };
+
+  const requestCameraPermissions = async () => {
+    try {
+      const cameraPermissions = await requestFullCameraAccess();
+
+      if (cameraPermissions.camera && cameraPermissions.mediaLibrary) {
+      } else {
+        console.log("❌ Some camera permissions denied:", cameraPermissions);
+      }
+    } catch (error) {
+      console.error("Error requesting camera permissions:", error);
+    }
+  };
 
   useEffect(() => {
-    const setupNotifications = async () => {
-      try {
-        const permissionGranted = await requestFCMPermission();
-        if (permissionGranted) {
-          const token = await getFCMToken();
-          const deviceInfo = await getDeviceInfo();
-          const formData = new FormData();
-          formData.append("type", "update_noti");
-          formData.append("user_id", user?.user_id ? user?.user_id : "");
-          formData.append("devicePlatform", deviceInfo.platform);
-          formData.append("deviceRid", token || "");
-          formData.append("deviceModel", deviceInfo.model);
-          try {
-            const response = await apiCall(formData);
-            console.log("FCM registration response:", response);
-          } catch (error) {
-            console.error("FCM registration failed:", error);
-          }
-        } else {
-          console.log("FCM permission not granted");
-        }
-      } catch (error) {
-        console.error("Error setting up notifications:", error);
-      }
-    };
-    setupNotifications();
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => true
+    );
+    return () => backHandler.remove();
+  }, []);
 
-    const requestPermissions = async () => {
-      try {
-        // Then request location permission
-        const location = await requestUserLocation();
-        if (location) {
-          const userData = {
-            lat: location?.latitude,
-            lng: location.longitude,
-          };
-        } else {
-          console.log("❌ Location permission denied");
-        }
-
-        // Finally request camera permissions
-        const cameraPermissions = await requestFullCameraAccess();
-        if (cameraPermissions.camera && cameraPermissions.mediaLibrary) {
-          // console.log("✅ All camera permissions granted");
-        } else {
-          console.log("❌ Some camera permissions denied:", cameraPermissions);
-        }
-      } catch (error) {
-        console.error("Error requesting permissions:", error);
-      }
-    };
-    requestPermissions();
-
+  useEffect(() => {
     const handleNotificationPress = (data: any) => {
       console.log("🔔 Notification Pressed:", data);
     };
     const unsubscribe = setupNotificationListeners(handleNotificationPress);
+
+    requestPermissionsSequentially();
+
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [user?.user_id]);
 
-  const handleAppleSignUp = async () => {
-    setAppleLoading(true);
+  const handleSocialLogin = async (provider: "apple" | "google") => {
+    const setLoading =
+      provider === "apple" ? setAppleLoading : setGoogleLoading;
+    const token = provider === "apple" ? "1" : "2";
+
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("type", "social_login");
-      formData.append("token", "1");
+      formData.append("token", token);
 
       const response = await apiCall(formData);
 
       if (response.success) {
-        console.log("response", response);
-
         const userData = {
           user_id: response.user_id,
           email: response.email,
@@ -148,8 +151,8 @@ export default function Welcome() {
         router.push({
           pathname: "/auth/verify",
           params: {
-            type: "apple account",
-            contact: "apple account",
+            type: `${provider} account`,
+            contact: `${provider} account`,
           },
         });
       } else {
@@ -160,49 +163,12 @@ export default function Welcome() {
       showToast("Something went wrong. Please try again.", "error");
       console.error("Login Error:", error);
     } finally {
-      setAppleLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    setGoogleLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("type", "social_login");
-      formData.append("token", "2");
-
-      const response = await apiCall(formData);
-
-      if (response.success) {
-        console.log("response", response);
-
-        const userData = {
-          user_id: response.user_id,
-          email: response.email,
-          name: response.name,
-          image: response.image,
-          created: response.created,
-        };
-
-        setUser(userData);
-        router.push({
-          pathname: "/auth/verify",
-          params: {
-            type: "google account",
-            contact: "google account",
-          },
-        });
-      } else {
-        showToast(response.message || "Login failed", "error");
-        console.error("Login Error:", response.message);
-      }
-    } catch (error) {
-      showToast("Something went wrong. Please try again.", "error");
-      console.error("Login Error:", error);
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
+  const handleAppleSignUp = () => handleSocialLogin("apple");
+  const handleGoogleSignUp = () => handleSocialLogin("google");
 
   const handlePhoneSignUp = () => {
     router.push({
@@ -221,6 +187,8 @@ export default function Welcome() {
   const handleLogin = () => {
     router.push("/auth/login?tab=phone");
   };
+
+  const isLoading = appleLoading || googleLoading;
 
   return (
     <>
@@ -243,7 +211,6 @@ export default function Welcome() {
             </Text>
 
             <View style={styles.buttonContainer}>
-              {/* Apple Button */}
               <CustomButton
                 title="Continue with Apple"
                 onPress={handleAppleSignUp}
@@ -253,7 +220,6 @@ export default function Welcome() {
                 isDisabled={googleLoading}
               />
 
-              {/* Google Button */}
               <CustomButton
                 title="Continue with Google"
                 onPress={handleGoogleSignUp}
@@ -263,22 +229,20 @@ export default function Welcome() {
                 isDisabled={appleLoading}
               />
 
-              {/* Phone Button */}
               <CustomButton
                 title="Continue with Phone"
                 onPress={handlePhoneSignUp}
                 icon={<PhoneIcon />}
                 variant="secondary"
-                isDisabled={appleLoading || googleLoading}
+                isDisabled={isLoading}
               />
 
-              {/* Email Button */}
               <CustomButton
                 title="Continue with Email"
                 onPress={handleEmailSignUp}
                 icon={<EmailIcon />}
                 variant="secondary"
-                isDisabled={appleLoading || googleLoading}
+                isDisabled={isLoading}
               />
             </View>
 

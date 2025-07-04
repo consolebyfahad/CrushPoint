@@ -1,10 +1,29 @@
 import * as Location from "expo-location";
+import { Alert, Linking, Platform } from "react-native";
 
 export async function requestUserLocation() {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
+    console.log("status", status);
+
     if (status !== "granted") {
-      // console.warn("Location permission not granted");
+      Alert.alert(
+        "Permission Required",
+        "Location access is required to use this feature. Please enable it in settings.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Open Settings",
+            onPress: () => {
+              if (Platform.OS === "ios") {
+                Linking.openURL("app-settings:");
+              } else {
+                Linking.openSettings(); // Android
+              }
+            },
+          },
+        ]
+      );
       return null;
     }
 

@@ -7,6 +7,8 @@ import LookingFor from "@/components/looking_for";
 import Nationality from "@/components/nationality";
 import Religion from "@/components/religion";
 import ZodiacSign from "@/components/zodic";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
 import { BellIcon } from "@/utils/SvgIcons";
@@ -19,6 +21,7 @@ import { useEffect, useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
+  const { user, updateUserData } = useAppContext();
   const [viewType, setViewType] = useState("Map");
   const [showFilters, setShowFilters] = useState(false);
   const [showLookingFor, setShowLookingFor] = useState(false);
@@ -41,11 +44,31 @@ export default function Index() {
   }, []);
 
   const handleAllowLocation = async () => {
+    console.log("press");
     const location = await requestUserLocation();
+    console.log("press2", location);
     if (location) {
-      console.log("User location:", location);
-      setLocationPermissionGranted(true);
-      setShowLocationModal(false);
+      try {
+        const formData = new FormData();
+        formData.append("type", "add_data");
+        formData.append("table_name", "user_locations");
+        formData.append("user_id", user!.user_id);
+        formData.append("lat", location?.latitude.toString());
+        formData.append("lng", location.longitude.toString());
+
+        const response = await apiCall(formData);
+        if (response.result) {
+          updateUserData({
+            latitude: location.latitude,
+            longitude: location.longitude,
+          });
+          console.log("User location:", location);
+          setLocationPermissionGranted(true);
+          setShowLocationModal(false);
+        }
+      } catch (error) {
+        console.error("❌ Failed to save location:", error);
+      }
     }
   };
 

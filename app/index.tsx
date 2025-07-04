@@ -11,7 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function Splash() {
-  const { isLoggedIn, userData, user } = useAppContext();
+  const { isLoggedIn } = useAppContext();
   const containerScale = useSharedValue(0);
   const imageScale = useSharedValue(0);
   const textOpacity = useSharedValue(0);
@@ -52,7 +52,6 @@ export default function Splash() {
     opacity: textOpacity.value,
     transform: [{ translateY: textTranslateY.value }],
   }));
-  console.log("isLoggedIn", isLoggedIn, user);
   useEffect(() => {
     setTimeout(() => {
       if (isLoggedIn) {

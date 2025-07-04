@@ -17,8 +17,11 @@ import Animated, {
 
 interface InterestOption {
   id: string;
-  emoji: string;
-  label: string;
+  name: string; // Now contains both emoji and text together
+  distance: number;
+  date: string;
+  time: string;
+  image_url: string;
 }
 
 interface AnimatedInterestTagProps {
@@ -148,20 +151,14 @@ export default function AnimatedInterestTag({
     };
   });
 
-  const animatedEmojiStyle = useAnimatedStyle(() => {
-    const emojiScale = withSpring(isSelected ? 1.15 : 1, {
+  const animatedNameStyle = useAnimatedStyle(() => {
+    const nameScale = withSpring(isSelected ? 1.05 : 1, {
       damping: 12,
       stiffness: 200,
     });
 
-    // Add a slight rotation for selected emojis
-    const rotate = withSpring(isSelected ? "5deg" : "0deg", {
-      damping: 15,
-      stiffness: 200,
-    });
-
     return {
-      transform: [{ scale: emojiScale }, { rotate }],
+      transform: [{ scale: nameScale }],
     };
   });
 
@@ -171,13 +168,15 @@ export default function AnimatedInterestTag({
       onPress={handlePress}
       activeOpacity={0.9}
     >
-      <Animated.Text style={[styles.emoji, animatedEmojiStyle]}>
-        {interest.emoji}
-      </Animated.Text>
       <Animated.Text
-        style={[styles.interestLabel, animatedTextStyle, textStyle]}
+        style={[
+          styles.interestName,
+          animatedTextStyle,
+          animatedNameStyle,
+          textStyle,
+        ]}
       >
-        {interest.label}
+        {interest.name}
       </Animated.Text>
     </AnimatedTouchableOpacity>
   );
@@ -191,14 +190,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 99,
     borderWidth: 1,
-    gap: 6,
     marginBottom: 8,
     marginRight: 8,
   },
-  emoji: {
-    fontSize: 14,
-  },
-  interestLabel: {
+  interestName: {
     fontSize: 16,
     fontFamily: font.medium,
   },

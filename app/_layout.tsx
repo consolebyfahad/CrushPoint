@@ -1,9 +1,10 @@
 import { AppProvider } from "@/context/app_context";
+import { color } from "@/utils/constants";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { StatusBar, Text, View } from "react-native";
+import { ActivityIndicator, StatusBar, View } from "react-native";
 import { ToastProvider } from "../components/toast_provider";
 
 SplashScreen.preventAutoHideAsync();
@@ -29,7 +30,7 @@ export default function RootLayout() {
   if (!isReady) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color={color.primary} />
       </View>
     );
   }
