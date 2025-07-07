@@ -8,6 +8,7 @@ export interface User {
   name: string;
   image: string | null;
   created: boolean;
+  new: boolean;
 }
 
 export interface UserData {
@@ -23,8 +24,8 @@ export interface UserData {
   nationality: string;
   religion: string;
   zodiac: string;
-  latitude: number;
-  longitude: number;
+  lat: any;
+  lng: any;
 }
 
 interface AppContextType {
@@ -65,8 +66,8 @@ const defaultUserData: UserData = {
   nationality: "",
   religion: "",
   zodiac: "",
-  latitude: 0,
-  longitude: 0,
+  lat: 0,
+  lng: 0,
 };
 
 const STORAGE_KEY = "@AppContext";

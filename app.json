@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "crushpoint",
-    "newArchEnabled": false,
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
@@ -17,6 +16,8 @@
       },
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera for scanning and face detection.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload profile pictures and verify your identity.",
+        "NSPhotoLibraryAddUsageDescription": "This app needs permission to save photos to your photo library.",
         "NSFaceIDUsageDescription": "This app uses Face ID for secure login.",
         "UIBackgroundModes": ["remote-notification"]
       },
@@ -56,6 +57,7 @@
       "expo-router",
       "expo-web-browser",
       "@react-native-firebase/app",
+      "@react-native-google-signin/google-signin",
       [
         "expo-splash-screen",
         {

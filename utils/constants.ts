@@ -35,4 +35,5 @@ export const image = {
   icon: require("@/assets/images/icon.png"),
   splash: require("@/assets/images/Splash.png"),
   welcome: require("@/assets/images/welcome.png"),
+  femaleDefault: require("@/assets/images/femaleDefault.jpg"),
 };

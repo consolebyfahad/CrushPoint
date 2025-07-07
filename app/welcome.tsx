@@ -3,15 +3,15 @@ import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { AnimatedLogo } from "@/utils//animations";
 import { apiCall } from "@/utils/api";
-import { requestFullCameraAccess } from "@/utils/camera";
 import { color, font } from "@/utils/constants";
-import {
-  getFCMToken,
-  requestFCMPermission,
-  setupNotificationListeners,
-} from "@/utils/notification";
 import { AppleIcon, EmailIcon, GoogleIcon, PhoneIcon } from "@/utils/SvgIcons";
-import * as Device from "expo-device";
+import { appleAuth } from "@invertase/react-native-apple-authentication";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { router, Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -24,84 +24,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+// Configure Google Sign-In
+GoogleSignin.configure({
+  webClientId:
+    "247710361352-tpf24aqbsl6cldmat3m6377hh27mv8mo.apps.googleusercontent.com",
+  iosClientId:
+    "247710361352-7dkl9r2vu65cclb0rq7s8g273kq7iobm.apps.googleusercontent.com",
+  googleServicePlistPath: "../GoogleService-Info.plist",
+});
+
 export default function Welcome() {
-  const { setUser, user } = useAppContext();
+  const { setUser } = useAppContext();
   const { showToast } = useToast();
   const [appleLoading, setAppleLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-
-  const getDeviceInfo = async () => {
-    try {
-      return {
-        platform: Platform.OS || "",
-        model: Device.modelName || "unknown",
-      };
-    } catch (error) {
-      console.error("Error getting device info:", error);
-      return {
-        platform: Platform.OS || "",
-        model: "unknown",
-      };
-    }
-  };
-
-  const requestPermissionsSequentially = async () => {
-    try {
-      await requestNotificationPermissions();
-      await requestCameraPermissions();
-    } catch (error) {
-      console.error("Error in permission flow:", error);
-    }
-  };
-
-  const requestNotificationPermissions = async () => {
-    try {
-      console.log("🔔 Requesting notification permissions...");
-      const permissionGranted = await requestFCMPermission();
-
-      if (permissionGranted) {
-        console.log("✅ Notification permission granted");
-        await registerFCMToken();
-      } else {
-        console.log("❌ Notification permission denied");
-      }
-    } catch (error) {
-      console.error("Error requesting notification permissions:", error);
-    }
-  };
-
-  const registerFCMToken = async () => {
-    try {
-      const token = await getFCMToken();
-      if (!token || !user?.user_id) return;
-
-      const deviceInfo = await getDeviceInfo();
-      const formData = new FormData();
-      formData.append("type", "update_noti");
-      formData.append("user_id", user.user_id);
-      formData.append("devicePlatform", deviceInfo.platform);
-      formData.append("deviceRid", token);
-      formData.append("deviceModel", deviceInfo.model);
-
-      const response = await apiCall(formData);
-      console.log("✅ FCM token registered:", response.success);
-    } catch (error) {
-      console.error("❌ FCM registration failed:", error);
-    }
-  };
-
-  const requestCameraPermissions = async () => {
-    try {
-      const cameraPermissions = await requestFullCameraAccess();
-
-      if (cameraPermissions.camera && cameraPermissions.mediaLibrary) {
-      } else {
-        console.log("❌ Some camera permissions denied:", cameraPermissions);
-      }
-    } catch (error) {
-      console.error("Error requesting camera permissions:", error);
-    }
-  };
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -111,64 +47,158 @@ export default function Welcome() {
     return () => backHandler.remove();
   }, []);
 
-  useEffect(() => {
-    const handleNotificationPress = (data: any) => {
-      console.log("🔔 Notification Pressed:", data);
-    };
-    const unsubscribe = setupNotificationListeners(handleNotificationPress);
+  const handleAppleSignIn = async () => {
+    // Check if Apple Sign-In is available (iOS 13+)
+    if (!appleAuth.isSupported) {
+      showToast("Apple Sign-In is not supported on this device", "error");
+      return;
+    }
 
-    requestPermissionsSequentially();
-
-    return () => {
-      unsubscribe();
-    };
-  }, [user?.user_id]);
-
-  const handleSocialLogin = async (provider: "apple" | "google") => {
-    const setLoading =
-      provider === "apple" ? setAppleLoading : setGoogleLoading;
-    const token = provider === "apple" ? "1" : "2";
-
-    setLoading(true);
+    setAppleLoading(true);
     try {
+      // Perform the Apple Sign-In request
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+
+      const { identityToken, nonce, user, email, fullName } =
+        appleAuthRequestResponse;
+
+      // Check if we have the required data
+      if (!identityToken) {
+        showToast("Apple Sign-In failed: No identity token received", "error");
+        return;
+      }
+
+      // Construct user data for API
+      const userData = {
+        id: user,
+        email: email,
+        name: fullName
+          ? `${fullName.givenName || ""} ${fullName.familyName || ""}`.trim()
+          : "",
+        identityToken,
+        nonce,
+      };
+
+      // Send to your backend
       const formData = new FormData();
       formData.append("type", "social_login");
-      formData.append("token", token);
+      formData.append("provider", "apple");
+      formData.append("token", identityToken);
+      formData.append("user_data", JSON.stringify(userData));
 
-      const response = await apiCall(formData);
+      const apiResponse = await apiCall(formData);
 
-      if (response.success) {
-        const userData = {
-          user_id: response.user_id,
-          email: response.email,
-          name: response.name,
-          image: response.image,
-          created: response.created,
+      if (apiResponse.success) {
+        const userInfo = {
+          user_id: apiResponse.user_id,
+          email: apiResponse.email,
+          name: apiResponse.name,
+          image: apiResponse.image,
+          created: apiResponse.created,
+          new: apiResponse?.new,
         };
 
-        setUser(userData);
+        setUser(userInfo);
 
         router.push({
           pathname: "/auth/verify",
           params: {
-            type: `${provider} account`,
-            contact: `${provider} account`,
+            type: "apple account",
+            contact: "apple account",
           },
         });
       } else {
-        showToast(response.message || "Login failed", "error");
-        console.error("Login Error:", response.message);
+        showToast(apiResponse.message || "Apple Sign-In failed", "error");
+        console.error("Apple Sign-In API Error:", apiResponse.message);
       }
-    } catch (error) {
-      showToast("Something went wrong. Please try again.", "error");
-      console.error("Login Error:", error);
+    } catch (error: any) {
+      console.error("Apple Sign-In Error:", error);
+
+      if (error.code === appleAuth.Error.CANCELED) {
+        showToast("Apple Sign-In was cancelled", "error");
+      } else if (error.code === appleAuth.Error.FAILED) {
+        showToast("Apple Sign-In failed", "error");
+      } else if (error.code === appleAuth.Error.INVALID_RESPONSE) {
+        showToast("Invalid response from Apple", "error");
+      } else if (error.code === appleAuth.Error.NOT_HANDLED) {
+        showToast("Apple Sign-In not handled", "error");
+      } else if (error.code === appleAuth.Error.UNKNOWN) {
+        showToast("Unknown Apple Sign-In error", "error");
+      } else {
+        showToast("Something went wrong with Apple Sign-In", "error");
+      }
     } finally {
-      setLoading(false);
+      setAppleLoading(false);
     }
   };
 
-  const handleAppleSignUp = () => handleSocialLogin("apple");
-  const handleGoogleSignUp = () => handleSocialLogin("google");
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      console.log("first");
+
+      if (isSuccessResponse(response)) {
+        const { user } = response.data;
+
+        // Send the actual Google ID token to your backend
+        const formData = new FormData();
+        formData.append("type", "social_login");
+        // formData.append("provider", "google");
+        formData.append("token", response.data.idToken || "");
+        formData.append("user_data", user.email);
+
+        const apiResponse = await apiCall(formData);
+        if (apiResponse.success) {
+          const userData = {
+            user_id: apiResponse.user_id,
+            email: apiResponse.email,
+            name: apiResponse.name,
+            image: apiResponse.image,
+            created: apiResponse.created,
+            new: apiResponse?.new,
+          };
+
+          setUser(userData);
+
+          router.push({
+            pathname: "/auth/verify",
+            params: {
+              type: "google account",
+              contact: "google account",
+            },
+          });
+        } else {
+          showToast(apiResponse.message || "Google Sign-In failed", "error");
+          console.error("Google Sign-In API Error:", apiResponse.message);
+        }
+      } else {
+        showToast("Google sign in was cancelled", "error");
+      }
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            showToast("Sign in already in progress", "error");
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            showToast("Google Play Services not available", "error");
+            break;
+          default:
+            showToast("Google sign in failed", "error");
+        }
+      } else {
+        showToast("Something went wrong with Google Sign-In", "error");
+        console.error("Google Sign-In Error:", error);
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handlePhoneSignUp = () => {
     router.push({
@@ -211,18 +241,21 @@ export default function Welcome() {
             </Text>
 
             <View style={styles.buttonContainer}>
-              <CustomButton
-                title="Continue with Apple"
-                onPress={handleAppleSignUp}
-                icon={<AppleIcon />}
-                variant="secondary"
-                isLoading={appleLoading}
-                isDisabled={googleLoading}
-              />
+              {/* Show Apple Sign-In only on iOS */}
+              {Platform.OS === "ios" && appleAuth.isSupported && (
+                <CustomButton
+                  title="Continue with Apple"
+                  onPress={handleAppleSignIn}
+                  icon={<AppleIcon />}
+                  variant="secondary"
+                  isLoading={appleLoading}
+                  isDisabled={googleLoading}
+                />
+              )}
 
               <CustomButton
                 title="Continue with Google"
-                onPress={handleGoogleSignUp}
+                onPress={handleGoogleSignIn}
                 icon={<GoogleIcon />}
                 variant="secondary"
                 isLoading={googleLoading}

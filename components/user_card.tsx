@@ -1,85 +1,61 @@
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
+import { calculateDistance } from "@/utils/distanceCalculator";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomButton from "./custom_button";
-export default function UserCard({ user, onViewProfile, onBookmark }: any) {
-  const defaultUser = {
-    id: "1",
-    name: "Alex",
-    age: 25,
-    distance: "0.5 km",
-    isOnline: true,
-    lookingFor: "Serious relationship",
-    interests: ["Coffee", "Hiking", "Photography"],
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&crop=face",
-    ...user,
-  };
 
-  const handleViewProfile = () => {
-    if (onViewProfile) {
-      onViewProfile(defaultUser);
-    } else {
-      console.log("View profile for:", defaultUser.name);
+interface UserCardProps {
+  user: any;
+  onViewProfile: () => void;
+  onBookmark: () => void;
+}
+
+export default function UserCard({
+  user,
+  onViewProfile,
+  onBookmark,
+}: UserCardProps) {
+  const { userData: currentUser } = useAppContext();
+  console.log("useruseruser", user);
+  // Calculate distance between current user and target user
+  const distance = calculateDistance(
+    {
+      lat: currentUser?.lat || 0,
+      lng: currentUser?.lng || 0,
+    },
+    {
+      lat: user?.actualLocation?.lat || 0,
+      lng: user?.actualLocation?.lng || 0,
+    }
+  );
+
+  // Get profile image source - handle both URI and local assets
+  const getProfileImageSource = () => {
+    // If user has images, use the first one as URI
+    if (user?.images && user.images.length > 0 && user.images[0]) {
+      return { uri: user.images[0] };
     }
   };
 
-  const handleBookmark = () => {
-    if (onBookmark) {
-      onBookmark(defaultUser);
-    } else {
-      console.log("Bookmark user:", defaultUser.name);
-    }
-  };
+  const profileImageSource = getProfileImageSource();
 
-  const getInterestIcon = (interest: string) => {
-    switch (interest.toLowerCase()) {
-      case "coffee":
-        return "☕";
-      case "hiking":
-        return "🥾";
-      case "photography":
-        return "📸";
-      case "music":
-        return "🎵";
-      case "travel":
-        return "✈️";
-      case "fitness":
-        return "💪";
-      case "cooking":
-        return "👨‍🍳";
-      case "reading":
-        return "📚";
-      default:
-        return "🎯";
-    }
-  };
-
-  const getLookingForIcon = (lookingFor: string) => {
-    if (lookingFor.toLowerCase().includes("serious")) {
-      return "🩵";
-    } else if (lookingFor.toLowerCase().includes("casual")) {
-      return "😊";
-    } else if (lookingFor.toLowerCase().includes("friendship")) {
-      return "🤝";
-    } else {
-      return "🔥";
-    }
-  };
+  // Format looking for text
+  const lookingForText =
+    user?.lookingFor?.length > 0
+      ? user.lookingFor.join(", ")
+      : "Open to connect";
 
   return (
     <View style={styles.container}>
       {/* Profile Image */}
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: defaultUser.image }}
-          style={styles.profileImage}
-        />
+        <Image source={profileImageSource} style={styles.profileImage} />
 
-        {/* Online Status */}
-        {defaultUser.isOnline && (
+        {/* Online Status - Only show if user is online */}
+        {user?.isOnline && (
           <View style={styles.onlineStatus}>
             <View style={styles.onlineDot} />
             <Text style={styles.onlineText}>Online</Text>
@@ -91,7 +67,7 @@ export default function UserCard({ user, onViewProfile, onBookmark }: any) {
       <View style={styles.userInfo}>
         <View style={styles.nameRow}>
           <Text style={styles.userName}>
-            {defaultUser.name}, {defaultUser.age}
+            {user?.name || "Unknown"}, {user?.age || "N/A"}
           </Text>
           <View style={styles.distanceContainer}>
             <SimpleLineIcons
@@ -99,27 +75,23 @@ export default function UserCard({ user, onViewProfile, onBookmark }: any) {
               size={16}
               color={color.gray55}
             />
-            <Text style={styles.distance}>{defaultUser.distance}</Text>
+            <Text style={styles.distance}>{distance}</Text>
           </View>
         </View>
 
         {/* Looking For */}
         <View style={styles.lookingForContainer}>
-          <Text style={styles.lookingForIcon}>
-            {getLookingForIcon(defaultUser.lookingFor)}
-          </Text>
-          <Text style={styles.lookingForText}>{defaultUser.lookingFor}</Text>
+          <Text style={styles.lookingForIcon}>💕</Text>
+          <Text style={styles.lookingForText}>{lookingForText}</Text>
         </View>
 
         {/* Interests */}
         <View style={styles.interestsContainer}>
-          {defaultUser.interests
-            .slice(0, 3)
+          {user?.interests
+            ?.slice(0, 3)
             .map((interest: string, index: number) => (
               <View key={index} style={styles.interestTag}>
-                <Text style={styles.interestIcon}>
-                  {getInterestIcon(interest)}
-                </Text>
+                <Text style={styles.interestIcon}>✨</Text>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>
             ))}
@@ -127,22 +99,15 @@ export default function UserCard({ user, onViewProfile, onBookmark }: any) {
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          {/* <TouchableOpacity
-            style={styles.viewProfileButton}
-            onPress={handleViewProfile}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.viewProfileText}>View Profile</Text>
-          </TouchableOpacity> */}
           <CustomButton
             title="View Profile"
             style={{ width: "80%", paddingVertical: 8 }}
-            onPress={handleViewProfile}
+            onPress={onViewProfile}
           />
 
           <TouchableOpacity
             style={styles.bookmarkButton}
-            onPress={handleBookmark}
+            onPress={onBookmark}
             activeOpacity={0.8}
           >
             <Feather name="map" size={18} color="black" />

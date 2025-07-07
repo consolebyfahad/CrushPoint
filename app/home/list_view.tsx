@@ -1,70 +1,20 @@
-import { useToast } from "@/components/toast_provider";
 import UserCard from "@/components/user_card";
 import useGetUsers from "@/hooks/useGetUsers";
+import { color } from "@/utils/constants";
 import React from "react";
-import { FlatList, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ListView({ onViewProfile, onBookmark }: any) {
   const { users, loading, error, refetch } = useGetUsers();
-  const { showToast } = useToast();
-  // const users = [
-  //   {
-  //     id: "1",
-  //     name: "Alex",
-  //     age: 25,
-  //     distance: "0.5 km",
-  //     isOnline: true,
-  //     lookingFor: "Serious relationship",
-  //     interests: ["Coffee", "Hiking", "Photography"],
-  //     image:
-  //       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&crop=face",
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "Sam",
-  //     age: 28,
-  //     distance: "1.2 km",
-  //     isOnline: false,
-  //     lookingFor: "Casual dating",
-  //     interests: ["Food", "Wine", "Writing"],
-  //     image:
-  //       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face",
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "Julia",
-  //     age: 24,
-  //     distance: "2.1 km",
-  //     isOnline: true,
-  //     lookingFor: "Friendship",
-  //     interests: ["Reading", "Art", "Yoga"],
-  //     image:
-  //       "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=500&fit=crop&crop=face",
-  //   },
-  //   {
-  //     id: "4",
-  //     name: "Mike",
-  //     age: 30,
-  //     distance: "3.5 km",
-  //     isOnline: false,
-  //     lookingFor: "Open to possibilities",
-  //     interests: ["Fitness", "Travel", "Music"],
-  //     image:
-  //       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop&crop=face",
-  //   },
-  //   {
-  //     id: "5",
-  //     name: "Emma",
-  //     age: 26,
-  //     distance: "4.2 km",
-  //     isOnline: true,
-  //     lookingFor: "Serious relationship",
-  //     interests: ["Cooking", "Dancing", "Movies"],
-  //     image:
-  //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop&crop=face",
-  //   },
-  // ];
 
   const renderUserCard = ({ item }: any) => (
     <UserCard
@@ -74,15 +24,52 @@ export default function ListView({ onViewProfile, onBookmark }: any) {
     />
   );
 
+  // Main content with users
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={users}
-        renderItem={renderUserCard}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-      />
+      {error && users.length === 0 ? (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>😔 Oops!</Text>
+          <Text style={styles.errorMessage}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      ) : loading && users.length === 0 ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Loading users...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={users}
+          renderItem={renderUserCard}
+          keyExtractor={(item: any) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContainer}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={refetch}
+              colors={[color.primary]}
+              tintColor={color.primary}
+              title="Pull to refresh"
+              titleColor="#666"
+            />
+          }
+          // Optional: Show error message at top if there are users but also an error
+          ListHeaderComponent={
+            error && users.length > 0 ? (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorBannerText}>⚠️ {error}</Text>
+                <TouchableOpacity onPress={refetch}>
+                  <Text style={styles.retryLink}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -91,9 +78,64 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
-    // marginBottom: 24,
+    marginBottom: 24,
   },
   listContainer: {
     paddingTop: 60,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+  },
+  errorText: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  retryButton: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  errorBanner: {
+    backgroundColor: "#FFF3CD",
+    borderColor: "#FFEAA7",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    margin: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  errorBannerText: {
+    color: "#856404",
+    fontSize: 14,
+    flex: 1,
+  },
+  retryLink: {
+    color: "#007AFF",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

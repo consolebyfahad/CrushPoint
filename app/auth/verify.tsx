@@ -118,13 +118,15 @@ export default function Verify() {
       if (response.result) {
         setIsLoggedIn(true);
         setCode(["", "", "", "", "", ""]);
-        router.push("/auth/gender");
+        if (user?.new) {
+          router.push("/auth/gender");
+        } else {
+          router.push("/(tabs)");
+        }
       } else {
         showToast(response.message || "Invalid verification code", "error");
         console.error("Verification Error:", response.message);
-
         setCode(["", "", "", "", "", ""]);
-
         setTimeout(() => {
           inputRefs.current[0]?.focus();
         }, 100);
