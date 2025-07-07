@@ -48,7 +48,6 @@ export default function Welcome() {
   }, []);
 
   const handleAppleSignIn = async () => {
-    // Check if Apple Sign-In is available (iOS 13+)
     if (!appleAuth.isSupported) {
       showToast("Apple Sign-In is not supported on this device", "error");
       return;
@@ -56,7 +55,6 @@ export default function Welcome() {
 
     setAppleLoading(true);
     try {
-      // Perform the Apple Sign-In request
       const appleAuthRequestResponse = await appleAuth.performRequest({
         requestedOperation: appleAuth.Operation.LOGIN,
         requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
@@ -65,13 +63,11 @@ export default function Welcome() {
       const { identityToken, nonce, user, email, fullName } =
         appleAuthRequestResponse;
 
-      // Check if we have the required data
       if (!identityToken) {
         showToast("Apple Sign-In failed: No identity token received", "error");
         return;
       }
 
-      // Construct user data for API
       const userData = {
         id: user,
         email: email,

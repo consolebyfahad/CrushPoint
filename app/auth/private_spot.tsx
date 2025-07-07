@@ -1,14 +1,16 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
 import { MarkerIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -18,7 +20,9 @@ import MapView, { Circle, Marker, Region } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivateSpot() {
-  const { updateUserData } = useAppContext();
+  const { updateUserData, userData, user } = useAppContext();
+  const { fromEdit } = useLocalSearchParams();
+  const isEdit = fromEdit === "true";
   const [selectedRadius, setSelectedRadius] = useState("100m");
   const [mapRegion, setMapRegion] = useState<Region>({
     latitude: 45.4408474,
@@ -29,10 +33,30 @@ export default function PrivateSpot() {
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    getUserLocation();
-  }, []);
+    if (isEdit && userData) {
+      // Load existing location data when in edit mode
+      if (userData.lat && userData.lng) {
+        const existingRegion: Region = {
+          latitude: userData.lat,
+          longitude: userData.lng,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        };
+        setMapRegion(existingRegion);
+        setLocationPermissionGranted(true);
+        setIsLoadingLocation(false);
+      }
+
+      if (userData.radius) {
+        setSelectedRadius(userData.radius === 100 ? "100m" : "200m");
+      }
+    } else {
+      getUserLocation();
+    }
+  }, [isEdit, userData]);
 
   const getUserLocation = async () => {
     setIsLoadingLocation(true);
@@ -85,11 +109,63 @@ export default function PrivateSpot() {
     router.push("/auth/add_photos");
   };
 
+  const handleSaveChanges = async () => {
+    if (!user?.user_id) {
+      Alert.alert("Error", "User session expired. Please login again.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", user.user_id);
+      formData.append("table_name", "users");
+      formData.append(
+        "radius",
+        (selectedRadius === "100m" ? 100 : 200).toString()
+      );
+      formData.append("lat", mapRegion.latitude.toString());
+      formData.append("lng", mapRegion.longitude.toString());
+
+      console.log("Updating private spot:", {
+        radius: selectedRadius === "100m" ? 100 : 200,
+        latitude: mapRegion.latitude,
+        longitude: mapRegion.longitude,
+      });
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        // Update context with new location data
+        updateUserData({
+          radius: selectedRadius === "100m" ? 100 : 200,
+          lat: mapRegion.latitude,
+          lng: mapRegion.longitude,
+        });
+
+        Alert.alert("Success", "Private spot updated successfully!", [
+          {
+            text: "OK",
+            onPress: () => router.back(),
+          },
+        ]);
+      } else {
+        throw new Error(response.message || "Failed to update private spot");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      Alert.alert("Error", "Failed to update private spot. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const getRadiusInMeters = () => {
     return selectedRadius === "100m" ? 100 : 200;
   };
 
-  if (isLoadingLocation) {
+  if (isLoadingLocation && !isEdit) {
     return (
       <SafeAreaView style={styles.container}>
         <Header />
@@ -106,11 +182,15 @@ export default function PrivateSpot() {
       <Header />
       <View style={styles.content}>
         <View style={styles.titleSection}>
-          <Text style={styles.title}>Set Your Private Spot</Text>
+          <Text style={styles.title}>
+            {isEdit ? "Edit Your Private Spot" : "Set Your Private Spot"}
+          </Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>
               <Octicons name="info" size={14} color={color.gray55} />{" "}
-              {locationPermissionGranted
+              {isEdit
+                ? "Update the area where you don't want to be visible to others"
+                : locationPermissionGranted
                 ? "Drag the map to choose an area where you don't want to be visible to others"
                 : "Choose an area on the map where you don't want to be visible to others"}
             </Text>
@@ -123,7 +203,7 @@ export default function PrivateSpot() {
             style={styles.map}
             region={mapRegion}
             onRegionChangeComplete={handleMapRegionChange}
-            showsUserLocation={locationPermissionGranted}
+            showsUserLocation={locationPermissionGranted && !isEdit}
             showsMyLocationButton={false}
             scrollEnabled={true}
             zoomEnabled={true}
@@ -204,7 +284,7 @@ export default function PrivateSpot() {
           </View>
         </View>
 
-        {!locationPermissionGranted && (
+        {!locationPermissionGranted && !isEdit && (
           <View style={styles.retryContainer}>
             <TouchableOpacity
               style={styles.retryButton}
@@ -218,7 +298,14 @@ export default function PrivateSpot() {
       </View>
 
       <View style={styles.buttonContainer}>
-        <CustomButton title="Save & Continue" onPress={handleSaveAndContinue} />
+        <CustomButton
+          title={
+            isSaving ? "Saving..." : isEdit ? "Save Changes" : "Save & Continue"
+          }
+          onPress={isEdit ? handleSaveChanges : handleSaveAndContinue}
+          isDisabled={isSaving}
+          isLoading={isSaving}
+        />
       </View>
     </SafeAreaView>
   );

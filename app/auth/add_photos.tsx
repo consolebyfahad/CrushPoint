@@ -6,8 +6,8 @@ import { color, font } from "@/utils/constants";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -25,16 +25,40 @@ type UploadedPhoto = {
   uri: string;
   width: number;
   height: number;
-  fileName?: string;
+  fileName?: any;
   serverUrl?: string;
   isUploading?: boolean;
+  isExisting?: boolean;
 };
 
 export default function AddPhotos() {
-  const { user, addUserImage, removeUserImage } = useAppContext();
+  const { user, addUserImage, removeUserImage, userImages } = useAppContext();
+  const params = useLocalSearchParams();
   const [selectedPhotos, setSelectedPhotos] = useState<UploadedPhoto[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Check if coming from profile edit
+  const isEditMode = params.fromEdit === "true";
   const maxPhotos = 6;
   const minPhotos = 2;
+
+  // Load existing images when in edit mode
+  useEffect(() => {
+    if (isEditMode && userImages && userImages.length > 0) {
+      const existingPhotos: UploadedPhoto[] = userImages.map(
+        (fileName, index) => ({
+          id: `existing_${index}`,
+          uri: `https://your-server.com/uploads/${fileName}`, // Replace with your actual image URL
+          width: 300,
+          height: 400,
+          fileName: fileName,
+          isExisting: true,
+          isUploading: false,
+        })
+      );
+      setSelectedPhotos(existingPhotos);
+    }
+  }, [isEditMode, userImages]);
 
   const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -75,7 +99,10 @@ export default function AddPhotos() {
       const response = await apiCall(formData);
 
       if (response.result && response.file_name) {
-        addUserImage(response.file_name);
+        // Only add to context if not in edit mode (edit mode handles this in save)
+        if (!isEditMode) {
+          addUserImage(response.file_name);
+        }
 
         setSelectedPhotos((prev) =>
           prev.map((photo) =>
@@ -131,6 +158,7 @@ export default function AddPhotos() {
           width: asset.width,
           height: asset.height,
           isUploading: false,
+          isExisting: false,
         }));
 
         // Add photos to state first
@@ -152,8 +180,8 @@ export default function AddPhotos() {
   const removePhoto = (photoId: string) => {
     const photoToRemove = selectedPhotos.find((photo) => photo.id === photoId);
 
-    // Remove from server/context if it was uploaded
-    if (photoToRemove?.fileName) {
+    // Remove from server/context if it was uploaded and not in edit mode
+    if (photoToRemove?.fileName && !isEditMode) {
       removeUserImage(photoToRemove.fileName);
     }
 
@@ -180,6 +208,59 @@ export default function AddPhotos() {
       uploadedPhotos.map((p) => p.fileName)
     );
     router.push("/auth/verification");
+  };
+
+  const handleSave = async () => {
+    const uploadedPhotos = selectedPhotos.filter(
+      (photo) => photo.fileName && !photo.isUploading
+    );
+
+    if (uploadedPhotos.length < minPhotos) {
+      Alert.alert(
+        "Not enough photos",
+        `Please upload at least ${minPhotos} photos to save.`
+      );
+      return;
+    }
+
+    if (!user?.user_id) {
+      Alert.alert("Error", "User ID not found. Please login again.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const imageFileNames = uploadedPhotos.map((photo) => photo.fileName);
+
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", user.user_id);
+      formData.append("table_name", "users");
+      formData.append("images", JSON.stringify(imageFileNames));
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        // Update context with new images
+        // Clear existing images and add new ones
+        userImages.forEach((fileName) => removeUserImage(fileName));
+        imageFileNames.forEach((fileName) => addUserImage(fileName));
+
+        Alert.alert("Success", "Photos updated successfully!", [
+          {
+            text: "OK",
+            onPress: () => router.back(),
+          },
+        ]);
+      } else {
+        throw new Error(response.message || "Failed to update photos");
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      Alert.alert("Error", "Failed to save photos. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isButtonDisabled =
@@ -249,7 +330,9 @@ export default function AddPhotos() {
         <Header />
         <View style={styles.content}>
           <View style={styles.titleSection}>
-            <Text style={styles.title}>Add your best photos</Text>
+            <Text style={styles.title}>
+              {isEditMode ? "Edit your photos" : "Add your best photos"}
+            </Text>
             <View style={styles.subtitleContainer}>
               <Text style={styles.subtitle}>
                 <Octicons name="info" size={14} color={color.gray55} /> Photos
@@ -297,12 +380,13 @@ export default function AddPhotos() {
         </View>
       </ScrollView>
 
-      {/* Continue Button */}
+      {/* Action Button */}
       <View style={styles.buttonContainer}>
         <CustomButton
-          title="Continue"
-          onPress={handleContinue}
-          isDisabled={isButtonDisabled}
+          title={isLoading ? "Saving..." : isEditMode ? "Save" : "Continue"}
+          onPress={isEditMode ? handleSave : handleContinue}
+          isDisabled={isButtonDisabled || isLoading}
+          isLoading={isLoading}
         />
       </View>
     </SafeAreaView>

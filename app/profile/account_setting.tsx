@@ -1,9 +1,12 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import React, { useState } from "react";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Platform,
@@ -17,16 +20,92 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountSettings({ route, navigation }: any) {
+  const { user, userData, updateUserData } = useAppContext();
+
   const [accountData, setAccountData] = useState({
-    fullName: "Julia Williams",
-    dateOfBirth: "11/17/1994",
-    phoneNumber: "+1 316 322 0000",
-    email: "Email@example.com",
+    fullName: "",
+    dateOfBirth: "",
+    phoneNumber: "",
+    email: "",
   });
 
   const [isChanged, setIsChanged] = useState(false);
-  const [date, setDate] = useState(new Date(1994, 10, 17));
+  const [isLoading, setIsLoading] = useState(false);
+  const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Load existing user data when component mounts
+  useEffect(() => {
+    if (userData) {
+      setAccountData({
+        fullName: userData.name || "",
+        dateOfBirth: userData.dob || "",
+        phoneNumber: userData.phone || "",
+        email: userData.email || "",
+      });
+
+      // Set date picker date if DOB exists
+      if (userData.dob) {
+        try {
+          // Assuming DOB is in mm/dd/yyyy format
+          const [month, day, year] = userData.dob.split("/");
+          const dateObj = new Date(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day)
+          );
+          setDate(dateObj);
+        } catch (error) {
+          console.error("Error parsing date:", error);
+        }
+      }
+    }
+  }, [userData]);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhoneNumber = (phone: string) => {
+    // Basic phone validation - should contain numbers and can have +, -, spaces, parentheses
+    const phoneRegex = /^[\+]?[1-9][\d\-\s\(\)]{7,15}$/;
+    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""));
+  };
+
+  const validateFields = () => {
+    if (!accountData.fullName.trim()) {
+      Alert.alert("Validation Error", "Please enter your full name.");
+      return false;
+    }
+
+    if (!accountData.dateOfBirth.trim()) {
+      Alert.alert("Validation Error", "Please select your date of birth.");
+      return false;
+    }
+
+    if (!accountData.phoneNumber.trim()) {
+      Alert.alert("Validation Error", "Please enter your phone number.");
+      return false;
+    }
+
+    if (!validatePhoneNumber(accountData.phoneNumber)) {
+      Alert.alert("Validation Error", "Please enter a valid phone number.");
+      return false;
+    }
+
+    if (!accountData.email.trim()) {
+      Alert.alert("Validation Error", "Please enter your email address.");
+      return false;
+    }
+
+    if (!validateEmail(accountData.email)) {
+      Alert.alert("Validation Error", "Please enter a valid email address.");
+      return false;
+    }
+
+    return true;
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setAccountData((prev) => ({
@@ -36,17 +115,77 @@ export default function AccountSettings({ route, navigation }: any) {
     setIsChanged(true);
   };
 
-  const handleSaveChanges = () => {
-    console.log("Saving account changes:", accountData);
-    // Save changes to backend
-    setIsChanged(false);
+  const handleSaveChanges = async () => {
+    if (!user?.user_id) {
+      Alert.alert("Error", "User session expired. Please login again.");
+      return;
+    }
 
-    // Show success message
-    Alert.alert(
-      "Success",
-      "Your account settings have been updated successfully.",
-      [{ text: "OK" }]
-    );
+    if (!validateFields()) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", user.user_id);
+      formData.append("table_name", "users");
+      formData.append("name", accountData.fullName.trim());
+      formData.append("dob", accountData.dateOfBirth);
+      formData.append("phone", accountData.phoneNumber.trim());
+      formData.append("email", accountData.email.trim().toLowerCase());
+
+      console.log("Updating account data:", {
+        name: accountData.fullName.trim(),
+        dob: accountData.dateOfBirth,
+        phone: accountData.phoneNumber.trim(),
+        email: accountData.email.trim().toLowerCase(),
+      });
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        // Update context with new data
+        updateUserData({
+          name: accountData.fullName.trim(),
+          dob: accountData.dateOfBirth,
+          phone: accountData.phoneNumber.trim(),
+          email: accountData.email.trim().toLowerCase(),
+        });
+
+        setIsChanged(false);
+
+        Alert.alert(
+          "Success",
+          "Your account settings have been updated successfully.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                if (navigation) {
+                  navigation.goBack();
+                } else {
+                  router.back();
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        throw new Error(
+          response.message || "Failed to update account settings"
+        );
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      Alert.alert(
+        "Error",
+        "Failed to update account settings. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -63,7 +202,7 @@ export default function AccountSettings({ route, navigation }: any) {
           style: "destructive",
           onPress: () => {
             console.log("Account deletion confirmed");
-            // Handle account deletion
+            // TODO: Implement account deletion API call
           },
         },
       ]
@@ -105,6 +244,7 @@ export default function AccountSettings({ route, navigation }: any) {
             onChangeText={(value) => handleInputChange("fullName", value)}
             placeholder="Enter your full name"
             placeholderTextColor={color.gray14}
+            editable={!isLoading}
           />
           <Text style={styles.fieldNote}>Changeable only once in 6 months</Text>
         </View>
@@ -113,9 +253,10 @@ export default function AccountSettings({ route, navigation }: any) {
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>Date of Birth</Text>
           <TouchableOpacity
-            style={styles.dateInput}
+            style={[styles.dateInput, isLoading && { opacity: 0.6 }]}
             onPress={handleDatePress}
             activeOpacity={0.7}
+            disabled={isLoading}
           >
             <TextInput
               style={[
@@ -154,6 +295,7 @@ export default function AccountSettings({ route, navigation }: any) {
             placeholder="Enter your phone number"
             placeholderTextColor={color.gray14}
             keyboardType="phone-pad"
+            editable={!isLoading}
           />
         </View>
 
@@ -168,6 +310,7 @@ export default function AccountSettings({ route, navigation }: any) {
             placeholderTextColor={color.gray14}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={!isLoading}
           />
         </View>
 
@@ -183,8 +326,14 @@ export default function AccountSettings({ route, navigation }: any) {
           style={{ borderColor: color.error }}
           fontstyle={{ color: color.error }}
           onPress={handleDeleteAccount}
+          isDisabled={isLoading}
         />
-        <CustomButton title="Save Changes" onPress={handleSaveChanges} />
+        <CustomButton
+          title={isLoading ? "Saving..." : "Save Changes"}
+          onPress={handleSaveChanges}
+          isDisabled={!isChanged || isLoading}
+          isLoading={isLoading}
+        />
       </View>
     </SafeAreaView>
   );
