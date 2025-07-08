@@ -11,14 +11,27 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
+import {
+  getFCMToken,
+  requestFCMPermission,
+  setupNotificationListeners,
+} from "@/utils/notification";
 import { BellIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as Device from "expo-device";
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function Index() {
   const { user, updateUserData } = useAppContext();
@@ -43,10 +56,70 @@ export default function Index() {
     })();
   }, []);
 
+  useEffect(() => {
+    requestNotificationPermissions();
+    const handleNotificationPress = (data: any) => {
+      console.log("🔔 Notification Pressed:", data);
+    };
+    const unsubscribe = setupNotificationListeners(handleNotificationPress);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const getDeviceInfo = async () => {
+    try {
+      return {
+        platform: Platform.OS || "",
+        model: Device.modelName || "unknown",
+      };
+    } catch (error) {
+      console.error("Error getting device info:", error);
+      return {
+        platform: Platform.OS || "",
+        model: "unknown",
+      };
+    }
+  };
+
+  const requestNotificationPermissions = async () => {
+    try {
+      console.log("🔔 Requesting notification permissions...");
+      const permissionGranted = await requestFCMPermission();
+
+      if (permissionGranted) {
+        console.log("✅ Notification permission granted");
+        await registerFCMToken();
+      } else {
+        console.log("❌ Notification permission denied");
+      }
+    } catch (error) {
+      console.error("Error requesting notification permissions:", error);
+    }
+  };
+
+  const registerFCMToken = async () => {
+    try {
+      const token = await getFCMToken();
+      if (!token || !user?.user_id) return;
+
+      const deviceInfo = await getDeviceInfo();
+      const formData = new FormData();
+      formData.append("type", "update_noti");
+      formData.append("user_id", user.user_id);
+      formData.append("devicePlatform", deviceInfo.platform);
+      formData.append("deviceRid", token);
+      formData.append("deviceModel", deviceInfo.model);
+
+      const response = await apiCall(formData);
+      console.log("✅ FCM token registered:", response.success);
+    } catch (error) {
+      console.error("❌ FCM registration failed:", error);
+    }
+  };
+
   const handleAllowLocation = async () => {
-    console.log("press");
     const location = await requestUserLocation();
-    console.log("press2", location);
     if (location) {
       try {
         const formData = new FormData();
@@ -59,10 +132,9 @@ export default function Index() {
         const response = await apiCall(formData);
         if (response.result) {
           updateUserData({
-            latitude: location.latitude,
-            longitude: location.longitude,
+            lat: location.latitude,
+            lng: location.longitude,
           });
-          console.log("User location:", location);
           setLocationPermissionGranted(true);
           setShowLocationModal(false);
         }
@@ -138,20 +210,20 @@ export default function Index() {
   };
 
   // User interaction handlers
-  const handleViewProfile = (user: any) => {
-    console.log("View profile for:", user);
-    router.push("/profile/user_profile");
+  const handleViewProfile = (userData: any) => {
+    console.log("View profile for:", userData);
+    router.push({
+      pathname: "/profile/user_profile",
+      params: {
+        user: JSON.stringify(userData),
+        userId: userData.id,
+      },
+    });
   };
 
   const handleBookmark = (user: any) => {
     console.log("Bookmark user:", user);
     // Handle bookmark logic
-  };
-
-  const handleUserPress = (user: any) => {
-    console.log("User pressed on map:", user);
-    router.push("/profile/user_profile");
-    // Handle map user press
   };
 
   const handleClose = () => {

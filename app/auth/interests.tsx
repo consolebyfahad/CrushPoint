@@ -3,6 +3,7 @@ import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { useAppContext } from "@/context/app_context";
 import useGetInterests from "@/hooks/useGetInterests";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -10,6 +11,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Platform,
   RefreshControl,
   ScrollView,
@@ -29,17 +31,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interests() {
   const { interests, loading, error, refetch } = useGetInterests();
-  const { updateUserData } = useAppContext();
+  const { updateUserData, userData, user } = useAppContext();
   const { fromEdit } = useLocalSearchParams();
   const isEdit = fromEdit === "true";
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const minSelections = 3;
-  const isButtonDisabled = selectedInterests.length < minSelections;
+  const isButtonDisabled =
+    selectedInterests.length < (isEdit ? 1 : minSelections);
 
   const counterProgress = useSharedValue(0);
+
+  // Load existing interests when in edit mode
+  useEffect(() => {
+    if (isEdit && userData?.interests) {
+      setSelectedInterests(userData.interests);
+    }
+  }, [isEdit, userData?.interests]);
 
   useEffect(() => {
     counterProgress.value = withSpring(
@@ -58,6 +69,50 @@ export default function Interests() {
   const handleContinue = () => {
     updateUserData({ interests: selectedInterests });
     router.push("/auth/private_spot");
+  };
+
+  const handleSaveChanges = async () => {
+    if (!user?.user_id) {
+      Alert.alert("Error", "User session expired. Please login again.");
+      return;
+    }
+
+    if (selectedInterests.length === 0) {
+      Alert.alert("Validation Error", "Please select at least one interest.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", user.user_id);
+      formData.append("table_name", "users");
+      formData.append("interests", JSON.stringify(selectedInterests));
+
+      console.log("Updating interests:", selectedInterests);
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        // Update context with new interests
+        updateUserData({ interests: selectedInterests });
+
+        Alert.alert("Success", "Interests updated successfully!", [
+          {
+            text: "OK",
+            onPress: () => router.back(),
+          },
+        ]);
+      } else {
+        throw new Error(response.message || "Failed to update interests");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      Alert.alert("Error", "Failed to update interests. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRefresh = async () => {
@@ -102,11 +157,15 @@ export default function Interests() {
       >
         <View style={styles.content}>
           <View style={styles.titleSection}>
-            <Text style={styles.title}>What are your interests?</Text>
+            <Text style={styles.title}>
+              {isEdit ? "Edit your interests" : "What are your interests?"}
+            </Text>
             <View style={styles.subtitleContainer}>
               <Text style={styles.subtitle}>
-                <Octicons name="info" size={14} color={color.gray55} /> Select
-                at least 3 interests to help us find better matches for you
+                <Octicons name="info" size={14} color={color.gray55} />
+                {isEdit
+                  ? "Update your interests to get better matches"
+                  : "Select at least 3 interests to help us find better matches for you"}
               </Text>
             </View>
           </View>
@@ -151,7 +210,7 @@ export default function Interests() {
               selectedInterests={selectedInterests}
               onSelectionChange={handleSelectionChange}
               searchQuery={searchQuery}
-              minSelections={minSelections}
+              minSelections={isEdit ? 1 : minSelections}
               staggerAnimation={true}
               staggerDelay={30}
               containerStyle={styles.interestsContainer}
@@ -173,10 +232,15 @@ export default function Interests() {
         </View>
       ) : (
         <View style={styles.buttonContainer}>
+          <Text style={styles.selectedCountEdit}>
+            Selected: {selectedInterests.length} interest
+            {selectedInterests.length !== 1 ? "s" : ""}
+          </Text>
           <CustomButton
-            title="Save Changes"
-            onPress={handleContinue}
-            isDisabled={selectedInterests.length === 0}
+            title={isLoading ? "Saving..." : "Save Changes"}
+            onPress={handleSaveChanges}
+            isDisabled={isButtonDisabled || isLoading}
+            isLoading={isLoading}
           />
         </View>
       )}
@@ -252,11 +316,20 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: 16,
+    borderTopWidth: 1,
+    borderColor: color.gray87,
+    gap: 12,
   },
   selectedCount: {
     fontSize: 16,
     fontFamily: font.regular,
     textAlign: "center",
+  },
+  selectedCountEdit: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    textAlign: "center",
+    color: color.gray55,
   },
   // Loading states
   loadingContainer: {

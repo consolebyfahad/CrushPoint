@@ -8,6 +8,14 @@ export interface User {
   name: string;
   image: string | null;
   created: boolean;
+  new: boolean;
+}
+
+export interface NotificationSetting {
+  key: string;
+  enabled: boolean;
+  title: string;
+  description: string;
 }
 
 export interface UserData {
@@ -23,8 +31,11 @@ export interface UserData {
   nationality: string;
   religion: string;
   zodiac: string;
-  latitude: number;
-  longitude: number;
+  lat: any;
+  lng: any;
+  phone?: string;
+  email?: string;
+  notification_settings?: NotificationSetting[];
 }
 
 interface AppContextType {
@@ -47,10 +58,71 @@ interface AppContextType {
   removeUserImage: (fileName: string) => void;
   clearUserImages: () => void;
 
+  // Notification settings
+  updateNotificationSettings: (settings: NotificationSetting[]) => void;
+  getNotificationSetting: (key: string) => boolean;
+
   // Utilities
   logout: () => Promise<boolean>;
   isHydrated: boolean;
 }
+
+const defaultNotificationSettings: NotificationSetting[] = [
+  {
+    key: "newMatches",
+    enabled: true,
+    title: "New Matches",
+    description: "When you get a new match",
+  },
+  {
+    key: "emojiReceived",
+    enabled: true,
+    title: "Emoji Received",
+    description: "When someone sends you an emoji",
+  },
+  {
+    key: "nearbyMatches",
+    enabled: true,
+    title: "Nearby Matches",
+    description: "When your matches are nearby",
+  },
+  {
+    key: "nearbyUsers",
+    enabled: false,
+    title: "Nearby Users",
+    description: "When new users are in your area",
+  },
+  {
+    key: "profileVisits",
+    enabled: false,
+    title: "Profile Visits",
+    description: "When someone views your profile",
+  },
+  {
+    key: "newEventPosted",
+    enabled: false,
+    title: "New Event Posted",
+    description: "When a new event is posted in your area",
+  },
+  {
+    key: "eventInvitationAccepted",
+    enabled: false,
+    title: "Event Invitation Accepted",
+    description: "When someone accepts event invitation",
+  },
+  {
+    key: "eventReminder",
+    enabled: true,
+    title: "Event Reminder",
+    description: "Reminders for upcoming events",
+  },
+  {
+    key: "offersPromotions",
+    enabled: false,
+    title: "Offers & Promotions",
+    description: "Special offers and promotions",
+  },
+];
 
 const defaultUserData: UserData = {
   gender: "",
@@ -65,8 +137,11 @@ const defaultUserData: UserData = {
   nationality: "",
   religion: "",
   zodiac: "",
-  latitude: 0,
-  longitude: 0,
+  lat: 0,
+  lng: 0,
+  phone: "",
+  email: "",
+  notification_settings: defaultNotificationSettings,
 };
 
 const STORAGE_KEY = "@AppContext";
@@ -89,7 +164,16 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           const parsed = JSON.parse(saved);
           setIsLoggedIn(parsed.isLoggedIn ?? false);
           setUser(parsed.user ?? null);
-          setUserData(parsed.userData ?? defaultUserData);
+
+          // Merge with default notification settings if they don't exist
+          const hydratedUserData = {
+            ...defaultUserData,
+            ...parsed.userData,
+            notification_settings:
+              parsed.userData?.notification_settings ||
+              defaultNotificationSettings,
+          };
+          setUserData(hydratedUserData);
           setUserImages(parsed.userImages ?? []);
         }
       } catch (error) {
@@ -146,6 +230,18 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setUserImages([]);
   };
 
+  const updateNotificationSettings = (settings: NotificationSetting[]) => {
+    setUserData((prev) => ({
+      ...prev,
+      notification_settings: settings,
+    }));
+  };
+
+  const getNotificationSetting = (key: string): boolean => {
+    const setting = userData.notification_settings?.find((s) => s.key === key);
+    return setting?.enabled ?? false;
+  };
+
   const logout = async (): Promise<boolean> => {
     try {
       setIsLoggedIn(false);
@@ -174,6 +270,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     addUserImage,
     removeUserImage,
     clearUserImages,
+    updateNotificationSettings,
+    getNotificationSetting,
     logout,
     isHydrated,
   };

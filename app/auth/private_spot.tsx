@@ -1,30 +1,94 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import { requestUserLocation } from "@/utils/location";
 import { MarkerIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
-import { router } from "expo-router";
-import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import MapView, { Circle, Marker } from "react-native-maps";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import MapView, { Circle, Marker, Region } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivateSpot() {
-  const { updateUserData } = useAppContext();
+  const { updateUserData, userData, user } = useAppContext();
+  const { fromEdit } = useLocalSearchParams();
+  const isEdit = fromEdit === "true";
   const [selectedRadius, setSelectedRadius] = useState("100m");
-  const [mapRegion, setMapRegion] = useState({
+  const [mapRegion, setMapRegion] = useState<Region>({
     latitude: 45.4408474,
     longitude: 12.3155151,
     latitudeDelta: 0.005,
     longitudeDelta: 0.005,
   });
-  console.log("first");
-  const handleRadiusSelect = (radius: any) => {
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [locationPermissionGranted, setLocationPermissionGranted] =
+    useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (isEdit && userData) {
+      // Load existing location data when in edit mode
+      if (userData.lat && userData.lng) {
+        const existingRegion: Region = {
+          latitude: userData.lat,
+          longitude: userData.lng,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        };
+        setMapRegion(existingRegion);
+        setLocationPermissionGranted(true);
+        setIsLoadingLocation(false);
+      }
+
+      if (userData.radius) {
+        setSelectedRadius(userData.radius === 100 ? "100m" : "200m");
+      }
+    } else {
+      getUserLocation();
+    }
+  }, [isEdit, userData]);
+
+  const getUserLocation = async () => {
+    setIsLoadingLocation(true);
+    try {
+      const location = await requestUserLocation();
+
+      if (location) {
+        setLocationPermissionGranted(true);
+        const newRegion: Region = {
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        };
+        setMapRegion(newRegion);
+      } else {
+        setLocationPermissionGranted(false);
+        // Keep default location if permission denied
+      }
+    } catch (error) {
+      console.error("Error getting user location:", error);
+      setLocationPermissionGranted(false);
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  };
+
+  const handleRadiusSelect = (radius: string) => {
     setSelectedRadius(radius);
 
-    // Adjust map zoom based on radius
-    const newDelta = radius === "100m" ? 0.005 : 0.01;
+    // Adjust map zoom based on radius for better visualization
+    const newDelta = radius === "100m" ? 0.005 : 0.008;
     setMapRegion((prev) => ({
       ...prev,
       latitudeDelta: newDelta,
@@ -32,39 +96,103 @@ export default function PrivateSpot() {
     }));
   };
 
-  const handleMapRegionChange = (region: any) => {
-    // Keep the same zoom level but allow map movement
+  const handleMapRegionChange = (region: Region) => {
     setMapRegion(region);
   };
 
   const handleSaveAndContinue = () => {
     updateUserData({
       radius: selectedRadius === "100m" ? 100 : 200,
-      latitude: mapRegion.latitude,
-      longitude: mapRegion.longitude,
+      lat: mapRegion.latitude,
+      lng: mapRegion.longitude,
     });
-    console.log("Private spot location:", mapRegion);
-    console.log("Privacy radius:", selectedRadius);
     router.push("/auth/add_photos");
   };
 
-  // Calculate radius in meters for the circle
+  const handleSaveChanges = async () => {
+    if (!user?.user_id) {
+      Alert.alert("Error", "User session expired. Please login again.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", user.user_id);
+      formData.append("table_name", "users");
+      formData.append(
+        "radius",
+        (selectedRadius === "100m" ? 100 : 200).toString()
+      );
+      formData.append("lat", mapRegion.latitude.toString());
+      formData.append("lng", mapRegion.longitude.toString());
+
+      console.log("Updating private spot:", {
+        radius: selectedRadius === "100m" ? 100 : 200,
+        latitude: mapRegion.latitude,
+        longitude: mapRegion.longitude,
+      });
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        // Update context with new location data
+        updateUserData({
+          radius: selectedRadius === "100m" ? 100 : 200,
+          lat: mapRegion.latitude,
+          lng: mapRegion.longitude,
+        });
+
+        Alert.alert("Success", "Private spot updated successfully!", [
+          {
+            text: "OK",
+            onPress: () => router.back(),
+          },
+        ]);
+      } else {
+        throw new Error(response.message || "Failed to update private spot");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      Alert.alert("Error", "Failed to update private spot. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const getRadiusInMeters = () => {
     return selectedRadius === "100m" ? 100 : 200;
   };
+
+  if (isLoadingLocation && !isEdit) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Header />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={color.primary} />
+          <Text style={styles.loadingText}>Getting your location...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <Header />
       <View style={styles.content}>
         <View style={styles.titleSection}>
-          <Text style={styles.title}>Set Your Private Spot</Text>
+          <Text style={styles.title}>
+            {isEdit ? "Edit Your Private Spot" : "Set Your Private Spot"}
+          </Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>
               <Octicons name="info" size={14} color={color.gray55} />{" "}
-              {
-                "Choose an area on the map where you don't want to be visible to others"
-              }
+              {isEdit
+                ? "Update the area where you don't want to be visible to others"
+                : locationPermissionGranted
+                ? "Drag the map to choose an area where you don't want to be visible to others"
+                : "Choose an area on the map where you don't want to be visible to others"}
             </Text>
           </View>
         </View>
@@ -75,13 +203,14 @@ export default function PrivateSpot() {
             style={styles.map}
             region={mapRegion}
             onRegionChangeComplete={handleMapRegionChange}
-            showsUserLocation={false}
+            showsUserLocation={locationPermissionGranted && !isEdit}
             showsMyLocationButton={false}
             scrollEnabled={true}
             zoomEnabled={true}
             rotateEnabled={false}
             pitchEnabled={false}
           >
+            {/* Privacy Circle - always centered on current map region */}
             <Circle
               center={{
                 latitude: mapRegion.latitude,
@@ -90,9 +219,10 @@ export default function PrivateSpot() {
               radius={getRadiusInMeters()}
               fillColor="rgba(99, 179, 206, 0.2)"
               strokeColor={color.primary}
-              strokeWidth={1}
+              strokeWidth={2}
             />
 
+            {/* Center Marker - always at map center */}
             <Marker
               coordinate={{
                 latitude: mapRegion.latitude,
@@ -153,26 +283,52 @@ export default function PrivateSpot() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {!locationPermissionGranted && !isEdit && (
+          <View style={styles.retryContainer}>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={getUserLocation}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.retryButtonText}>Enable Location Access</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <View style={styles.buttonContainer}>
-        <CustomButton title="Save & Continue" onPress={handleSaveAndContinue} />
+        <CustomButton
+          title={
+            isSaving ? "Saving..." : isEdit ? "Save Changes" : "Save & Continue"
+          }
+          onPress={isEdit ? handleSaveChanges : handleSaveAndContinue}
+          isDisabled={isSaving}
+          isLoading={isSaving}
+        />
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  map: {
-    width: "100%",
-    height: 500,
-  },
   container: {
     flex: 1,
     backgroundColor: color.white,
   },
   content: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray55,
   },
   titleSection: {
     marginBottom: 32,
@@ -190,20 +346,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 8,
   },
-  infoIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: color.gray69,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 2,
-  },
-  infoIconText: {
-    fontSize: 12,
-    color: color.gray14,
-    fontFamily: font.medium,
-  },
   subtitle: {
     fontSize: 16,
     fontFamily: font.regular,
@@ -216,29 +358,33 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
   },
-  customMarker: {
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+  centerIndicator: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -10 }, { translateY: -10 }],
     width: 20,
     height: 20,
-    borderRadius: 10,
-    backgroundColor: color.primary,
-    alignItems: "center",
     justifyContent: "center",
-    borderWidth: 3,
-    borderColor: color.white,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    alignItems: "center",
   },
-  markerInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: color.white,
+  crosshairHorizontal: {
+    position: "absolute",
+    width: 20,
+    height: 2,
+    backgroundColor: color.primary,
+    opacity: 0.8,
+  },
+  crosshairVertical: {
+    position: "absolute",
+    width: 2,
+    height: 20,
+    backgroundColor: color.primary,
+    opacity: 0.8,
   },
   radiusSection: {
     padding: 24,
@@ -278,6 +424,21 @@ const styles = StyleSheet.create({
   },
   unselectedRadiusText: {
     color: color.black,
+  },
+  retryContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: color.primary,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  retryButtonText: {
+    color: color.white,
+    fontSize: 16,
+    fontFamily: font.medium,
   },
   buttonContainer: {
     padding: 16,

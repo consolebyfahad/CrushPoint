@@ -54,6 +54,7 @@ export default function Login() {
         name: response?.name,
         image: response?.image,
         created: response?.created,
+        new: response?.new,
       };
       setUser(userData);
 

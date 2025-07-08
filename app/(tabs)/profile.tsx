@@ -49,13 +49,18 @@ export default function Profile({ navigation }: any) {
 
   const handleEditPrivateSpot = () => {
     console.log("Edit private spot");
-    router.push("/auth/private_spot");
-    // Handle private spot editing
+    router.push({
+      pathname: "/auth/private_spot",
+      params: { fromEdit: "true" },
+    });
   };
 
   const handleEditPhotos = () => {
     console.log("Edit photos");
-    router.push("/auth/add_photos");
+    router.push({
+      pathname: "/auth/add_photos",
+      params: { fromEdit: "true" },
+    });
   };
 
   const handleEditProfile = () => {

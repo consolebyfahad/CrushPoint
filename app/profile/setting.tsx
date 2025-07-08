@@ -43,6 +43,14 @@ export default function Settings() {
     ]);
   };
 
+  const handleEditPrivateSpot = () => {
+    console.log("Edit private spot");
+    router.push({
+      pathname: "/auth/private_spot",
+      params: { fromEdit: "true" },
+    });
+  };
+
   // Settings sections data
   const visibilitySettings = [
     {
@@ -50,7 +58,7 @@ export default function Settings() {
       title: "Edit Private Spot",
       icon: "location-outline",
       hasChevron: true,
-      onPress: () => console.log("Edit Private Spot"),
+      onPress: handleEditPrivateSpot,
     },
   ];
 

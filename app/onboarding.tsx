@@ -108,7 +108,7 @@ export default function OnboardingScreen() {
   };
 
   const handleSkip = () => {
-    router.push("/welcome");
+    router.push("/auth/dummy");
   };
 
   // Animated styles

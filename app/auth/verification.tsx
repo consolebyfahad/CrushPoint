@@ -51,8 +51,8 @@ const VerifyIdentityScreen: React.FC<VerifyIdentityScreenProps> = ({
         JSON.stringify(userData.looking_for)
       );
       submissionData.append("radius", userData.radius.toString());
-      // submissionData.append("latitude", userData.latitude.toString());
-      // submissionData.append("longitude", userData.longitude.toString());
+      submissionData.append("lat", userData.lat.toString());
+      submissionData.append("l", userData.lng.toString());
 
       // Optional fields - only add if they have values
       if (userData.height) submissionData.append("height", userData.height);

@@ -1,9 +1,12 @@
 import CustomButton from "@/components/custom_button";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,6 +19,8 @@ import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BasicInfo({ route, navigation }: any) {
+  const { user } = useAppContext();
+
   // Get initial data from route params or use defaults
   const initialData = route?.params?.basicInfo || {
     interestedIn: "Men",
@@ -27,6 +32,7 @@ export default function BasicInfo({ route, navigation }: any) {
   };
 
   const [basicInfo, setBasicInfo] = useState(initialData);
+  const [isLoading, setIsLoading] = useState(false);
 
   // States for dropdown pickers
   const [relationshipGoalsOpen, setRelationshipGoalsOpen] = useState(false);
@@ -100,21 +106,117 @@ export default function BasicInfo({ route, navigation }: any) {
     router.back();
   };
 
-  const handleSave = () => {
+  const validateFields = () => {
+    if (!basicInfo.interestedIn) {
+      Alert.alert(
+        "Validation Error",
+        "Please select what you're interested in."
+      );
+      return false;
+    }
+
+    if (!relationshipGoalsValue || relationshipGoalsValue.length === 0) {
+      Alert.alert(
+        "Validation Error",
+        "Please select at least one relationship goal."
+      );
+      return false;
+    }
+
+    if (!basicInfo.height || isNaN(Number(basicInfo.height))) {
+      Alert.alert(
+        "Validation Error",
+        "Please enter a valid height in centimeters."
+      );
+      return false;
+    }
+
+    if (!basicInfo.nationality) {
+      Alert.alert("Validation Error", "Please select your nationality.");
+      return false;
+    }
+
+    if (!basicInfo.religion) {
+      Alert.alert("Validation Error", "Please select your religion.");
+      return false;
+    }
+
+    if (!basicInfo.zodiacSign) {
+      Alert.alert("Validation Error", "Please select your zodiac sign.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!user?.user_id) {
+      Alert.alert("Error", "User session expired. Please login again.");
+      return;
+    }
+
+    if (!validateFields()) {
+      return;
+    }
+
     const updatedBasicInfo = {
       ...basicInfo,
       relationshipGoals: relationshipGoalsValue,
     };
-    console.log("Saving basic info:", updatedBasicInfo);
-    // Save the changes to backend/storage
-    // Navigate back with updated data
-    if (navigation) {
-      navigation.goBack();
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", user.user_id);
+      formData.append("table_name", "users");
+
+      // Append all basic info fields
+      formData.append("gender_interest", updatedBasicInfo.interestedIn);
+      formData.append(
+        "looking_for",
+        JSON.stringify(updatedBasicInfo.relationshipGoals)
+      );
+      formData.append("height", updatedBasicInfo.height);
+      formData.append("nationality", updatedBasicInfo.nationality);
+      formData.append("religion", updatedBasicInfo.religion);
+      formData.append("zodiac", updatedBasicInfo.zodiacSign);
+
+      console.log("Updating basic info:", updatedBasicInfo);
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        Alert.alert("Success", "Basic information updated successfully!", [
+          {
+            text: "OK",
+            onPress: () => {
+              if (navigation) {
+                navigation.goBack();
+              } else {
+                router.back();
+              }
+            },
+          },
+        ]);
+      } else {
+        throw new Error(
+          response.message || "Failed to update basic information"
+        );
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      Alert.alert(
+        "Error",
+        "Failed to update basic information. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const updateField = (field: string, value: any) => {
-    setBasicInfo((prev) => ({
+  const updateField = (field: any, value: any) => {
+    setBasicInfo((prev: any) => ({
       ...prev,
       [field]: value,
     }));
@@ -323,7 +425,12 @@ export default function BasicInfo({ route, navigation }: any) {
 
       {/* Save Button */}
       <View style={styles.saveContainer}>
-        <CustomButton title="Save Changes" onPress={handleSave} />
+        <CustomButton
+          title={isLoading ? "Saving..." : "Save Changes"}
+          onPress={handleSave}
+          isDisabled={isLoading}
+          isLoading={isLoading}
+        />
       </View>
     </SafeAreaView>
   );

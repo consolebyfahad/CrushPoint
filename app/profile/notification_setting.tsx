@@ -1,10 +1,23 @@
+import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationSettings({ navigation }: any) {
+  const { user, userData, updateUserData } = useAppContext();
+
   const [notificationSettings, setNotificationSettings] = useState({
     newMatches: true,
     emojiReceived: true,
@@ -17,11 +30,119 @@ export default function NotificationSettings({ navigation }: any) {
     offersPromotions: false,
   });
 
-  const toggleNotification = (key: any) => {
-    setNotificationSettings((prev: any) => ({
+  const [isChanged, setIsChanged] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load existing notification settings when component mounts
+  useEffect(() => {
+    if (userData?.notification_settings) {
+      try {
+        // If notification_settings is a string, parse it
+        const settings =
+          typeof userData.notification_settings === "string"
+            ? JSON.parse(userData.notification_settings)
+            : userData.notification_settings;
+
+        // Convert array format back to object format
+        if (Array.isArray(settings)) {
+          const settingsObj = { ...notificationSettings };
+          settings.forEach((setting) => {
+            if (setting.key && typeof setting.enabled === "boolean") {
+              settingsObj[setting.key as keyof typeof settingsObj] =
+                setting.enabled;
+            }
+          });
+          setNotificationSettings(settingsObj);
+        } else if (typeof settings === "object") {
+          // Direct object format
+          setNotificationSettings((prev) => ({ ...prev, ...settings }));
+        }
+      } catch (error) {
+        console.error("Error parsing notification settings:", error);
+      }
+    }
+  }, [userData?.notification_settings]);
+
+  const toggleNotification = (key: keyof typeof notificationSettings) => {
+    setNotificationSettings((prev) => ({
       ...prev,
       [key]: !prev[key],
     }));
+    setIsChanged(true);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!user?.user_id) {
+      Alert.alert("Error", "User session expired. Please login again.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Convert notification settings object to array format for API
+      const notificationArray = Object.entries(notificationSettings).map(
+        ([key, enabled]) => ({
+          key,
+          enabled,
+          title:
+            notificationOptions.find((opt) => opt.key === key)?.title || key,
+          description:
+            notificationOptions.find((opt) => opt.key === key)?.description ||
+            "",
+        })
+      );
+
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", user.user_id);
+      formData.append("table_name", "users");
+      formData.append(
+        "notification_settings",
+        JSON.stringify(notificationArray)
+      );
+
+      console.log("Updating notification settings:", notificationArray);
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        // Update context with new notification settings
+        updateUserData({
+          notification_settings: notificationArray,
+        });
+
+        setIsChanged(false);
+
+        Alert.alert(
+          "Success",
+          "Your notification settings have been updated successfully.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                if (navigation) {
+                  navigation.goBack();
+                } else {
+                  router.back();
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        throw new Error(
+          response.message || "Failed to update notification settings"
+        );
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      Alert.alert(
+        "Error",
+        "Failed to update notification settings. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const notificationOptions = [
@@ -94,7 +215,8 @@ export default function NotificationSettings({ navigation }: any) {
         trackColor={{ false: "#DFDFDF", true: color.primary }}
         thumbColor={item.enabled ? "#FFFFFF" : "#FFFFFF"}
         ios_backgroundColor="#DFDFDF"
-        style={styles.switch}
+        style={[styles.switch, isLoading && { opacity: 0.6 }]}
+        disabled={isLoading}
       />
     </View>
   );
@@ -107,7 +229,20 @@ export default function NotificationSettings({ navigation }: any) {
       {/* Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {notificationOptions.map(renderNotificationItem)}
+
+        {/* Bottom Spacing */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Save Button */}
+      <View style={styles.buttonContainer}>
+        <CustomButton
+          title={isLoading ? "Saving..." : "Save Changes"}
+          onPress={handleSaveChanges}
+          isDisabled={!isChanged || isLoading}
+          isLoading={isLoading}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -145,5 +280,13 @@ const styles = StyleSheet.create({
   },
   switch: {
     transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }],
+  },
+  bottomSpacing: {
+    height: 100,
+  },
+  buttonContainer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: color.gray87,
   },
 });

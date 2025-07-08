@@ -6,8 +6,8 @@ import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useMemo, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -20,32 +20,162 @@ import {
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-export default function UserProfile({ route, navigation }: any) {
-  const user = route?.params?.user || {
-    id: "3",
-    name: "Julia",
-    age: 24,
-    distance: "1.2 km",
-    isOnline: true,
-    lookingFor: ["Serious relationship", "Friendship"],
-    interests: ["Travel", "Art", "Cooking", "Fashion", "Music", "Wine"],
-    height: "175 cm",
-    nationality: "Canadian",
-    religion: "Christian",
-    zodiac: "Leo",
-    images: [
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=600&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=600&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=600&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop&crop=face",
-    ],
-  };
-
+export default function UserProfile() {
+  const params = useLocalSearchParams();
+  console.log("params", params);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
   const [showReportUser, setShowReportUser] = useState(false);
+
+  // Parse user data from params with fallback
+  const userData = useMemo(() => {
+    try {
+      if (params.user && typeof params.user === "string") {
+        const parsed = JSON.parse(params.user);
+        console.log("Parsed user data:", parsed);
+        return parsed;
+      }
+      console.log("No user data found in params");
+      return null;
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      return null;
+    }
+  }, [params.user]);
+
+  // Helper function to calculate age from date of birth
+  const calculateAge = (dob: string) => {
+    if (!dob) return null;
+    try {
+      const today = new Date();
+      const birthDate = new Date(dob);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+      return age;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // Helper function to parse comma-separated strings to arrays
+  const parseStringToArray = (str: any) => {
+    if (!str || typeof str !== "string" || str.trim() === "") return [];
+    return str
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  };
+
+  // Helper function to parse images
+  const parseImages = (imagesString: any) => {
+    if (
+      !imagesString ||
+      typeof imagesString !== "string" ||
+      imagesString.trim() === ""
+    ) {
+      // Return default avatar if no images
+      return [
+        "https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo",
+      ];
+    }
+
+    const imageArray = parseStringToArray(imagesString);
+    if (imageArray.length === 0) {
+      return [
+        "https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo",
+      ];
+    }
+
+    return imageArray;
+  };
+
+  // Helper function to format height
+  const formatHeight = (heightString: any) => {
+    if (
+      !heightString ||
+      typeof heightString !== "string" ||
+      heightString === ""
+    )
+      return "Not specified";
+
+    // Convert from mm to cm if the value is large (assuming API returns mm)
+    const heightNum = parseInt(heightString);
+    if (isNaN(heightNum)) return "Not specified";
+
+    if (heightNum > 300) {
+      return `${(heightNum / 10).toFixed(0)} cm`;
+    }
+    return `${heightNum} cm`;
+  };
+
+  // Calculate distance (placeholder - you'd need actual user location and target user location)
+  const calculateDistance = (lat: any, lng: any) => {
+    // Placeholder distance calculation
+    // In real app, you'd calculate using current user's location and target user's location
+    if (!lat || !lng || typeof lat !== "string" || typeof lng !== "string")
+      return "-- km";
+    return "2.5 km"; // Placeholder
+  };
+
+  // Map API data to component structure
+  const user = useMemo(() => {
+    if (!userData || typeof userData !== "object") {
+      console.log("No valid user data available, using fallback");
+      // Fallback data if no user provided
+      return {
+        id: "unknown",
+        name: "Unknown User",
+        age: 0,
+        distance: "-- km",
+        isOnline: false,
+        lookingFor: [],
+        interests: [],
+        height: "Not specified",
+        nationality: "Not specified",
+        religion: "Not specified",
+        zodiac: "Not specified",
+        about: "",
+        images: [
+          "https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo",
+        ],
+      };
+    }
+
+    const age = calculateAge(userData.dob);
+    const images = parseImages(userData.images);
+    const interests = parseStringToArray(userData.interests);
+    const lookingFor = parseStringToArray(userData.looking_for);
+    const distance = calculateDistance(userData.lat, userData.lng);
+
+    return {
+      id: userData.id || "unknown",
+      name: userData.name || "Unknown User",
+      age: age || 0,
+      distance: distance,
+      isOnline: userData.status === "1", // Assuming status "1" means online
+      lookingFor: lookingFor.length > 0 ? lookingFor : ["Not specified"],
+      interests: interests.length > 0 ? interests : ["No interests listed"],
+      height: formatHeight(userData.height),
+      nationality: userData.nationality || "Not specified",
+      religion: userData.religion || "Not specified",
+      zodiac: userData.zodiac || "Not specified",
+      about: userData.about || "",
+      email: userData.email || "",
+      gender: userData.gender || "Not specified",
+      country: userData.country || "Not specified",
+      state: userData.state || "Not specified",
+      city: userData.city || "Not specified",
+      languages: parseStringToArray(userData.languages),
+      images: images,
+    };
+  }, [userData]);
 
   const handleBack = () => {
     router.back();
@@ -91,6 +221,14 @@ export default function UserProfile({ route, navigation }: any) {
         return "💪";
       case "reading":
         return "📚";
+      case "sports":
+        return "⚽";
+      case "movies":
+        return "🎬";
+      case "dancing":
+        return "💃";
+      case "gaming":
+        return "🎮";
       default:
         return "🎯";
     }
@@ -98,11 +236,13 @@ export default function UserProfile({ route, navigation }: any) {
 
   const getLookingForIcon = (lookingFor: string) => {
     if (lookingFor.toLowerCase().includes("serious")) {
-      return "🔥";
+      return "💕";
     } else if (lookingFor.toLowerCase().includes("casual")) {
       return "😊";
     } else if (lookingFor.toLowerCase().includes("friendship")) {
       return "🤝";
+    } else if (lookingFor.toLowerCase().includes("relationship")) {
+      return "💖";
     } else {
       return "💫";
     }
@@ -120,24 +260,24 @@ export default function UserProfile({ route, navigation }: any) {
     if (action === "like") {
       router.push("/profile/match");
     }
-    console.log("Emoji action:", action);
+    console.log("Emoji action:", action, "for user:", user.name);
   };
 
   const handleBlock = () => {
-    setShowProfileOptions(false); // Hide profile options
-    setShowBlockConfirmation(true); // Show block confirmation
+    setShowProfileOptions(false);
+    setShowBlockConfirmation(true);
   };
 
   const handleConfirmBlock = () => {
     console.log("Block user:", user.name);
     // Handle block logic here
     setShowBlockConfirmation(false);
-    // navigation.goBack(); // Go back after blocking
+    router.back();
   };
 
   const handleReport = () => {
-    setShowProfileOptions(false); // Hide profile options
-    setShowReportUser(true); // Show report modal
+    setShowProfileOptions(false);
+    setShowReportUser(true);
   };
 
   const handleSubmitReport = (reportData: any) => {
@@ -148,9 +288,9 @@ export default function UserProfile({ route, navigation }: any) {
   };
 
   const handleBackToProfileOptions = () => {
-    setShowBlockConfirmation(false); // Hide block confirmation
-    setShowReportUser(false); // Hide report modal
-    setShowProfileOptions(true); // Show profile options again
+    setShowBlockConfirmation(false);
+    setShowReportUser(false);
+    setShowProfileOptions(true);
   };
 
   return (
@@ -173,17 +313,19 @@ export default function UserProfile({ route, navigation }: any) {
             <Ionicons name="arrow-back" size={20} color={color.white} />
           </TouchableOpacity>
           {/* Image Indicators */}
-          <View style={styles.imageIndicators}>
-            {user.images.map((_: any, index: number) => (
-              <View
-                key={index}
-                style={[
-                  styles.indicator,
-                  index === currentImageIndex && styles.activeIndicator,
-                ]}
-              />
-            ))}
-          </View>
+          {user.images.length > 1 && (
+            <View style={styles.imageIndicators}>
+              {user.images.map((_: any, index: number) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.indicator,
+                    index === currentImageIndex && styles.activeIndicator,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
           {/* Options Button */}
           <TouchableOpacity
             style={styles.optionsButton}
@@ -195,16 +337,20 @@ export default function UserProfile({ route, navigation }: any) {
         </View>
 
         {/* Image Navigation Areas */}
-        <TouchableOpacity
-          style={styles.leftImageArea}
-          onPress={handlePreviousImage}
-          activeOpacity={0.1}
-        />
-        <TouchableOpacity
-          style={styles.rightImageArea}
-          onPress={handleNextImage}
-          activeOpacity={0.1}
-        />
+        {user.images.length > 1 && (
+          <>
+            <TouchableOpacity
+              style={styles.leftImageArea}
+              onPress={handlePreviousImage}
+              activeOpacity={0.1}
+            />
+            <TouchableOpacity
+              style={styles.rightImageArea}
+              onPress={handleNextImage}
+              activeOpacity={0.1}
+            />
+          </>
+        )}
 
         {/* Action Emojis */}
         <View style={styles.actionEmojis}>
@@ -230,8 +376,14 @@ export default function UserProfile({ route, navigation }: any) {
         <View style={styles.nameSection}>
           <View style={styles.nameRow}>
             <Text style={styles.userName}>
-              {user.name}, {user.age}
+              {user.name}
+              {user.age > 0 ? `, ${user.age}` : ""}
             </Text>
+            {user.isOnline && (
+              <View style={styles.onlineIndicator}>
+                <Text style={styles.onlineText}>Online</Text>
+              </View>
+            )}
           </View>
           <View style={styles.distanceContainer}>
             <SimpleLineIcons
@@ -242,10 +394,32 @@ export default function UserProfile({ route, navigation }: any) {
             <Text style={styles.distance}>{user.distance}</Text>
           </View>
           <TouchableOpacity style={styles.bookmarkButton}>
-            <Feather name="map" size={20} color="black" />
-            {/* <Ionicons name="bookmark-outline" size={20} color={color.black} /> */}
+            <Feather name="bookmark" size={20} color={color.black} />
           </TouchableOpacity>
         </View>
+
+        {/* Location Info */}
+        {(user.city || user.state || user.country) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Location</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Location</Text>
+              <Text style={styles.infoValue}>
+                {[user.city, user.state, user.country]
+                  .filter(Boolean)
+                  .join(", ") || "Not specified"}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* About Section */}
+        {user.about && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>About</Text>
+            <Text style={styles.aboutText}>{user.about}</Text>
+          </View>
+        )}
 
         {/* Looking For */}
         <View style={styles.section}>
@@ -277,8 +451,23 @@ export default function UserProfile({ route, navigation }: any) {
           </View>
         </View>
 
+        {/* Languages */}
+        {user.languages.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Languages</Text>
+            <View style={styles.interestsContainer}>
+              {user.languages.map((language: string, index: number) => (
+                <View key={index} style={styles.languageTag}>
+                  <Text style={styles.languageText}>{language}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Other Information */}
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Basic Information</Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Height</Text>
             <Text style={styles.infoValue}>{user.height}</Text>
@@ -295,6 +484,10 @@ export default function UserProfile({ route, navigation }: any) {
             <Text style={styles.infoLabel}>Zodiac</Text>
             <Text style={styles.infoValue}>{user.zodiac}</Text>
           </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Gender</Text>
+            <Text style={styles.infoValue}>{user.gender}</Text>
+          </View>
         </View>
       </ScrollView>
 
@@ -307,7 +500,7 @@ export default function UserProfile({ route, navigation }: any) {
         userData={{
           name: user.name,
           age: user.age,
-          image: user.images ? user.images[0] : user.image,
+          image: user.images[0],
         }}
         isMatch={false}
       />
@@ -441,7 +634,7 @@ const styles = StyleSheet.create({
   },
   nameSection: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     marginBottom: 18,
   },
@@ -453,6 +646,19 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     color: color.black,
     marginBottom: 4,
+  },
+  onlineIndicator: {
+    backgroundColor: "#10B981",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    alignSelf: "flex-start",
+    marginTop: 4,
+  },
+  onlineText: {
+    fontSize: 12,
+    fontFamily: font.medium,
+    color: color.white,
   },
   distanceContainer: {
     flexDirection: "row",
@@ -483,6 +689,12 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
     color: color.black,
     marginBottom: 12,
+  },
+  aboutText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.gray55,
+    lineHeight: 24,
   },
   lookingForContainer: {
     flexDirection: "row",
@@ -529,6 +741,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: font.medium,
     color: color.black,
+  },
+  languageTag: {
+    backgroundColor: "#EEF2FF",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#C7D2FE",
+  },
+  languageText: {
+    fontSize: 14,
+    fontFamily: font.medium,
+    color: "#6366F1",
   },
   infoRow: {
     flexDirection: "row",
