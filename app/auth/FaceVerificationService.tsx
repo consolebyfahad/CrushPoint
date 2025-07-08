@@ -1,10 +1,84 @@
-// services/FaceVerificationService.js
+// services/FaceVerificationService.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 
+// Interface definitions
+interface FaceVerificationOptions {
+  confidenceThreshold?: number;
+  cacheEnabled?: boolean;
+  maxRetries?: number;
+}
+
+interface VerificationOptions {
+  cacheKey?: string;
+  skipQualityCheck?: boolean;
+  requireHighConfidence?: boolean;
+}
+
+interface FaceQuality {
+  overall: string;
+  score: number;
+  issues: string[];
+  recommendations: string[];
+}
+
+interface FaceTokenData {
+  token: string;
+  attributes: any;
+  quality: FaceQuality;
+  landmarks: any;
+  rectangle: any;
+}
+
+interface ComparisonResult {
+  confidence: number;
+  thresholds: any;
+  isMatch: boolean;
+  matchLevel: string;
+  analysis: ConfidenceAnalysis;
+}
+
+interface ConfidenceAnalysis {
+  level: string;
+  description: string;
+  recommendation: string;
+}
+
+interface VerificationResult {
+  verified: boolean;
+  confidence: number;
+  matchLevel: string;
+  analysis: ConfidenceAnalysis;
+  capturedFaceQuality: FaceQuality;
+  processingTime: number;
+  thresholds: any;
+  timestamp: string;
+}
+
+interface CachedToken {
+  token: string;
+  timestamp: number;
+}
+
+interface CustomError extends Error {
+  processingTime?: number;
+  userFriendlyMessage?: string;
+}
+
 export class FaceVerificationService {
-  constructor(apiKey: any, apiSecret: any, options = {}) {
+  private apiKey: string;
+  private apiSecret: string;
+  private baseUrl: string;
+  private confidenceThreshold: number;
+  private cacheEnabled: boolean;
+  private maxRetries: number;
+
+  constructor(
+    apiKey: string,
+    apiSecret: string,
+    options: FaceVerificationOptions = {}
+  ) {
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
     this.baseUrl = "https://api-us.faceplusplus.com/facepp/v3";
@@ -18,12 +92,12 @@ export class FaceVerificationService {
     lastRequest: 0,
     minInterval: 1000, // 1 second between requests
 
-    async throttle() {
+    async throttle(): Promise<void> {
       const now = Date.now();
       const timeSinceLastRequest = now - this.lastRequest;
 
       if (timeSinceLastRequest < this.minInterval) {
-        await new Promise((resolve) =>
+        await new Promise<void>((resolve) =>
           setTimeout(resolve, this.minInterval - timeSinceLastRequest)
         );
       }
@@ -33,7 +107,7 @@ export class FaceVerificationService {
   };
 
   // Convert image to base64 with validation
-  async imageToBase64(imageUri) {
+  async imageToBase64(imageUri: string): Promise<string> {
     try {
       // Validate file exists and size
       const fileInfo = await FileSystem.getInfoAsync(imageUri);
@@ -60,7 +134,7 @@ export class FaceVerificationService {
   }
 
   // Prepare asset-based reference image
-  async prepareAssetImage(assetModule: any) {
+  async prepareAssetImage(assetModule: any): Promise<string> {
     try {
       const cacheKey = `asset_${Date.now()}`;
       const filename = `${cacheKey}.jpg`;
@@ -94,14 +168,17 @@ export class FaceVerificationService {
       }
 
       return fileUri;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error preparing asset image:", error);
       throw new Error(`Failed to prepare reference image: ${error.message}`);
     }
   }
 
   // Get face token with retry logic
-  async getFaceToken(imageUri, retries = this.maxRetries) {
+  async getFaceToken(
+    imageUri: string,
+    retries: number = this.maxRetries
+  ): Promise<FaceTokenData> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         await FaceVerificationService.rateLimiter.throttle();
@@ -124,7 +201,6 @@ export class FaceVerificationService {
             "Content-Type": "multipart/form-data",
           },
           body: formData,
-          timeout: 30000, // 30 second timeout
         });
 
         const result = await response.json();
@@ -146,7 +222,7 @@ export class FaceVerificationService {
           landmarks: face.landmark,
           rectangle: face.face_rectangle,
         };
-      } catch (error) {
+      } catch (error: any) {
         console.log(`Face detection attempt ${attempt} failed:`, error.message);
 
         if (attempt === retries) {
@@ -156,14 +232,19 @@ export class FaceVerificationService {
         }
 
         // Wait before retry (exponential backoff)
-        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, attempt * 1000)
+        );
       }
     }
+
+    // This should never be reached due to the throw in the catch block
+    throw new Error("Unexpected error in face detection");
   }
 
   // Assess face quality and provide recommendations
-  assessFaceQuality(faceData) {
-    const quality = {
+  assessFaceQuality(faceData: any): FaceQuality {
+    const quality: FaceQuality = {
       overall: "Good",
       score: 100,
       issues: [],
@@ -205,7 +286,10 @@ export class FaceVerificationService {
   }
 
   // Compare face tokens with detailed analysis
-  async compareFaceTokens(token1, token2) {
+  async compareFaceTokens(
+    token1: string,
+    token2: string
+  ): Promise<ComparisonResult> {
     try {
       await FaceVerificationService.rateLimiter.throttle();
 
@@ -221,7 +305,6 @@ export class FaceVerificationService {
           "Content-Type": "multipart/form-data",
         },
         body: formData,
-        timeout: 30000,
       });
 
       const result = await response.json();
@@ -237,14 +320,14 @@ export class FaceVerificationService {
         matchLevel: this.getMatchLevel(result.confidence),
         analysis: this.analyzeConfidence(result.confidence),
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Face comparison error:", error);
       throw new Error(`Face comparison failed: ${error.message}`);
     }
   }
 
   // Get match level description
-  getMatchLevel(confidence) {
+  getMatchLevel(confidence: number): string {
     if (confidence >= 90) return "Very Strong Match";
     if (confidence >= 80) return "Strong Match";
     if (confidence >= 70) return "Good Match";
@@ -253,7 +336,7 @@ export class FaceVerificationService {
   }
 
   // Analyze confidence score
-  analyzeConfidence(confidence) {
+  analyzeConfidence(confidence: number): ConfidenceAnalysis {
     if (confidence >= 90) {
       return {
         level: "Excellent",
@@ -288,7 +371,7 @@ export class FaceVerificationService {
   }
 
   // Cache management
-  async cacheReferenceToken(key, token) {
+  async cacheReferenceToken(key: string, token: string): Promise<void> {
     if (!this.cacheEnabled) return;
 
     try {
@@ -304,7 +387,10 @@ export class FaceVerificationService {
     }
   }
 
-  async getCachedReferenceToken(key, maxAge = 24 * 60 * 60 * 1000) {
+  async getCachedReferenceToken(
+    key: string,
+    maxAge: number = 24 * 60 * 60 * 1000
+  ): Promise<string | null> {
     // 24 hours
     if (!this.cacheEnabled) return null;
 
@@ -312,7 +398,7 @@ export class FaceVerificationService {
       const cached = await AsyncStorage.getItem(`face_token_${key}`);
       if (!cached) return null;
 
-      const { token, timestamp } = JSON.parse(cached);
+      const { token, timestamp }: CachedToken = JSON.parse(cached);
 
       // Check if cache is still valid
       if (Date.now() - timestamp > maxAge) {
@@ -328,7 +414,11 @@ export class FaceVerificationService {
   }
 
   // Complete verification workflow
-  async verifyFaces(capturedImageUri, referenceImageSource, options = {}) {
+  async verifyFaces(
+    capturedImageUri: string,
+    referenceImageSource: string | any,
+    options: VerificationOptions = {}
+  ): Promise<VerificationResult> {
     const startTime = Date.now();
     const {
       cacheKey = "default_reference",
@@ -355,7 +445,7 @@ export class FaceVerificationService {
       if (!referenceFaceToken) {
         console.log("🔄 Processing reference image...");
 
-        let referenceImageUri;
+        let referenceImageUri: string;
         if (typeof referenceImageSource === "string") {
           // Already a file URI
           referenceImageUri = referenceImageSource;
@@ -391,7 +481,7 @@ export class FaceVerificationService {
 
       const processingTime = Date.now() - startTime;
 
-      const result = {
+      const result: VerificationResult = {
         verified: comparisonResult.isMatch,
         confidence: comparisonResult.confidence,
         matchLevel: comparisonResult.matchLevel,
@@ -409,21 +499,23 @@ export class FaceVerificationService {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const processingTime = Date.now() - startTime;
       console.error("❌ Verification failed:", error.message);
 
-      throw {
-        ...error,
-        processingTime,
-        userFriendlyMessage: this.getUserFriendlyErrorMessage(error.message),
-      };
+      const customError: CustomError = new Error(error.message);
+      customError.processingTime = processingTime;
+      customError.userFriendlyMessage = this.getUserFriendlyErrorMessage(
+        error.message
+      );
+
+      throw customError;
     }
   }
 
   // Convert technical errors to user-friendly messages
-  getUserFriendlyErrorMessage(errorMessage) {
-    const errorMappings = {
+  getUserFriendlyErrorMessage(errorMessage: string): string {
+    const errorMappings: Record<string, string> = {
       "No face detected":
         "Please ensure your face is clearly visible in the image.",
       INVALID_API_KEY: "Service configuration error. Please contact support.",
@@ -446,7 +538,7 @@ export class FaceVerificationService {
   }
 
   // Clear all cached data
-  async clearCache() {
+  async clearCache(): Promise<void> {
     try {
       const keys = await AsyncStorage.getAllKeys();
       const faceKeys = keys.filter(
@@ -464,17 +556,17 @@ export class FaceVerificationService {
 }
 
 // Singleton instance for easy usage
-let globalFaceService = null;
+let globalFaceService: FaceVerificationService | null = null;
 
 export const createFaceVerificationService = (
-  apiKey,
-  apiSecret,
-  options = {}
-) => {
+  apiKey: string,
+  apiSecret: string,
+  options: FaceVerificationOptions = {}
+): FaceVerificationService => {
   return new FaceVerificationService(apiKey, apiSecret, options);
 };
 
-export const getGlobalFaceService = () => {
+export const getGlobalFaceService = (): FaceVerificationService => {
   if (!globalFaceService) {
     throw new Error(
       "Face verification service not initialized. Call initGlobalFaceService first."
@@ -483,18 +575,22 @@ export const getGlobalFaceService = () => {
   return globalFaceService;
 };
 
-export const initGlobalFaceService = (apiKey, apiSecret, options = {}) => {
+export const initGlobalFaceService = (
+  apiKey: string,
+  apiSecret: string,
+  options: FaceVerificationOptions = {}
+): FaceVerificationService => {
   globalFaceService = new FaceVerificationService(apiKey, apiSecret, options);
   return globalFaceService;
 };
 
 // Quick verification function
 export const quickVerify = async (
-  capturedImageUri,
-  referenceImageSource,
-  apiKey,
-  apiSecret
-) => {
+  capturedImageUri: string,
+  referenceImageSource: string | any,
+  apiKey: string,
+  apiSecret: string
+): Promise<VerificationResult> => {
   const service = createFaceVerificationService(apiKey, apiSecret);
   return await service.verifyFaces(capturedImageUri, referenceImageSource);
 };
