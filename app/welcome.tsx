@@ -4,6 +4,7 @@ import { useAppContext } from "@/context/app_context";
 import { AnimatedLogo } from "@/utils//animations";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import onAppleButtonPress from "@/utils/social_auth";
 import { AppleIcon, EmailIcon, GoogleIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { appleAuth } from "@invertase/react-native-apple-authentication";
 import {
@@ -24,7 +25,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Configure Google Sign-In
 GoogleSignin.configure({
   webClientId:
     "247710361352-tpf24aqbsl6cldmat3m6377hh27mv8mo.apps.googleusercontent.com",
@@ -55,30 +55,10 @@ export default function Welcome() {
 
     setAppleLoading(true);
     try {
-      const appleAuthRequestResponse = await appleAuth.performRequest({
-        requestedOperation: appleAuth.Operation.LOGIN,
-        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-      });
+      const { userCredential, identityToken, userData } =
+        await onAppleButtonPress();
+      console.log("Apple Login:", { userCredential, identityToken, userData });
 
-      const { identityToken, nonce, user, email, fullName } =
-        appleAuthRequestResponse;
-
-      if (!identityToken) {
-        showToast("Apple Sign-In failed: No identity token received", "error");
-        return;
-      }
-
-      const userData = {
-        id: user,
-        email: email,
-        name: fullName
-          ? `${fullName.givenName || ""} ${fullName.familyName || ""}`.trim()
-          : "",
-        identityToken,
-        nonce,
-      };
-
-      // Send to your backend
       const formData = new FormData();
       formData.append("type", "social_login");
       formData.append("provider", "apple");
@@ -136,15 +116,12 @@ export default function Welcome() {
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
-      console.log("first");
 
       if (isSuccessResponse(response)) {
         const { user } = response.data;
-
-        // Send the actual Google ID token to your backend
+        console.log("user", response.data.idToken);
         const formData = new FormData();
         formData.append("type", "social_login");
-        // formData.append("provider", "google");
         formData.append("token", response.data.idToken || "");
         formData.append("user_data", user.email);
 
@@ -237,17 +214,14 @@ export default function Welcome() {
             </Text>
 
             <View style={styles.buttonContainer}>
-              {/* Show Apple Sign-In only on iOS */}
-              {Platform.OS === "ios" && appleAuth.isSupported && (
-                <CustomButton
-                  title="Continue with Apple"
-                  onPress={handleAppleSignIn}
-                  icon={<AppleIcon />}
-                  variant="secondary"
-                  isLoading={appleLoading}
-                  isDisabled={googleLoading}
-                />
-              )}
+              <CustomButton
+                title="Continue with Apple"
+                onPress={handleAppleSignIn}
+                icon={<AppleIcon />}
+                variant="secondary"
+                isLoading={appleLoading}
+                isDisabled={googleLoading || Platform.OS != "ios"}
+              />
 
               <CustomButton
                 title="Continue with Google"

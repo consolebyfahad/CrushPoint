@@ -37,7 +37,7 @@ export default function ListView({ onViewProfile, onBookmark }: any) {
         </View>
       ) : loading && users.length === 0 ? (
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={color.primary} />
           <Text style={styles.loadingText}>Loading users...</Text>
         </View>
       ) : (

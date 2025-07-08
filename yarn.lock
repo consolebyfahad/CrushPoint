@@ -1896,6 +1896,13 @@
   dependencies:
     firebase "11.3.1"
 
+"@react-native-firebase/auth@^22.2.1":
+  version "22.2.1"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/auth/-/auth-22.2.1.tgz#43776117b84d96c4b58aec7c5da0f93cdfe71ba2"
+  integrity sha512-qy8TvT4MXmrR3d9xv7kAs7hBUVXo0n2u/rkaWK57TI8E4TmSlTwYiFOqabSlk9VjiHCYZtjpcWHeG1xwpzZ5ig==
+  dependencies:
+    plist "^3.1.0"
+
 "@react-native-firebase/messaging@^22.2.1":
   version "22.2.1"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/messaging/-/messaging-22.2.1.tgz#2d2915747e054bfc438dedc5a2e94a1bacf657b1"
@@ -6254,7 +6261,7 @@ pirates@^4.0.1, pirates@^4.0.4:
   resolved "https://registry.yarnpkg.com/pirates/-/pirates-4.0.7.tgz#643b4a18c4257c8a65104b73f3049ce9a0a15e22"
   integrity sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==
 
-plist@^3.0.5:
+plist@^3.0.5, plist@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/plist/-/plist-3.1.0.tgz#797a516a93e62f5bde55e0b9cc9c967f860893c9"
   integrity sha512-uysumyrvkUX0rX/dEVqt8gC3sTBzd4zoWfLeS29nb53imdaXVvLINYXTI2GNqzaMuvacNx4uJQ8+b3zXR0pkgQ==
