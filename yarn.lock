@@ -1617,11 +1617,6 @@
   resolved "https://registry.yarnpkg.com/@ide/backoff/-/backoff-1.0.0.tgz#466842c25bd4a4833e0642fab41ccff064010176"
   integrity sha512-F0YfUDjvT+Mtt/R4xdl2X0EYCHMMiJqNLdxHD++jDT5ydEFIyqbCHh51Qx2E211dgZprPKhV7sHmnXKpLuvc5g==
 
-"@invertase/react-native-apple-authentication@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@invertase/react-native-apple-authentication/-/react-native-apple-authentication-2.4.1.tgz#166cc923a6424e19791d20f47d08ad648499db15"
-  integrity sha512-SzWXS/T6H62ScTX+jMLJFLAcBp2p8P30J5uQEimpLMUolqnv/iAljfpwTvZYaniVmMSUXjG0/N95ScUIcmsYRQ==
-
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
   resolved "https://registry.yarnpkg.com/@isaacs/cliui/-/cliui-8.0.2.tgz#b37667b7bc181c168782259bab42474fbf52b550"
@@ -1895,13 +1890,6 @@
   integrity sha512-FNekjZgvLLBWLNMGKfKUHR4TTu8OY1YnvlQV9HaNboF5U5+CvTcK8IKycXKdhVP8YfcILTaM3AFraoQsQsy3/w==
   dependencies:
     firebase "11.3.1"
-
-"@react-native-firebase/auth@^22.2.1":
-  version "22.2.1"
-  resolved "https://registry.yarnpkg.com/@react-native-firebase/auth/-/auth-22.2.1.tgz#43776117b84d96c4b58aec7c5da0f93cdfe71ba2"
-  integrity sha512-qy8TvT4MXmrR3d9xv7kAs7hBUVXo0n2u/rkaWK57TI8E4TmSlTwYiFOqabSlk9VjiHCYZtjpcWHeG1xwpzZ5ig==
-  dependencies:
-    plist "^3.1.0"
 
 "@react-native-firebase/messaging@^22.2.1":
   version "22.2.1"
@@ -4139,6 +4127,13 @@ expo-image-loader@~5.1.0:
   resolved "https://registry.yarnpkg.com/expo-image-loader/-/expo-image-loader-5.1.0.tgz#f7d65f9b9a9714eaaf5d50a406cb34cb25262153"
   integrity sha512-sEBx3zDQIODWbB5JwzE7ZL5FJD+DK3LVLWBVJy6VzsqIA6nDEnSFnsnWyCfCTSvbGigMATs1lgkC2nz3Jpve1Q==
 
+expo-image-manipulator@~13.1.7:
+  version "13.1.7"
+  resolved "https://registry.yarnpkg.com/expo-image-manipulator/-/expo-image-manipulator-13.1.7.tgz#e891ce9b49d75962eafdf5b7d670116583379e76"
+  integrity sha512-DBy/Xdd0E/yFind14x36XmwfWuUxOHI/oH97/giKjjPaRc2dlyjQ3tuW3x699hX6gAs9Sixj5WEJ1qNf3c8sag==
+  dependencies:
+    expo-image-loader "~5.1.0"
+
 expo-image-picker@~16.1.4:
   version "16.1.4"
   resolved "https://registry.yarnpkg.com/expo-image-picker/-/expo-image-picker-16.1.4.tgz#d4ac2d1f64f6ec9347c3f64f8435b40e6e4dcc40"
@@ -6266,7 +6261,7 @@ pirates@^4.0.1, pirates@^4.0.4:
   resolved "https://registry.yarnpkg.com/pirates/-/pirates-4.0.7.tgz#643b4a18c4257c8a65104b73f3049ce9a0a15e22"
   integrity sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==
 
-plist@^3.0.5, plist@^3.1.0:
+plist@^3.0.5:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/plist/-/plist-3.1.0.tgz#797a516a93e62f5bde55e0b9cc9c967f860893c9"
   integrity sha512-uysumyrvkUX0rX/dEVqt8gC3sTBzd4zoWfLeS29nb53imdaXVvLINYXTI2GNqzaMuvacNx4uJQ8+b3zXR0pkgQ==

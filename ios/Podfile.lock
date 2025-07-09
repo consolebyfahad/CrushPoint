@@ -78,6 +78,10 @@ PODS:
     - SDWebImageAVIFCoder (~> 0.11.0)
     - SDWebImageSVGCoder (~> 1.7.0)
     - SDWebImageWebPCoder (~> 0.14.6)
+  - ExpoImageManipulator (13.1.7):
+    - EXImageLoader
+    - ExpoModulesCore
+    - SDWebImageWebPCoder
   - ExpoImagePicker (16.1.4):
     - ExpoModulesCore
   - ExpoKeepAwake (14.1.4):
@@ -123,25 +127,11 @@ PODS:
     - ExpoModulesCore
   - fast_float (6.1.4)
   - FBLazyVector (0.79.5)
-  - Firebase/Auth (11.13.0):
-    - Firebase/CoreOnly
-    - FirebaseAuth (~> 11.13.0)
   - Firebase/CoreOnly (11.13.0):
     - FirebaseCore (~> 11.13.0)
   - Firebase/Messaging (11.13.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 11.13.0)
-  - FirebaseAppCheckInterop (11.15.0)
-  - FirebaseAuth (11.13.0):
-    - FirebaseAppCheckInterop (~> 11.0)
-    - FirebaseAuthInterop (~> 11.0)
-    - FirebaseCore (~> 11.13.0)
-    - FirebaseCoreExtension (~> 11.13.0)
-    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
-    - GoogleUtilities/Environment (~> 8.1)
-    - GTMSessionFetcher/Core (< 5.0, >= 3.4)
-    - RecaptchaInterop (~> 101.0)
-  - FirebaseAuthInterop (11.15.0)
   - FirebaseCore (11.13.0):
     - FirebaseCoreInternal (~> 11.13.0)
     - GoogleUtilities/Environment (~> 8.1)
@@ -2035,9 +2025,6 @@ PODS:
     - React-logger (= 0.79.5)
     - React-perflogger (= 0.79.5)
     - React-utils (= 0.79.5)
-  - RecaptchaInterop (101.0.0)
-  - RNAppleAuthentication (2.4.1):
-    - React-Core
   - RNCAsyncStorage (2.1.2):
     - DoubleConversion
     - glog
@@ -2089,10 +2076,6 @@ PODS:
   - RNFBApp (22.2.1):
     - Firebase/CoreOnly (= 11.13.0)
     - React-Core
-  - RNFBAuth (22.2.1):
-    - Firebase/Auth (= 11.13.0)
-    - React-Core
-    - RNFBApp
   - RNFBMessaging (22.2.1):
     - Firebase/Messaging (= 11.13.0)
     - FirebaseCoreExtension
@@ -2385,6 +2368,7 @@ DEPENDENCIES:
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
   - ExpoHead (from `../node_modules/expo-router/ios`)
   - ExpoImage (from `../node_modules/expo-image/ios`)
+  - ExpoImageManipulator (from `../node_modules/expo-image-manipulator/ios`)
   - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
@@ -2469,11 +2453,9 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
-  - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -2486,9 +2468,6 @@ SPEC REPOS:
     - AppAuth
     - AppCheckCore
     - Firebase
-    - FirebaseAppCheckInterop
-    - FirebaseAuth
-    - FirebaseAuthInterop
     - FirebaseCore
     - FirebaseCoreExtension
     - FirebaseCoreInternal
@@ -2506,7 +2485,6 @@ SPEC REPOS:
     - libwebp
     - nanopb
     - PromisesObjC
-    - RecaptchaInterop
     - SDWebImage
     - SDWebImageAVIFCoder
     - SDWebImageSVGCoder
@@ -2551,6 +2529,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-router/ios"
   ExpoImage:
     :path: "../node_modules/expo-image/ios"
+  ExpoImageManipulator:
+    :path: "../node_modules/expo-image-manipulator/ios"
   ExpoImagePicker:
     :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
@@ -2716,16 +2696,12 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  RNAppleAuthentication:
-    :path: "../node_modules/@invertase/react-native-apple-authentication"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNDateTimePicker:
     :path: "../node_modules/@react-native-community/datetimepicker"
   RNFBApp:
     :path: "../node_modules/@react-native-firebase/app"
-  RNFBAuth:
-    :path: "../node_modules/@react-native-firebase/auth"
   RNFBMessaging:
     :path: "../node_modules/@react-native-firebase/messaging"
   RNGoogleSignin:
@@ -2760,6 +2736,7 @@ SPEC CHECKSUMS:
   ExpoHaptics: 0ff6e0d83cd891178a306e548da1450249d54500
   ExpoHead: 9efbc31e85b2a6b3df1fcbd7595659873bb06c81
   ExpoImage: 785f7673cfecd97045cf333fd6486b57ccab4b71
+  ExpoImageManipulator: 1e06e7a1e56f454e75d01b7032c1e44963bfc865
   ExpoImagePicker: 0963da31800c906e01c03e25d7c849f16ebf02a2
   ExpoKeepAwake: bf0811570c8da182bfb879169437d4de298376e7
   ExpoLinking: d5c183998ca6ada66ff45e407e0f965b398a8902
@@ -2773,9 +2750,6 @@ SPEC CHECKSUMS:
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: d2a9cd223302b6c9aa4aa34c1a775e9db609eb52
   Firebase: 3435bc66b4d494c2f22c79fd3aae4c1db6662327
-  FirebaseAppCheckInterop: 06fe5a3799278ae4667e6c432edd86b1030fa3df
-  FirebaseAuth: 175cb5503dfdb52191b8ff81cdd52c1d9dee9ac9
-  FirebaseAuthInterop: 7087d7a4ee4bc4de019b2d0c240974ed5d89e2fd
   FirebaseCore: c692c7f1c75305ab6aff2b367f25e11d73aa8bd0
   FirebaseCoreExtension: c048485c347616dba6165358dbef765c5197597b
   FirebaseCoreInternal: 29d7b3af4aaf0b8f3ed20b568c13df399b06f68c
@@ -2863,12 +2837,9 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: f3e842e6cb5a825b6918a74a38402ba1409411f8
   ReactCodegen: 542dbcd3d677ed7c4fe69e28b7c492998f48c9db
   ReactCommon: 1aa48867a0fc71a2b4f9e8a1529f5673648354f3
-  RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
-  RNAppleAuthentication: c3dddf5918126c9aae85dc2e2ce9fb87835e9e04
   RNCAsyncStorage: 646c1bf2ebfc78d6632a3b0399f471fba8101e73
   RNDateTimePicker: cbba58b7fde72d73362a8896b9815498c8e014b2
   RNFBApp: 557f15b87d602ed5879a1cbd6dc574481bccb278
-  RNFBAuth: fb0421232f23c6801923926f4447cf73e62418e8
   RNFBMessaging: e6480aaf434826565d5a40b01c422fb0f58fc8a9
   RNGoogleSignin: db4aa231a90bdc4cea8b749ec68b168c8f747ec2
   RNReanimated: a3f55346df73f35c38bf0b446294d3d0b1ac8cf9

@@ -79,7 +79,7 @@ export default function Map({ onUserPress }: any) {
           longitudeDelta: 0.02,
         }}
         showsUserLocation={true}
-        showsMyLocationButton={true}
+        showsMyLocationButton={false}
         scrollEnabled={true}
         zoomEnabled={true}
         rotateEnabled={false}
@@ -90,8 +90,9 @@ export default function Map({ onUserPress }: any) {
             key={user.id}
             coordinate={user.coordinate}
             onPress={() => onUserPress(user)}
+            tracksViewChanges={false}
           >
-            <View style={styles.userMarker}>
+            <View style={styles.userMarker} pointerEvents="box-none">
               <Image source={{ uri: user.image }} style={styles.userImage} />
             </View>
           </Marker>
@@ -103,9 +104,6 @@ export default function Map({ onUserPress }: any) {
           }}
           anchor={{ x: 0.5, y: 0.5 }}
         >
-          {/* <View style={styles.customMarker}>
-                <View style={styles.markerInner} />
-              </View> */}
           <MarkerIcon />
         </Marker>
       </MapView>

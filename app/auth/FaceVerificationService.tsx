@@ -2,7 +2,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
-
+import * as ImageManipulator from "expo-image-manipulator";
 // Interface definitions
 interface FaceVerificationOptions {
   confidenceThreshold?: number;
@@ -106,23 +106,111 @@ export class FaceVerificationService {
     },
   };
 
-  // Convert image to base64 with validation
+  // Check if a string is an HTTPS URL
+  private isHttpsUrl(url: string): boolean {
+    return url.startsWith("https://") || url.startsWith("http://");
+  }
+
+  // Download remote image to local file
+  async downloadImageToLocal(remoteUrl: string): Promise<string> {
+    try {
+      console.log("📥 Downloading remote image:", remoteUrl);
+
+      // Create a unique filename
+      const timestamp = Date.now();
+      const filename = `remote_image_${timestamp}.jpg`;
+      const localUri = `${FileSystem.documentDirectory}${filename}`;
+
+      // Check cache first
+      if (this.cacheEnabled) {
+        const cachedUri = await AsyncStorage.getItem(
+          `remote_image_${remoteUrl}`
+        );
+        if (cachedUri) {
+          const fileInfo = await FileSystem.getInfoAsync(cachedUri);
+          if (fileInfo.exists) {
+            console.log("⚡ Using cached remote image");
+            return cachedUri;
+          }
+        }
+      }
+
+      // Download the image
+      const downloadResult = await FileSystem.downloadAsync(
+        remoteUrl,
+        localUri
+      );
+
+      if (downloadResult.status !== 200) {
+        throw new Error(
+          `Failed to download image: HTTP ${downloadResult.status}`
+        );
+      }
+
+      // Verify the file was downloaded
+      const fileInfo = await FileSystem.getInfoAsync(localUri);
+      if (!fileInfo.exists) {
+        throw new Error("Downloaded file not found");
+      }
+
+      // Cache the local URI
+      if (this.cacheEnabled) {
+        await AsyncStorage.setItem(`remote_image_${remoteUrl}`, localUri);
+      }
+
+      console.log("✅ Image downloaded successfully to:", localUri);
+      return localUri;
+    } catch (error: any) {
+      console.error("Error downloading remote image:", error);
+      throw new Error(`Failed to download remote image: ${error.message}`);
+    }
+  }
+
+  // Convert image to base64 with validation and compression
   async imageToBase64(imageUri: string): Promise<string> {
     try {
-      // Validate file exists and size
-      const fileInfo = await FileSystem.getInfoAsync(imageUri);
+      // If it's a remote URL, download it first
+      let localUri = imageUri;
+      if (this.isHttpsUrl(imageUri)) {
+        localUri = await this.downloadImageToLocal(imageUri);
+      }
+
+      // Validate file exists
+      const fileInfo = await FileSystem.getInfoAsync(localUri);
       if (!fileInfo.exists) {
         throw new Error("Image file not found");
       }
 
+      let processedUri = localUri;
       const fileSizeInMB = fileInfo.size / (1024 * 1024);
+
+      // If image is too large, compress it
       if (fileSizeInMB > 2) {
-        throw new Error(
-          `Image too large: ${fileSizeInMB.toFixed(2)}MB. Max size is 2MB`
+        console.log(
+          `📦 Compressing image from ${fileSizeInMB.toFixed(2)}MB...`
         );
+
+        const manipulatorResult = await ImageManipulator.manipulateAsync(
+          localUri,
+          [{ resize: { width: 1024 } }], // Resize to max width of 1024px
+          {
+            compress: 0.7, // 70% quality
+            format: ImageManipulator.SaveFormat.JPEG,
+          }
+        );
+
+        processedUri = manipulatorResult.uri;
+
+        // Check new size
+        const newFileInfo = await FileSystem.getInfoAsync(processedUri);
+        if (!newFileInfo.exists) {
+          throw new Error("Compressed file not found");
+        }
+        const newSizeInMB = newFileInfo.size / (1024 * 1024);
+        console.log(`✅ Image compressed to ${newSizeInMB.toFixed(2)}MB`);
       }
 
-      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+      const base64 = await FileSystem.readAsStringAsync(processedUri, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
@@ -447,7 +535,7 @@ export class FaceVerificationService {
 
         let referenceImageUri: string;
         if (typeof referenceImageSource === "string") {
-          // Already a file URI
+          // Could be a local file URI or HTTPS URL
           referenceImageUri = referenceImageSource;
         } else {
           // Asset module - need to prepare it
@@ -524,6 +612,8 @@ export class FaceVerificationService {
       "Poor image quality":
         "Image quality is too low. Please take a clearer photo.",
       "Image too large": "Image file is too large. Please use a smaller image.",
+      "Failed to download":
+        "Unable to access reference image. Please try again.",
       network: "Network connection error. Please check your internet.",
       timeout: "Request timed out. Please try again.",
     };
@@ -542,7 +632,10 @@ export class FaceVerificationService {
     try {
       const keys = await AsyncStorage.getAllKeys();
       const faceKeys = keys.filter(
-        (key) => key.startsWith("face_token_") || key.startsWith("asset_uri_")
+        (key) =>
+          key.startsWith("face_token_") ||
+          key.startsWith("asset_uri_") ||
+          key.startsWith("remote_image_")
       );
 
       if (faceKeys.length > 0) {

@@ -119,24 +119,26 @@ export default function FaceVerification() {
             1
           )}%\nRecommendation: ${verificationResult.analysis.recommendation}`;
 
-      Alert.alert(title, message, [
-        {
-          text: "Try Again",
-          onPress: () => {
-            setCapturedImage(null);
-            // setShowCamera(true);
+      setTimeout(() => {
+        Alert.alert(title, message, [
+          {
+            text: "Try Again",
+            onPress: () => {
+              setCapturedImage(null);
+              // setShowCamera(true);
+            },
           },
-        },
-        {
-          text: "OK",
-          style: "default",
-          onPress: () => {
-            if (verificationResult.verified) {
-              submitAllData();
-            }
+          {
+            text: "OK",
+            style: "default",
+            onPress: () => {
+              if (verificationResult.verified) {
+                submitAllData();
+              }
+            },
           },
-        },
-      ]);
+        ]);
+      }, 100);
     } catch (error: any) {
       console.error("Error in face verification:", error);
 
