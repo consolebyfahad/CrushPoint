@@ -52,12 +52,6 @@ GMSServices.provideAPIKey("AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y")
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
-// @generated begin @react-native-firebase/auth-openURL - expo prebuild (DO NOT MODIFY)
-    if url.host?.lowercased() == "firebaseauth" {
-      // invocations for Firebase Auth are handled elsewhere and should not be forwarded to Expo Router
-      return false
-    }
-// @generated end @react-native-firebase/auth-openURL
     return super.application(app, open: url, options: options) || RCTLinkingManager.application(app, open: url, options: options)
   }
 

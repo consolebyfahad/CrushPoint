@@ -1,3 +1,6 @@
+import { useToast } from "@/components/toast_provider";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
@@ -22,9 +25,13 @@ export default function InviteMatches({
   onBack,
   onSendInvites,
   eventTitle = "Event",
+  eventId,
 }: any) {
+  const { user } = useAppContext();
+  const { showToast } = useToast();
   const [searchText, setSearchText] = useState("");
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Sample matches data - replace with your actual matches
   const matches = [
@@ -80,21 +87,46 @@ export default function InviteMatches({
     });
   };
 
-  const handleSendInvites = () => {
-    const selectedMatchesData = matches.filter((match) =>
-      selectedMatches.includes(match.id)
-    );
-
-    if (onSendInvites) {
-      onSendInvites(selectedMatchesData);
-    } else {
-      console.log("Send invites to:", selectedMatchesData);
+  const handleSendInvites = async () => {
+    if (!user?.user_id) {
+      console.error("User ID not available");
+      return;
     }
+    setIsSubmitting(true);
 
-    // Reset and close
-    setSelectedMatches([]);
-    setSearchText("");
-    onClose();
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data");
+      formData.append("user_id", user.user_id);
+      formData.append("table_name", "event_invites");
+      console.log("first", eventId);
+      formData.append("event_id", eventId.toString());
+      formData.append("invited_id", JSON.stringify(selectedMatches));
+      console.log("formData", formData);
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        showToast("Invites sent successfully!", "success");
+
+        const selectedMatchesData = matches.filter((match) =>
+          selectedMatches.includes(match.id)
+        );
+
+        if (onSendInvites) {
+          onSendInvites(selectedMatchesData);
+        }
+
+        setSelectedMatches([]);
+        setSearchText("");
+        onClose();
+      } else {
+        showToast(response.message || "Failed to send invites", "error");
+      }
+    } catch (error) {
+      showToast("Something went wrong. Please try again.", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderMatchItem = ({ item }: any) => {
@@ -196,9 +228,10 @@ export default function InviteMatches({
             </Text>
 
             <CustomButton
-              title="Send Invites"
+              title={isSubmitting ? "Sending..." : "Send Invites"}
               onPress={handleSendInvites}
-              isDisabled={selectedMatches.length === 0}
+              isDisabled={selectedMatches.length === 0 || isSubmitting}
+              isLoading={isSubmitting}
             />
           </View>
         </View>

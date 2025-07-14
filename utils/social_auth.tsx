@@ -84,7 +84,6 @@ export default function SocialAuth({
         `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`
       );
       const userInfo = await userInfoResponse.json();
-
       if (!userInfo.email) {
         onAuthError("Google Sign-In failed: No email received");
         return;
@@ -93,10 +92,9 @@ export default function SocialAuth({
       // Prepare data for your API
       const formData = new FormData();
       formData.append("type", "social_login");
-      formData.append("provider", "google");
       formData.append("token", accessToken);
-      formData.append("user_data", JSON.stringify(userInfo));
-
+      formData.append("email", userInfo.email);
+      formData.append("name", userInfo.name);
       const apiResponse = await apiCall(formData);
 
       if (apiResponse.success) {
@@ -144,11 +142,13 @@ export default function SocialAuth({
 
         if (isSuccessResponse(response)) {
           const { user } = response.data;
+          console.log(user);
           console.log("user", response.data.idToken);
           const formData = new FormData();
           formData.append("type", "social_login");
           formData.append("token", response.data.idToken || "");
-          formData.append("user_data", user.email);
+          formData.append("email", user?.email);
+          formData.append("name", user?.name);
 
           const apiResponse = await apiCall(formData);
           if (apiResponse.success) {

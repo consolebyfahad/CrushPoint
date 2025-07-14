@@ -14,11 +14,11 @@ export default function LookingFor() {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const options = [
-    { id: "serious", emoji: "🩵", label: "Serious relationship" },
-    { id: "casual", emoji: "😘", label: "Casual dating" },
-    { id: "friendship", emoji: "🤝", label: "Friendship" },
-    { id: "open", emoji: "🔥", label: "Open to possibilities" },
-    { id: "prefer-not", emoji: "🤫", label: "Prefer not to say" },
+    { id: "serious", label: "🩵 Serious relationship" },
+    { id: "casual", label: "😘 Casual dating" },
+    { id: "friendship", label: "🤝 Friendship" },
+    { id: "open", label: "🔥 Open to possibilities" },
+    { id: "prefer-not", label: "🤫 Prefer not to say" },
   ];
 
   const handleSelectionChange = (newSelection: string[]) => {

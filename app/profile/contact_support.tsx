@@ -1,9 +1,16 @@
+import CustomButton from "@/components/custom_button";
+import Header from "@/components/header";
+import { useToast } from "@/components/toast_provider";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Alert,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,10 +20,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function ContactSupport({ navigation }: any) {
+export default function ContactSupport() {
+  const { user, userData } = useAppContext();
+  const { showToast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
-    name: "Julia Williams",
-    email: "Email@example.com",
+    name: "",
+    email: "",
     subject: "",
     message: "",
   });
@@ -29,6 +40,15 @@ export default function ContactSupport({ navigation }: any) {
     "Billing Question",
     "Other",
   ];
+
+  // Pre-populate user data from context
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      name: userData?.name || user?.name || "",
+      email: userData?.email || user?.email || "",
+    }));
+  }, [user, userData]);
 
   const handleBack = () => {
     router.back();
@@ -48,48 +68,81 @@ export default function ContactSupport({ navigation }: any) {
     }));
   };
 
-  const handleSendMessage = () => {
-    // Validate form
+  const validateForm = () => {
     if (!formData.name.trim()) {
-      Alert.alert("Error", "Please enter your name");
-      return;
+      showToast("Name is required", "error");
+      return false;
     }
 
     if (!formData.email.trim()) {
-      Alert.alert("Error", "Please enter your email");
-      return;
+      showToast("Email is required", "error");
+      return false;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      showToast("Please enter a valid email", "error");
+      return false;
     }
 
     if (!formData.subject) {
-      Alert.alert("Error", "Please select a subject");
-      return;
+      showToast("Subject is required", "error");
+      return false;
     }
 
     if (!formData.message.trim()) {
-      Alert.alert("Error", "Please enter a message");
+      showToast("Message is required", "error");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSendMessage = async () => {
+    if (!validateForm()) {
       return;
     }
 
-    console.log("Sending support message:", formData);
+    if (!user?.user_id) {
+      showToast("User session expired. Please login again.", "error");
+      return;
+    }
 
-    // Show success message
-    Alert.alert(
-      "Message Sent",
-      "Thank you for contacting us! Our support team will get back to you as soon as possible.",
-      [
-        {
-          text: "OK",
-          onPress: () => {
-            // Reset form
-            setFormData((prev) => ({
-              ...prev,
-              subject: "",
-              message: "",
-            }));
-          },
-        },
-      ]
-    );
+    setIsSubmitting(true);
+
+    try {
+      const submissionData = new FormData();
+      submissionData.append("type", "contact_us");
+      submissionData.append("user_id", user.user_id);
+      submissionData.append("subject", formData.subject);
+      submissionData.append("message", formData.message.trim());
+
+      const response = await apiCall(submissionData);
+
+      if (response.result) {
+        showToast("Message sent successfully!", "success");
+
+        // Reset form (keep name and email)
+        setFormData((prev) => ({
+          ...prev,
+          subject: "",
+          message: "",
+        }));
+
+        // Optional: Navigate back after success
+        setTimeout(() => {
+          router.back();
+        }, 1500);
+      } else {
+        showToast(response.message || "Failed to send message", "error");
+      }
+    } catch (error) {
+      console.error("Contact support error:", error);
+      showToast("Something went wrong. Please try again.", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderSubjectOption = (option: string) => (
@@ -101,6 +154,7 @@ export default function ContactSupport({ navigation }: any) {
       ]}
       onPress={() => handleSubjectSelect(option)}
       activeOpacity={0.7}
+      disabled={isSubmitting}
     >
       <Text
         style={[
@@ -113,119 +167,110 @@ export default function ContactSupport({ navigation }: any) {
     </TouchableOpacity>
   );
 
+  const isFormValid =
+    formData.name.trim() &&
+    formData.email.trim() &&
+    formData.subject &&
+    formData.message.trim();
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.8}
+      <Header title={"Contact Support"} divider />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardContainer}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
-          <Ionicons name="arrow-back" size={24} color={color.black} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Contact Support</Text>
-        <View style={styles.placeholder} />
-      </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Header Card */}
-        <View style={styles.headerCard}>
-          <View style={styles.helpIcon}>
-            <Ionicons name="help-circle-outline" size={32} color="#5FB3D4" />
+          {/* Header Card */}
+          <View style={styles.headerCard}>
+            <View style={styles.helpIcon}>
+              <Ionicons name="help-circle-outline" size={32} color="#5FB3D4" />
+            </View>
+            <Text style={styles.helpTitle}>{"We're here to help"}</Text>
+            <Text style={styles.helpDescription}>
+              Our support team will get back to you as soon as possible.
+            </Text>
           </View>
-          <Text style={styles.helpTitle}>{"We're here to help"}</Text>
-          <Text style={styles.helpDescription}>
-            Our support team will get back to you as soon as possible.
-          </Text>
-        </View>
 
-        {/* Name Field */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Name</Text>
-          <TextInput
-            style={styles.textInput}
-            value={formData.name}
-            onChangeText={(value) => handleInputChange("name", value)}
-            placeholder="Enter your name"
-            placeholderTextColor={color.gray14}
-          />
-        </View>
-
-        {/* Email Field */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Email</Text>
-          <TextInput
-            style={styles.textInput}
-            value={formData.email}
-            onChangeText={(value) => handleInputChange("email", value)}
-            placeholder="Enter your email"
-            placeholderTextColor={color.gray14}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
-
-        {/* Subject Field */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Subject</Text>
-          <View style={styles.subjectGrid}>
-            {subjectOptions.map(renderSubjectOption)}
+          {/* Name Field */}
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Name *</Text>
+            <TextInput
+              style={styles.textInput}
+              value={formData.name}
+              onChangeText={(value) => handleInputChange("name", value)}
+              placeholder="Enter your name"
+              placeholderTextColor={color.gray14}
+              editable={!isSubmitting}
+              returnKeyType="next"
+            />
           </View>
-        </View>
 
-        {/* Message Field */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Message</Text>
-          <TextInput
-            style={styles.messageInput}
-            value={formData.message}
-            onChangeText={(value) => handleInputChange("message", value)}
-            placeholder="How can we help?"
-            placeholderTextColor={color.gray14}
-            multiline
-            numberOfLines={6}
-            textAlignVertical="top"
-            maxLength={500}
+          {/* Email Field */}
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Email *</Text>
+            <TextInput
+              style={styles.textInput}
+              value={formData.email}
+              onChangeText={(value) => handleInputChange("email", value)}
+              placeholder="Enter your email"
+              placeholderTextColor={color.gray14}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!isSubmitting}
+              returnKeyType="next"
+            />
+          </View>
+
+          {/* Subject Field */}
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Subject *</Text>
+            <View style={styles.subjectGrid}>
+              {subjectOptions.map(renderSubjectOption)}
+            </View>
+          </View>
+
+          {/* Message Field */}
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>Message *</Text>
+            <TextInput
+              style={styles.messageInput}
+              value={formData.message}
+              onChangeText={(value) => handleInputChange("message", value)}
+              placeholder="How can we help?"
+              placeholderTextColor={color.gray14}
+              multiline
+              numberOfLines={6}
+              textAlignVertical="top"
+              maxLength={500}
+              editable={!isSubmitting}
+              returnKeyType="done"
+              blurOnSubmit={true}
+            />
+            <Text style={styles.characterCount}>
+              {formData.message.length}/500
+            </Text>
+          </View>
+        </ScrollView>
+
+        {/* Send Button */}
+        <View style={styles.sendContainer}>
+          <CustomButton
+            title={isSubmitting ? "Sending..." : "Send Message"}
+            onPress={handleSendMessage}
+            isDisabled={!isFormValid || isSubmitting}
+            icon={<Feather name="send" size={18} color="white" />}
           />
-          <Text style={styles.characterCount}>
-            {formData.message.length}/500
-          </Text>
         </View>
-
-        {/* Bottom Spacing */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-
-      {/* Send Button */}
-      <View style={styles.sendContainer}>
-        <TouchableOpacity
-          style={[
-            styles.sendButton,
-            (!formData.name.trim() ||
-              !formData.email.trim() ||
-              !formData.subject ||
-              !formData.message.trim()) &&
-              styles.sendButtonDisabled,
-          ]}
-          onPress={handleSendMessage}
-          activeOpacity={0.8}
-          disabled={
-            !formData.name.trim() ||
-            !formData.email.trim() ||
-            !formData.subject ||
-            !formData.message.trim()
-          }
-        >
-          <Ionicons
-            name="send"
-            size={18}
-            color={color.white}
-            style={styles.sendIcon}
-          />
-          <Text style={styles.sendButtonText}>Send Message</Text>
-        </TouchableOpacity>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -235,40 +280,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontFamily: font.semiBold,
-    color: color.black,
-  },
-  placeholder: {
-    width: 40,
+  keyboardContainer: {
+    flex: 1,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    padding: 20,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   headerCard: {
-    backgroundColor: "#E0F2FE",
+    backgroundColor: color.primary100,
     borderRadius: 16,
     padding: 20,
-    marginTop: 20,
     marginBottom: 24,
-    alignItems: "center",
   },
   helpIcon: {
     width: 60,
@@ -289,7 +315,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: font.regular,
     color: color.gray14,
-    textAlign: "center",
     lineHeight: 20,
   },
   fieldContainer: {
@@ -354,38 +379,14 @@ const styles = StyleSheet.create({
   characterCount: {
     fontSize: 12,
     fontFamily: font.regular,
-    color: color.gray14,
+    color: color.gray69,
     textAlign: "right",
     marginTop: 8,
   },
-  bottomSpacing: {
-    height: 100,
-  },
   sendContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 34,
+    padding: 16,
     backgroundColor: color.white,
     borderTopWidth: 1,
     borderTopColor: "#F5F5F5",
-  },
-  sendButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#5FB3D4",
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  sendButtonDisabled: {
-    backgroundColor: color.gray14,
-  },
-  sendIcon: {
-    marginRight: 8,
-  },
-  sendButtonText: {
-    fontSize: 16,
-    fontFamily: font.semiBold,
-    color: color.white,
   },
 });

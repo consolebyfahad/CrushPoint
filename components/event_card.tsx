@@ -12,6 +12,15 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
     return `${month} ${day}`;
   };
 
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   const handlePress = () => {
     if (onPress) {
       onPress(event);
@@ -49,6 +58,13 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           <Text style={styles.dateText}>{formatDate(event.date)}</Text>
         </View>
 
+        {/* Category Badge */}
+        {event.category && (
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>{event.category}</Text>
+          </View>
+        )}
+
         {/* Going Badge - Only show if user is attending */}
         {event.isAttending && (
           <View style={styles.goingBadge}>
@@ -70,6 +86,12 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           </Text>
         </View>
 
+        {/* Time Info */}
+        <View style={styles.timeRow}>
+          <Ionicons name="time-outline" size={14} color={color.gray69} />
+          <Text style={styles.timeText}>{formatTime(event.date)}</Text>
+        </View>
+
         <Text style={styles.description} numberOfLines={2}>
           {event.description}
         </Text>
@@ -83,7 +105,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           <View style={styles.attendeesInfo}>
             <Ionicons name="people-outline" size={14} color={color.gray69} />
             <Text style={styles.attendeesText}>
-              {event.attendees} attending
+              {event.totalAttendees || event.attendees || 0} attending
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={color.gray69} />
@@ -147,6 +169,20 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     color: color.black,
   },
+  categoryBadge: {
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    backgroundColor: color.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  categoryText: {
+    fontSize: 10,
+    fontFamily: font.semiBold,
+    color: color.white,
+  },
   goingBadge: {
     position: "absolute",
     top: 16,
@@ -173,7 +209,7 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   locationText: {
     fontSize: 14,
@@ -181,6 +217,17 @@ const styles = StyleSheet.create({
     color: color.gray69,
     marginLeft: 4,
     flex: 1,
+  },
+  timeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  timeText: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray69,
+    marginLeft: 4,
   },
   description: {
     fontSize: 16,

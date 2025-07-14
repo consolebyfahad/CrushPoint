@@ -102,7 +102,7 @@ export default function UserCard({
           <CustomButton
             title="View Profile"
             style={{ width: "80%", paddingVertical: 8 }}
-            onPress={onViewProfile}
+            onPress={() => onViewProfile(user)}
           />
 
           <TouchableOpacity

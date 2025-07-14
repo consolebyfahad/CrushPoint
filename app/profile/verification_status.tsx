@@ -17,56 +17,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function VerificationStatus({ navigation }: any) {
   const [verificationState, setVerificationState] = useState({
-    status: "failed", // "failed", "pending", "verified"
+    status: "faild", // "failed", "pending", "verified"
     lastAttempt: new Date(),
   });
-
-  const handleBack = () => {
-    router.back();
-  };
 
   const handleTryAgain = () => {
     console.log("Starting verification process...");
     router.push("/auth/verification");
-    // Update status to pending
-    // setVerificationState((prev) => ({
-    //   ...prev,
-    //   status: "pending",
-    // }));
-
-    // // Simulate verification process
-    // Alert.alert(
-    //   "Verification Started",
-    //   "Please follow the camera instructions to verify your identity.",
-    //   [
-    //     {
-    //       text: "OK",
-    //       onPress: () => {
-    //         // For demo, we'll simulate a random result after a delay
-    //         setTimeout(() => {
-    //           const success = Math.random() > 0.5;
-    //           setVerificationState((prev) => ({
-    //             ...prev,
-    //             status: success ? "verified" : "failed",
-    //             lastAttempt: new Date(),
-    //           }));
-
-    //           if (success) {
-    //             Alert.alert(
-    //               "Verification Successful",
-    //               "Your account has been verified!"
-    //             );
-    //           } else {
-    //             Alert.alert(
-    //               "Verification Failed",
-    //               "Please try again following the guidelines."
-    //             );
-    //           }
-    //         }, 2000);
-    //       },
-    //     },
-    //   ]
-    // );
   };
 
   const handleWhyVerify = () => {

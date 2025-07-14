@@ -1,9 +1,10 @@
 import Header from "@/components/header";
+import useGetBlockedUsers from "@/hooks/useGetBlockedUsers";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -15,29 +16,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BlockedUsers({ navigation }: any) {
-  const [blockedUsers, setBlockedUsers] = useState([
-    {
-      id: "1",
-      name: "Alex",
-      age: 25,
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      blockedDate: "7 days ago",
-    },
-    {
-      id: "2",
-      name: "Sam",
-      age: 28,
-      image:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      blockedDate: "2 days ago",
-    },
-  ]);
-
-  const handleBack = () => {
-    router.back();
-  };
-
+  const { blockedUsers, loading, unblockUser } = useGetBlockedUsers();
+  console.log("blockedUsers", blockedUsers);
   const handleUnblock = (user: any) => {
     Alert.alert(
       "Unblock User",
@@ -50,20 +30,16 @@ export default function BlockedUsers({ navigation }: any) {
         {
           text: "Unblock",
           style: "default",
-          onPress: () => {
-            // Remove user from blocked list
-            setBlockedUsers((prevUsers) =>
-              prevUsers.filter((blockedUser) => blockedUser.id !== user.id)
-            );
+          onPress: async () => {
+            const success = await unblockUser(user.id, user.block_id);
 
-            console.log(`Unblocked user: ${user.name}`);
-
-            // Show success message
-            Alert.alert(
-              "User Unblocked",
-              `${user.name} has been unblocked successfully.`,
-              [{ text: "OK" }]
-            );
+            if (success) {
+              Alert.alert(
+                "User Unblocked",
+                `${user.name} has been unblocked successfully.`,
+                [{ text: "OK" }]
+              );
+            }
           },
         },
       ]
@@ -104,20 +80,31 @@ export default function BlockedUsers({ navigation }: any) {
     </View>
   );
 
+  const renderLoadingState = () => (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color={color.primary} />
+      <Text style={styles.loadingText}>Loading blocked users...</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <Header title={"Blocked Users"} divider={true} />
 
       {/* Content */}
-      <FlatList
-        data={blockedUsers}
-        renderItem={renderBlockedUser}
-        keyExtractor={(item) => item.id}
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={renderEmptyState}
-      />
+      {loading ? (
+        renderLoadingState()
+      ) : (
+        <FlatList
+          data={blockedUsers}
+          renderItem={renderBlockedUser}
+          keyExtractor={(item) => item.id}
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={renderEmptyState}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -230,5 +217,17 @@ const styles = StyleSheet.create({
     color: color.gray14,
     textAlign: "center",
     lineHeight: 24,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.gray55,
+    marginTop: 16,
   },
 });

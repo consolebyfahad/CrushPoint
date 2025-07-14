@@ -1,3 +1,4 @@
+// Updated FaceVerification.tsx
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { useToast } from "@/components/toast_provider";
@@ -8,22 +9,12 @@ import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import { CameraView } from "expo-camera";
 import { router } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Alert, Dimensions, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  getGlobalFaceService,
-  initGlobalFaceService,
-} from "./FaceVerificationService";
+import { compareSimpleFaces } from "./FaceVerificationService";
 
 const { width } = Dimensions.get("window");
-
-// Face++ Configuration
-const FACE_PLUS_PLUS_CONFIG = {
-  API_KEY: "p-kmeDYiAJfe2K3vOoShCPQ4LNmAbVvB",
-  API_SECRET: "1MRi6hRagROVPEG9r7wYyu9bLJBZEMgl",
-  CONFIDENCE_THRESHOLD: 75,
-};
 
 export default function FaceVerification() {
   const { userData, user, userImages } = useAppContext();
@@ -33,43 +24,26 @@ export default function FaceVerification() {
       : null;
   const { showToast } = useToast();
   const [isCapturing, setIsCapturing] = useState(false);
-  const [capturedImage, setCapturedImage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const cameraRef = useRef<any>(null);
 
-  // Initialize Face Verification Service
-  useEffect(() => {
-    initGlobalFaceService(
-      FACE_PLUS_PLUS_CONFIG.API_KEY,
-      FACE_PLUS_PLUS_CONFIG.API_SECRET,
-      {
-        confidenceThreshold: FACE_PLUS_PLUS_CONFIG.CONFIDENCE_THRESHOLD,
-        cacheEnabled: true,
-        maxRetries: 2,
-      }
-    );
-  }, []);
-
-  // Simplified face comparison using the service
+  // Simplified face comparison
   const compareFaces = async (
-    capturedImageUri: any,
-    referenceImageAsset: any
+    capturedImageUri: string,
+    referenceImageUri: string
   ) => {
     try {
       setIsProcessing(true);
 
-      const faceService = getGlobalFaceService();
+      if (!referenceImageUri) {
+        throw new Error("No reference image available");
+      }
 
-      // Use the service's complete verification workflow
-      const result = await faceService.verifyFaces(
+      // Use the simple comparison function
+      const result = await compareSimpleFaces(
         capturedImageUri,
-        referenceImageAsset,
-        {
-          cacheKey: "fahad_reference",
-          skipQualityCheck: false,
-          requireHighConfidence: false,
-        }
+        referenceImageUri
       );
 
       return result;
@@ -84,6 +58,11 @@ export default function FaceVerification() {
   const takePicture = async () => {
     if (!cameraRef.current || isCapturing) return;
 
+    if (!defaultImage) {
+      Alert.alert("Error", "No reference image available for comparison.");
+      return;
+    }
+
     setIsCapturing(true);
 
     try {
@@ -94,39 +73,22 @@ export default function FaceVerification() {
       });
 
       console.log("Photo captured:", photo.uri);
-      setCapturedImage(photo.uri);
-      //   setShowCamera(false);
 
-      // Compare with reference image using Face++
+      // Compare with the simple function
       const verificationResult = await compareFaces(photo.uri, defaultImage);
 
       console.log("Verification result:", verificationResult);
 
-      // Show detailed result to user
+      // Show result to user
       const title = verificationResult.verified
         ? "✅ Verification Successful!"
         : "❌ Verification Failed!";
 
-      const message = verificationResult.verified
-        ? `Face verified with ${verificationResult.confidence.toFixed(
-            1
-          )}% confidence.\n\nMatch Level: ${
-            verificationResult.matchLevel
-          }\nProcessing Time: ${verificationResult.processingTime}ms`
-        : `${
-            verificationResult.analysis.description
-          }\n\nConfidence: ${verificationResult.confidence.toFixed(
-            1
-          )}%\nRecommendation: ${verificationResult.analysis.recommendation}`;
-
       setTimeout(() => {
-        Alert.alert(title, message, [
+        Alert.alert(title, verificationResult.message, [
           {
             text: "Try Again",
-            onPress: () => {
-              setCapturedImage(null);
-              // setShowCamera(true);
-            },
+            onPress: () => {},
           },
           {
             text: "OK",
@@ -144,16 +106,11 @@ export default function FaceVerification() {
 
       Alert.alert(
         "Verification Error",
-        error.userFriendlyMessage ||
-          error.message ||
-          "Failed to verify face. Please try again.",
+        error.message || "Failed to verify face. Please try again.",
         [
           {
             text: "Try Again",
-            onPress: () => {
-              setCapturedImage(null);
-              //   setShowCamera(true);
-            },
+            onPress: () => {},
           },
         ]
       );
@@ -186,7 +143,7 @@ export default function FaceVerification() {
       );
       submissionData.append("radius", userData.radius.toString());
       submissionData.append("lat", userData.lat.toString());
-      submissionData.append("l", userData.lng.toString());
+      submissionData.append("lng", userData.lng.toString()); // Fixed typo from "l" to "lng"
 
       // Optional fields - only add if they have values
       if (userData.height) submissionData.append("height", userData.height);
@@ -196,7 +153,7 @@ export default function FaceVerification() {
         submissionData.append("religion", userData.religion);
       if (userData.zodiac) submissionData.append("zodiac", userData.zodiac);
 
-      console.log("Submitting profile data:", submissionData);
+      console.log("Submitting profile data...");
 
       const response = await apiCall(submissionData);
 
@@ -213,31 +170,6 @@ export default function FaceVerification() {
     }
   };
 
-  const validateData = () => {
-    const requiredFields = {
-      gender: userData.gender,
-      gender_interest: userData.gender_interest,
-      name: userData.name,
-      dob: userData.dob,
-      interests: userData.interests.length > 0,
-      looking_for: userData.looking_for.length > 0,
-      images: userImages.length >= 2,
-    };
-
-    const missingFields = Object.entries(requiredFields)
-      .filter(([key, value]) => !value)
-      .map(([key]) => key);
-
-    if (missingFields.length > 0) {
-      showToast(
-        `Missing required fields: ${missingFields.join(", ")}`,
-        "error"
-      );
-      return false;
-    }
-
-    return true;
-  };
   return (
     <SafeAreaView style={styles.container}>
       <Header />
@@ -278,7 +210,7 @@ export default function FaceVerification() {
               : "Start Scan"
           }
           onPress={takePicture}
-          isDisabled={isProcessing || isCapturing}
+          isDisabled={isProcessing || isCapturing || !defaultImage}
           isLoading={isProcessing || isCapturing}
           icon={<Feather name="camera" size={20} color="white" />}
         />
@@ -287,12 +219,12 @@ export default function FaceVerification() {
   );
 }
 
+// Keep your existing styles...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
   },
-
   titleContainer: {
     paddingTop: 40,
     paddingHorizontal: 16,
@@ -305,19 +237,6 @@ const styles = StyleSheet.create({
   instructionText: {
     fontSize: 16,
     color: color.gray55,
-  },
-
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  processingText: {
-    fontSize: 14,
-    color: "#007AFF",
-    fontWeight: "600",
-    marginTop: 8,
   },
   content: {
     flex: 1,
@@ -333,7 +252,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#E5E5EA",
     borderRadius: 12,
     overflow: "hidden",
-    // maxHeight: 600,
   },
   camera: {
     flex: 1,
@@ -366,79 +284,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
   },
-  previewContainer: {
-    flex: 1,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  previewTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#000",
-  },
-  previewImage: {
-    width: width - 32,
-    height: ((width - 32) * 4) / 3,
-    borderRadius: 12,
-    maxHeight: 400,
-  },
-  referenceContainer: {
-    alignItems: "center",
-    marginTop: 20,
-  },
-  referenceTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: "#000",
-  },
-  referenceImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: "#007AFF",
-  },
   buttonContainer: {
     padding: 16,
-  },
-  captureButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  retakeButton: {
-    backgroundColor: "#FF3B30",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  permissionText: {
-    fontSize: 16,
-    color: "#000",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  permissionButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
   },
 });

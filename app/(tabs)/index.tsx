@@ -52,6 +52,7 @@ export default function Index() {
       if (status === "granted") {
         setLocationPermissionGranted(true);
         setShowLocationModal(false);
+        handleAllowLocation();
       }
     })();
   }, []);

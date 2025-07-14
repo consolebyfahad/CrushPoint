@@ -1,397 +1,111 @@
-// services/FaceVerificationService.tsx
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Asset } from "expo-asset";
+// SimpleFaceVerification.ts
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
-// Interface definitions
-interface FaceVerificationOptions {
-  confidenceThreshold?: number;
-  cacheEnabled?: boolean;
-  maxRetries?: number;
-}
 
-interface VerificationOptions {
-  cacheKey?: string;
-  skipQualityCheck?: boolean;
-  requireHighConfidence?: boolean;
-}
+const FACE_API_CONFIG = {
+  API_KEY: "p-kmeDYiAJfe2K3vOoShCPQ4LNmAbVvB",
+  API_SECRET: "1MRi6hRagROVPEG9r7wYyu9bLJBZEMgl",
+  BASE_URL: "https://api-us.faceplusplus.com/facepp/v3",
+  CONFIDENCE_THRESHOLD: 75,
+};
 
-interface FaceQuality {
-  overall: string;
-  score: number;
-  issues: string[];
-  recommendations: string[];
-}
-
-interface FaceTokenData {
-  token: string;
-  attributes: any;
-  quality: FaceQuality;
-  landmarks: any;
-  rectangle: any;
-}
-
-interface ComparisonResult {
-  confidence: number;
-  thresholds: any;
-  isMatch: boolean;
-  matchLevel: string;
-  analysis: ConfidenceAnalysis;
-}
-
-interface ConfidenceAnalysis {
-  level: string;
-  description: string;
-  recommendation: string;
-}
-
-interface VerificationResult {
+interface SimpleVerificationResult {
   verified: boolean;
   confidence: number;
-  matchLevel: string;
-  analysis: ConfidenceAnalysis;
-  capturedFaceQuality: FaceQuality;
-  processingTime: number;
-  thresholds: any;
-  timestamp: string;
+  message: string;
 }
 
-interface CachedToken {
-  token: string;
-  timestamp: number;
-}
-
-interface CustomError extends Error {
-  processingTime?: number;
-  userFriendlyMessage?: string;
-}
-
-export class FaceVerificationService {
-  private apiKey: string;
-  private apiSecret: string;
-  private baseUrl: string;
-  private confidenceThreshold: number;
-  private cacheEnabled: boolean;
-  private maxRetries: number;
-
-  constructor(
-    apiKey: string,
-    apiSecret: string,
-    options: FaceVerificationOptions = {}
-  ) {
-    this.apiKey = apiKey;
-    this.apiSecret = apiSecret;
-    this.baseUrl = "https://api-us.faceplusplus.com/facepp/v3";
-    this.confidenceThreshold = options.confidenceThreshold || 75;
-    this.cacheEnabled = options.cacheEnabled !== false;
-    this.maxRetries = options.maxRetries || 2;
-  }
-
-  // Rate limiting
-  static rateLimiter = {
-    lastRequest: 0,
-    minInterval: 1000, // 1 second between requests
-
-    async throttle(): Promise<void> {
-      const now = Date.now();
-      const timeSinceLastRequest = now - this.lastRequest;
-
-      if (timeSinceLastRequest < this.minInterval) {
-        await new Promise<void>((resolve) =>
-          setTimeout(resolve, this.minInterval - timeSinceLastRequest)
-        );
-      }
-
-      this.lastRequest = Date.now();
-    },
-  };
-
-  // Check if a string is an HTTPS URL
-  private isHttpsUrl(url: string): boolean {
-    return url.startsWith("https://") || url.startsWith("http://");
-  }
-
-  // Download remote image to local file
-  async downloadImageToLocal(remoteUrl: string): Promise<string> {
+class SimpleFaceVerification {
+  // Resize image to meet Face++ requirements (max 1MB, 800px width)
+  private async resizeImage(imageUri: string): Promise<string> {
     try {
-      console.log("📥 Downloading remote image:", remoteUrl);
+      console.log("📦 Resizing image:", imageUri);
 
-      // Create a unique filename
-      const timestamp = Date.now();
-      const filename = `remote_image_${timestamp}.jpg`;
-      const localUri = `${FileSystem.documentDirectory}${filename}`;
-
-      // Check cache first
-      if (this.cacheEnabled) {
-        const cachedUri = await AsyncStorage.getItem(
-          `remote_image_${remoteUrl}`
-        );
-        if (cachedUri) {
-          const fileInfo = await FileSystem.getInfoAsync(cachedUri);
-          if (fileInfo.exists) {
-            console.log("⚡ Using cached remote image");
-            return cachedUri;
-          }
+      const manipulatorResult = await ImageManipulator.manipulateAsync(
+        imageUri,
+        [{ resize: { width: 600 } }], // Smaller size to ensure it fits
+        {
+          compress: 0.7, // 70% quality
+          format: ImageManipulator.SaveFormat.JPEG,
         }
-      }
-
-      // Download the image
-      const downloadResult = await FileSystem.downloadAsync(
-        remoteUrl,
-        localUri
       );
 
-      if (downloadResult.status !== 200) {
-        throw new Error(
-          `Failed to download image: HTTP ${downloadResult.status}`
-        );
-      }
+      // Check file size
+      const fileInfo = await FileSystem.getInfoAsync(manipulatorResult.uri);
+      const fileSizeInMB = fileInfo.size / (1024 * 1024);
+      console.log(`✅ Resized image size: ${fileSizeInMB.toFixed(2)}MB`);
 
-      // Verify the file was downloaded
-      const fileInfo = await FileSystem.getInfoAsync(localUri);
-      if (!fileInfo.exists) {
-        throw new Error("Downloaded file not found");
-      }
-
-      // Cache the local URI
-      if (this.cacheEnabled) {
-        await AsyncStorage.setItem(`remote_image_${remoteUrl}`, localUri);
-      }
-
-      console.log("✅ Image downloaded successfully to:", localUri);
-      return localUri;
+      return manipulatorResult.uri;
     } catch (error: any) {
-      console.error("Error downloading remote image:", error);
-      throw new Error(`Failed to download remote image: ${error.message}`);
+      console.error("Error resizing image:", error);
+      throw new Error(`Failed to resize image: ${error.message}`);
     }
   }
 
-  // Convert image to base64 with validation and compression
-  async imageToBase64(imageUri: string): Promise<string> {
+  // Convert image to base64
+  private async imageToBase64(imageUri: string): Promise<string> {
     try {
-      // If it's a remote URL, download it first
-      let localUri = imageUri;
-      if (this.isHttpsUrl(imageUri)) {
-        localUri = await this.downloadImageToLocal(imageUri);
-      }
+      // First resize the image
+      const resizedUri = await this.resizeImage(imageUri);
 
-      // Validate file exists
-      const fileInfo = await FileSystem.getInfoAsync(localUri);
-      if (!fileInfo.exists) {
-        throw new Error("Image file not found");
-      }
-
-      let processedUri = localUri;
-      const fileSizeInMB = fileInfo.size / (1024 * 1024);
-
-      // If image is too large, compress it
-      if (fileSizeInMB > 2) {
-        console.log(
-          `📦 Compressing image from ${fileSizeInMB.toFixed(2)}MB...`
-        );
-
-        const manipulatorResult = await ImageManipulator.manipulateAsync(
-          localUri,
-          [{ resize: { width: 1024 } }], // Resize to max width of 1024px
-          {
-            compress: 0.7, // 70% quality
-            format: ImageManipulator.SaveFormat.JPEG,
-          }
-        );
-
-        processedUri = manipulatorResult.uri;
-
-        // Check new size
-        const newFileInfo = await FileSystem.getInfoAsync(processedUri);
-        if (!newFileInfo.exists) {
-          throw new Error("Compressed file not found");
-        }
-        const newSizeInMB = newFileInfo.size / (1024 * 1024);
-        console.log(`✅ Image compressed to ${newSizeInMB.toFixed(2)}MB`);
-      }
-
-      const base64 = await FileSystem.readAsStringAsync(processedUri, {
+      const base64 = await FileSystem.readAsStringAsync(resizedUri, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
+      console.log(`📏 Base64 length: ${base64.length} characters`);
+
+      if (base64.length > 10485760) {
+        // 10MB limit
+        throw new Error("Image too large even after compression");
+      }
+
       return base64;
     } catch (error: any) {
-      console.error("Error converting image to base64:", error);
+      console.error("Error converting to base64:", error);
       throw new Error(`Failed to process image: ${error.message}`);
     }
   }
 
-  // Prepare asset-based reference image
-  async prepareAssetImage(assetModule: any): Promise<string> {
+  // Download remote image if needed
+  private async downloadRemoteImage(url: string): Promise<string> {
     try {
-      const cacheKey = `asset_${Date.now()}`;
-      const filename = `${cacheKey}.jpg`;
-      const fileUri = `${FileSystem.documentDirectory}${filename}`;
-
-      // Check if we have a cached version
-      if (this.cacheEnabled) {
-        const cachedUri = await AsyncStorage.getItem(
-          `asset_uri_${assetModule}`
-        );
-        if (cachedUri) {
-          const fileInfo = await FileSystem.getInfoAsync(cachedUri);
-          if (fileInfo.exists) {
-            return cachedUri;
-          }
-        }
+      if (!url.startsWith("http")) {
+        return url; // Already local
       }
 
-      // Load and copy asset
-      const asset = Asset.fromModule(assetModule);
-      await asset.downloadAsync();
+      console.log("📥 Downloading image:", url);
+      const filename = `temp_${Date.now()}.jpg`;
+      const localUri = `${FileSystem.documentDirectory}${filename}`;
 
-      await FileSystem.copyAsync({
-        from: asset.localUri || asset.uri,
-        to: fileUri,
-      });
+      const downloadResult = await FileSystem.downloadAsync(url, localUri);
 
-      // Cache the URI
-      if (this.cacheEnabled) {
-        await AsyncStorage.setItem(`asset_uri_${assetModule}`, fileUri);
+      if (downloadResult.status !== 200) {
+        throw new Error(`Download failed: HTTP ${downloadResult.status}`);
       }
 
-      return fileUri;
+      return localUri;
     } catch (error: any) {
-      console.error("Error preparing asset image:", error);
-      throw new Error(`Failed to prepare reference image: ${error.message}`);
+      console.error("Error downloading image:", error);
+      throw new Error(`Failed to download image: ${error.message}`);
     }
   }
 
-  // Get face token with retry logic
-  async getFaceToken(
-    imageUri: string,
-    retries: number = this.maxRetries
-  ): Promise<FaceTokenData> {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        await FaceVerificationService.rateLimiter.throttle();
-
-        const base64Image = await this.imageToBase64(imageUri);
-
-        const formData = new FormData();
-        formData.append("api_key", this.apiKey);
-        formData.append("api_secret", this.apiSecret);
-        formData.append("image_base64", base64Image);
-        formData.append("return_landmark", "1");
-        formData.append(
-          "return_attributes",
-          "age,gender,emotion,facequality,eyestatus"
-        );
-
-        const response = await fetch(`${this.baseUrl}/detect`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          body: formData,
-        });
-
-        const result = await response.json();
-
-        if (result.error_message) {
-          throw new Error(result.error_message);
-        }
-
-        if (!result.faces || result.faces.length === 0) {
-          throw new Error("No face detected in the image");
-        }
-
-        const face = result.faces[0];
-
-        return {
-          token: face.face_token,
-          attributes: face.attributes,
-          quality: this.assessFaceQuality(face),
-          landmarks: face.landmark,
-          rectangle: face.face_rectangle,
-        };
-      } catch (error: any) {
-        console.log(`Face detection attempt ${attempt} failed:`, error.message);
-
-        if (attempt === retries) {
-          throw new Error(
-            `Face detection failed after ${retries} attempts: ${error.message}`
-          );
-        }
-
-        // Wait before retry (exponential backoff)
-        await new Promise<void>((resolve) =>
-          setTimeout(resolve, attempt * 1000)
-        );
-      }
-    }
-
-    // This should never be reached due to the throw in the catch block
-    throw new Error("Unexpected error in face detection");
-  }
-
-  // Assess face quality and provide recommendations
-  assessFaceQuality(faceData: any): FaceQuality {
-    const quality: FaceQuality = {
-      overall: "Good",
-      score: 100,
-      issues: [],
-      recommendations: [],
-    };
-
-    if (faceData.attributes) {
-      const { facequality, eyestatus, emotion } = faceData.attributes;
-
-      // Check face quality score
-      if (facequality && facequality.value < 70) {
-        quality.score = facequality.value;
-        quality.overall = facequality.value < 50 ? "Poor" : "Fair";
-        quality.issues.push("Low image quality detected");
-        quality.recommendations.push("Use better lighting and camera quality");
-      }
-
-      // Check eye status
-      if (eyestatus) {
-        const leftEyeOpen = eyestatus.left_eye_status?.no_glass_eye_open || 0;
-        const rightEyeOpen = eyestatus.right_eye_status?.no_glass_eye_open || 0;
-
-        if (leftEyeOpen < 0.8 || rightEyeOpen < 0.8) {
-          quality.issues.push("Eyes not clearly visible");
-          quality.recommendations.push("Ensure both eyes are open and visible");
-          quality.score = Math.min(quality.score, 70);
-        }
-      }
-
-      // Check if person is smiling (might affect recognition)
-      if (emotion && emotion.happiness > 90) {
-        quality.recommendations.push(
-          "Try a neutral expression for better recognition"
-        );
-      }
-    }
-
-    return quality;
-  }
-
-  // Compare face tokens with detailed analysis
-  async compareFaceTokens(
-    token1: string,
-    token2: string
-  ): Promise<ComparisonResult> {
+  // Get face token from Face++ API
+  private async getFaceToken(imageUri: string): Promise<string> {
     try {
-      await FaceVerificationService.rateLimiter.throttle();
+      // Download if remote URL
+      const localUri = await this.downloadRemoteImage(imageUri);
+
+      // Convert to base64
+      const base64Image = await this.imageToBase64(localUri);
 
       const formData = new FormData();
-      formData.append("api_key", this.apiKey);
-      formData.append("api_secret", this.apiSecret);
-      formData.append("face_token1", token1);
-      formData.append("face_token2", token2);
+      formData.append("api_key", FACE_API_CONFIG.API_KEY);
+      formData.append("api_secret", FACE_API_CONFIG.API_SECRET);
+      formData.append("image_base64", base64Image);
 
-      const response = await fetch(`${this.baseUrl}/compare`, {
+      const response = await fetch(`${FACE_API_CONFIG.BASE_URL}/detect`, {
         method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
         body: formData,
       });
 
@@ -401,291 +115,128 @@ export class FaceVerificationService {
         throw new Error(result.error_message);
       }
 
-      return {
-        confidence: result.confidence,
-        thresholds: result.thresholds,
-        isMatch: result.confidence >= this.confidenceThreshold,
-        matchLevel: this.getMatchLevel(result.confidence),
-        analysis: this.analyzeConfidence(result.confidence),
-      };
+      if (!result.faces || result.faces.length === 0) {
+        throw new Error("No face detected in the image");
+      }
+
+      return result.faces[0].face_token;
     } catch (error: any) {
-      console.error("Face comparison error:", error);
-      throw new Error(`Face comparison failed: ${error.message}`);
+      console.error("Face detection error:", error);
+      throw error;
     }
   }
 
-  // Get match level description
-  getMatchLevel(confidence: number): string {
-    if (confidence >= 90) return "Very Strong Match";
-    if (confidence >= 80) return "Strong Match";
-    if (confidence >= 70) return "Good Match";
-    if (confidence >= 60) return "Weak Match";
-    return "No Match";
-  }
-
-  // Analyze confidence score
-  analyzeConfidence(confidence: number): ConfidenceAnalysis {
-    if (confidence >= 90) {
-      return {
-        level: "Excellent",
-        description: "Extremely likely to be the same person",
-        recommendation: "High confidence verification",
-      };
-    } else if (confidence >= 80) {
-      return {
-        level: "Very Good",
-        description: "Very likely to be the same person",
-        recommendation: "Reliable verification",
-      };
-    } else if (confidence >= 70) {
-      return {
-        level: "Good",
-        description: "Likely to be the same person",
-        recommendation: "Acceptable verification",
-      };
-    } else if (confidence >= 60) {
-      return {
-        level: "Fair",
-        description: "Possibly the same person",
-        recommendation: "Consider retaking photo",
-      };
-    } else {
-      return {
-        level: "Poor",
-        description: "Unlikely to be the same person",
-        recommendation: "Verification failed - retake required",
-      };
-    }
-  }
-
-  // Cache management
-  async cacheReferenceToken(key: string, token: string): Promise<void> {
-    if (!this.cacheEnabled) return;
-
+  // Compare two face tokens
+  private async compareFaceTokens(
+    token1: string,
+    token2: string
+  ): Promise<number> {
     try {
-      await AsyncStorage.setItem(
-        `face_token_${key}`,
-        JSON.stringify({
-          token,
-          timestamp: Date.now(),
-        })
-      );
-    } catch (error) {
-      console.error("Error caching face token:", error);
-    }
-  }
+      const formData = new FormData();
+      formData.append("api_key", FACE_API_CONFIG.API_KEY);
+      formData.append("api_secret", FACE_API_CONFIG.API_SECRET);
+      formData.append("face_token1", token1);
+      formData.append("face_token2", token2);
 
-  async getCachedReferenceToken(
-    key: string,
-    maxAge: number = 24 * 60 * 60 * 1000
-  ): Promise<string | null> {
-    // 24 hours
-    if (!this.cacheEnabled) return null;
-
-    try {
-      const cached = await AsyncStorage.getItem(`face_token_${key}`);
-      if (!cached) return null;
-
-      const { token, timestamp }: CachedToken = JSON.parse(cached);
-
-      // Check if cache is still valid
-      if (Date.now() - timestamp > maxAge) {
-        await AsyncStorage.removeItem(`face_token_${key}`);
-        return null;
-      }
-
-      return token;
-    } catch (error) {
-      console.error("Error retrieving cached face token:", error);
-      return null;
-    }
-  }
-
-  // Complete verification workflow
-  async verifyFaces(
-    capturedImageUri: string,
-    referenceImageSource: string | any,
-    options: VerificationOptions = {}
-  ): Promise<VerificationResult> {
-    const startTime = Date.now();
-    const {
-      cacheKey = "default_reference",
-      skipQualityCheck = false,
-      requireHighConfidence = false,
-    } = options;
-
-    try {
-      console.log("🔍 Starting face verification workflow...");
-
-      // Step 1: Get captured face token
-      console.log("📸 Analyzing captured image...");
-      const capturedFaceData = await this.getFaceToken(capturedImageUri);
-
-      if (!skipQualityCheck && capturedFaceData.quality.overall === "Poor") {
-        throw new Error(
-          `Poor image quality: ${capturedFaceData.quality.issues.join(", ")}`
-        );
-      }
-
-      // Step 2: Get reference face token (with caching)
-      let referenceFaceToken = await this.getCachedReferenceToken(cacheKey);
-
-      if (!referenceFaceToken) {
-        console.log("🔄 Processing reference image...");
-
-        let referenceImageUri: string;
-        if (typeof referenceImageSource === "string") {
-          // Could be a local file URI or HTTPS URL
-          referenceImageUri = referenceImageSource;
-        } else {
-          // Asset module - need to prepare it
-          referenceImageUri = await this.prepareAssetImage(
-            referenceImageSource
-          );
-        }
-
-        const referenceFaceData = await this.getFaceToken(referenceImageUri);
-        referenceFaceToken = referenceFaceData.token;
-
-        // Cache for future use
-        await this.cacheReferenceToken(cacheKey, referenceFaceToken);
-      } else {
-        console.log("⚡ Using cached reference token");
-      }
-
-      // Step 3: Compare faces
-      console.log("🔀 Comparing faces...");
-      const comparisonResult = await this.compareFaceTokens(
-        capturedFaceData.token,
-        referenceFaceToken
-      );
-
-      // Step 4: Apply additional validation if required
-      if (requireHighConfidence && comparisonResult.confidence < 85) {
-        comparisonResult.isMatch = false;
-        comparisonResult.analysis.recommendation =
-          "High confidence required - verification failed";
-      }
-
-      const processingTime = Date.now() - startTime;
-
-      const result: VerificationResult = {
-        verified: comparisonResult.isMatch,
-        confidence: comparisonResult.confidence,
-        matchLevel: comparisonResult.matchLevel,
-        analysis: comparisonResult.analysis,
-        capturedFaceQuality: capturedFaceData.quality,
-        processingTime,
-        thresholds: comparisonResult.thresholds,
-        timestamp: new Date().toISOString(),
-      };
-
-      console.log("✅ Verification completed:", {
-        verified: result.verified,
-        confidence: result.confidence,
-        processingTime: `${processingTime}ms`,
+      const response = await fetch(`${FACE_API_CONFIG.BASE_URL}/compare`, {
+        method: "POST",
+        body: formData,
       });
 
-      return result;
+      const result = await response.json();
+
+      if (result.error_message) {
+        throw new Error(result.error_message);
+      }
+
+      return result.confidence;
     } catch (error: any) {
-      const processingTime = Date.now() - startTime;
-      console.error("❌ Verification failed:", error.message);
-
-      const customError: CustomError = new Error(error.message);
-      customError.processingTime = processingTime;
-      customError.userFriendlyMessage = this.getUserFriendlyErrorMessage(
-        error.message
-      );
-
-      throw customError;
+      console.error("Face comparison error:", error);
+      throw error;
     }
   }
 
-  // Convert technical errors to user-friendly messages
-  getUserFriendlyErrorMessage(errorMessage: string): string {
-    const errorMappings: Record<string, string> = {
-      "No face detected":
-        "Please ensure your face is clearly visible in the image.",
-      INVALID_API_KEY: "Service configuration error. Please contact support.",
-      CONCURRENCY_LIMIT_EXCEEDED:
-        "Service is busy. Please try again in a moment.",
-      "Poor image quality":
-        "Image quality is too low. Please take a clearer photo.",
-      "Image too large": "Image file is too large. Please use a smaller image.",
-      "Failed to download":
-        "Unable to access reference image. Please try again.",
-      network: "Network connection error. Please check your internet.",
-      timeout: "Request timed out. Please try again.",
-    };
-
-    for (const [key, message] of Object.entries(errorMappings)) {
-      if (errorMessage.toLowerCase().includes(key.toLowerCase())) {
-        return message;
-      }
-    }
-
-    return "Verification failed. Please try again.";
-  }
-
-  // Clear all cached data
-  async clearCache(): Promise<void> {
+  // Main verification function
+  async verifyFaces(
+    capturedImageUri: string,
+    referenceImageUri: string
+  ): Promise<SimpleVerificationResult> {
     try {
-      const keys = await AsyncStorage.getAllKeys();
-      const faceKeys = keys.filter(
-        (key) =>
-          key.startsWith("face_token_") ||
-          key.startsWith("asset_uri_") ||
-          key.startsWith("remote_image_")
+      console.log("🔍 Starting simple face verification...");
+      console.log("📸 Captured image:", capturedImageUri);
+      console.log("🖼️ Reference image:", referenceImageUri);
+
+      // Get face tokens for both images
+      console.log("🔍 Detecting face in captured image...");
+      const capturedToken = await this.getFaceToken(capturedImageUri);
+
+      console.log("🔍 Detecting face in reference image...");
+      const referenceToken = await this.getFaceToken(referenceImageUri);
+
+      // Compare faces
+      console.log("⚖️ Comparing faces...");
+      const confidence = await this.compareFaceTokens(
+        capturedToken,
+        referenceToken
       );
 
-      if (faceKeys.length > 0) {
-        await AsyncStorage.multiRemove(faceKeys);
-        console.log(`Cleared ${faceKeys.length} cached items`);
+      const verified = confidence >= FACE_API_CONFIG.CONFIDENCE_THRESHOLD;
+
+      let message = "";
+      if (verified) {
+        message = `✅ Face verified with ${confidence.toFixed(1)}% confidence`;
+      } else {
+        message = `❌ Face verification failed. Confidence: ${confidence.toFixed(
+          1
+        )}%`;
       }
-    } catch (error) {
-      console.error("Error clearing cache:", error);
+
+      console.log("🎯 Verification result:", { verified, confidence, message });
+
+      return {
+        verified,
+        confidence,
+        message,
+      };
+    } catch (error: any) {
+      console.error("❌ Verification failed:", error);
+
+      let userMessage = "Verification failed. Please try again.";
+
+      if (error.message.includes("No face detected")) {
+        userMessage =
+          "No face detected. Please ensure your face is clearly visible.";
+      } else if (error.message.includes("INVALID_IMAGE_SIZE")) {
+        userMessage = "Image size issue. Please try taking a new photo.";
+      } else if (error.message.includes("CONCURRENCY_LIMIT_EXCEEDED")) {
+        userMessage = "Service is busy. Please try again in a moment.";
+      } else if (
+        error.message.includes("network") ||
+        error.message.includes("timeout")
+      ) {
+        userMessage =
+          "Network error. Please check your connection and try again.";
+      }
+
+      return {
+        verified: false,
+        confidence: 0,
+        message: userMessage,
+      };
     }
   }
 }
 
-// Singleton instance for easy usage
-let globalFaceService: FaceVerificationService | null = null;
+// Export a singleton instance
+export const simpleFaceVerification = new SimpleFaceVerification();
 
-export const createFaceVerificationService = (
-  apiKey: string,
-  apiSecret: string,
-  options: FaceVerificationOptions = {}
-): FaceVerificationService => {
-  return new FaceVerificationService(apiKey, apiSecret, options);
-};
-
-export const getGlobalFaceService = (): FaceVerificationService => {
-  if (!globalFaceService) {
-    throw new Error(
-      "Face verification service not initialized. Call initGlobalFaceService first."
-    );
-  }
-  return globalFaceService;
-};
-
-export const initGlobalFaceService = (
-  apiKey: string,
-  apiSecret: string,
-  options: FaceVerificationOptions = {}
-): FaceVerificationService => {
-  globalFaceService = new FaceVerificationService(apiKey, apiSecret, options);
-  return globalFaceService;
-};
-
-// Quick verification function
-export const quickVerify = async (
+// Export the main function for easy use
+export const compareSimpleFaces = async (
   capturedImageUri: string,
-  referenceImageSource: string | any,
-  apiKey: string,
-  apiSecret: string
-): Promise<VerificationResult> => {
-  const service = createFaceVerificationService(apiKey, apiSecret);
-  return await service.verifyFaces(capturedImageUri, referenceImageSource);
+  referenceImageUri: string
+): Promise<SimpleVerificationResult> => {
+  return await simpleFaceVerification.verifyFaces(
+    capturedImageUri,
+    referenceImageUri
+  );
 };
-
-export default FaceVerificationService;

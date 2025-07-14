@@ -1,11 +1,14 @@
 import CustomButton from "@/components/custom_button";
 import InviteMatches from "@/components/invite";
+import { useToast } from "@/components/toast_provider";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { AddCalender, Calender, Users } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -18,49 +21,37 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-export default function EventDetails({ route, navigation }: any) {
-  const event = route?.params?.event || {
-    id: "1",
-    title: "Summer Meetup Party",
-    category: "Social",
-    date: "2024-07-15T19:00:00Z",
-    location: "Central Park, New York",
-    description:
-      "Join us for a fun evening of music, games, and meeting new people! We'll have live music, outdoor games, and food trucks. This is a great opportunity to make new friends and enjoy a beautiful summer evening in the park.",
-    image:
-      "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop",
-    organizer: {
-      name: "City Social Club",
-      image:
-        "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
-      verified: true,
-    },
-    attendees: [
-      {
-        id: "1",
-        name: "Alex",
-        image:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      },
-      {
-        id: "2",
-        name: "Emma",
-        image:
-          "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-      },
-      {
-        id: "3",
-        name: "David",
-        image:
-          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      },
-    ],
-    totalAttendees: 3,
-    isAttending: false,
-  };
-
-  const [isAttending, setIsAttending] = useState(event.isAttending);
+export default function EventDetails({ route }: any) {
+  const params = useLocalSearchParams();
+  const [event, setEvent] = useState<any>(null);
+  const [isAttending, setIsAttending] = useState(false);
   const [showInviteMatches, setShowInviteMatches] = useState(false);
+  const { user } = useAppContext();
+  const { showToast } = useToast();
+  const [isRSVPing, setIsRSVPing] = useState(false);
+  useEffect(() => {
+    if (params.event) {
+      try {
+        const eventData = JSON.parse(params.event as string);
+        setEvent(eventData);
+        setIsAttending(eventData.isAttending || false);
+      } catch (error) {
+        console.error("Error parsing event data:", error);
+        router.back();
+      }
+    } else {
+      console.error("No event data provided");
+      router.back();
+    }
+  }, [params.event]);
+
+  if (!event) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading event...</Text>
+      </View>
+    );
+  }
 
   const handleBack = () => {
     router.back();
@@ -91,10 +82,34 @@ export default function EventDetails({ route, navigation }: any) {
     // You could show a success message or navigate somewhere
   };
 
-  const handleRSVP = () => {
-    setIsAttending(!isAttending);
-    console.log(isAttending ? "Left event" : "Joined event");
-    // Handle RSVP logic
+  const handleRSVP = async () => {
+    if (!user?.user_id) {
+      showToast("User session expired. Please login again.", "error");
+      return;
+    }
+
+    setIsRSVPing(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data");
+      formData.append("user_id", user.user_id);
+      formData.append("table_name", "event_rsvp");
+      formData.append("event_id", event.id.toString());
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        setIsAttending(!isAttending);
+        showToast(isAttending ? "Left event" : "RSVP confirmed!", "success");
+      } else {
+        showToast(response.message || "Failed to RSVP", "error");
+      }
+    } catch (error) {
+      showToast("Something went wrong. Please try again.", "error");
+    } finally {
+      setIsRSVPing(false);
+    }
   };
 
   const handleViewAllAttendees = () => {
@@ -144,7 +159,6 @@ export default function EventDetails({ route, navigation }: any) {
               activeOpacity={0.8}
             >
               <Feather name="share-2" size={24} color={color.white} />
-              {/* <Ionicons name="share-outline" size={24} color={color.white} /> */}
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -250,15 +264,6 @@ export default function EventDetails({ route, navigation }: any) {
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          {/* <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={handleAddToCalendar}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="calendar-outline" size={18} color={color.black} />
-            <Text style={styles.secondaryButtonText}>Add to Calendar</Text>
-          </TouchableOpacity> */}
-
           <CustomButton
             title="Add to Calendar"
             variant="secondary"
@@ -273,15 +278,6 @@ export default function EventDetails({ route, navigation }: any) {
             icon={<Users />}
             onPress={handleInviteMatches}
           />
-          {/* 
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={handleInviteMatches}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="person-add-outline" size={18} color={color.black} />
-            <Text style={styles.secondaryButtonText}>Invite Matches</Text>
-          </TouchableOpacity> */}
         </View>
 
         {/* Bottom Spacing */}
@@ -291,9 +287,13 @@ export default function EventDetails({ route, navigation }: any) {
       {/* RSVP Button */}
       <View style={styles.rsvpContainer}>
         <CustomButton
-          title={isAttending ? "Going" : "RSVP Now"}
+          title={
+            isRSVPing ? "Processing..." : isAttending ? "Going" : "RSVP Now"
+          }
           icon={<Calender />}
           onPress={handleRSVP}
+          isDisabled={isRSVPing}
+          isLoading={isRSVPing}
         />
       </View>
 
@@ -303,6 +303,7 @@ export default function EventDetails({ route, navigation }: any) {
         onClose={() => setShowInviteMatches(false)}
         onSendInvites={handleSendInvites}
         eventTitle={event.title}
+        eventId={event.id}
       />
     </View>
   );
@@ -312,6 +313,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: color.white,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.gray55,
   },
   imageContainer: {
     height: SCREEN_HEIGHT * 0.35,
