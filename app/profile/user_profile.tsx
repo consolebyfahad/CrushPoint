@@ -1,6 +1,8 @@
 import BlockConfirmation from "@/components/block_option";
 import ProfileOptions from "@/components/profile_options";
 import ReportUser from "@/components/report_user";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,8 +23,10 @@ import {
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function UserProfile() {
+  const { user } = useAppContext();
+  console.log("first", user);
   const params = useLocalSearchParams();
-  console.log("params", params);
+  console.log("params+", params);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
@@ -44,91 +48,9 @@ export default function UserProfile() {
     }
   }, [params.user]);
 
-  // Helper function to calculate age from date of birth
-  const calculateAge = (dob: string) => {
-    if (!dob) return null;
-    try {
-      const today = new Date();
-      const birthDate = new Date(dob);
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birthDate.getDate())
-      ) {
-        age--;
-      }
-      return age;
-    } catch (error) {
-      return null;
-    }
-  };
-
-  // Helper function to parse comma-separated strings to arrays
-  const parseStringToArray = (str: any) => {
-    if (!str || typeof str !== "string" || str.trim() === "") return [];
-    return str
-      .split(",")
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
-  };
-
-  // Helper function to parse images
-  const parseImages = (imagesString: any) => {
-    if (
-      !imagesString ||
-      typeof imagesString !== "string" ||
-      imagesString.trim() === ""
-    ) {
-      // Return default avatar if no images
-      return [
-        "https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo",
-      ];
-    }
-
-    const imageArray = parseStringToArray(imagesString);
-    if (imageArray.length === 0) {
-      return [
-        "https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo",
-      ];
-    }
-
-    return imageArray;
-  };
-
-  // Helper function to format height
-  const formatHeight = (heightString: any) => {
-    if (
-      !heightString ||
-      typeof heightString !== "string" ||
-      heightString === ""
-    )
-      return "Not specified";
-
-    // Convert from mm to cm if the value is large (assuming API returns mm)
-    const heightNum = parseInt(heightString);
-    if (isNaN(heightNum)) return "Not specified";
-
-    if (heightNum > 300) {
-      return `${(heightNum / 10).toFixed(0)} cm`;
-    }
-    return `${heightNum} cm`;
-  };
-
-  // Calculate distance (placeholder - you'd need actual user location and target user location)
-  const calculateDistance = (lat: any, lng: any) => {
-    // Placeholder distance calculation
-    // In real app, you'd calculate using current user's location and target user's location
-    if (!lat || !lng || typeof lat !== "string" || typeof lng !== "string")
-      return "-- km";
-    return "2.5 km"; // Placeholder
-  };
-
   // Map API data to component structure
-  const user = useMemo(() => {
+  const userInfo = useMemo(() => {
     if (!userData || typeof userData !== "object") {
-      console.log("No valid user data available, using fallback");
-      // Fallback data if no user provided
       return {
         id: "unknown",
         name: "Unknown User",
@@ -148,32 +70,32 @@ export default function UserProfile() {
       };
     }
 
-    const age = calculateAge(userData.dob);
-    const images = parseImages(userData.images);
-    const interests = parseStringToArray(userData.interests);
-    const lookingFor = parseStringToArray(userData.looking_for);
-    const distance = calculateDistance(userData.lat, userData.lng);
-
     return {
       id: userData.id || "unknown",
       name: userData.name || "Unknown User",
-      age: age || 0,
-      distance: distance,
-      isOnline: userData.status === "1", // Assuming status "1" means online
-      lookingFor: lookingFor.length > 0 ? lookingFor : ["Not specified"],
-      interests: interests.length > 0 ? interests : ["No interests listed"],
-      height: formatHeight(userData.height),
+      age: userData.age || 0,
+      distance: "2.5 km", // or calculate as needed
+      isOnline: userData.isOnline || true,
+      lookingFor: userData.lookingFor || [],
+      interests: userData.interests || [],
+      height: userData.height || "Not specified",
       nationality: userData.nationality || "Not specified",
       religion: userData.religion || "Not specified",
       zodiac: userData.zodiac || "Not specified",
-      about: userData.about || "",
+      about: userData.about || "This is me",
       email: userData.email || "",
-      gender: userData.gender || "Not specified",
+      gender:
+        userData.gender === "female"
+          ? "Female"
+          : userData.gender || "Not specified",
       country: userData.country || "Not specified",
       state: userData.state || "Not specified",
       city: userData.city || "Not specified",
-      languages: parseStringToArray(userData.languages),
-      images: images,
+      languages: userData.languages ? userData.languages.split(",") : [],
+      images:
+        userData.images && userData.images.length > 0
+          ? userData.images
+          : ["https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo"],
     };
   }, [userData]);
 
@@ -187,65 +109,14 @@ export default function UserProfile() {
 
   const handlePreviousImage = () => {
     setCurrentImageIndex((prev) =>
-      prev === 0 ? user.images.length - 1 : prev - 1
+      prev === 0 ? userInfo.images.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = () => {
     setCurrentImageIndex((prev) =>
-      prev === user.images.length - 1 ? 0 : prev + 1
+      prev === userInfo.images.length - 1 ? 0 : prev + 1
     );
-  };
-
-  const getInterestIcon = (interest: string) => {
-    switch (interest.toLowerCase()) {
-      case "travel":
-        return "✈️";
-      case "art":
-        return "🎨";
-      case "cooking":
-        return "🍳";
-      case "fashion":
-        return "👗";
-      case "music":
-        return "🎵";
-      case "wine":
-        return "🍷";
-      case "coffee":
-        return "☕";
-      case "hiking":
-        return "🥾";
-      case "photography":
-        return "📸";
-      case "fitness":
-        return "💪";
-      case "reading":
-        return "📚";
-      case "sports":
-        return "⚽";
-      case "movies":
-        return "🎬";
-      case "dancing":
-        return "💃";
-      case "gaming":
-        return "🎮";
-      default:
-        return "🎯";
-    }
-  };
-
-  const getLookingForIcon = (lookingFor: string) => {
-    if (lookingFor.toLowerCase().includes("serious")) {
-      return "💕";
-    } else if (lookingFor.toLowerCase().includes("casual")) {
-      return "😊";
-    } else if (lookingFor.toLowerCase().includes("friendship")) {
-      return "🤝";
-    } else if (lookingFor.toLowerCase().includes("relationship")) {
-      return "💖";
-    } else {
-      return "💫";
-    }
   };
 
   const actionEmojis = [
@@ -256,11 +127,23 @@ export default function UserProfile() {
     { emoji: svgIcon.Hi, action: "friend", color: "#F97316" },
   ];
 
-  const handleEmojiAction = (action: string) => {
-    if (action === "like") {
-      router.push("/profile/match");
-    }
-    console.log("Emoji action:", action, "for user:", user.name);
+  const handleEmojiAction = async (action: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data"),
+        formData.append("table_name", "matches"),
+        formData.append("match_id", userInfo.id),
+        formData.append("user_id", user?.user_id || ""),
+        formData.append("emoji", action);
+      console.log("formData", formData);
+      const response = await apiCall(formData);
+      if (response.result) {
+      }
+    } catch (error) {}
+    // if (action === "like") {
+    //   router.push("/profile/match");
+    // }
+    console.log("Emoji action:", action, "for user:", userInfo.name);
   };
 
   const handleBlock = () => {
@@ -268,11 +151,22 @@ export default function UserProfile() {
     setShowBlockConfirmation(true);
   };
 
-  const handleConfirmBlock = () => {
-    console.log("Block user:", user.name);
+  const handleConfirmBlock = async () => {
+    console.log("Block user:", userInfo.name);
     // Handle block logic here
-    setShowBlockConfirmation(false);
-    router.back();
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data"),
+        formData.append("table_name", "blocked_users"),
+        formData.append("block_id", userInfo.id),
+        formData.append("user_id", user?.user_id || ""),
+        console.log("formData", formData);
+      const response = await apiCall(formData);
+      if (response.result) {
+        setShowBlockConfirmation(false);
+        // router.back();
+      }
+    } catch (error) {}
   };
 
   const handleReport = () => {
@@ -280,11 +174,22 @@ export default function UserProfile() {
     setShowReportUser(true);
   };
 
-  const handleSubmitReport = (reportData: any) => {
+  const handleSubmitReport = async (reportData: any) => {
     console.log("Report submitted:", reportData);
-    // Handle report submission logic here
-    setShowReportUser(false);
-    // Show success message or navigate back
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data"),
+        formData.append("table_name", "reported_users"),
+        formData.append("block_id", userInfo.id),
+        formData.append("additional_details", reportData.additionalDetails),
+        formData.append("reason", reportData.reason),
+        formData.append("user_id", user?.user_id || ""),
+        console.log("formData", formData);
+      const response = await apiCall(formData);
+      if (response.result) {
+        setShowReportUser(false);
+      }
+    } catch (error) {}
   };
 
   const handleBackToProfileOptions = () => {
@@ -298,7 +203,7 @@ export default function UserProfile() {
       {/* Image Slider */}
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: user.images[currentImageIndex] }}
+          source={{ uri: userInfo.images[currentImageIndex] }}
           style={styles.profileImage}
         />
 
@@ -313,9 +218,9 @@ export default function UserProfile() {
             <Ionicons name="arrow-back" size={20} color={color.white} />
           </TouchableOpacity>
           {/* Image Indicators */}
-          {user.images.length > 1 && (
+          {userInfo.images.length > 1 && (
             <View style={styles.imageIndicators}>
-              {user.images.map((_: any, index: number) => (
+              {userInfo.images.map((_: any, index: number) => (
                 <View
                   key={index}
                   style={[
@@ -337,7 +242,7 @@ export default function UserProfile() {
         </View>
 
         {/* Image Navigation Areas */}
-        {user.images.length > 1 && (
+        {userInfo.images.length > 1 && (
           <>
             <TouchableOpacity
               style={styles.leftImageArea}
@@ -376,60 +281,31 @@ export default function UserProfile() {
         <View style={styles.nameSection}>
           <View style={styles.nameRow}>
             <Text style={styles.userName}>
-              {user.name}
-              {user.age > 0 ? `, ${user.age}` : ""}
+              {userInfo.name}
+              {userInfo.age > 0 ? `, ${userInfo.age}` : ""}
             </Text>
-            {user.isOnline && (
-              <View style={styles.onlineIndicator}>
-                <Text style={styles.onlineText}>Online</Text>
-              </View>
-            )}
           </View>
-          <View style={styles.distanceContainer}>
-            <SimpleLineIcons
-              name="location-pin"
-              size={14}
-              color={color.gray55}
-            />
-            <Text style={styles.distance}>{user.distance}</Text>
-          </View>
-          <TouchableOpacity style={styles.bookmarkButton}>
-            <Feather name="bookmark" size={20} color={color.black} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Location Info */}
-        {(user.city || user.state || user.country) && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Location</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Location</Text>
-              <Text style={styles.infoValue}>
-                {[user.city, user.state, user.country]
-                  .filter(Boolean)
-                  .join(", ") || "Not specified"}
-              </Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={styles.distanceContainer}>
+              <SimpleLineIcons
+                name="location-pin"
+                size={14}
+                color={color.gray55}
+              />
+              <Text style={styles.distance}>{userInfo.distance}</Text>
             </View>
+            <TouchableOpacity style={styles.bookmarkButton}>
+              <Feather name="bookmark" size={20} color={color.black} />
+            </TouchableOpacity>
           </View>
-        )}
-
-        {/* About Section */}
-        {user.about && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About</Text>
-            <Text style={styles.aboutText}>{user.about}</Text>
-          </View>
-        )}
+        </View>
 
         {/* Looking For */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Looking for</Text>
           <View style={styles.lookingForContainer}>
-            {user.lookingFor.map((item: string, index: number) => (
+            {userInfo.lookingFor.map((item: string, index: number) => (
               <View key={index} style={styles.lookingForTag}>
-                <Text style={styles.lookingForIcon}>
-                  {getLookingForIcon(item)}
-                </Text>
                 <Text style={styles.lookingForText}>{item}</Text>
               </View>
             ))}
@@ -440,11 +316,8 @@ export default function UserProfile() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Interests</Text>
           <View style={styles.interestsContainer}>
-            {user.interests.map((interest: string, index: number) => (
+            {userInfo.interests.map((interest: string, index: number) => (
               <View key={index} style={styles.interestTag}>
-                <Text style={styles.interestIcon}>
-                  {getInterestIcon(interest)}
-                </Text>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>
             ))}
@@ -452,11 +325,11 @@ export default function UserProfile() {
         </View>
 
         {/* Languages */}
-        {user.languages.length > 0 && (
+        {userInfo.languages.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Languages</Text>
             <View style={styles.interestsContainer}>
-              {user.languages.map((language: string, index: number) => (
+              {userInfo.languages.map((language: string, index: number) => (
                 <View key={index} style={styles.languageTag}>
                   <Text style={styles.languageText}>{language}</Text>
                 </View>
@@ -470,23 +343,23 @@ export default function UserProfile() {
           <Text style={styles.sectionTitle}>Basic Information</Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Height</Text>
-            <Text style={styles.infoValue}>{user.height}</Text>
+            <Text style={styles.infoValue}>{userInfo.height}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Nationality</Text>
-            <Text style={styles.infoValue}>{user.nationality}</Text>
+            <Text style={styles.infoValue}>{userInfo.nationality}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Religion</Text>
-            <Text style={styles.infoValue}>{user.religion}</Text>
+            <Text style={styles.infoValue}>{userInfo.religion}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Zodiac</Text>
-            <Text style={styles.infoValue}>{user.zodiac}</Text>
+            <Text style={styles.infoValue}>{userInfo.zodiac}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Gender</Text>
-            <Text style={styles.infoValue}>{user.gender}</Text>
+            <Text style={styles.infoValue}>{userInfo.gender}</Text>
           </View>
         </View>
       </ScrollView>
@@ -498,9 +371,9 @@ export default function UserProfile() {
         onBlock={handleBlock}
         onReport={handleReport}
         userData={{
-          name: user.name,
-          age: user.age,
-          image: user.images[0],
+          name: userInfo.name,
+          age: userInfo.age,
+          image: userInfo.images[0],
         }}
         isMatch={false}
       />
@@ -511,7 +384,7 @@ export default function UserProfile() {
         onClose={() => setShowBlockConfirmation(false)}
         onBack={handleBackToProfileOptions}
         onConfirm={handleConfirmBlock}
-        userName={user.name}
+        userName={userInfo.name}
       />
 
       {/* Report User Modal */}
@@ -520,7 +393,7 @@ export default function UserProfile() {
         onClose={() => setShowReportUser(false)}
         onBack={handleBackToProfileOptions}
         onSubmit={handleSubmitReport}
-        userName={user.name}
+        userName={userInfo.name}
       />
     </View>
   );
@@ -634,6 +507,7 @@ const styles = StyleSheet.create({
   },
   nameSection: {
     flexDirection: "row",
+    alignContent: "center",
     alignItems: "flex-start",
     justifyContent: "space-between",
     marginBottom: 18,
@@ -646,19 +520,6 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     color: color.black,
     marginBottom: 4,
-  },
-  onlineIndicator: {
-    backgroundColor: "#10B981",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    alignSelf: "flex-start",
-    marginTop: 4,
-  },
-  onlineText: {
-    fontSize: 12,
-    fontFamily: font.medium,
-    color: color.white,
   },
   distanceContainer: {
     flexDirection: "row",
@@ -675,7 +536,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: color.white,
     borderWidth: 1,
     borderColor: "#E5E5E5",
     alignItems: "center",

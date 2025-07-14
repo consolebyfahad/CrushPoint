@@ -24,7 +24,7 @@ export default function BasicInfo({ route, navigation }: any) {
   // Get initial data from route params or use defaults
   const initialData = route?.params?.basicInfo || {
     interestedIn: "Men",
-    relationshipGoals: ["Serious relationship", "Friendship"],
+    relationshipGoals: [],
     height: "170",
     nationality: "American",
     religion: "Christianity",
@@ -48,13 +48,11 @@ export default function BasicInfo({ route, navigation }: any) {
   ];
 
   const relationshipGoalOptions = [
-    { label: "Serious relationship", value: "Serious relationship" },
-    { label: "Casual dating", value: "Casual dating" },
-    { label: "Friendship", value: "Friendship" },
-    { label: "Something casual", value: "Something casual" },
-    { label: "Don't know yet", value: "Don't know yet" },
-    { label: "Marriage", value: "Marriage" },
-    { label: "Long-term relationship", value: "Long-term relationship" },
+    { label: "🩵 Serious relationship", value: "🩵 Serious relationship" },
+    { label: "😘 Casual dating", value: "😘 Casual dating" },
+    { label: "🤝 Friendship", value: "🤝 Friendship" },
+    { label: "🔥 Open to possibilities", value: "🔥 Open to possibilities" },
+    { label: "🤫 Prefer not to say", value: "🤫 Prefer not to say" },
   ];
 
   const nationalityOptions = [

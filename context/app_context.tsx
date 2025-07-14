@@ -21,7 +21,7 @@ export interface NotificationSetting {
 export interface UserData {
   gender: string;
   gender_interest: string;
-  interests: string[];
+  interests: any[];
   name: string;
   dob: string;
   images: string[];

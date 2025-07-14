@@ -42,12 +42,6 @@ export default function UserCard({
 
   const profileImageSource = getProfileImageSource();
 
-  // Format looking for text
-  const lookingForText =
-    user?.lookingFor?.length > 0
-      ? user.lookingFor.join(", ")
-      : "Open to connect";
-
   return (
     <View style={styles.container}>
       {/* Profile Image */}
@@ -80,9 +74,15 @@ export default function UserCard({
         </View>
 
         {/* Looking For */}
-        <View style={styles.lookingForContainer}>
-          <Text style={styles.lookingForIcon}>💕</Text>
-          <Text style={styles.lookingForText}>{lookingForText}</Text>
+
+        <View style={styles.interestsContainer}>
+          {user?.lookingFor
+            ?.slice(0, 3)
+            .map((lookingFor: string, index: number) => (
+              <View style={styles.lookingForContainer}>
+                <Text style={styles.lookingForText}>{lookingFor}</Text>
+              </View>
+            ))}
         </View>
 
         {/* Interests */}
@@ -91,7 +91,6 @@ export default function UserCard({
             ?.slice(0, 3)
             .map((interest: string, index: number) => (
               <View key={index} style={styles.interestTag}>
-                <Text style={styles.interestIcon}>✨</Text>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>
             ))}
@@ -196,14 +195,9 @@ const styles = StyleSheet.create({
   lookingForContainer: {
     flexDirection: "row",
     alignSelf: "flex-start",
-    marginBottom: 16,
     backgroundColor: color.gray95,
     padding: 12,
     borderRadius: 99,
-  },
-  lookingForIcon: {
-    fontSize: 16,
-    marginRight: 8,
   },
   lookingForText: {
     fontSize: 16,
@@ -223,10 +217,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-  },
-  interestIcon: {
-    fontSize: 14,
-    marginRight: 6,
   },
   interestText: {
     fontSize: 14,

@@ -21,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivateSpot() {
   const { updateUserData, userData, user } = useAppContext();
+  console.log("userData", userData);
   const { fromEdit } = useLocalSearchParams();
   const isEdit = fromEdit === "true";
   const [selectedRadius, setSelectedRadius] = useState("100m");

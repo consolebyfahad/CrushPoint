@@ -31,6 +31,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interests() {
   const { interests, loading, error, refetch } = useGetInterests();
+  console.log("interests", interests);
   const { updateUserData, userData, user } = useAppContext();
   const { fromEdit } = useLocalSearchParams();
   const isEdit = fromEdit === "true";
@@ -67,7 +68,10 @@ export default function Interests() {
   };
 
   const handleContinue = () => {
-    updateUserData({ interests: selectedInterests });
+    const selectedInterestNames = selectedInterests
+      .map((id) => interests.find((interest) => interest.id === id)?.name)
+      .filter(Boolean);
+    updateUserData({ interests: selectedInterestNames });
     router.push("/auth/private_spot");
   };
 
@@ -95,8 +99,10 @@ export default function Interests() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        // Update context with new interests
-        updateUserData({ interests: selectedInterests });
+        const selectedInterestNames = selectedInterests
+          .map((id) => interests.find((interest) => interest.id === id)?.name)
+          .filter(Boolean);
+        updateUserData({ interests: selectedInterestNames });
 
         Alert.alert("Success", "Interests updated successfully!", [
           {

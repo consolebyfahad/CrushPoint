@@ -10,7 +10,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LookingFor() {
-  const { updateUserData } = useAppContext();
+  const { updateUserData, userData } = useAppContext();
+  console.log("user", userData);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const options = [
@@ -26,7 +27,11 @@ export default function LookingFor() {
   };
 
   const handleContinue = () => {
-    updateUserData({ looking_for: selectedOptions });
+    updateUserData({
+      looking_for: options
+        .filter((opt) => selectedOptions.includes(opt.id))
+        .map((opt) => opt.label),
+    });
     router.push("/auth/interests");
   };
 
