@@ -11,8 +11,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CustomSearchBar from "@/components/custom_search";
 import { MatchesTabsHeader } from "@/components/tabs_header";
 import { useAppContext } from "@/context/app_context";
-import useGetUsers from "@/hooks/useGetUsers";
+import useGetMatches from "@/hooks/useGetMatches";
 import { apiCall } from "@/utils/api";
+
 export default function Matches() {
   const { user } = useAppContext();
   const [searchText, setSearchText] = useState("");
@@ -22,57 +23,21 @@ export default function Matches() {
   const [showRemoveMatch, setShowRemoveMatch] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
 
-  // const [matches, setMatches] = useState([
-  //   {
-  //     id: "1",
-  //     name: "Alex",
-  //     age: 25,
-  //     distance: "0.5 km",
-  //     timeAgo: "2 hours ago",
-  //     isOnline: true,
-  //     isVerified: true,
-  //     image:
-  //       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "Sophia",
-  //     age: 28,
-  //     distance: "1.2 km",
-  //     timeAgo: "1 day ago",
-  //     isOnline: false,
-  //     isVerified: true,
-  //     image:
-  //       "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "Julia",
-  //     age: 24,
-  //     distance: "2.1 km",
-  //     timeAgo: "3 days ago",
-  //     isOnline: true,
-  //     isVerified: false,
-  //     image:
-  //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
-  //   },
-  // ]);
-
+  // Use the useGetMatches hook
+  const { matches, loading, error, refetch, removeMatch, updateMatchStatus } =
+    useGetMatches();
   // Filter matches based on search text
-
-  const { users, loading, error, refetch } = useGetUsers();
-
-  const filteredMatches = users.filter((match) =>
+  const filteredMatches = matches.filter((match) =>
     match.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const handleViewProfile = (match: any) => {
+  const handleViewProfile = (match) => {
     console.log("View profile for:", match.name);
     // Navigate to profile screen
     // navigation.navigate('UserProfile', { user: match });
   };
 
-  const handleMatchOptions = (match: any) => {
+  const handleMatchOptions = (match) => {
     setSelectedMatch(match);
     setShowProfileOptions(true);
   };
@@ -102,50 +67,99 @@ export default function Matches() {
   };
 
   // Action handlers
-  const handleRemoveMatch = () => {
-    console.log("Remove match:", selectedMatch?.name);
-    // Remove match from the list
-    if (selectedMatch) {
-      setMatches((prevMatches) =>
-        prevMatches.filter((match) => match.id !== selectedMatch.id)
-      );
+  const handleRemoveMatch = async () => {
+    try {
+      if (selectedMatch) {
+        // Call API to remove match
+        const formData = new FormData();
+        formData.append("type", "delete_data");
+        formData.append("table_name", "matches");
+        formData.append("id", selectedMatch.id);
+
+        const response = await apiCall(formData);
+
+        if (response.result) {
+          // Remove from local state using the hook function
+          removeMatch(selectedMatch.id);
+        } else {
+          console.error("Failed to remove match:", response.message);
+        }
+      }
+    } catch (error) {
+      console.error("Remove match error:", error);
+    } finally {
+      setShowRemoveMatch(false);
+      setSelectedMatch(null);
     }
-    setShowRemoveMatch(false);
-    setSelectedMatch(null);
   };
 
   const handleConfirmBlock = async () => {
     try {
-      const formData = new FormData();
-      formData.append("type", "add_data");
-      formData.append("user_id", user?.user_id ? user?.user_id : "");
-      formData.append("table_name", "blocked_users");
-      formData.append("block_id", selectedMatch?.id);
+      if (selectedMatch) {
+        // Add to blocked users
+        const blockFormData = new FormData();
+        blockFormData.append("type", "add_data");
+        blockFormData.append("user_id", user?.user_id || "");
+        blockFormData.append("table_name", "blocked_users");
+        blockFormData.append("block_id", selectedMatch.match_id);
 
-      const response = await apiCall(formData);
+        const blockResponse = await apiCall(blockFormData);
 
-      if (response.result) {
-        if (selectedMatch) {
-          setMatches((prevMatches) =>
-            prevMatches.filter((match) => match.id !== selectedMatch.id)
-          );
+        if (blockResponse.result) {
+          // Remove match from matches table
+          const removeFormData = new FormData();
+          removeFormData.append("type", "delete_data");
+          removeFormData.append("table_name", "matches");
+          removeFormData.append("id", selectedMatch.id);
+
+          const removeResponse = await apiCall(removeFormData);
+
+          if (removeResponse.result) {
+            // Remove from local state using the hook function
+            removeMatch(selectedMatch.id);
+          }
+        } else {
+          console.error("Block failed:", blockResponse.message);
         }
-        setShowBlockConfirmation(false);
-        setSelectedMatch(null);
       }
     } catch (error) {
-      console.error("Block Error:", response.message);
+      console.error("Block Error:", error);
+    } finally {
+      setShowBlockConfirmation(false);
+      setSelectedMatch(null);
     }
   };
 
-  const handleSubmitReport = (reportData: any) => {
-    console.log("Report submitted:", reportData);
-    // Handle report submission logic here
-    setShowReportUser(false);
-    setSelectedMatch(null);
+  const handleSubmitReport = async (reportData) => {
+    try {
+      if (selectedMatch) {
+        // Submit report to API
+        const formData = new FormData();
+        formData.append("type", "add_data");
+        formData.append("table_name", "reports");
+        formData.append("user_id", user?.user_id || "");
+        formData.append("reported_user_id", selectedMatch.match_id);
+        formData.append("reason", reportData.reason);
+        formData.append("description", reportData.description || "");
+
+        const response = await apiCall(formData);
+
+        if (response.result) {
+          // Optionally remove the match after reporting
+          removeMatch(selectedMatch.id);
+        } else {
+          console.error("Report submission failed:", response.message);
+        }
+      }
+    } catch (error) {
+      console.error("Report submission error:", error);
+    } finally {
+      setShowReportUser(false);
+      setSelectedMatch(null);
+    }
   };
 
-  const renderMatchCard = ({ item }: any) => (
+  const renderMatchCard = ({ item }) => (
     <MatchCard
       match={item}
       onViewProfile={handleViewProfile}
@@ -162,10 +176,19 @@ export default function Matches() {
     </View>
   );
 
+  const renderErrorState = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyTitle}>Error loading matches</Text>
+      <Text style={styles.emptyText}>
+        {error || "Something went wrong. Pull to refresh."}
+      </Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <MatchesTabsHeader title="Your Matches" matches={users} />
+      <MatchesTabsHeader title="Your Matches" matches={matches} />
 
       {/* Search Bar */}
       <CustomSearchBar
@@ -181,7 +204,7 @@ export default function Matches() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={renderEmptyState}
+        ListEmptyComponent={error ? renderErrorState : renderEmptyState}
         refreshControl={
           <RefreshControl
             refreshing={loading}

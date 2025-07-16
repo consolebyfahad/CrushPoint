@@ -1,0 +1,36 @@
+interface UserData {
+  id: string;
+  email: string;
+  name: string;
+  dob: string;
+  images: string | null;
+  phone: any;
+  gender: string;
+  gender_interest: string;
+  lat: string;
+  lng: string;
+  country: string;
+  state: string;
+  city: string;
+  languages: string;
+  interests: any;
+  looking_for: string;
+  radius: string;
+  height: string;
+  nationality: string;
+  religion: string;
+  zodiac: string;
+  about: string;
+  timestamp: string;
+  uploaded_selfie: string;
+  distance: number;
+  date: string;
+  time: string;
+  thumb_images: string;
+  image_url: string;
+  status: string;
+  age: number;
+  photos: string[];
+  parsedInterests: string[];
+  parsedLookingFor: string[];
+}

@@ -39,7 +39,7 @@ export default function RootLayout() {
     <AppProvider>
       <ToastProvider>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false, animation: "fade" }} />
       </ToastProvider>
     </AppProvider>
   );

@@ -21,7 +21,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivateSpot() {
   const { updateUserData, userData, user } = useAppContext();
-  console.log("userData", userData);
   const { fromEdit } = useLocalSearchParams();
   const isEdit = fromEdit === "true";
   const [selectedRadius, setSelectedRadius] = useState("100m");
@@ -128,13 +127,6 @@ export default function PrivateSpot() {
       );
       formData.append("lat", mapRegion.latitude.toString());
       formData.append("lng", mapRegion.longitude.toString());
-
-      console.log("Updating private spot:", {
-        radius: selectedRadius === "100m" ? 100 : 200,
-        latitude: mapRegion.latitude,
-        longitude: mapRegion.longitude,
-      });
-
       const response = await apiCall(formData);
 
       if (response.result) {

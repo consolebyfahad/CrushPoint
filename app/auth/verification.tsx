@@ -72,12 +72,8 @@ export default function FaceVerification() {
         exif: false,
       });
 
-      console.log("Photo captured:", photo.uri);
-
       // Compare with the simple function
       const verificationResult = await compareFaces(photo.uri, defaultImage);
-
-      console.log("Verification result:", verificationResult);
 
       // Show result to user
       const title = verificationResult.verified
@@ -91,10 +87,10 @@ export default function FaceVerification() {
             onPress: () => {},
           },
           {
-            text: "OK",
+            text: verificationResult.verified ? "OK" : "Skip",
             style: "default",
             onPress: () => {
-              if (verificationResult.verified) {
+              if (verificationResult.verified || !verificationResult.verified) {
                 submitAllData();
               }
             },
@@ -111,6 +107,11 @@ export default function FaceVerification() {
           {
             text: "Try Again",
             onPress: () => {},
+          },
+          {
+            text: "Skip",
+            style: "destructive",
+            onPress: () => submitAllData(),
           },
         ]
       );
@@ -152,8 +153,6 @@ export default function FaceVerification() {
       if (userData.religion)
         submissionData.append("religion", userData.religion);
       if (userData.zodiac) submissionData.append("zodiac", userData.zodiac);
-
-      console.log("Submitting profile data...");
 
       const response = await apiCall(submissionData);
 

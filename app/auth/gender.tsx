@@ -16,8 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Gender() {
-  const { updateUserData, user } = useAppContext();
-  console.log("isLoggedIn", user);
+  const { updateUserData } = useAppContext();
 
   const [selectedGender, setSelectedGender] = useState("male");
 

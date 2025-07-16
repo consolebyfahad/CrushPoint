@@ -99,8 +99,6 @@ export default function Notifications({ navigation }: any) {
       formData.append("type", "notifications");
       formData.append("user_id", user.user_id);
 
-      console.log("Fetching notifications for user:", user.user_id);
-
       const response = await apiCall(formData);
 
       if (response.result && Array.isArray(response.data)) {
@@ -179,8 +177,6 @@ export default function Notifications({ navigation }: any) {
   };
 
   const handleNotificationPress = (notification: Notification) => {
-    console.log("Notification pressed:", notification);
-
     // Mark as read locally
     setNotifications((prevNotifications) =>
       prevNotifications.map((notif) =>

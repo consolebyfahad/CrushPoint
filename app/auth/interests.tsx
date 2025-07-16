@@ -31,10 +31,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interests() {
   const { interests, loading, error, refetch } = useGetInterests();
-  console.log("interests", interests);
-  const { updateUserData, userData, user } = useAppContext();
-  const { fromEdit } = useLocalSearchParams();
-  const isEdit = fromEdit === "true";
+  const { updateUserData, user } = useAppContext();
+  const params = useLocalSearchParams();
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -42,16 +40,16 @@ export default function Interests() {
 
   const minSelections = 3;
   const isButtonDisabled =
-    selectedInterests.length < (isEdit ? 1 : minSelections);
+    selectedInterests.length < (params.isEdit ? 1 : minSelections);
 
   const counterProgress = useSharedValue(0);
 
   // Load existing interests when in edit mode
   useEffect(() => {
-    if (isEdit && userData?.interests) {
-      setSelectedInterests(userData.interests);
+    if (params.isEdit && params?.interests) {
+      setSelectedInterests(params.interests);
     }
-  }, [isEdit, userData?.interests]);
+  }, [params.isEdit, params?.interests]);
 
   useEffect(() => {
     counterProgress.value = withSpring(
@@ -86,6 +84,10 @@ export default function Interests() {
       return;
     }
 
+    const selectedInterestNames = selectedInterests
+      .map((id) => interests.find((interest) => interest.id === id)?.name)
+      .filter(Boolean);
+
     setIsLoading(true);
     try {
       const formData = new FormData();
@@ -93,8 +95,6 @@ export default function Interests() {
       formData.append("id", user.user_id);
       formData.append("table_name", "users");
       formData.append("interests", JSON.stringify(selectedInterests));
-
-      console.log("Updating interests:", selectedInterests);
 
       const response = await apiCall(formData);
 
@@ -164,12 +164,14 @@ export default function Interests() {
         <View style={styles.content}>
           <View style={styles.titleSection}>
             <Text style={styles.title}>
-              {isEdit ? "Edit your interests" : "What are your interests?"}
+              {params.isEdit
+                ? "Edit your interests"
+                : "What are your interests?"}
             </Text>
             <View style={styles.subtitleContainer}>
               <Text style={styles.subtitle}>
                 <Octicons name="info" size={14} color={color.gray55} />
-                {isEdit
+                {params.isEdit
                   ? "Update your interests to get better matches"
                   : "Select at least 3 interests to help us find better matches for you"}
               </Text>
@@ -216,7 +218,7 @@ export default function Interests() {
               selectedInterests={selectedInterests}
               onSelectionChange={handleSelectionChange}
               searchQuery={searchQuery}
-              minSelections={isEdit ? 1 : minSelections}
+              minSelections={params.isEdit ? 1 : minSelections}
               staggerAnimation={true}
               staggerDelay={30}
               containerStyle={styles.interestsContainer}
@@ -225,7 +227,7 @@ export default function Interests() {
         </View>
       </ScrollView>
 
-      {!isEdit ? (
+      {!params.isEdit ? (
         <View style={styles.bottomSection}>
           <Animated.Text style={[styles.selectedCount, animatedCounterStyle]}>
             Selected: {selectedInterests.length} (minimum {minSelections})

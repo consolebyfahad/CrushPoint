@@ -26,13 +26,13 @@ export default function Filters({
   setFilterData,
 }: any) {
   const [selectedGender, setSelectedGender] = useState(
-    filterData.gender || "Men"
+    filterData.gender || "Male"
   );
   const [ageFrom, setAgeFrom] = useState(filterData.ageFrom || "18");
   const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");
   const [distance, setDistance] = useState(filterData.distance || 10);
 
-  const genderOptions = ["Men", "Women", "All"];
+  const genderOptions = ["Male", "Female", "Both"];
 
   const expandableOptions = [
     {
@@ -70,14 +70,14 @@ export default function Filters({
   ];
 
   const handleReset = () => {
-    setSelectedGender("Men");
+    setSelectedGender("Male");
     setAgeFrom("18");
     setAgeTo("35");
     setDistance(10);
 
     // Reset all filter data
     setFilterData({
-      gender: "Men",
+      gender: "Male",
       ageFrom: "18",
       ageTo: "35",
       distance: 10,

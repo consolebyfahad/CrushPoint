@@ -350,8 +350,6 @@ export default function useGetUsers() {
     }
   };
 
-  console.log("gender", transformUser);
-
   // Helper function to get default image based on gender
   const getDefaultImage = (gender: string): string => {
     const normalizedGender = safeString(gender).toLowerCase();

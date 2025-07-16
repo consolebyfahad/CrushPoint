@@ -69,10 +69,6 @@ export default function Splash() {
           <Animated.Image
             style={[styles.image, animatedImageStyle]}
             source={image.splash}
-            onError={(error) => {
-              console.log("Image loading error:", error);
-              setImageError(true);
-            }}
           />
         ) : (
           <Animated.View style={[styles.fallbackContainer, animatedImageStyle]}>

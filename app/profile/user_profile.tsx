@@ -24,9 +24,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function UserProfile() {
   const { user } = useAppContext();
-  console.log("first", user);
   const params = useLocalSearchParams();
-  console.log("params+", params);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
@@ -37,10 +35,8 @@ export default function UserProfile() {
     try {
       if (params.user && typeof params.user === "string") {
         const parsed = JSON.parse(params.user);
-        console.log("Parsed user data:", parsed);
         return parsed;
       }
-      console.log("No user data found in params");
       return null;
     } catch (error) {
       console.error("Error parsing user data:", error);
@@ -135,7 +131,6 @@ export default function UserProfile() {
         formData.append("match_id", userInfo.id),
         formData.append("user_id", user?.user_id || ""),
         formData.append("emoji", action);
-      console.log("formData", formData);
       const response = await apiCall(formData);
       if (response.result) {
       }
@@ -183,8 +178,7 @@ export default function UserProfile() {
         formData.append("block_id", userInfo.id),
         formData.append("additional_details", reportData.additionalDetails),
         formData.append("reason", reportData.reason),
-        formData.append("user_id", user?.user_id || ""),
-        console.log("formData", formData);
+        formData.append("user_id", user?.user_id || "");
       const response = await apiCall(formData);
       if (response.result) {
         setShowReportUser(false);

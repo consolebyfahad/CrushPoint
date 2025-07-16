@@ -1,9 +1,16 @@
 import CustomButton from "@/components/custom_button";
+import Header from "@/components/header";
+import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import {
+  nationalityOptions,
+  religionOptions,
+  zodiacOptions,
+} from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -11,26 +18,29 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function BasicInfo({ route, navigation }: any) {
+export default function BasicInfo() {
   const { user } = useAppContext();
-
-  // Get initial data from route params or use defaults
-  const initialData = route?.params?.basicInfo || {
-    interestedIn: "Men",
-    relationshipGoals: [],
-    height: "170",
-    nationality: "American",
-    religion: "Christianity",
-    zodiacSign: "Cancer",
+  console.log(user?.user_id);
+  const { showToast } = useToast();
+  const params = useLocalSearchParams();
+  console.log("params", params);
+  const initialData = {
+    interestedIn: params.interestedIn || "Male",
+    relationshipGoals: params.relationshipGoals
+      ? JSON.parse(params.relationshipGoals as string)
+      : [],
+    height: params.height || "170",
+    nationality: params.nationality || "American",
+    religion: params.religion || "Christianity",
+    zodiacSign: params.zodiacSign || "Cancer",
   };
-
+  console.log(initialData.relationshipGoals);
   const [basicInfo, setBasicInfo] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,9 +52,9 @@ export default function BasicInfo({ route, navigation }: any) {
 
   // Options for dropdowns
   const interestedInOptions = [
-    { label: "Men", value: "Men" },
-    { label: "Women", value: "Women" },
-    { label: "Both", value: "Both" },
+    { label: "Male", value: "male" },
+    { label: "Female", value: "female" },
+    { label: "Both", value: "both" },
   ];
 
   const relationshipGoalOptions = [
@@ -54,55 +64,6 @@ export default function BasicInfo({ route, navigation }: any) {
     { label: "🔥 Open to possibilities", value: "🔥 Open to possibilities" },
     { label: "🤫 Prefer not to say", value: "🤫 Prefer not to say" },
   ];
-
-  const nationalityOptions = [
-    { label: "American", value: "American" },
-    { label: "Canadian", value: "Canadian" },
-    { label: "British", value: "British" },
-    { label: "Australian", value: "Australian" },
-    { label: "German", value: "German" },
-    { label: "French", value: "French" },
-    { label: "Italian", value: "Italian" },
-    { label: "Spanish", value: "Spanish" },
-    { label: "Japanese", value: "Japanese" },
-    { label: "Chinese", value: "Chinese" },
-    { label: "Indian", value: "Indian" },
-    { label: "Brazilian", value: "Brazilian" },
-    { label: "Mexican", value: "Mexican" },
-    { label: "Russian", value: "Russian" },
-    { label: "Korean", value: "Korean" },
-  ];
-
-  const religionOptions = [
-    { label: "Christianity", value: "Christianity" },
-    { label: "Islam", value: "Islam" },
-    { label: "Judaism", value: "Judaism" },
-    { label: "Hinduism", value: "Hinduism" },
-    { label: "Buddhism", value: "Buddhism" },
-    { label: "Atheist", value: "Atheist" },
-    { label: "Agnostic", value: "Agnostic" },
-    { label: "Other", value: "Other" },
-    { label: "Prefer not to say", value: "Prefer not to say" },
-  ];
-
-  const zodiacOptions = [
-    { label: "Aries", value: "Aries" },
-    { label: "Taurus", value: "Taurus" },
-    { label: "Gemini", value: "Gemini" },
-    { label: "Cancer", value: "Cancer" },
-    { label: "Leo", value: "Leo" },
-    { label: "Virgo", value: "Virgo" },
-    { label: "Libra", value: "Libra" },
-    { label: "Scorpio", value: "Scorpio" },
-    { label: "Sagittarius", value: "Sagittarius" },
-    { label: "Capricorn", value: "Capricorn" },
-    { label: "Aquarius", value: "Aquarius" },
-    { label: "Pisces", value: "Pisces" },
-  ];
-
-  const handleBack = () => {
-    router.back();
-  };
 
   const validateFields = () => {
     if (!basicInfo.interestedIn) {
@@ -180,27 +141,13 @@ export default function BasicInfo({ route, navigation }: any) {
       formData.append("religion", updatedBasicInfo.religion);
       formData.append("zodiac", updatedBasicInfo.zodiacSign);
 
-      console.log("Updating basic info:", updatedBasicInfo);
-
       const response = await apiCall(formData);
 
       if (response.result) {
-        Alert.alert("Success", "Basic information updated successfully!", [
-          {
-            text: "OK",
-            onPress: () => {
-              if (navigation) {
-                navigation.goBack();
-              } else {
-                router.back();
-              }
-            },
-          },
-        ]);
+        showToast("Basic information updated successfully!");
+        router.back();
       } else {
-        throw new Error(
-          response.message || "Failed to update basic information"
-        );
+        showToast(response.message || "Failed to update basic information");
       }
     } catch (error) {
       console.error("Update error:", error);
@@ -220,55 +167,10 @@ export default function BasicInfo({ route, navigation }: any) {
     }));
   };
 
-  const getReligionIcon = (religion: string) => {
-    switch (religion.toLowerCase()) {
-      case "christianity":
-        return "✝️";
-      case "islam":
-        return "☪️";
-      case "judaism":
-        return "✡️";
-      case "hinduism":
-        return "🕉️";
-      case "buddhism":
-        return "☸️";
-      default:
-        return "🔮";
-    }
-  };
-
-  const getZodiacIcon = (sign: string) => {
-    const zodiacEmojis: { [key: string]: string } = {
-      aries: "♈",
-      taurus: "♉",
-      gemini: "♊",
-      cancer: "♋",
-      leo: "♌",
-      virgo: "♍",
-      libra: "♎",
-      scorpio: "♏",
-      sagittarius: "♐",
-      capricorn: "♑",
-      aquarius: "♒",
-      pisces: "♓",
-    };
-    return zodiacEmojis[sign.toLowerCase()] || "⭐";
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="arrow-back" size={24} color={color.black} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Basic Info</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <Header title={"Basic Info"} divider />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Interested in */}
@@ -354,7 +256,6 @@ export default function BasicInfo({ route, navigation }: any) {
             onChange={(item) => {
               updateField("nationality", item.value);
             }}
-            renderLeftIcon={() => <Text style={styles.fieldIcon}>🇺🇸</Text>}
             renderRightIcon={() => (
               <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
@@ -378,11 +279,6 @@ export default function BasicInfo({ route, navigation }: any) {
             onChange={(item) => {
               updateField("religion", item.value);
             }}
-            renderLeftIcon={() => (
-              <Text style={styles.fieldIcon}>
-                {getReligionIcon(basicInfo.religion)}
-              </Text>
-            )}
             renderRightIcon={() => (
               <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
@@ -406,11 +302,6 @@ export default function BasicInfo({ route, navigation }: any) {
             onChange={(item) => {
               updateField("zodiacSign", item.value);
             }}
-            renderLeftIcon={() => (
-              <Text style={styles.fieldIcon}>
-                {getZodiacIcon(basicInfo.zodiacSign)}
-              </Text>
-            )}
             renderRightIcon={() => (
               <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}

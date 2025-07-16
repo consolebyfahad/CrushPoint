@@ -19,7 +19,6 @@ export default function UserCard({
   onBookmark,
 }: UserCardProps) {
   const { userData: currentUser } = useAppContext();
-  console.log("useruseruser", user);
   // Calculate distance between current user and target user
   const distance = calculateDistance(
     {

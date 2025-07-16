@@ -44,7 +44,6 @@ export default function Settings() {
   };
 
   const handleEditPrivateSpot = () => {
-    console.log("Edit private spot");
     router.push({
       pathname: "/auth/private_spot",
       params: { fromEdit: "true" },

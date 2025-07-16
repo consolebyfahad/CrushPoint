@@ -10,8 +10,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LookingFor() {
-  const { updateUserData, userData } = useAppContext();
-  console.log("user", userData);
+  const { updateUserData } = useAppContext();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const options = [

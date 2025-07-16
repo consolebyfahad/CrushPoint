@@ -31,7 +31,6 @@ export default function Verify() {
   const animatedValues = useRef(code.map(() => new Animated.Value(1))).current;
 
   useEffect(() => {
-    console.log("user", user);
     if (inputRefs.current[0]) {
       setTimeout(() => {
         inputRefs.current[0]?.focus();
@@ -106,13 +105,10 @@ export default function Verify() {
     setIsVerifying(true);
 
     try {
-      console.log("Verifying code:", fullCode);
-
       const formData = new FormData();
       formData.append("type", "verify_otp");
       formData.append("user_id", user?.user_id);
       formData.append("code", fullCode);
-      console.log(formData);
       const response = await apiCall(formData);
 
       if (response.result) {
@@ -149,8 +145,6 @@ export default function Verify() {
     if (!canResend || !user?.user_id) return;
 
     try {
-      console.log("Resending code...");
-
       const formData = new FormData();
       formData.append("type", "resend_otp");
       formData.append("user_id", user.user_id);

@@ -201,12 +201,6 @@ export default function AddPhotos() {
       );
       return;
     }
-
-    console.log("Selected photos:", selectedPhotos);
-    console.log(
-      "Uploaded file names:",
-      uploadedPhotos.map((p) => p.fileName)
-    );
     router.push("/auth/verification");
   };
 

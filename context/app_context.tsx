@@ -36,6 +36,15 @@ export interface UserData {
   phone?: string;
   email?: string;
   notification_settings?: NotificationSetting[];
+  age?: number;
+  photos?: string[];
+  parsedInterests?: string[];
+  parsedLookingFor?: string[];
+  country?: string;
+  state?: string;
+  city?: string;
+  languages?: string;
+  about?: string;
 }
 
 interface AppContextType {
@@ -142,6 +151,15 @@ const defaultUserData: UserData = {
   phone: "",
   email: "",
   notification_settings: defaultNotificationSettings,
+  age: 0,
+  photos: [],
+  parsedInterests: [],
+  parsedLookingFor: [],
+  country: "",
+  state: "",
+  city: "",
+  languages: "",
+  about: "",
 };
 
 const STORAGE_KEY = "@AppContext";

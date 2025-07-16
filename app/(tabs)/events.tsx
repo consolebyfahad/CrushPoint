@@ -211,7 +211,6 @@ export default function Events({ navigation }: any) {
   );
 
   const handleEventPress = (event: any) => {
-    console.log("Event pressed:", event.title);
     router.push({
       pathname: "/events/event_details",
       params: { event: JSON.stringify(event) },

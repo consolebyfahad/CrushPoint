@@ -42,18 +42,18 @@ export default function Interested() {
           <TouchableOpacity
             style={[
               styles.interestOption,
-              selectedInterest === "men"
+              selectedInterest === "male"
                 ? styles.selectedOption
                 : styles.unselectedOption,
             ]}
-            onPress={() => handleInterestSelect("men")}
+            onPress={() => handleInterestSelect("male")}
             activeOpacity={0.8}
           >
             <MaleIcon />
             <Text
               style={[
                 styles.interestText,
-                selectedInterest === "men"
+                selectedInterest === "male"
                   ? styles.selectedText
                   : styles.unselectedText,
               ]}
@@ -66,18 +66,18 @@ export default function Interested() {
           <TouchableOpacity
             style={[
               styles.interestOption,
-              selectedInterest === "women"
+              selectedInterest === "female"
                 ? styles.selectedOption
                 : styles.unselectedOption,
             ]}
-            onPress={() => handleInterestSelect("women")}
+            onPress={() => handleInterestSelect("female")}
             activeOpacity={0.8}
           >
             <FemaleIcon />
             <Text
               style={[
                 styles.interestText,
-                selectedInterest === "women"
+                selectedInterest === "female"
                   ? styles.selectedText
                   : styles.unselectedText,
               ]}

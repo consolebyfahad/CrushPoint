@@ -147,7 +147,7 @@ export default function Index() {
 
   // Filter data state
   const [filterData, setFilterData] = useState({
-    gender: "Men",
+    gender: "Male",
     ageFrom: "18",
     ageTo: "35",
     distance: 10,
@@ -161,7 +161,6 @@ export default function Index() {
   // Header handlers
   const handleNotifications = () => {
     router.push("/notifications");
-    console.log("Open notifications");
   };
 
   const handleFilters = () => {
@@ -212,7 +211,6 @@ export default function Index() {
 
   // User interaction handlers
   const handleViewProfile = (userData: any) => {
-    console.log("View profile for:", userData);
     router.push({
       pathname: "/profile/user_profile",
       params: {

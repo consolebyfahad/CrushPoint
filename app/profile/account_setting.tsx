@@ -136,13 +136,6 @@ export default function AccountSettings({ route, navigation }: any) {
       formData.append("phone", accountData.phoneNumber.trim());
       formData.append("email", accountData.email.trim().toLowerCase());
 
-      console.log("Updating account data:", {
-        name: accountData.fullName.trim(),
-        dob: accountData.dateOfBirth,
-        phone: accountData.phoneNumber.trim(),
-        email: accountData.email.trim().toLowerCase(),
-      });
-
       const response = await apiCall(formData);
 
       if (response.result) {

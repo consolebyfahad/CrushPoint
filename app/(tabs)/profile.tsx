@@ -1,12 +1,17 @@
+import CustomButton from "@/components/custom_button";
+import { useAppContext } from "@/context/app_context";
+import useGetProfile from "@/hooks/useGetProfile";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,26 +21,11 @@ import {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-export default function Profile({ navigation }: any) {
-  const [userProfile, setUserProfile] = useState({
-    name: "Julia",
-    age: 24,
-    mainPhoto:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop&crop=face",
-    photos: [
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop&crop=face",
-    ],
-    basicInfo: {
-      interestedIn: "Men",
-      relationshipGoals: ["Serious Relationship", "Long-term", "Marriage"],
-      height: "120 cm",
-      nationality: "USA",
-      religion: "Christianity",
-      zodiacSign: "Cancer",
-    },
-    interests: ["Travel", "Art", "Cooking", "Fashion", "Music", "Wine"],
-  });
+export default function Profile() {
+  const { userData } = useAppContext();
+  console.log("userData profile", userData);
+  const { userProfile, loading, error, refetch } = useGetProfile();
+  console.log("userProfile", userProfile);
 
   const handleCamera = () => {
     console.log("Open camera");
@@ -43,12 +33,10 @@ export default function Profile({ navigation }: any) {
   };
 
   const handleSettings = () => {
-    console.log("Open settings");
     router.push("/profile/setting");
   };
 
   const handleEditPrivateSpot = () => {
-    console.log("Edit private spot");
     router.push({
       pathname: "/auth/private_spot",
       params: { fromEdit: "true" },
@@ -56,61 +44,58 @@ export default function Profile({ navigation }: any) {
   };
 
   const handleEditPhotos = () => {
-    console.log("Edit photos");
     router.push({
       pathname: "/auth/add_photos",
       params: { fromEdit: "true" },
     });
   };
-
   const handleEditProfile = () => {
-    console.log("Edit profile");
-    router.push("/profile/basic_info");
+    router.push({
+      pathname: "/profile/basic_info",
+      params: {
+        fromEdit: "true",
+        interestedIn: userProfile?.gender_interest,
+        relationshipGoals: JSON.stringify(userProfile?.parsedLookingFor),
+        height: userProfile?.height,
+        nationality: userProfile?.nationality,
+        religion: userProfile?.religion,
+        zodiacSign: userProfile?.zodiac,
+      },
+    });
   };
-
   const handleEditInterests = () => {
-    console.log("Edit interests");
     router.push({
       pathname: "/auth/interests",
-      params: { fromEdit: "true" },
+      params: { isEdit: "true", interests: userProfile?.parsedInterests },
     });
   };
 
-  const getInterestIcon = (interest: string) => {
-    switch (interest.toLowerCase()) {
-      case "travel":
-        return "✈️";
-      case "art":
-        return "🎨";
-      case "cooking":
-        return "🍳";
-      case "fashion":
-        return "👗";
-      case "music":
-        return "🎵";
-      case "wine":
-        return "🍷";
-      case "coffee":
-        return "☕";
-      case "hiking":
-        return "🥾";
-      case "photography":
-        return "📸";
-      case "fitness":
-        return "💪";
-      case "reading":
-        return "📚";
-      default:
-        return "🎯";
-    }
-  };
+  // Loading state
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={color.primary} />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (error || !userProfile) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{"Failed to load profile."}</Text>
+        <CustomButton title="Retry" onPress={refetch} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.mainPhotoContainer}>
         <Image
-          source={{ uri: userProfile.mainPhoto }}
+          source={{ uri: userProfile.photos[0] }}
           style={styles.mainPhoto}
         />
         <View style={styles.header}>
@@ -119,7 +104,6 @@ export default function Profile({ navigation }: any) {
             onPress={handleCamera}
             activeOpacity={0.8}
           >
-            {/* <Ionicons name="camera-outline" size={24} color={color.black} /> */}
             <Feather name="camera" size={20} color={color.black} />
           </TouchableOpacity>
 
@@ -133,9 +117,17 @@ export default function Profile({ navigation }: any) {
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Main Photo */}
-
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refetch}
+            colors={[color.primary]}
+          />
+        }
+      >
         {/* Name and Age */}
         <View style={styles.nameSection}>
           <Text style={styles.userName}>
@@ -164,19 +156,22 @@ export default function Profile({ navigation }: any) {
           </View>
 
           <View style={styles.photosContainer}>
-            {userProfile.photos.map((photo, index) => (
-              <View key={index} style={styles.photoItem}>
-                <Image source={{ uri: photo }} style={styles.photo} />
-                <TouchableOpacity style={styles.removePhotoButton}>
-                  <Ionicons name="close" size={16} color={color.white} />
-                </TouchableOpacity>
-              </View>
-            ))}
-
-            {/* Add Photo Button */}
-            <TouchableOpacity style={styles.addPhotoButton}>
-              <Feather name="camera" size={24} color={color.gray900} />
-            </TouchableOpacity>
+            {userProfile.photos.length > 1 ? (
+              userProfile.photos.slice(0, 3).map((photo, index) => (
+                <>
+                  <View key={index} style={styles.photoItem}>
+                    <Image source={{ uri: photo }} style={styles.photo} />
+                  </View>
+                  <TouchableOpacity style={styles.addPhotoButton}>
+                    <Feather name="camera" size={24} color={color.gray900} />
+                  </TouchableOpacity>
+                </>
+              ))
+            ) : (
+              <TouchableOpacity style={styles.addPhotoButton}>
+                <Feather name="camera" size={24} color={color.gray900} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -193,19 +188,19 @@ export default function Profile({ navigation }: any) {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Interested in</Text>
               <Text style={styles.infoValue}>
-                {userProfile.basicInfo.interestedIn}
+                {userProfile.gender_interest}
               </Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Relationship goals</Text>
-              <View style={styles.relationshipGoals}>
+              <View style={styles.infoRow}>
                 <Text style={styles.infoValue}>
-                  {userProfile.basicInfo.relationshipGoals[0]}
+                  {userProfile.parsedLookingFor[0]}
                 </Text>
-                {userProfile.basicInfo.relationshipGoals.length > 1 && (
+                {userProfile.parsedLookingFor.length > 1 && (
                   <Text style={styles.additionalGoals}>
-                    , +{userProfile.basicInfo.relationshipGoals.length - 1}
+                    , +{userProfile.parsedLookingFor.length - 1}
                   </Text>
                 )}
               </View>
@@ -213,30 +208,22 @@ export default function Profile({ navigation }: any) {
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Height</Text>
-              <Text style={styles.infoValue}>
-                {userProfile.basicInfo.height}
-              </Text>
+              <Text style={styles.infoValue}>{userProfile.height}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Nationality</Text>
-              <Text style={styles.infoValue}>
-                {userProfile.basicInfo.nationality}
-              </Text>
+              <Text style={styles.infoValue}>{userProfile.nationality}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Religion</Text>
-              <Text style={styles.infoValue}>
-                {userProfile.basicInfo.religion}
-              </Text>
+              <Text style={styles.infoValue}>{userProfile.religion}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Zodiac Sign</Text>
-              <Text style={styles.infoValue}>
-                {userProfile.basicInfo.zodiacSign}
-              </Text>
+              <Text style={styles.infoValue}>{userProfile.zodiac}</Text>
             </View>
           </View>
         </View>
@@ -251,11 +238,8 @@ export default function Profile({ navigation }: any) {
           </View>
 
           <View style={styles.interestsContainer}>
-            {userProfile.interests.map((interest, index) => (
+            {userProfile.parsedInterests.map((interest, index) => (
               <View key={index} style={styles.interestTag}>
-                <Text style={styles.interestIcon}>
-                  {getInterestIcon(interest)}
-                </Text>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>
             ))}
@@ -272,7 +256,43 @@ export default function Profile({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: color.white,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: color.white,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray55,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: color.white,
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    fontFamily: font.semiBold,
+    color: color.error,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: color.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: color.white,
+    fontSize: 16,
+    fontFamily: font.medium,
   },
   header: {
     position: "absolute",
@@ -339,14 +359,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -366,7 +378,7 @@ const styles = StyleSheet.create({
   },
   photosContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
     gap: 12,
   },
   photoItem: {
@@ -393,9 +405,6 @@ const styles = StyleSheet.create({
     width: 103,
     height: 103,
     borderRadius: 12,
-    // borderWidth: 2,
-    // borderColor: "#E5E5E5",
-    // borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: color.gray94,
@@ -417,6 +426,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.regular,
     color: color.black,
+    textTransform: "capitalize",
   },
   relationshipGoals: {
     flexDirection: "row",
