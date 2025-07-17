@@ -24,22 +24,22 @@ import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BasicInfo() {
-  const { user } = useAppContext();
+  const { user, userData, updateUserData } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
   console.log("params", params);
 
   // Initialize state properly from params
   const [basicInfo, setBasicInfo] = useState({
-    interestedIn: (params.interestedIn as string) || "",
-    height: (params.height as string) || "",
-    nationality: (params.nationality as string) || "",
-    religion: (params.religion as string) || "",
-    zodiacSign: (params.zodiacSign as string) || "",
+    interestedIn: userData.gender_interest || "",
+    height: userData.height || "",
+    nationality: userData.nationality || "",
+    religion: userData.religion || "",
+    zodiacSign: userData.zodiac || "",
   });
 
   const [relationshipGoal, setRelationshipGoal] = useState(
-    params.relationshipGoals
+    userData.originalLookingForIds?.[0] || ""
   );
   const [isLoading, setIsLoading] = useState(false);
 
@@ -82,6 +82,15 @@ export default function BasicInfo() {
       const response = await apiCall(formData);
 
       if (response.result) {
+        updateUserData({
+          gender_interest: basicInfo.interestedIn,
+          looking_for: [relationshipGoal],
+          originalLookingForIds: [relationshipGoal],
+          height: basicInfo.height,
+          nationality: basicInfo.nationality,
+          religion: basicInfo.religion,
+          zodiac: basicInfo.zodiacSign,
+        });
         showToast("Basic information updated successfully!");
         router.back();
       } else {

@@ -1,4 +1,5 @@
 import CustomButton from "@/components/custom_button";
+import { useAppContext } from "@/context/app_context";
 import useGetProfile from "@/hooks/useGetProfile";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,20 +22,15 @@ import {
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function Profile() {
-  const { userProfile, loading, error, refetch } = useGetProfile();
-  console.log("userProfile", userProfile);
+  const { userData } = useAppContext();
+  const { loading, error, refetch } = useGetProfile();
   const handleCamera = () => {
     console.log("Open camera");
     // Handle camera functionality
   };
 
   const handleSettings = () => {
-    router.push({
-      pathname: "/profile/setting",
-      params: {
-        userProfile: JSON.stringify(userProfile),
-      },
-    });
+    router.push("/profile/setting");
   };
 
   const handleEditPrivateSpot = () => {
@@ -42,9 +38,6 @@ export default function Profile() {
       pathname: "/auth/private_spot",
       params: {
         fromEdit: "true",
-        lat: userProfile?.lat?.toString() || "",
-        lng: userProfile?.lng?.toString() || "",
-        radius: userProfile?.radius || "100",
       },
     });
   };
@@ -60,12 +53,6 @@ export default function Profile() {
       pathname: "/profile/basic_info",
       params: {
         fromEdit: "true",
-        interestedIn: userProfile?.gender_interest,
-        relationshipGoals: userProfile?.originalLookingForIds?.[0] || "",
-        height: userProfile?.height,
-        nationality: userProfile?.nationality,
-        religion: userProfile?.religion,
-        zodiacSign: userProfile?.zodiac,
       },
     });
   };
@@ -74,7 +61,6 @@ export default function Profile() {
       pathname: "/auth/interests",
       params: {
         isEdit: "true",
-        interests: JSON.stringify(userProfile?.originalInterestIds || []),
       },
     });
   };
@@ -90,7 +76,7 @@ export default function Profile() {
   }
 
   // Error state
-  if (error || !userProfile) {
+  if (error || !userData) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{"Failed to load profile."}</Text>
@@ -104,7 +90,7 @@ export default function Profile() {
       {/* Header */}
       <View style={styles.mainPhotoContainer}>
         <Image
-          source={{ uri: userProfile.photos[0] }}
+          source={{ uri: userData.photos?.[0] ?? "" }}
           style={styles.mainPhoto}
         />
         <View style={styles.header}>
@@ -140,7 +126,7 @@ export default function Profile() {
         {/* Name and Age */}
         <View style={styles.nameSection}>
           <Text style={styles.userName}>
-            {userProfile.name}, {userProfile.age}
+            {userData.name}, {userData.age}
           </Text>
           <TouchableOpacity
             onPress={handleEditPrivateSpot}
@@ -165,8 +151,8 @@ export default function Profile() {
           </View>
 
           <View style={styles.photosContainer}>
-            {userProfile.photos.length > 1 ? (
-              userProfile.photos.slice(0, 3).map((photo, index) => (
+            {(userData.photos ?? []).length > 1 ? (
+              (userData.photos ?? []).slice(0, 3).map((photo, index) => (
                 <>
                   <View key={index} style={styles.photoItem}>
                     <Image source={{ uri: photo }} style={styles.photo} />
@@ -196,20 +182,18 @@ export default function Profile() {
           <View style={styles.infoContainer}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Interested in</Text>
-              <Text style={styles.infoValue}>
-                {userProfile.gender_interest}
-              </Text>
+              <Text style={styles.infoValue}>{userData.gender_interest}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Relationship goals</Text>
               <View style={styles.infoRow}>
                 <Text style={styles.infoValue}>
-                  {userProfile.parsedLookingFor[0]}
+                  {userData.parsedLookingFor?.[0] ?? ""}
                 </Text>
-                {userProfile.parsedLookingFor.length > 1 && (
+                {(userData.parsedLookingFor?.length ?? 0) > 1 && (
                   <Text style={styles.additionalGoals}>
-                    , +{userProfile.parsedLookingFor.length - 1}
+                    , +{userData.parsedLookingFor!.length - 1}
                   </Text>
                 )}
               </View>
@@ -217,22 +201,22 @@ export default function Profile() {
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Height</Text>
-              <Text style={styles.infoValue}>{userProfile.height}</Text>
+              <Text style={styles.infoValue}>{userData.height}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Nationality</Text>
-              <Text style={styles.infoValue}>{userProfile.nationality}</Text>
+              <Text style={styles.infoValue}>{userData.nationality}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Religion</Text>
-              <Text style={styles.infoValue}>{userProfile.religion}</Text>
+              <Text style={styles.infoValue}>{userData.religion}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Zodiac Sign</Text>
-              <Text style={styles.infoValue}>{userProfile.zodiac}</Text>
+              <Text style={styles.infoValue}>{userData.zodiac}</Text>
             </View>
           </View>
         </View>
@@ -247,7 +231,7 @@ export default function Profile() {
           </View>
 
           <View style={styles.interestsContainer}>
-            {userProfile.parsedInterests.map((interest, index) => (
+            {(userData.parsedInterests ?? []).map((interest, index) => (
               <View key={index} style={styles.interestTag}>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>

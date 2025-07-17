@@ -9,7 +9,7 @@ import {
 import { useEffect, useState } from "react";
 
 export default function useGetProfile() {
-  const { user } = useAppContext();
+  const { user, updateUserData } = useAppContext();
   const [userProfile, setUserProfile] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +90,7 @@ export default function useGetProfile() {
           phone: userData.phone || "Not Specified",
         };
         setUserProfile(extendedUserData);
+        updateUserData(extendedUserData);
       } else {
         setError("No user data found");
       }

@@ -52,20 +52,12 @@ export default function Settings() {
       pathname: "/auth/private_spot",
       params: {
         fromEdit: "true",
-        lat: userProfile?.lat?.toString() || "",
-        lng: userProfile?.lng?.toString() || "",
-        radius: userProfile?.radius || "100",
       },
     });
   };
 
   const handleAccountSettings = () => {
-    router.push({
-      pathname: "/profile/account_setting",
-      params: {
-        userProfile: JSON.stringify(userProfile),
-      },
-    });
+    router.push("/profile/account_setting");
   };
 
   const handleNotificationSettings = () => {

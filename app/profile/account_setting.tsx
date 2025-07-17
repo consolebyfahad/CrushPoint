@@ -6,7 +6,7 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -21,10 +21,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountSettings() {
-  const { user, updateUserData } = useAppContext();
+  const { user, updateUserData, userData } = useAppContext();
   const { showToast } = useToast();
-  const params = useLocalSearchParams();
-  const userProfileString = params.userProfile as string;
   const [accountData, setAccountData] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -39,15 +37,15 @@ export default function AccountSettings() {
 
   // Load existing user data when component mounts
   useEffect(() => {
-    if (userProfileString) {
+    if (userData) {
       try {
-        const userProfile = JSON.parse(userProfileString); // Parse inside useEffect
+        const userProfile = userData;
 
         setAccountData({
-          fullName: userProfile.name || "",
-          dateOfBirth: userProfile.dob || "",
-          phoneNumber: userProfile.phone || "",
-          email: userProfile.email || "",
+          fullName: userData.name || "",
+          dateOfBirth: userData.dob || "",
+          phoneNumber: userData.phone || "",
+          email: userData.email || "",
         });
 
         // Set date picker date if DOB exists
@@ -69,7 +67,7 @@ export default function AccountSettings() {
         console.error("Error parsing userProfile:", error);
       }
     }
-  }, [userProfileString]);
+  }, [userData]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

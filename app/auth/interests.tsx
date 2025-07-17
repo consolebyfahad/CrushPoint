@@ -32,7 +32,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interests() {
   const { interests, loading, error, refetch } = useGetInterests();
-  const { updateUserData, user } = useAppContext();
+  const { updateUserData, user, userData } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -47,13 +47,13 @@ export default function Interests() {
 
   // Load existing interests when in edit mode
   useEffect(() => {
-    if (params.isEdit && params?.interests) {
+    if (params.isEdit && userData?.interests) {
       try {
         // Parse the interests if they're passed as JSON string
         const interestIds =
-          typeof params.interests === "string"
-            ? JSON.parse(params.interests)
-            : params.interests;
+          typeof userData.interests === "string"
+            ? JSON.parse(userData.interests)
+            : userData.interests;
 
         setSelectedInterests(
           Array.isArray(interestIds) ? interestIds : [interestIds]
@@ -63,7 +63,7 @@ export default function Interests() {
         setSelectedInterests([]);
       }
     }
-  }, [params.isEdit, params?.interests]);
+  }, [params.isEdit, userData?.interests]);
 
   useEffect(() => {
     counterProgress.value = withSpring(
@@ -219,7 +219,7 @@ export default function Interests() {
               selectedInterests={selectedInterests}
               onSelectionChange={handleSelectionChange}
               searchQuery={searchQuery}
-              minSelections={params.isEdit ? 1 : minSelections}
+              minSelections={minSelections}
               staggerAnimation={true}
               staggerDelay={30}
               containerStyle={styles.interestsContainer}

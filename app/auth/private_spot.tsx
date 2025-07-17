@@ -25,9 +25,6 @@ export default function PrivateSpot() {
   const { showToast } = useToast();
   const params = useLocalSearchParams();
   const isEdit = params?.fromEdit === "true";
-  const paramLat = params.lat as string;
-  const paramLng = params.lng as string;
-  const paramRadius = params.radius as string;
   const [selectedRadius, setSelectedRadius] = useState("100m");
   const [mapRegion, setMapRegion] = useState<Region>({
     latitude: 45.4408474,
@@ -42,10 +39,10 @@ export default function PrivateSpot() {
 
   useEffect(() => {
     if (isEdit) {
-      const lat = paramLat ? parseFloat(paramLat) : userData?.lat;
-      const lng = paramLng ? parseFloat(paramLng) : userData?.lng;
-      const radius = paramRadius ? paramRadius : userData?.radius?.toString();
-      console.log(radius);
+      const lat = userData?.lat;
+      const lng = userData?.lng;
+      const radius = userData?.radius;
+
       if (lat && lng) {
         const existingRegion: Region = {
           latitude: lat,
@@ -59,22 +56,12 @@ export default function PrivateSpot() {
       }
 
       if (radius) {
-        const radiusValue =
-          typeof radius === "string" ? radius : radius.toString();
-        setSelectedRadius(radiusValue === "100" ? "100m" : "200m");
+        setSelectedRadius(radius === 100 ? "100m" : "200m");
       }
     } else {
       getUserLocation();
     }
-  }, [
-    isEdit,
-    paramLat,
-    paramLng,
-    paramRadius,
-    userData?.lat,
-    userData?.lng,
-    userData?.radius,
-  ]);
+  }, [isEdit, userData?.lat, userData?.lng, userData?.radius]);
 
   const getUserLocation = async () => {
     setIsLoadingLocation(true);

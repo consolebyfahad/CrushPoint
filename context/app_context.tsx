@@ -45,6 +45,7 @@ export interface UserData {
   city?: string;
   languages?: string;
   about?: string;
+  originalLookingForIds: any;
 }
 
 interface AppContextType {
@@ -160,6 +161,7 @@ const defaultUserData: UserData = {
   city: "",
   languages: "",
   about: "",
+  originalLookingForIds: [],
 };
 
 const STORAGE_KEY = "@AppContext";
