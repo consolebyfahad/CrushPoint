@@ -10,7 +10,6 @@ import AnimatedSelectionOption from "./AnimatedSelectionOption";
 
 interface SelectionOption {
   id: string;
-  emoji: string;
   label: string;
 }
 

@@ -1,6 +1,7 @@
 import AnimatedInterestGrid from "@/components/AnimatedInterestGrid";
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
@@ -32,6 +33,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Interests() {
   const { interests, loading, error, refetch } = useGetInterests();
   const { updateUserData, user } = useAppContext();
+  const { showToast } = useToast();
   const params = useLocalSearchParams();
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,15 +41,27 @@ export default function Interests() {
   const [isLoading, setIsLoading] = useState(false);
 
   const minSelections = 3;
-  const isButtonDisabled =
-    selectedInterests.length < (params.isEdit ? 1 : minSelections);
+  const isButtonDisabled = selectedInterests.length < minSelections;
 
   const counterProgress = useSharedValue(0);
 
   // Load existing interests when in edit mode
   useEffect(() => {
     if (params.isEdit && params?.interests) {
-      setSelectedInterests(params.interests);
+      try {
+        // Parse the interests if they're passed as JSON string
+        const interestIds =
+          typeof params.interests === "string"
+            ? JSON.parse(params.interests)
+            : params.interests;
+
+        setSelectedInterests(
+          Array.isArray(interestIds) ? interestIds : [interestIds]
+        );
+      } catch (error) {
+        console.error("Error parsing interests:", error);
+        setSelectedInterests([]);
+      }
     }
   }, [params.isEdit, params?.interests]);
 
@@ -66,10 +80,7 @@ export default function Interests() {
   };
 
   const handleContinue = () => {
-    const selectedInterestNames = selectedInterests
-      .map((id) => interests.find((interest) => interest.id === id)?.name)
-      .filter(Boolean);
-    updateUserData({ interests: selectedInterestNames });
+    updateUserData({ interests: selectedInterests });
     router.push("/auth/private_spot");
   };
 
@@ -84,38 +95,28 @@ export default function Interests() {
       return;
     }
 
-    const selectedInterestNames = selectedInterests
-      .map((id) => interests.find((interest) => interest.id === id)?.name)
-      .filter(Boolean);
-
     setIsLoading(true);
     try {
       const formData = new FormData();
       formData.append("type", "update_data");
-      formData.append("id", user.user_id);
       formData.append("table_name", "users");
+      formData.append("id", user.user_id);
       formData.append("interests", JSON.stringify(selectedInterests));
 
       const response = await apiCall(formData);
 
       if (response.result) {
-        const selectedInterestNames = selectedInterests
-          .map((id) => interests.find((interest) => interest.id === id)?.name)
-          .filter(Boolean);
-        updateUserData({ interests: selectedInterestNames });
-
-        Alert.alert("Success", "Interests updated successfully!", [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          },
-        ]);
+        updateUserData({ interests: selectedInterests });
+        showToast("Interests updated successfully!", "success");
+        setTimeout(() => {
+          router.back();
+        }, 1000);
       } else {
-        throw new Error(response.message || "Failed to update interests");
+        showToast("Failed to update interests", "error");
       }
     } catch (error) {
       console.error("Update error:", error);
-      Alert.alert("Error", "Failed to update interests. Please try again.");
+      showToast("Failed to update interests. Please try again.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -172,8 +173,8 @@ export default function Interests() {
               <Text style={styles.subtitle}>
                 <Octicons name="info" size={14} color={color.gray55} />
                 {params.isEdit
-                  ? "Update your interests to get better matches"
-                  : "Select at least 3 interests to help us find better matches for you"}
+                  ? " Update your interests to get better matches"
+                  : " Select at least 3 interests to help us find better matches for you"}
               </Text>
             </View>
           </View>

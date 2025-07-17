@@ -17,7 +17,6 @@ import Animated, {
 
 interface SelectionOption {
   id: string;
-  emoji: string;
   label: string;
 }
 
@@ -129,26 +128,12 @@ export default function AnimatedSelectionOption({
     };
   });
 
-  const animatedEmojiStyle = useAnimatedStyle(() => {
-    const emojiScale = withSpring(isSelected ? 1.1 : 1, {
-      damping: 15,
-      stiffness: 200,
-    });
-
-    return {
-      transform: [{ scale: emojiScale }],
-    };
-  });
-
   return (
     <AnimatedTouchableOpacity
       style={[styles.optionButton, animatedContainerStyle, containerStyle]}
       onPress={handlePress}
       activeOpacity={0.9}
     >
-      <Animated.Text style={[styles.emoji, animatedEmojiStyle]}>
-        {option.emoji}
-      </Animated.Text>
       <Animated.Text style={[styles.optionText, animatedTextStyle, textStyle]}>
         {option.label}
       </Animated.Text>
@@ -167,9 +152,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     marginBottom: 12,
-  },
-  emoji: {
-    fontSize: 20,
   },
   optionText: {
     fontSize: 18,

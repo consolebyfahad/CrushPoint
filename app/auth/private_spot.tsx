@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
@@ -21,8 +22,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivateSpot() {
   const { updateUserData, userData, user } = useAppContext();
-  const { fromEdit } = useLocalSearchParams();
-  const isEdit = fromEdit === "true";
+  const { showToast } = useToast();
+  const params = useLocalSearchParams();
+  const isEdit = params?.fromEdit === "true";
+  const paramLat = params.lat as string;
+  const paramLng = params.lng as string;
+  const paramRadius = params.radius as string;
   const [selectedRadius, setSelectedRadius] = useState("100m");
   const [mapRegion, setMapRegion] = useState<Region>({
     latitude: 45.4408474,
@@ -36,12 +41,15 @@ export default function PrivateSpot() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (isEdit && userData) {
-      // Load existing location data when in edit mode
-      if (userData.lat && userData.lng) {
+    if (isEdit) {
+      const lat = paramLat ? parseFloat(paramLat) : userData?.lat;
+      const lng = paramLng ? parseFloat(paramLng) : userData?.lng;
+      const radius = paramRadius ? paramRadius : userData?.radius?.toString();
+      console.log(radius);
+      if (lat && lng) {
         const existingRegion: Region = {
-          latitude: userData.lat,
-          longitude: userData.lng,
+          latitude: lat,
+          longitude: lng,
           latitudeDelta: 0.005,
           longitudeDelta: 0.005,
         };
@@ -50,13 +58,23 @@ export default function PrivateSpot() {
         setIsLoadingLocation(false);
       }
 
-      if (userData.radius) {
-        setSelectedRadius(userData.radius === 100 ? "100m" : "200m");
+      if (radius) {
+        const radiusValue =
+          typeof radius === "string" ? radius : radius.toString();
+        setSelectedRadius(radiusValue === "100" ? "100m" : "200m");
       }
     } else {
       getUserLocation();
     }
-  }, [isEdit, userData]);
+  }, [
+    isEdit,
+    paramLat,
+    paramLng,
+    paramRadius,
+    userData?.lat,
+    userData?.lng,
+    userData?.radius,
+  ]);
 
   const getUserLocation = async () => {
     setIsLoadingLocation(true);
@@ -136,19 +154,15 @@ export default function PrivateSpot() {
           lat: mapRegion.latitude,
           lng: mapRegion.longitude,
         });
-
-        Alert.alert("Success", "Private spot updated successfully!", [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          },
-        ]);
+        showToast("Private spot updated successfully!", "success");
+        setTimeout(() => {
+          router.back();
+        }, 1000);
       } else {
-        throw new Error(response.message || "Failed to update private spot");
+        showToast("Failed to update private spot", "error");
       }
     } catch (error) {
-      console.error("Update error:", error);
-      Alert.alert("Error", "Failed to update private spot. Please try again.");
+      showToast("Failed to update private spot. Please try again.", "error");
     } finally {
       setIsSaving(false);
     }
@@ -292,9 +306,7 @@ export default function PrivateSpot() {
 
       <View style={styles.buttonContainer}>
         <CustomButton
-          title={
-            isSaving ? "Saving..." : isEdit ? "Save Changes" : "Save & Continue"
-          }
+          title={isSaving ? "Saving..." : isEdit ? "Save Changes" : "Continue"}
           onPress={isEdit ? handleSaveChanges : handleSaveAndContinue}
           isDisabled={isSaving}
           isLoading={isSaving}

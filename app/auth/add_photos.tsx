@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
@@ -33,6 +34,7 @@ type UploadedPhoto = {
 
 export default function AddPhotos() {
   const { user, addUserImage, removeUserImage, userImages } = useAppContext();
+  const { showToast } = useToast();
   const params = useLocalSearchParams();
   const [selectedPhotos, setSelectedPhotos] = useState<UploadedPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -122,21 +124,15 @@ export default function AddPhotos() {
         throw new Error(response.message || "Upload failed");
       }
     } catch (error) {
-      console.error("Upload error:", error);
-
       setSelectedPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
-
-      Alert.alert("Upload Error", "Failed to upload image. Please try again.");
+      showToast("Failed to upload image. Please try again.");
       return null;
     }
   };
 
   const pickImage = async () => {
     if (selectedPhotos.length >= maxPhotos) {
-      Alert.alert(
-        "Maximum photos reached",
-        `You can only upload up to ${maxPhotos} photos.`
-      );
+      showToast("Maximum photos reached", "warning");
       return;
     }
 
@@ -235,8 +231,6 @@ export default function AddPhotos() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        // Update context with new images
-        // Clear existing images and add new ones
         userImages.forEach((fileName) => removeUserImage(fileName));
         imageFileNames.forEach((fileName) => addUserImage(fileName));
 

@@ -27,9 +27,7 @@ export default function LookingFor() {
 
   const handleContinue = () => {
     updateUserData({
-      looking_for: options
-        .filter((opt) => selectedOptions.includes(opt.id))
-        .map((opt) => opt.label),
+      looking_for: selectedOptions,
     });
     router.push("/auth/interests");
   };
@@ -52,7 +50,7 @@ export default function LookingFor() {
           options={options}
           selectedOptions={selectedOptions}
           onSelectionChange={handleSelectionChange}
-          multiSelect={true}
+          multiSelect={false}
           staggerAnimation={true}
           staggerDelay={80}
           containerStyle={styles.optionsContainer}

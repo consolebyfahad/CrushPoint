@@ -32,6 +32,9 @@ class SimpleFaceVerification {
 
       // Check file size
       const fileInfo = await FileSystem.getInfoAsync(manipulatorResult.uri);
+      if (!fileInfo.exists || typeof fileInfo.size !== "number") {
+        throw new Error("Resized image file not found or size unknown");
+      }
       const fileSizeInMB = fileInfo.size / (1024 * 1024);
       console.log(`✅ Resized image size: ${fileSizeInMB.toFixed(2)}MB`);
 

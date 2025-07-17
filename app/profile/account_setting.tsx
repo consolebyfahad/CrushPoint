@@ -1,11 +1,12 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -19,9 +20,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function AccountSettings({ route, navigation }: any) {
-  const { user, userData, updateUserData } = useAppContext();
-
+export default function AccountSettings() {
+  const { user, updateUserData } = useAppContext();
+  const { showToast } = useToast();
+  const params = useLocalSearchParams();
+  const userProfileString = params.userProfile as string;
   const [accountData, setAccountData] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -36,31 +39,37 @@ export default function AccountSettings({ route, navigation }: any) {
 
   // Load existing user data when component mounts
   useEffect(() => {
-    if (userData) {
-      setAccountData({
-        fullName: userData.name || "",
-        dateOfBirth: userData.dob || "",
-        phoneNumber: userData.phone || "",
-        email: userData.email || "",
-      });
+    if (userProfileString) {
+      try {
+        const userProfile = JSON.parse(userProfileString); // Parse inside useEffect
 
-      // Set date picker date if DOB exists
-      if (userData.dob) {
-        try {
-          // Assuming DOB is in mm/dd/yyyy format
-          const [month, day, year] = userData.dob.split("/");
-          const dateObj = new Date(
-            parseInt(year),
-            parseInt(month) - 1,
-            parseInt(day)
-          );
-          setDate(dateObj);
-        } catch (error) {
-          console.error("Error parsing date:", error);
+        setAccountData({
+          fullName: userProfile.name || "",
+          dateOfBirth: userProfile.dob || "",
+          phoneNumber: userProfile.phone || "",
+          email: userProfile.email || "",
+        });
+
+        // Set date picker date if DOB exists
+        if (userProfile.dob) {
+          try {
+            // Assuming DOB is in mm/dd/yyyy format
+            const [month, day, year] = userProfile.dob.split("/");
+            const dateObj = new Date(
+              parseInt(year),
+              parseInt(month) - 1,
+              parseInt(day)
+            );
+            setDate(dateObj);
+          } catch (error) {
+            console.error("Error parsing date:", error);
+          }
         }
+      } catch (error) {
+        console.error("Error parsing userProfile:", error);
       }
     }
-  }, [userData]);
+  }, [userProfileString]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -148,33 +157,20 @@ export default function AccountSettings({ route, navigation }: any) {
         });
 
         setIsChanged(false);
-
-        Alert.alert(
-          "Success",
+        showToast(
           "Your account settings have been updated successfully.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                if (navigation) {
-                  navigation.goBack();
-                } else {
-                  router.back();
-                }
-              },
-            },
-          ]
+          "success"
         );
+        setTimeout(() => {
+          router.back();
+        }, 1000);
       } else {
-        throw new Error(
-          response.message || "Failed to update account settings"
-        );
+        showToast("Failed to update account settings", "error");
       }
     } catch (error) {
-      console.error("Update error:", error);
-      Alert.alert(
-        "Error",
-        "Failed to update account settings. Please try again."
+      showToast(
+        `Failed to update account settings. Please try again. || ${error}`,
+        "error"
       );
     } finally {
       setIsLoading(false);

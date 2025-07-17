@@ -2,6 +2,27 @@ const parseMMDDYYYY = (dateStr: string): Date => {
   const [month, day, year] = dateStr.split("/").map(Number);
   return new Date(year, month - 1, day); // month is 0-indexed
 };
+
+const INTEREST_MAPPING: { [key: string]: string } = {
+  "1": "💻 Tech",
+  "2": "🎨 Art",
+  "3": "🧪 Test",
+  "4": "Music",
+  "5": "Sports",
+  "6": "Travel",
+  "7": "Food",
+  "8": "Movies",
+  "9": "Books",
+  "10": "Gaming",
+  // Add more mappings as needed
+};
+
+const convertInterestIdsToNames = (interestIds: string[]): string[] => {
+  return interestIds
+    .map((id) => INTEREST_MAPPING[id] || `Unknown Interest (${id})`)
+    .filter((name) => name !== `Unknown Interest (${interestIds})`); // Optional: filter out unknown interests
+};
+
 export const calculateAge = (dob: string): number => {
   const birthDate = parseMMDDYYYY(dob);
   const today = new Date();
@@ -27,36 +48,46 @@ export const parseJsonString = (jsonString: string): string[] => {
   }
 };
 
-export const getInterestIcon = (interest: string) => {
-  switch (interest.toLowerCase()) {
-    case "travel":
-      return "✈️";
-    case "art":
-      return "🎨";
-    case "cooking":
-      return "🍳";
-    case "fashion":
-      return "👗";
-    case "music":
-      return "🎵";
-    case "wine":
-      return "🍷";
-    case "coffee":
-      return "☕";
-    case "hiking":
-      return "🥾";
-    case "photography":
-      return "📸";
-    case "fitness":
-      return "💪";
-    case "reading":
-      return "📚";
-    case "tech":
-      return "💻";
-    case "test":
-      return "🧪";
-    default:
-      return "🎯";
+export const parseInterestsWithNames = (jsonString: string): string[] => {
+  try {
+    const cleanedString = jsonString.replace(/\\\"/g, '"');
+    const interestIds = JSON.parse(cleanedString);
+    return convertInterestIdsToNames(interestIds);
+  } catch (error) {
+    console.error("Error parsing interests:", error);
+    return [];
+  }
+};
+
+const LOOKING_FOR_OPTIONS = [
+  { id: "serious", label: "🩵 Serious relationship" },
+  { id: "casual", label: "😘 Casual dating" },
+  { id: "friendship", label: "🤝 Friendship" },
+  { id: "open", label: "🔥 Open to possibilities" },
+  { id: "prefer-not", label: "🤫 Prefer not to say" },
+];
+
+const LOOKING_FOR_MAPPING: { [key: string]: string } =
+  LOOKING_FOR_OPTIONS.reduce((acc, option) => {
+    acc[option.id] = option.label;
+    return acc;
+  }, {} as { [key: string]: string });
+
+const convertLookingForIdsToLabels = (lookingForIds: string[]): string[] => {
+  return lookingForIds
+    .map((id) => LOOKING_FOR_MAPPING[id] || `Unknown Option (${id})`)
+    .filter((label) => !label.startsWith("Unknown Option")); // Optional: filter out unknown options
+};
+
+// Add new function specifically for looking_for
+export const parseLookingForWithLabels = (jsonString: string): string[] => {
+  try {
+    const cleanedString = jsonString.replace(/\\\"/g, '"');
+    const lookingForIds = JSON.parse(cleanedString);
+    return convertLookingForIdsToLabels(lookingForIds);
+  } catch (error) {
+    console.error("Error parsing looking_for:", error);
+    return [];
   }
 };
 

@@ -1,10 +1,15 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
-import { calculateAge, parseJsonString } from "@/utils/helper";
+import {
+  calculateAge,
+  parseInterestsWithNames,
+  parseJsonString,
+  parseLookingForWithLabels,
+} from "@/utils/helper";
 import { useEffect, useState } from "react";
 
 export default function useGetProfile() {
-  const { user, updateUserData } = useAppContext();
+  const { user } = useAppContext();
   const [userProfile, setUserProfile] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +47,6 @@ export default function useGetProfile() {
               photos = [defaultPhoto];
             }
           } catch (error) {
-            console.error("Error parsing images:", error);
             photos = [defaultPhoto];
           }
         } else {
@@ -50,8 +54,18 @@ export default function useGetProfile() {
         }
 
         const age = calculateAge(userData.dob);
-        const parsedInterests = parseJsonString(userData.interests);
-        const parsedLookingFor = parseJsonString(userData.looking_for);
+        const parsedInterests = userData.interests
+          ? parseInterestsWithNames(userData.interests)
+          : [];
+        const originalInterestIds = userData.interests
+          ? parseJsonString(userData.interests)
+          : [];
+        const parsedLookingFor = userData.looking_for
+          ? parseLookingForWithLabels(userData.looking_for)
+          : [];
+        const originalLookingForIds = userData.looking_for
+          ? parseJsonString(userData.looking_for)
+          : [];
 
         const extendedUserData = {
           ...userData,
@@ -59,6 +73,8 @@ export default function useGetProfile() {
           photos,
           parsedInterests,
           parsedLookingFor,
+          originalLookingForIds,
+          originalInterestIds,
           email: userData.email || "Not Specified",
           gender: userData.gender || "Not Specified",
           gender_interest: userData.gender_interest || "Not Specified",
@@ -74,7 +90,6 @@ export default function useGetProfile() {
           phone: userData.phone || "Not Specified",
         };
         setUserProfile(extendedUserData);
-        updateUserData(extendedUserData);
       } else {
         setError("No user data found");
       }

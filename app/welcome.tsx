@@ -2,11 +2,11 @@ import CustomButton from "@/components/custom_button";
 import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { AnimatedLogo } from "@/utils//animations";
-import { requestFullCameraAccess } from "@/utils/camera";
+import { useCombinedPermissions } from "@/utils/camera";
 import { color, font } from "@/utils/constants";
 import SocialAuth from "@/utils/social_auth";
 import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   BackHandler,
@@ -21,42 +21,18 @@ export default function Welcome() {
   const { setUser } = useAppContext();
   const { showToast } = useToast();
   const [otherMethodsLoading, setOtherMethodsLoading] = useState(false);
-
+  const { ensurePermissions } = useCombinedPermissions();
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       () => true
     );
-    requestCameraPermissions();
+    checkPermissions();
     return () => backHandler.remove();
   }, []);
 
-  const requestCameraPermissions = async () => {
-    try {
-      const permissions = await requestFullCameraAccess();
-
-      if (permissions.camera && permissions.mediaLibrary) {
-        showToast("Camera permissions granted!", "success");
-      } else if (permissions.camera) {
-        showToast(
-          "Camera access granted, but media library access denied",
-          "warning"
-        );
-      } else if (permissions.mediaLibrary) {
-        showToast(
-          "Media library access granted, but camera access denied",
-          "warning"
-        );
-      } else {
-        showToast(
-          "Camera permissions denied. You can enable them in settings.",
-          "error"
-        );
-      }
-    } catch (error) {
-      console.error("Failed to request camera permissions:", error);
-      showToast("Failed to request camera permissions", "error");
-    }
+  const checkPermissions = async () => {
+    ensurePermissions();
   };
 
   // Handle successful social authentication
@@ -103,69 +79,61 @@ export default function Welcome() {
   };
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          gestureEnabled: false,
-          headerShown: false,
-        }}
-      />
-      <SafeAreaView style={styles.container}>
-        <View style={styles.topSection}>
-          <View style={styles.logo}>
-            <AnimatedLogo />
-          </View>
-          <Text style={styles.appName}>CrushPoint</Text>
-          <View style={styles.contentContainer}>
-            <Text style={styles.title}>Create Your Account</Text>
-            <Text style={styles.subtitle}>
-              Choose your preferred sign up method
-            </Text>
-
-            <View style={styles.buttonContainer}>
-              {/* Social Authentication Component */}
-              <SocialAuth
-                onAuthSuccess={handleSocialAuthSuccess}
-                onAuthError={handleSocialAuthError}
-                isDisabled={otherMethodsLoading}
-              />
-
-              {/* Other sign-up methods */}
-              <CustomButton
-                title="Continue with Phone"
-                onPress={handlePhoneSignUp}
-                icon={<PhoneIcon />}
-                variant="secondary"
-                isLoading={otherMethodsLoading}
-              />
-
-              <CustomButton
-                title="Continue with Email"
-                onPress={handleEmailSignUp}
-                icon={<EmailIcon />}
-                variant="secondary"
-                isLoading={otherMethodsLoading}
-              />
-            </View>
-
-            <View style={styles.loginSection}>
-              <Text style={styles.loginText}>Already have an account? </Text>
-              <TouchableOpacity onPress={handleLogin}>
-                <Text style={styles.loginLink}>Log In</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.topSection}>
+        <View style={styles.logo}>
+          <AnimatedLogo />
         </View>
-
-        <View>
-          <Text style={styles.termsText}>
-            By signing up, you agree to our{" "}
-            <Text style={styles.linkText}>Terms</Text> and{" "}
-            <Text style={styles.linkText}>Privacy Policy</Text>
+        <Text style={styles.appName}>CrushPoint</Text>
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>Create Your Account</Text>
+          <Text style={styles.subtitle}>
+            Choose your preferred sign up method
           </Text>
+
+          <View style={styles.buttonContainer}>
+            {/* Social Authentication Component */}
+            <SocialAuth
+              onAuthSuccess={handleSocialAuthSuccess}
+              onAuthError={handleSocialAuthError}
+              isDisabled={otherMethodsLoading}
+            />
+
+            {/* Other sign-up methods */}
+            <CustomButton
+              title="Continue with Phone"
+              onPress={handlePhoneSignUp}
+              icon={<PhoneIcon />}
+              variant="secondary"
+              isLoading={otherMethodsLoading}
+            />
+
+            <CustomButton
+              title="Continue with Email"
+              onPress={handleEmailSignUp}
+              icon={<EmailIcon />}
+              variant="secondary"
+              isLoading={otherMethodsLoading}
+            />
+          </View>
+
+          <View style={styles.loginSection}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={handleLogin}>
+              <Text style={styles.loginLink}>Log In</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </SafeAreaView>
-    </>
+      </View>
+
+      <View>
+        <Text style={styles.termsText}>
+          By signing up, you agree to our{" "}
+          <Text style={styles.linkText}>Terms</Text> and{" "}
+          <Text style={styles.linkText}>Privacy Policy</Text>
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 }
 

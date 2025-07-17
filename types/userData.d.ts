@@ -33,4 +33,6 @@ interface UserData {
   photos: string[];
   parsedInterests: string[];
   parsedLookingFor: string[];
+  originalInterestIds: string[];
+  originalLookingForIds: string[];
 }

@@ -1,4 +1,3 @@
-// Updated FaceVerification.tsx
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { useToast } from "@/components/toast_provider";
@@ -10,14 +9,14 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { CameraView } from "expo-camera";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
-import { Alert, Dimensions, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { compareSimpleFaces } from "./FaceVerificationService";
-
-const { width } = Dimensions.get("window");
+import { compareSimpleFaces } from "../../utils/FaceVerificationService";
 
 export default function FaceVerification() {
   const { userData, user, userImages } = useAppContext();
+  console.log("userData,", userData);
+  console.log("userImages,", userImages);
   const defaultImage =
     userImages.length > 0
       ? `https://7tracking.com/crushpoint/images/${userImages[0]}`
@@ -26,6 +25,9 @@ export default function FaceVerification() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedSelfieFileName, setUploadedSelfieFileName] = useState<
+    string | null
+  >(null);
   const cameraRef = useRef<any>(null);
 
   // Simplified face comparison
@@ -52,6 +54,34 @@ export default function FaceVerification() {
       throw error;
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const uploadImageToServer = async (imageUri: string) => {
+    if (!user?.user_id) {
+      throw new Error("User ID not found. Please login again.");
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("type", "upload_data");
+      formData.append("user_id", user.user_id);
+      formData.append("file", {
+        uri: imageUri,
+        type: "image/jpeg",
+        name: "selfie.jpg",
+      } as any);
+
+      const response = await apiCall(formData);
+
+      if (response.result && response.file_name) {
+        return response.file_name;
+      } else {
+        throw new Error(response.message || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Image upload error:", error);
+      throw error;
     }
   };
 
@@ -89,17 +119,29 @@ export default function FaceVerification() {
           {
             text: verificationResult.verified ? "OK" : "Skip",
             style: "default",
-            onPress: () => {
-              if (verificationResult.verified || !verificationResult.verified) {
-                submitAllData();
+            onPress: async () => {
+              if (verificationResult.verified) {
+                try {
+                  setIsProcessing(true);
+                  const fileName = await uploadImageToServer(photo.uri);
+                  setUploadedSelfieFileName(fileName);
+                  showToast("Selfie uploaded successfully!", "success");
+                  submitAllData(fileName);
+                } catch (error) {
+                  showToast("Failed to upload selfie", "error");
+                  submitAllData(null);
+                } finally {
+                  setIsProcessing(false);
+                }
+              } else {
+                submitAllData(null);
               }
             },
           },
         ]);
       }, 100);
     } catch (error: any) {
-      console.error("Error in face verification:", error);
-
+      showToast("Error in face verification", "error");
       Alert.alert(
         "Verification Error",
         error.message || "Failed to verify face. Please try again.",
@@ -111,7 +153,7 @@ export default function FaceVerification() {
           {
             text: "Skip",
             style: "destructive",
-            onPress: () => submitAllData(),
+            onPress: () => submitAllData(null),
           },
         ]
       );
@@ -120,7 +162,7 @@ export default function FaceVerification() {
     }
   };
 
-  const submitAllData = async () => {
+  const submitAllData = async (selfieFileName?: string | null) => {
     if (!user?.user_id) {
       showToast("User session expired. Please login again.", "error");
       return;
@@ -130,13 +172,17 @@ export default function FaceVerification() {
     try {
       const submissionData = new FormData();
       submissionData.append("type", "update_data");
-      submissionData.append("id", user.user_id);
       submissionData.append("table_name", "users");
+      submissionData.append("id", user.user_id);
       submissionData.append("gender", userData.gender);
       submissionData.append("gender_interest", userData.gender_interest);
       submissionData.append("interests", JSON.stringify(userData.interests));
       submissionData.append("name", userData.name);
       submissionData.append("dob", userData.dob);
+      const finalSelfieFileName = selfieFileName || uploadedSelfieFileName;
+      if (finalSelfieFileName) {
+        submissionData.append("uploaded_selfie", finalSelfieFileName);
+      }
       submissionData.append("images", JSON.stringify(userImages));
       submissionData.append(
         "looking_for",
@@ -144,16 +190,7 @@ export default function FaceVerification() {
       );
       submissionData.append("radius", userData.radius.toString());
       submissionData.append("lat", userData.lat.toString());
-      submissionData.append("lng", userData.lng.toString()); // Fixed typo from "l" to "lng"
-
-      // Optional fields - only add if they have values
-      if (userData.height) submissionData.append("height", userData.height);
-      if (userData.nationality)
-        submissionData.append("nationality", userData.nationality);
-      if (userData.religion)
-        submissionData.append("religion", userData.religion);
-      if (userData.zodiac) submissionData.append("zodiac", userData.zodiac);
-
+      submissionData.append("lng", userData.lng.toString());
       const response = await apiCall(submissionData);
 
       if (response.result) {

@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interested() {
   const { updateUserData } = useAppContext();
-  const [selectedInterest, setSelectedInterest] = useState("women");
+  const [selectedInterest, setSelectedInterest] = useState("both");
 
   const handleInterestSelect = (interest: any) => {
     setSelectedInterest(interest);

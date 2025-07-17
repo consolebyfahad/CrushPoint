@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function VerificationStatus({ navigation }: any) {
+export default function VerificationStatus() {
   const [verificationState, setVerificationState] = useState({
     status: "faild", // "failed", "pending", "verified"
     lastAttempt: new Date(),

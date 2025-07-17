@@ -1,5 +1,4 @@
 import CustomButton from "@/components/custom_button";
-import { useAppContext } from "@/context/app_context";
 import useGetProfile from "@/hooks/useGetProfile";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,24 +21,31 @@ import {
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function Profile() {
-  const { userData } = useAppContext();
-  console.log("userData profile", userData);
   const { userProfile, loading, error, refetch } = useGetProfile();
   console.log("userProfile", userProfile);
-
   const handleCamera = () => {
     console.log("Open camera");
     // Handle camera functionality
   };
 
   const handleSettings = () => {
-    router.push("/profile/setting");
+    router.push({
+      pathname: "/profile/setting",
+      params: {
+        userProfile: JSON.stringify(userProfile),
+      },
+    });
   };
 
   const handleEditPrivateSpot = () => {
     router.push({
       pathname: "/auth/private_spot",
-      params: { fromEdit: "true" },
+      params: {
+        fromEdit: "true",
+        lat: userProfile?.lat?.toString() || "",
+        lng: userProfile?.lng?.toString() || "",
+        radius: userProfile?.radius || "100",
+      },
     });
   };
 
@@ -55,7 +61,7 @@ export default function Profile() {
       params: {
         fromEdit: "true",
         interestedIn: userProfile?.gender_interest,
-        relationshipGoals: JSON.stringify(userProfile?.parsedLookingFor),
+        relationshipGoals: userProfile?.originalLookingForIds?.[0] || "",
         height: userProfile?.height,
         nationality: userProfile?.nationality,
         religion: userProfile?.religion,
@@ -66,7 +72,10 @@ export default function Profile() {
   const handleEditInterests = () => {
     router.push({
       pathname: "/auth/interests",
-      params: { isEdit: "true", interests: userProfile?.parsedInterests },
+      params: {
+        isEdit: "true",
+        interests: JSON.stringify(userProfile?.originalInterestIds || []),
+      },
     });
   };
 

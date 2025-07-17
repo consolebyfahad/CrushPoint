@@ -3,7 +3,7 @@ import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
   Alert,
@@ -18,6 +18,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Settings() {
   const { logout } = useAppContext();
   const { showToast } = useToast();
+  const params = useLocalSearchParams();
+  const userProfile = params.userProfile
+    ? JSON.parse(params.userProfile as string)
+    : null;
   const handleBack = () => {
     router.back();
   };
@@ -46,7 +50,39 @@ export default function Settings() {
   const handleEditPrivateSpot = () => {
     router.push({
       pathname: "/auth/private_spot",
-      params: { fromEdit: "true" },
+      params: {
+        fromEdit: "true",
+        lat: userProfile?.lat?.toString() || "",
+        lng: userProfile?.lng?.toString() || "",
+        radius: userProfile?.radius || "100",
+      },
+    });
+  };
+
+  const handleAccountSettings = () => {
+    router.push({
+      pathname: "/profile/account_setting",
+      params: {
+        userProfile: JSON.stringify(userProfile),
+      },
+    });
+  };
+
+  const handleNotificationSettings = () => {
+    router.push({
+      pathname: "/profile/notification_setting",
+      params: {
+        userProfile: JSON.stringify(userProfile),
+      },
+    });
+  };
+
+  const handleVerificationStatus = () => {
+    router.push({
+      pathname: "/profile/verification_status",
+      params: {
+        userProfile: JSON.stringify(userProfile),
+      },
     });
   };
 
@@ -67,27 +103,21 @@ export default function Settings() {
       title: "Account Settings",
       icon: "person-outline",
       hasChevron: true,
-      onPress: () => {
-        router.push("/profile/account_setting");
-      },
+      onPress: handleAccountSettings,
     },
     {
       id: "notifications",
       title: "Notifications",
       icon: "notifications-outline",
       hasChevron: true,
-      onPress: () => {
-        router.push("/profile/notification_setting");
-      },
+      onPress: handleNotificationSettings,
     },
     {
       id: "verification",
       title: "Verification Status",
       icon: "shield-checkmark-outline",
       hasChevron: true,
-      onPress: () => {
-        router.push("/profile/verification_status");
-      },
+      onPress: handleVerificationStatus,
     },
     {
       id: "blocked_users",

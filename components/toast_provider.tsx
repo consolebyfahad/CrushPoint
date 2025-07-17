@@ -24,20 +24,20 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
     duration = 1500
   ) => {
     // Set toast configuration
-    const options = { duration };
+    // const options = { duration };
 
     switch (type) {
       case "success":
-        Toast.success(message, options);
+        Toast.success(message);
         break;
       case "error":
-        Toast.error(message, options);
+        Toast.error(message);
         break;
       case "warning":
-        Toast.warn(message, options);
+        Toast.warn(message);
         break;
       default:
-        Toast.info(message, options);
+        Toast.info(message);
     }
   };
 
