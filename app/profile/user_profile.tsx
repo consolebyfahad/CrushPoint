@@ -36,13 +36,16 @@ export default function UserProfile() {
       if (params.user && typeof params.user === "string") {
         const parsed = JSON.parse(params.user);
         return parsed;
+      } else if (params.user && typeof params.user === "object") {
+        return params.user;
       }
-      return null;
+      // Fallback: check if match data is directly in params
+      return params;
     } catch (error) {
       console.error("Error parsing user data:", error);
-      return null;
+      return params; // Return raw params as fallback
     }
-  }, [params.user]);
+  }, [params]);
 
   // Map API data to component structure
   const userInfo = useMemo(() => {

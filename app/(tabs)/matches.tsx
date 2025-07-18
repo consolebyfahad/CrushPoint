@@ -13,6 +13,7 @@ import { MatchesTabsHeader } from "@/components/tabs_header";
 import { useAppContext } from "@/context/app_context";
 import useGetMatches from "@/hooks/useGetMatches";
 import { apiCall } from "@/utils/api";
+import { router } from "expo-router";
 
 export default function Matches() {
   const { user } = useAppContext();
@@ -33,6 +34,10 @@ export default function Matches() {
 
   const handleViewProfile = (match) => {
     console.log("View profile for:", match.name);
+    router.push({
+      pathname: "/profile/user_profile",
+      params: { user: JSON.stringify(match) },
+    });
     // Navigate to profile screen
     // navigation.navigate('UserProfile', { user: match });
   };

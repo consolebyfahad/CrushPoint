@@ -18,10 +18,10 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
   };
 
   const handleViewProfile = () => {
-    if (onViewProfile) {
+    if (onViewProfile && match) {
       onViewProfile(match);
     } else {
-      console.log("View profile for:", match.name);
+      console.log("View profile for:", match?.name || "Unknown user");
     }
   };
 
@@ -85,6 +85,7 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
             title="View Profile"
             style={{ width: "80%", paddingVertical: 8 }}
             fontstyle={{ fontSize: 14, fontFamily: font.medium }}
+            onPress={handleViewProfile}
           />
 
           <View style={styles.emojiContainer}>
