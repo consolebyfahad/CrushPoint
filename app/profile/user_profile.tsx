@@ -90,7 +90,11 @@ export default function UserProfile() {
       country: userData.country || "Not specified",
       state: userData.state || "Not specified",
       city: userData.city || "Not specified",
-      languages: userData.languages ? userData.languages.split(",") : [],
+      languages: Array.isArray(userData.languages)
+        ? userData.languages
+        : userData.languages
+        ? userData.languages.split(",").map((lang: string) => lang.trim())
+        : [],
       images:
         userData.images && userData.images.length > 0
           ? userData.images
@@ -134,6 +138,7 @@ export default function UserProfile() {
         formData.append("match_id", userInfo.id),
         formData.append("user_id", user?.user_id || ""),
         formData.append("emoji", action);
+      console.log("formData", formData);
       const response = await apiCall(formData);
       if (response.result) {
       }

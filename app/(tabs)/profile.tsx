@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -19,11 +19,12 @@ import {
   View,
 } from "react-native";
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function Profile() {
   const { userData } = useAppContext();
   const { loading, error, refetch } = useGetProfile();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const handleCamera = () => {
     console.log("Open camera");
     // Handle camera functionality
@@ -40,6 +41,18 @@ export default function Profile() {
         fromEdit: "true",
       },
     });
+  };
+
+  const handlePreviousImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? (userData.photos?.length || 1) - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === (userData.photos?.length || 1) - 1 ? 0 : prev + 1
+    );
   };
 
   const handleEditPhotos = () => {
@@ -90,9 +103,10 @@ export default function Profile() {
       {/* Header */}
       <View style={styles.mainPhotoContainer}>
         <Image
-          source={{ uri: userData.photos?.[0] ?? "" }}
+          source={{ uri: userData.photos?.[currentImageIndex] ?? "" }}
           style={styles.mainPhoto}
         />
+
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.headerButton}
@@ -102,6 +116,21 @@ export default function Profile() {
             <Feather name="camera" size={20} color={color.black} />
           </TouchableOpacity>
 
+          {/* Image Indicators */}
+          {(userData.photos?.length || 0) > 1 && (
+            <View style={styles.imageIndicators}>
+              {userData.photos?.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.indicator,
+                    index === currentImageIndex && styles.activeIndicator,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+
           <TouchableOpacity
             style={styles.headerButton}
             onPress={handleSettings}
@@ -110,6 +139,22 @@ export default function Profile() {
             <Ionicons name="settings-outline" size={20} color={color.black} />
           </TouchableOpacity>
         </View>
+
+        {/* Image Navigation Areas */}
+        {(userData.photos?.length || 0) > 1 && (
+          <>
+            <TouchableOpacity
+              style={styles.leftImageArea}
+              onPress={handlePreviousImage}
+              activeOpacity={0.1}
+            />
+            <TouchableOpacity
+              style={styles.rightImageArea}
+              onPress={handleNextImage}
+              activeOpacity={0.1}
+            />
+          </>
+        )}
       </View>
 
       <ScrollView
@@ -150,19 +195,20 @@ export default function Profile() {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.photosContainer}>
-            {(userData.photos ?? []).length > 1 ? (
-              <>
-                {(userData.photos ?? []).slice(0, 3).map((photo, index) => (
-                  <View key={index} style={styles.photoItem}>
-                    <Image source={{ uri: photo }} style={styles.photo} />
-                  </View>
-                ))}
-                <TouchableOpacity style={styles.addPhotoButton}>
-                  <Feather name="camera" size={24} color={color.gray900} />
-                </TouchableOpacity>
-              </>
-            ) : (
+          <View
+            style={[
+              styles.photosContainer,
+              userData.photos.length === 3 && {
+                justifyContent: "space-between",
+              },
+            ]}
+          >
+            {(userData.photos ?? []).slice(0, 3).map((photo, index) => (
+              <View key={index} style={styles.photoItem}>
+                <Image source={{ uri: photo }} style={styles.photo} />
+              </View>
+            ))}
+            {(userData.photos ?? []).length < 3 && (
               <TouchableOpacity style={styles.addPhotoButton}>
                 <Feather name="camera" size={24} color={color.gray900} />
               </TouchableOpacity>
@@ -325,6 +371,38 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
+  leftImageArea: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: SCREEN_WIDTH / 2,
+    height: "100%",
+  },
+  rightImageArea: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    width: SCREEN_WIDTH / 2,
+    height: "100%",
+  },
+  imageIndicators: {
+    position: "absolute",
+    top: 20,
+    left: 120,
+    right: 120,
+    flexDirection: "row",
+    gap: 6,
+    zIndex: 5,
+  },
+  indicator: {
+    flex: 1,
+    height: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 2,
+  },
+  activeIndicator: {
+    backgroundColor: color.white,
+  },
   nameSection: {
     padding: 16,
     backgroundColor: color.white,
@@ -335,6 +413,7 @@ const styles = StyleSheet.create({
     fontFamily: font.bold,
     color: color.black,
     marginBottom: 8,
+    textTransform: "capitalize",
   },
   editPrivateSpot: {
     fontSize: 14,
@@ -371,15 +450,15 @@ const styles = StyleSheet.create({
   },
   photosContainer: {
     flexDirection: "row",
-    // justifyContent: "space-between",
+
     gap: 12,
   },
   photoItem: {
     position: "relative",
   },
   photo: {
-    width: 103,
-    height: 103,
+    width: 108,
+    height: 108,
     borderRadius: 12,
     resizeMode: "cover",
   },

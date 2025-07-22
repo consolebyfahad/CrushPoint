@@ -6,15 +6,42 @@ import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomButton from "./custom_button";
-export default function MatchCard({ match, onViewProfile, onOptions }: any) {
-  const getMatchEmoji = (timeAgo: string) => {
-    if (timeAgo.includes("hours")) {
-      return svgIcon.Fire;
-    } else if (timeAgo.includes("1 day")) {
-      return svgIcon.Blink;
-    } else {
-      return svgIcon.Hi;
-    }
+
+interface MatchCardProps {
+  match: any;
+  onViewProfile: (match: any) => void;
+  onOptions: (match: any) => void;
+}
+
+export default function MatchCard({
+  match,
+  onViewProfile,
+  onOptions,
+}: MatchCardProps) {
+  // Map emoji actions to SVG icons and get the appropriate emoji
+  const getMatchEmoji = (emoji: string) => {
+    const emojiMap: { [key: string]: string } = {
+      like: svgIcon.Like,
+      super_like: svgIcon.Fire,
+      smile: svgIcon.Blink,
+      message: svgIcon.Tea,
+      friend: svgIcon.Hi,
+    };
+
+    return emojiMap[emoji] || svgIcon.Hi;
+  };
+
+  // Get emoji color based on type
+  const getEmojiColor = (emoji: string) => {
+    const colorMap: { [key: string]: string } = {
+      like: "#3B82F6",
+      super_like: "#F59E0B",
+      smile: "#10B981",
+      message: "#8B5CF6",
+      friend: "#F97316",
+    };
+
+    return colorMap[emoji] || "#F97316"; // Default color
   };
 
   const handleViewProfile = () => {
@@ -26,30 +53,50 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
   };
 
   const handleOptions = () => {
-    if (onOptions) {
+    if (onOptions && match) {
       onOptions(match);
     } else {
-      console.log("Options for:", match.name);
+      console.log("Options for:", match?.name || "Unknown user");
     }
   };
 
+  // Handle missing image
+  const getImageSource = () => {
+    if (match?.image) {
+      return { uri: match.image };
+    } else if (match?.images && match.images.length > 0) {
+      return { uri: match.images[0] };
+    }
+    // Return undefined to show placeholder
+    return undefined;
+  };
+
+  const imageSource = getImageSource();
+  console.log("match", match);
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image source={{ uri: match.image }} style={styles.profileImage} />
-        {match.isOnline && <View style={styles.onlineIndicator} />}
+        {imageSource ? (
+          <Image source={imageSource} style={styles.profileImage} />
+        ) : (
+          <View style={[styles.profileImage, styles.placeholderImage]}>
+            <Feather name="user" size={24} color={color.gray55} />
+          </View>
+        )}
+        {match?.isOnline && <View style={styles.onlineIndicator} />}
       </View>
+
       <View style={styles.infoContainer}>
         {/* Match Info */}
         <View style={styles.matchInfo}>
           <View style={styles.matchHeader}>
             <View style={styles.nameRow}>
-              <Text style={styles.userName}>
-                {match.name}, {match.age}
+              <Text style={styles.userName} numberOfLines={1}>
+                {match?.name || "Unknown"}, {match?.age || "N/A"}
               </Text>
-              {match.isVerified && (
+              {match?.isVerified && (
                 <Feather
-                  name="user"
+                  name="check-circle"
                   size={16}
                   color={color.success}
                   style={styles.verifiedIcon}
@@ -63,10 +110,9 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
                 size={14}
                 color={color.gray69}
               />
-
-              <Text style={styles.distance}>{match.distance}</Text>
+              <Text style={styles.distance}>{match?.distance || "2.5 km"}</Text>
               <View style={styles.separator} />
-              <Text style={styles.timeAgo}>{match.timeAgo}</Text>
+              <Text style={styles.timeAgo}>{match?.timeAgo || "Recently"}</Text>
             </View>
           </View>
 
@@ -78,19 +124,28 @@ export default function MatchCard({ match, onViewProfile, onOptions }: any) {
             <Ionicons name="ellipsis-vertical" size={16} color={color.gray55} />
           </TouchableOpacity>
         </View>
-
         {/* Action Buttons */}
         <View style={styles.actionContainer}>
           <CustomButton
             title="View Profile"
-            style={{ width: "80%", paddingVertical: 8 }}
-            fontstyle={{ fontSize: 14, fontFamily: font.medium }}
+            style={styles.viewProfileButton}
+            fontstyle={styles.viewProfileButtonText}
             onPress={handleViewProfile}
           />
 
-          <View style={styles.emojiContainer}>
-            <Text style={styles.matchEmoji}>
-              {getMatchEmoji(match.timeAgo)}
+          <View
+            style={[
+              styles.emojiContainer,
+              { backgroundColor: `${getEmojiColor(match?.emoji)}20` },
+            ]}
+          >
+            <Text
+              style={[
+                styles.matchEmoji,
+                { color: getEmojiColor(match?.emoji) },
+              ]}
+            >
+              {getMatchEmoji(match?.emoji)}
             </Text>
           </View>
         </View>
@@ -128,8 +183,13 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 70,
     height: 70,
-    borderRadius: 99,
+    borderRadius: 35,
     resizeMode: "cover",
+  },
+  placeholderImage: {
+    backgroundColor: color.gray94,
+    alignItems: "center",
+    justifyContent: "center",
   },
   onlineIndicator: {
     position: "absolute",
@@ -144,20 +204,21 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flex: 1,
-    // flexDirection: "row",
+    gap: 8,
   },
   matchInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
+    alignItems: "flex-start",
   },
   matchHeader: {
-    // flexDirection: "row",
+    flex: 1,
   },
   nameRow: {
     flexDirection: "row",
+    justifyContent: "flex-start",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: 4,
   },
   userName: {
     fontSize: 16,
@@ -189,6 +250,10 @@ const styles = StyleSheet.create({
     fontFamily: font.regular,
     color: color.gray69,
   },
+  optionsButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
   actionContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -196,31 +261,22 @@ const styles = StyleSheet.create({
   },
   viewProfileButton: {
     flex: 1,
-    backgroundColor: "#5FB3D4",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    alignItems: "center",
+    paddingVertical: 8,
     marginRight: 12,
   },
-  viewProfileText: {
+  viewProfileButtonText: {
     fontSize: 14,
-    fontFamily: font.semiBold,
-    color: color.white,
+    fontFamily: font.medium,
   },
   emojiContainer: {
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: color.gray94,
     alignItems: "center",
     justifyContent: "center",
   },
   matchEmoji: {
-    opacity: 1,
     fontSize: 18,
-  },
-  optionsButton: {
-    padding: 8,
+    fontWeight: "bold",
   },
 });

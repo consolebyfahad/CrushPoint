@@ -9,8 +9,8 @@ import CustomButton from "./custom_button";
 
 interface UserCardProps {
   user: any;
-  onViewProfile: () => void;
-  onBookmark: () => void;
+  onViewProfile: (user: any) => void;
+  onBookmark: (user: any) => void;
 }
 
 export default function UserCard({
@@ -19,6 +19,7 @@ export default function UserCard({
   onBookmark,
 }: UserCardProps) {
   const { userData: currentUser } = useAppContext();
+
   // Calculate distance between current user and target user
   const distance = calculateDistance(
     {
@@ -33,19 +34,44 @@ export default function UserCard({
 
   // Get profile image source - handle both URI and local assets
   const getProfileImageSource = () => {
-    // If user has images, use the first one as URI
     if (user?.images && user.images.length > 0 && user.images[0]) {
       return { uri: user.images[0] };
     }
+    // Return undefined if no valid image, will trigger fallback
+    return undefined;
   };
 
   const profileImageSource = getProfileImageSource();
+
+  // Handle view profile press
+  const handleViewProfile = () => {
+    try {
+      onViewProfile(user);
+    } catch (error) {
+      console.error("Error in onViewProfile:", error);
+    }
+  };
+
+  // Handle bookmark press
+  const handleBookmark = () => {
+    try {
+      onBookmark(user);
+    } catch (error) {
+      console.error("Error in onBookmark:", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
       {/* Profile Image */}
       <View style={styles.imageContainer}>
-        <Image source={profileImageSource} style={styles.profileImage} />
+        {profileImageSource ? (
+          <Image source={profileImageSource} style={styles.profileImage} />
+        ) : (
+          <View style={[styles.profileImage, styles.placeholderImage]}>
+            <Feather name="user" size={50} color={color.gray55} />
+          </View>
+        )}
 
         {/* Online Status - Only show if user is online */}
         {user?.isOnline && (
@@ -72,40 +98,59 @@ export default function UserCard({
           </View>
         </View>
 
-        {/* Looking For */}
+        {/* Looking For - Fixed key prop issue */}
+        {user?.lookingFor && user.lookingFor.length > 0 && (
+          <View style={styles.interestsContainer}>
+            {user.lookingFor
+              .slice(0, 2)
+              .map((lookingFor: string, index: number) => (
+                <View
+                  key={`looking-for-${index}-${lookingFor}`}
+                  style={styles.lookingForContainer}
+                >
+                  <Text style={styles.lookingForText}>{lookingFor}</Text>
+                </View>
+              ))}
+          </View>
+        )}
 
-        <View style={styles.interestsContainer}>
-          {user?.lookingFor
-            ?.slice(0, 3)
-            .map((lookingFor: string, index: number) => (
-              <View style={styles.lookingForContainer}>
-                <Text style={styles.lookingForText}>{lookingFor}</Text>
-              </View>
-            ))}
-        </View>
+        {/* Interests - Fixed key prop issue */}
+        {user?.interests && user.interests.length > 0 && (
+          <View style={styles.interestsContainer}>
+            {user.interests
+              .slice(0, 3)
+              .map((interest: string, index: number) => (
+                <View
+                  key={`interest-${index}-${interest}`}
+                  style={styles.interestTag}
+                >
+                  <Text style={styles.interestText}>{interest}</Text>
+                </View>
+              ))}
+          </View>
+        )}
 
-        {/* Interests */}
-        <View style={styles.interestsContainer}>
-          {user?.interests
-            ?.slice(0, 3)
-            .map((interest: string, index: number) => (
-              <View key={index} style={styles.interestTag}>
-                <Text style={styles.interestText}>{interest}</Text>
-              </View>
-            ))}
-        </View>
+        {/* Show message if no interests/looking for */}
+        {(!user?.interests || user.interests.length === 0) &&
+          (!user?.lookingFor || user.lookingFor.length === 0) && (
+            <View style={styles.noInfoContainer}>
+              <Text style={styles.noInfoText}>
+                No interests or preferences shared yet
+              </Text>
+            </View>
+          )}
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <CustomButton
             title="View Profile"
-            style={{ width: "80%", paddingVertical: 8 }}
-            onPress={() => onViewProfile(user)}
+            style={styles.viewProfileButton}
+            onPress={handleViewProfile}
           />
 
           <TouchableOpacity
             style={styles.bookmarkButton}
-            onPress={onBookmark}
+            onPress={handleBookmark}
             activeOpacity={0.8}
           >
             <Feather name="map" size={18} color="black" />
@@ -144,6 +189,11 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
+  placeholderImage: {
+    backgroundColor: color.gray94,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   onlineStatus: {
     position: "absolute",
     top: 16,
@@ -180,6 +230,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: font.semiBold,
     color: color.black,
+    flex: 1,
   },
   distanceContainer: {
     flexDirection: "row",
@@ -199,14 +250,15 @@ const styles = StyleSheet.create({
     borderRadius: 99,
   },
   lookingForText: {
-    fontSize: 16,
-    fontFamily: font.regular,
+    fontSize: 14,
+    fontFamily: font.medium,
     color: color.primary,
+    textTransform: "capitalize",
   },
   interestsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 20,
+    marginBottom: 12,
     gap: 8,
   },
   interestTag: {
@@ -221,18 +273,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: font.regular,
     color: color.black,
+    textTransform: "capitalize",
+  },
+  noInfoContainer: {
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  noInfoText: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray55,
+    fontStyle: "italic",
+    textAlign: "center",
   },
   actionButtons: {
     flexDirection: "row",
     gap: 12,
+    marginTop: 8,
+  },
+  viewProfileButton: {
+    flex: 1,
+    paddingVertical: 12,
   },
   bookmarkButton: {
-    width: 42,
-    height: 42,
+    width: 48,
+    height: 48,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: color.gray87,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: color.white,
   },
 });

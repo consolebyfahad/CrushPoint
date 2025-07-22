@@ -135,3 +135,68 @@ export const zodiacOptions = [
   { label: "♒️ Aquarius", value: "Aquarius" },
   { label: "♓️ Pisces", value: "Pisces" },
 ];
+
+export const formatTimeAgo = (date: string, time: string) => {
+  try {
+    // Parse the date format "Jul 22, 2025"
+    const monthMap: { [key: string]: number } = {
+      Jan: 0,
+      Feb: 1,
+      Mar: 2,
+      Apr: 3,
+      May: 4,
+      Jun: 5,
+      Jul: 6,
+      Aug: 7,
+      Sep: 8,
+      Oct: 9,
+      Nov: 10,
+      Dec: 11,
+    };
+
+    // Split date parts
+    const dateParts = date.split(" ");
+    const month = monthMap[dateParts[0]]; // Convert month name to number (0-11)
+    const day = parseInt(dateParts[1].replace(",", "")); // Remove comma and convert to number
+    const year = parseInt(dateParts[2]);
+
+    // Parse time "10:04 PM"
+    const timeParts = time.split(" ");
+    const timeValue = timeParts[0];
+    const ampm = timeParts[1];
+    const [hours, minutes] = timeValue.split(":").map(Number);
+
+    // Convert to 24-hour format
+    let hour24 = hours;
+    if (ampm === "PM" && hours !== 12) {
+      hour24 += 12;
+    } else if (ampm === "AM" && hours === 12) {
+      hour24 = 0;
+    }
+
+    // Create the date object
+    const matchDate = new Date(year, month, day, hour24, minutes);
+
+    if (isNaN(matchDate.getTime())) {
+      return "Recently";
+    }
+
+    const now = new Date();
+    const diffInMs = now.getTime() - matchDate.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) {
+      return "Just now";
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    } else if (diffInDays === 1) {
+      return "1 day ago";
+    } else {
+      return `${diffInDays} days ago`;
+    }
+  } catch (error) {
+    console.warn("Error formatting time ago:", error);
+    return "Recently";
+  }
+};

@@ -1,19 +1,34 @@
 import ReportUser from "@/components//report_user";
 import BlockConfirmation from "@/components/block_option";
+import CustomSearchBar from "@/components/custom_search";
 import MatchCard from "@/components/match_card";
 import ProfileOptions from "@/components/profile_options";
 import RemoveMatch from "@/components/remove_match";
-import { color, font } from "@/utils/constants";
-import React, { useState } from "react";
-import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import CustomSearchBar from "@/components/custom_search";
 import { MatchesTabsHeader } from "@/components/tabs_header";
 import { useAppContext } from "@/context/app_context";
 import useGetMatches from "@/hooks/useGetMatches";
 import { apiCall } from "@/utils/api";
+import { color, font } from "@/utils/constants";
 import { router } from "expo-router";
+import React, { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  ListRenderItem,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+interface Match {
+  id: string;
+  name: string;
+  age: number;
+  // Add other match properties as needed
+}
 
 export default function Matches() {
   const { user } = useAppContext();
@@ -22,57 +37,82 @@ export default function Matches() {
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
   const [showReportUser, setShowReportUser] = useState(false);
   const [showRemoveMatch, setShowRemoveMatch] = useState(false);
-  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [selectedMatch, setSelectedMatch] = useState<any>(null);
 
   // Use the useGetMatches hook
   const { matches, loading, error, refetch, removeMatch, updateMatchStatus } =
     useGetMatches();
+
   // Filter matches based on search text
   const filteredMatches = matches.filter((match) =>
     match.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const handleViewProfile = (match) => {
+  const handleViewProfile = useCallback((match: any) => {
     console.log("View profile for:", match.name);
+
+    // Transform match data to the format expected by UserProfile
+    const userProfileData = {
+      id: match.match_id || match.id,
+      name: match.name,
+      age: match.age,
+      images: match.images,
+      about: match.about,
+      height: match.height,
+      nationality: match.nationality,
+      religion: match.religion,
+      zodiac: match.zodiac,
+      gender: match.gender,
+      country: match.country,
+      state: match.state,
+      city: match.city,
+      languages: match.languages,
+      interests: match.interests,
+      lookingFor: match.lookingFor,
+      isOnline: match.isOnline,
+      phone: match.phone,
+      dob: match.dob,
+      actualLocation: match.actualLocation,
+      email: "", // Add if available
+    };
+
     router.push({
       pathname: "/profile/user_profile",
-      params: { user: JSON.stringify(match) },
+      params: { user: JSON.stringify(userProfileData) },
     });
-    // Navigate to profile screen
-    // navigation.navigate('UserProfile', { user: match });
-  };
+  }, []);
 
-  const handleMatchOptions = (match) => {
+  const handleMatchOptions = useCallback((match: any) => {
     setSelectedMatch(match);
     setShowProfileOptions(true);
-  };
+  }, []);
 
   // Navigation handlers (same pattern as UserProfile)
-  const handleNavigateToRemoveMatch = () => {
+  const handleNavigateToRemoveMatch = useCallback(() => {
     setShowProfileOptions(false);
     setShowRemoveMatch(true);
-  };
+  }, []);
 
-  const handleNavigateToBlock = () => {
+  const handleNavigateToBlock = useCallback(() => {
     setShowProfileOptions(false);
     setShowBlockConfirmation(true);
-  };
+  }, []);
 
-  const handleNavigateToReport = () => {
+  const handleNavigateToReport = useCallback(() => {
     setShowProfileOptions(false);
     setShowReportUser(true);
-  };
+  }, []);
 
   // Back to profile options handler
-  const handleBackToProfileOptions = () => {
+  const handleBackToProfileOptions = useCallback(() => {
     setShowBlockConfirmation(false);
     setShowReportUser(false);
     setShowRemoveMatch(false);
     setShowProfileOptions(true);
-  };
+  }, []);
 
   // Action handlers
-  const handleRemoveMatch = async () => {
+  const handleRemoveMatch = useCallback(async () => {
     try {
       if (selectedMatch) {
         // Call API to remove match
@@ -96,9 +136,9 @@ export default function Matches() {
       setShowRemoveMatch(false);
       setSelectedMatch(null);
     }
-  };
+  }, [selectedMatch, removeMatch]);
 
-  const handleConfirmBlock = async () => {
+  const handleConfirmBlock = useCallback(async () => {
     try {
       if (selectedMatch) {
         // Add to blocked users
@@ -133,90 +173,154 @@ export default function Matches() {
       setShowBlockConfirmation(false);
       setSelectedMatch(null);
     }
-  };
+  }, [selectedMatch, user?.user_id, removeMatch]);
 
-  const handleSubmitReport = async (reportData) => {
-    try {
-      if (selectedMatch) {
-        // Submit report to API
-        const formData = new FormData();
-        formData.append("type", "add_data");
-        formData.append("table_name", "reports");
-        formData.append("user_id", user?.user_id || "");
-        formData.append("reported_user_id", selectedMatch.match_id);
-        formData.append("reason", reportData.reason);
-        formData.append("description", reportData.description || "");
+  const handleSubmitReport = useCallback(
+    async (reportData: any) => {
+      try {
+        if (selectedMatch) {
+          // Submit report to API
+          const formData = new FormData();
+          formData.append("type", "add_data");
+          formData.append("table_name", "reports");
+          formData.append("user_id", user?.user_id || "");
+          formData.append("reported_user_id", selectedMatch.match_id);
+          formData.append("reason", reportData.reason);
+          formData.append("description", reportData.description || "");
 
-        const response = await apiCall(formData);
+          const response = await apiCall(formData);
 
-        if (response.result) {
-          // Optionally remove the match after reporting
-          removeMatch(selectedMatch.id);
-        } else {
-          console.error("Report submission failed:", response.message);
+          if (response.result) {
+            // Optionally remove the match after reporting
+            removeMatch(selectedMatch.id);
+          } else {
+            console.error("Report submission failed:", response.message);
+          }
         }
+      } catch (error) {
+        console.error("Report submission error:", error);
+      } finally {
+        setShowReportUser(false);
+        setSelectedMatch(null);
       }
-    } catch (error) {
-      console.error("Report submission error:", error);
-    } finally {
-      setShowReportUser(false);
-      setSelectedMatch(null);
-    }
-  };
-
-  const renderMatchCard = ({ item }) => (
-    <MatchCard
-      match={item}
-      onViewProfile={handleViewProfile}
-      onOptions={handleMatchOptions}
-    />
+    },
+    [selectedMatch, user?.user_id, removeMatch]
   );
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyTitle}>No matches yet</Text>
-      <Text style={styles.emptyText}>
-        Start swiping to find your perfect match!
-      </Text>
-    </View>
+  // Memoized render function for better performance
+  const renderMatchCard: ListRenderItem<Match> = useCallback(
+    ({ item }) => (
+      <MatchCard
+        match={item}
+        onViewProfile={handleViewProfile}
+        onOptions={handleMatchOptions}
+      />
+    ),
+    [handleViewProfile, handleMatchOptions]
   );
 
-  const renderErrorState = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyTitle}>Error loading matches</Text>
-      <Text style={styles.emptyText}>
-        {error || "Something went wrong. Pull to refresh."}
-      </Text>
-    </View>
+  // Memoized key extractor
+  const keyExtractor = useCallback((item: Match) => `match-${item.id}`, []);
+
+  const renderEmptyState = useCallback(
+    () => (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyEmoji}>💕</Text>
+        <Text style={styles.emptyTitle}>No matches yet</Text>
+        <Text style={styles.emptyText}>
+          Start swiping to find your perfect match!
+        </Text>
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+          <Text style={styles.retryButtonText}>Refresh</Text>
+        </TouchableOpacity>
+      </View>
+    ),
+    [refetch]
   );
+
+  const renderErrorState = useCallback(
+    () => (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyEmoji}>😔</Text>
+        <Text style={styles.emptyTitle}>Error loading matches</Text>
+        <Text style={styles.emptyText}>
+          {error || "Something went wrong. Pull to refresh."}
+        </Text>
+        <TouchableOpacity
+          style={[styles.retryButton, loading && styles.retryButtonDisabled]}
+          onPress={refetch}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color={color.white} />
+          ) : (
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    ),
+    [error, loading, refetch]
+  );
+
+  const renderLoadingState = useCallback(
+    () => (
+      <View style={styles.emptyContainer}>
+        <ActivityIndicator size="large" color={color.primary} />
+        <Text style={styles.loadingText}>Loading your matches...</Text>
+      </View>
+    ),
+    []
+  );
+
+  // Handle different states
+  if (loading && matches.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <MatchesTabsHeader title="Your Matches" matches={matches} />
+        {renderLoadingState()}
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <MatchesTabsHeader title="Your Matches" matches={matches} />
 
-      {/* Search Bar */}
-      <CustomSearchBar
-        searchText={searchText}
-        onChangeText={setSearchText}
-        placeholder="Search matches"
-      />
+      {/* Search Bar - only show if there are matches */}
+      {matches.length > 0 && (
+        <CustomSearchBar
+          searchText={searchText}
+          onChangeText={setSearchText}
+          placeholder="Search matches"
+        />
+      )}
 
       {/* Matches List */}
       <FlatList
         data={filteredMatches}
         renderItem={renderMatchCard}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={[
+          styles.listContainer,
+          filteredMatches.length === 0 && { flex: 1 },
+        ]}
         ListEmptyComponent={error ? renderErrorState : renderEmptyState}
         refreshControl={
           <RefreshControl
             refreshing={loading}
             onRefresh={refetch}
             colors={[color.primary]}
+            tintColor={color.primary}
           />
         }
+        // Performance optimizations
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={5}
+        updateCellsBatchingPeriod={30}
+        initialNumToRender={3}
+        windowSize={10}
       />
 
       {/* Profile Options Modal */}
@@ -268,57 +372,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
   },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 16,
+  listContainer: {
+    paddingTop: 8,
+    paddingBottom: 100,
+    flexGrow: 1,
   },
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  title: {
-    fontSize: 26,
-    fontFamily: font.bold,
-    color: color.black,
-  },
-  matchCount: {
-    fontSize: 14,
-    fontFamily: font.regular,
-    color: color.gray55,
-  },
-  searchContainer: {
-    padding: 16,
-  },
-  searchInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: color.gray94,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-  },
-  searchIcon: {
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
+  // Loading state
+  loadingText: {
+    marginTop: 16,
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.black,
+    color: color.gray55,
+    textAlign: "center",
   },
-  clearButton: {
-    marginLeft: 8,
-  },
-  listContainer: {
-    paddingTop: 16,
-    paddingBottom: 100,
-  },
+  // Empty/Error states
   emptyContainer: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 60,
     paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+  emptyEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 24,
@@ -330,8 +407,26 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontFamily: font.regular,
-    color: color.gray14,
+    color: color.gray55,
     textAlign: "center",
     lineHeight: 24,
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: color.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+    minWidth: 120,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  retryButtonDisabled: {
+    opacity: 0.7,
+  },
+  retryButtonText: {
+    color: color.white,
+    fontSize: 16,
+    fontFamily: font.semiBold,
   },
 });

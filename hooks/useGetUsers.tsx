@@ -1,5 +1,9 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
+import {
+  parseInterestsWithNames,
+  parseLookingForWithLabels,
+} from "@/utils/helper";
 import { useEffect, useState } from "react";
 
 interface LocationData {
@@ -113,17 +117,26 @@ export default function useGetUsers() {
                 `Failed to transform user ${userData?.id || "unknown"}:`,
                 transformError
               );
-              return null; // Skip this user if transformation fails
+              return null;
             }
           })
-          .filter((user): user is TransformedUser => user !== null); // Remove null entries
+          .filter((user): user is TransformedUser => user !== null);
 
         setUsers(transformedUsers);
+
+        // Clear error if successful
+        if (transformedUsers.length > 0) {
+          setError(null);
+        } else if (transformedUsers.length === 0) {
+          setError("No users found in your area");
+        }
       } else {
-        setError("Failed to fetch users or invalid response format");
+        setError("No users found or server error occurred");
       }
     } catch (err: any) {
-      setError(err.message || "An error occurred while fetching users");
+      const errorMessage =
+        err.message || "Network error occurred. Please check your connection.";
+      setError(errorMessage);
       console.error("Fetch Users Error:", err);
     } finally {
       setLoading(false);
@@ -143,7 +156,7 @@ export default function useGetUsers() {
       name: safeString(userData.name) || "Unknown",
       age: calculateAge(userData.dob) || 25,
       isOnline: safeString(userData.status) === "1",
-      images: parseImages(userData.images, gender), // Pass gender to parseImages
+      images: parseImages(userData.images, gender),
       height: formatHeight(userData.height),
       gender: gender,
       genderInterest: safeString(userData.gender_interest),
@@ -152,8 +165,9 @@ export default function useGetUsers() {
       city: safeString(userData.city),
       phone: safeString(userData.phone),
       languages: safeString(userData.languages),
-      interests: parseJsonArray(userData.interests),
-      lookingFor: parseJsonArray(userData.looking_for),
+      // Fixed: Use proper parsing functions for interests and looking_for
+      interests: parseUserInterests(userData.interests),
+      lookingFor: parseUserLookingFor(userData.looking_for),
       religion: safeString(userData.religion),
       zodiac: safeString(userData.zodiac),
       nationality: safeString(userData.nationality),
@@ -167,6 +181,34 @@ export default function useGetUsers() {
       ),
       loc: userData.loc,
     };
+  };
+
+  // Fixed: Parse interests using the same utility function as profile
+  const parseUserInterests = (interestsStr: string): string[] => {
+    try {
+      if (!interestsStr) return [];
+
+      // Use the same utility function that works in profile
+      const parsedInterests = parseInterestsWithNames(interestsStr);
+      return Array.isArray(parsedInterests) ? parsedInterests : [];
+    } catch (error) {
+      console.warn("Error parsing user interests:", error);
+      return [];
+    }
+  };
+
+  // Fixed: Parse looking_for using the same utility function as profile
+  const parseUserLookingFor = (lookingForStr: string): string[] => {
+    try {
+      if (!lookingForStr) return [];
+
+      // Use the same utility function that works in profile
+      const parsedLookingFor = parseLookingForWithLabels(lookingForStr);
+      return Array.isArray(parsedLookingFor) ? parsedLookingFor : [];
+    } catch (error) {
+      console.warn("Error parsing user looking_for:", error);
+      return [];
+    }
   };
 
   const safeString = (value: any): string => {
@@ -214,7 +256,6 @@ export default function useGetUsers() {
     };
   };
 
-  // Helper function to format height with error handling
   const formatHeight = (height: string): string => {
     const heightStr = safeString(height);
     if (!heightStr || heightStr === "0") {
@@ -229,15 +270,11 @@ export default function useGetUsers() {
     return `${heightNum} cm`;
   };
 
-  // Fixed function to handle double-escaped JSON strings
   const unescapeJsonString = (str: string): string => {
     if (!str) return str;
-
-    // Handle double-escaped quotes by replacing \" with "
     return str.replace(/\\"/g, '"');
   };
 
-  // Helper function to parse images and add base URL
   const parseImages = (imagesStr: string, gender: string): string[] => {
     const safeImagesStr = safeString(imagesStr);
 
@@ -246,7 +283,6 @@ export default function useGetUsers() {
     }
 
     try {
-      // Fix double-escaped JSON string
       const fixedJsonStr = unescapeJsonString(safeImagesStr);
       const parsedImages = JSON.parse(fixedJsonStr);
 
@@ -266,32 +302,6 @@ export default function useGetUsers() {
     }
   };
 
-  // Helper function to parse JSON arrays from strings with fix for double-escaping
-  const parseJsonArray = (jsonStr: string): string[] => {
-    const safeJsonStr = safeString(jsonStr);
-
-    if (!safeJsonStr) {
-      return [];
-    }
-
-    try {
-      // Fix double-escaped JSON string
-      const fixedJsonStr = unescapeJsonString(safeJsonStr);
-      const parsed = JSON.parse(fixedJsonStr);
-
-      if (!Array.isArray(parsed)) {
-        console.warn("Expected array but got:", typeof parsed);
-        return [];
-      }
-
-      return parsed.filter((item) => item && typeof item === "string");
-    } catch (error) {
-      console.warn("Error parsing JSON array:", error);
-      return [];
-    }
-  };
-
-  // Helper function to calculate age from date of birth with improved date parsing
   const calculateAge = (dob: string): number | null => {
     const safeDob = safeString(dob);
 
@@ -303,22 +313,18 @@ export default function useGetUsers() {
       const today = new Date();
       let birthDate: Date;
 
-      // Handle MM/DD/YYYY format specifically
       if (safeDob.includes("/")) {
         const [month, day, year] = safeDob
           .split("/")
           .map((num) => parseInt(num, 10));
 
-        // Validate the parsed date components
         if (isNaN(month) || isNaN(day) || isNaN(year)) {
           console.warn("Invalid date components:", safeDob);
           return null;
         }
 
-        // Create date object (month is 0-indexed in JavaScript)
         birthDate = new Date(year, month - 1, day);
       } else {
-        // Try parsing as ISO date or other formats
         birthDate = new Date(safeDob);
       }
 
@@ -337,7 +343,6 @@ export default function useGetUsers() {
         age--;
       }
 
-      // Sanity check for reasonable age range
       if (age < 0 || age > 150) {
         console.warn("Calculated age seems unreasonable:", age);
         return null;
@@ -350,23 +355,18 @@ export default function useGetUsers() {
     }
   };
 
-  // Helper function to get default image based on gender
   const getDefaultImage = (gender: string): string => {
     const normalizedGender = safeString(gender).toLowerCase();
 
     if (normalizedGender === "female" || normalizedGender === "f") {
-      // Female default image
       return `https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg`;
     } else if (normalizedGender === "male" || normalizedGender === "m") {
-      // Male default image
       return `https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg`;
     } else {
-      // Default fallback for unknown/unspecified gender (using female image as fallback)
       return `https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg`;
     }
   };
 
-  // Auto-fetch on mount
   useEffect(() => {
     if (user?.user_id) {
       fetchUsers();
