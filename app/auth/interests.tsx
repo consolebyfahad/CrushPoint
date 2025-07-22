@@ -40,7 +40,7 @@ export default function Interests() {
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const minSelections = 3;
+  const minSelections = 2;
   const isButtonDisabled = selectedInterests.length < minSelections;
 
   const counterProgress = useSharedValue(0);

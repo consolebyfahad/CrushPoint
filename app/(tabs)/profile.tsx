@@ -152,16 +152,16 @@ export default function Profile() {
 
           <View style={styles.photosContainer}>
             {(userData.photos ?? []).length > 1 ? (
-              (userData.photos ?? []).slice(0, 3).map((photo, index) => (
-                <>
+              <>
+                {(userData.photos ?? []).slice(0, 3).map((photo, index) => (
                   <View key={index} style={styles.photoItem}>
                     <Image source={{ uri: photo }} style={styles.photo} />
                   </View>
-                  <TouchableOpacity style={styles.addPhotoButton}>
-                    <Feather name="camera" size={24} color={color.gray900} />
-                  </TouchableOpacity>
-                </>
-              ))
+                ))}
+                <TouchableOpacity style={styles.addPhotoButton}>
+                  <Feather name="camera" size={24} color={color.gray900} />
+                </TouchableOpacity>
+              </>
             ) : (
               <TouchableOpacity style={styles.addPhotoButton}>
                 <Feather name="camera" size={24} color={color.gray900} />

@@ -35,18 +35,26 @@ export default function useGetProfile() {
 
       if (response.data && response.data.length > 0) {
         const userData: UserData = response.data[0];
-
         let photos: string[] = [];
 
         if (userData.images) {
           try {
-            const imageUrls = JSON.parse(userData.images);
-            if (Array.isArray(imageUrls) && imageUrls.length > 0) {
-              photos = imageUrls;
+            const cleanedImagesString = userData.images
+              .replace(/\\\\/g, "\\")
+              .replace(/\\\"/g, '"');
+            const imageFilenames = JSON.parse(cleanedImagesString);
+            const baseImageUrl = userData.image_url || "";
+
+            if (Array.isArray(imageFilenames) && imageFilenames.length > 0) {
+              photos = imageFilenames.map((filename: string) => {
+                const cleanFilename = filename.replace(/\\/g, "");
+                return `${baseImageUrl}${cleanFilename}`;
+              });
             } else {
               photos = [defaultPhoto];
             }
           } catch (error) {
+            console.error("Error parsing images:", error);
             photos = [defaultPhoto];
           }
         } else {
@@ -70,7 +78,7 @@ export default function useGetProfile() {
         const extendedUserData = {
           ...userData,
           age,
-          photos,
+          photos, // This now contains full URLs
           parsedInterests,
           parsedLookingFor,
           originalLookingForIds,
@@ -89,6 +97,7 @@ export default function useGetProfile() {
           about: userData.about || "Not Specified",
           phone: userData.phone || "Not Specified",
         };
+
         setUserProfile(extendedUserData);
         updateUserData(extendedUserData);
       } else {
