@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Events({ navigation }: any) {
+export default function EventsTab() {
   const [searchText, setSearchText] = useState("");
   const [events, setEvents] = useState([
     {

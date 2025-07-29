@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-export default function Splash() {
+export default function index() {
   const { isLoggedIn } = useAppContext();
   const containerScale = useSharedValue(0);
   const imageScale = useSharedValue(0);

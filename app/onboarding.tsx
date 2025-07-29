@@ -44,7 +44,7 @@ export const onboardingData = [
   },
 ];
 
-export default function OnboardingScreen() {
+export default function Onboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 

@@ -3,9 +3,10 @@ import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomButton from "./custom_button";
+import RequestMeetup from "./request_meetup";
 
 interface MatchCardProps {
   match: any;
@@ -18,9 +19,11 @@ export default function MatchCard({
   onViewProfile,
   onOptions,
 }: MatchCardProps) {
+  const [showRequestMeetup, setShowRequestMeetup] = useState(false);
+console.log("match", match)
   // Map emoji actions to SVG icons and get the appropriate emoji
-  const getMatchEmoji = (emoji: string) => {
-    const emojiMap: { [key: string]: string } = {
+  const getMatchEmoji = (emoji: any) => {
+    const emojiMap: { [key: string]: any } = {
       like: svgIcon.Like,
       super_like: svgIcon.Fire,
       smile: svgIcon.Blink,
@@ -44,11 +47,21 @@ export default function MatchCard({
     return colorMap[emoji] || "#F97316"; // Default color
   };
 
-  const handleViewProfile = () => {
-    if (onViewProfile && match) {
-      onViewProfile(match);
-    } else {
-      console.log("View profile for:", match?.name || "Unknown user");
+  const handleRequestMeetup = () => {
+    setShowRequestMeetup(true);
+  };
+
+  const handleSubmitMeetupRequest = async (meetupData: any) => {
+    try {
+      console.log("Submitting meetup request:", meetupData);
+      // Add your API call here to submit meetup request
+      // const response = await apiCall({...});
+      
+      setShowRequestMeetup(false);
+      
+      // Optionally show success message or navigate
+    } catch (error) {
+      console.error("Error submitting meetup request:", error);
     }
   };
 
@@ -72,85 +85,115 @@ export default function MatchCard({
   };
 
   const imageSource = getImageSource();
-  console.log("match", match);
+
   return (
-    <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        {imageSource ? (
-          <Image source={imageSource} style={styles.profileImage} />
-        ) : (
-          <View style={[styles.profileImage, styles.placeholderImage]}>
-            <Feather name="user" size={24} color={color.gray55} />
-          </View>
-        )}
-        {match?.isOnline && <View style={styles.onlineIndicator} />}
-      </View>
-
-      <View style={styles.infoContainer}>
-        {/* Match Info */}
-        <View style={styles.matchInfo}>
-          <View style={styles.matchHeader}>
-            <View style={styles.nameRow}>
-              <Text style={styles.userName} numberOfLines={1}>
-                {match?.name || "Unknown"}, {match?.age || "N/A"}
-              </Text>
-              {match?.isVerified && (
-                <Feather
-                  name="check-circle"
-                  size={16}
-                  color={color.success}
-                  style={styles.verifiedIcon}
-                />
-              )}
+    <>
+      <View style={styles.container}>
+        <View style={styles.imageContainer}>
+          {imageSource ? (
+            <Image source={imageSource} style={styles.profileImage} />
+          ) : (
+            <View style={[styles.profileImage, styles.placeholderImage]}>
+              <Feather name="user" size={24} color={color.gray55} />
             </View>
-
-            <View style={styles.detailsRow}>
-              <SimpleLineIcons
-                name="location-pin"
-                size={14}
-                color={color.gray69}
-              />
-              <Text style={styles.distance}>{match?.distance || "2.5 km"}</Text>
-              <View style={styles.separator} />
-              <Text style={styles.timeAgo}>{match?.timeAgo || "Recently"}</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={styles.optionsButton}
-            onPress={handleOptions}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="ellipsis-vertical" size={16} color={color.gray55} />
-          </TouchableOpacity>
+          )}
+          {match?.isOnline && <View style={styles.onlineIndicator} />}
         </View>
-        {/* Action Buttons */}
-        <View style={styles.actionContainer}>
-          <CustomButton
-            title="View Profile"
-            style={styles.viewProfileButton}
-            fontstyle={styles.viewProfileButtonText}
-            onPress={handleViewProfile}
-          />
 
-          <View
-            style={[
-              styles.emojiContainer,
-              { backgroundColor: `${getEmojiColor(match?.emoji)}20` },
-            ]}
-          >
-            <Text
+        <View style={styles.infoContainer}>
+          {/* Match Info */}
+          <View style={styles.matchInfo}>
+            <View style={styles.matchHeader}>
+              <View style={styles.nameRow}>
+                <Text style={styles.userName} numberOfLines={1}>
+                  {match?.name || "Unknown"}, {match?.age || "N/A"}
+                </Text>
+                {match?.isVerified && (
+                  <Feather
+                    name="check-circle"
+                    size={16}
+                    color={color.success}
+                    style={styles.verifiedIcon}
+                  />
+                )}
+              </View>
+
+              <View style={styles.detailsRow}>
+                <SimpleLineIcons
+                  name="location-pin"
+                  size={14}
+                  color={color.gray69}
+                />
+                <Text style={styles.distance}>{match?.distance || "2.5 km"}</Text>
+                <View style={styles.separator} />
+                <Text style={styles.timeAgo}>{match?.timeAgo || "Recently"}</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.optionsButton}
+              onPress={handleOptions}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="ellipsis-vertical" size={16} color={color.gray55} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.actionContainer}>
+            <CustomButton
+              title="Request Meetup"
+              style={styles.requestMeetupButton}
+              fontstyle={styles.requestMeetupButtonText}
+              onPress={handleRequestMeetup}
+            />
+
+            <View
               style={[
-                styles.matchEmoji,
-                { color: getEmojiColor(match?.emoji) },
+                styles.emojiContainer,
+                { backgroundColor: `${getEmojiColor(match?.emoji)}20` },
               ]}
             >
-              {getMatchEmoji(match?.emoji)}
-            </Text>
+              <Text
+                style={[
+                  styles.matchEmoji,
+                  { color: getEmojiColor(match?.emoji) },
+                ]}
+              >
+                {getMatchEmoji(match?.emoji)}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+
+      {/* Request Meetup Modal */}
+      <Modal
+        visible={showRequestMeetup}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowRequestMeetup(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowRequestMeetup(false)}
+          />
+          <RequestMeetup
+            onClose={() => setShowRequestMeetup(false)}
+            onSubmit={handleSubmitMeetupRequest}
+            matchData={{
+              id: match?.id || match?.match_id,
+              name: match?.name || "Unknown",
+              image: match?.image || (match?.images && match.images[0]),
+              distance: match?.distance || "2.5 km",
+              matchedTime: match?.matchedTime || "2 hours ago",
+            }}
+          />
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -259,12 +302,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  viewProfileButton: {
+  requestMeetupButton: {
     flex: 1,
     paddingVertical: 8,
     marginRight: 12,
   },
-  viewProfileButtonText: {
+  requestMeetupButtonText: {
     fontSize: 14,
     fontFamily: font.medium,
   },
@@ -278,5 +321,17 @@ const styles = StyleSheet.create({
   matchEmoji: {
     fontSize: 18,
     fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 });

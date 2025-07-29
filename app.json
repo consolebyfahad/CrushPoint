@@ -19,7 +19,9 @@
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload profile pictures and verify your identity.",
         "NSPhotoLibraryAddUsageDescription": "This app needs permission to save photos to your photo library.",
         "NSFaceIDUsageDescription": "This app uses Face ID for secure login.",
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       },
       "entitlements": {
         "aps-environment": "production"
@@ -91,6 +93,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "240ca0ca-f22e-485c-ad1d-5ed3458bf4dd"
+      }
+    },
+    "owner": "rehman.fahad"
   }
 }

@@ -174,7 +174,7 @@ const useGetMatches = () => {
               name: matchUser.name || `User ${match.match_id}`,
               age,
               isOnline: matchUser.status === "1",
-              isVerified: Math.random() > 0.3, // You can add verification logic
+              isVerified: Math.random() > 0.3,
               image: images[0],
               images,
 

@@ -2,12 +2,9 @@ import { AppProvider } from "@/context/app_context";
 import { color } from "@/utils/constants";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StatusBar, View } from "react-native";
 import { ToastProvider } from "../components/toast_provider";
-
-SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -22,7 +19,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
       setIsReady(true);
     }
   }, [fontsLoaded, fontError]);
@@ -39,7 +35,12 @@ export default function RootLayout() {
     <AppProvider>
       <ToastProvider>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-        <Stack screenOptions={{ headerShown: false, animation: "fade" }} />
+        <Stack
+          screenOptions={{ headerShown: false, animation: "fade" }}
+          initialRouteName="index"
+        >
+          <Stack.Screen name="index"></Stack.Screen>
+        </Stack>
       </ToastProvider>
     </AppProvider>
   );
