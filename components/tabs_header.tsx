@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-export default function EventsTabsHeader({ title, events }) {
+export default function EventsTabsHeader({ title, events }: any) {
   return (
     <View style={styles.header}>
       <View style={styles.titleContainer}>
@@ -16,8 +16,10 @@ export default function EventsTabsHeader({ title, events }) {
 }
 
 // TabsHeader for Notifications
-export function NotificationsTabsHeader({ title, notifications, close }) {
-  const unreadCount = notifications.filter((notif) => !notif.isRead).length;
+export function NotificationsTabsHeader({ title, notifications, close }: any) {
+  const unreadCount = notifications.filter(
+    (notif: any) => !notif.isRead
+  ).length;
 
   return (
     <View style={styles.header}>
@@ -43,7 +45,7 @@ export function NotificationsTabsHeader({ title, notifications, close }) {
 }
 
 // TabsHeader for Matches
-export function MatchesTabsHeader({ title, matches }) {
+export function MatchesTabsHeader({ title, matches }: any) {
   return (
     <View style={styles.header}>
       <View style={styles.titleContainer}>

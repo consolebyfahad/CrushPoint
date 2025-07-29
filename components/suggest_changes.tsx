@@ -1,17 +1,21 @@
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
-    Dimensions,
-    Image,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -19,6 +23,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 interface SuggestChangesProps {
   onClose: () => void;
   onSubmit: (changes: any) => void;
+  requestId: string; // Add meetup request ID
   originalRequest: {
     user: {
       name: string;
@@ -34,28 +39,31 @@ interface SuggestChangesProps {
 export default function SuggestChanges({
   onClose,
   onSubmit,
+  requestId,
   originalRequest,
 }: SuggestChangesProps) {
+  const { user } = useAppContext();
   const [newDate, setNewDate] = useState(new Date());
   const [newTime, setNewTime] = useState(new Date());
   const [newLocation, setNewLocation] = useState(originalRequest.location);
   const [message, setMessage] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
     });
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -73,16 +81,75 @@ export default function SuggestChanges({
     }
   };
 
-  const handleSubmit = () => {
-    const changes = {
-      date: formatDate(newDate),
-      time: formatTime(newTime),
-      location: newLocation,
-      message: message.trim(),
-    };
+  const handleSubmit = async () => {
+    if (!newLocation.trim()) {
+      Alert.alert("Error", "Please enter a new location.");
+      return;
+    }
 
-    console.log("Suggesting changes:", changes);
-    onSubmit(changes);
+    if (!user?.user_id) {
+      Alert.alert("Error", "User session expired. Please login again.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", requestId);
+      formData.append("table_name", "meetup_requests");
+
+      // Format date for API (YYYY-MM-DD)
+      const formattedDate = newDate.toISOString().split("T")[0];
+
+      // Format time for API (HH:MM:SS)
+      const formattedTime = newTime.toTimeString().split(" ")[0];
+
+      formData.append("new_date", formattedDate);
+      formData.append("new_time", formattedTime);
+      formData.append("new_location", newLocation.trim());
+      formData.append("new_message", message.trim());
+
+      console.log("📡 Suggesting changes:", {
+        id: requestId,
+        new_date: formattedDate,
+        new_time: formattedTime,
+        new_location: newLocation.trim(),
+        new_message: message.trim(),
+      });
+
+      const response = await apiCall(formData);
+
+      if (response.result) {
+        Alert.alert("Success", "Changes suggested successfully!", [
+          {
+            text: "OK",
+            onPress: () => {
+              onSubmit({
+                date: formattedDate,
+                time: formattedTime,
+                location: newLocation.trim(),
+                message: message.trim(),
+              });
+              onClose();
+            },
+          },
+        ]);
+      } else {
+        Alert.alert(
+          "Error",
+          response.message || "Failed to suggest changes. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("❌ Suggest changes error:", error);
+      Alert.alert(
+        "Error",
+        "Failed to suggest changes. Please check your connection and try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -98,9 +165,9 @@ export default function SuggestChanges({
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* User Info */}
         <View style={styles.userInfo}>
-          <Image 
-            source={{ uri: originalRequest.user.image }} 
-            style={styles.userImage} 
+          <Image
+            source={{ uri: originalRequest.user.image }}
+            style={styles.userImage}
           />
           <View style={styles.userDetails}>
             <Text style={styles.userName}>
@@ -115,13 +182,26 @@ export default function SuggestChanges({
           <Text style={styles.sectionTitle}>Original Request:</Text>
           <View style={styles.originalDetails}>
             <View style={styles.detailRow}>
-              <Ionicons name="calendar-outline" size={16} color={color.gray55} />
+              <Ionicons
+                name="calendar-outline"
+                size={16}
+                color={color.gray55}
+              />
               <Text style={styles.detailText}>{originalRequest.date}</Text>
-              <Ionicons name="time-outline" size={16} color={color.gray55} style={styles.timeIcon} />
+              <Ionicons
+                name="time-outline"
+                size={16}
+                color={color.gray55}
+                style={styles.timeIcon}
+              />
               <Text style={styles.detailText}>{originalRequest.time}</Text>
             </View>
             <View style={styles.detailRow}>
-              <Ionicons name="location-outline" size={16} color={color.gray55} />
+              <Ionicons
+                name="location-outline"
+                size={16}
+                color={color.gray55}
+              />
               <Text style={styles.detailText}>{originalRequest.location}</Text>
             </View>
           </View>
@@ -188,11 +268,19 @@ export default function SuggestChanges({
       {/* Submit Button */}
       <View style={styles.bottomButton}>
         <TouchableOpacity
-          style={styles.submitButton}
+          style={[
+            styles.submitButton,
+            (!newLocation.trim() || isLoading) && styles.submitButtonDisabled,
+          ]}
           onPress={handleSubmit}
+          disabled={!newLocation.trim() || isLoading}
           activeOpacity={0.8}
         >
-          <Text style={styles.submitButtonText}>Suggest Changes</Text>
+          {isLoading ? (
+            <ActivityIndicator size="small" color={color.white} />
+          ) : (
+            <Text style={styles.submitButtonText}>Suggest Changes</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -201,7 +289,7 @@ export default function SuggestChanges({
         <DateTimePicker
           value={newDate}
           mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleDateChange}
           minimumDate={new Date()}
         />
@@ -212,7 +300,7 @@ export default function SuggestChanges({
         <DateTimePicker
           value={newTime}
           mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleTimeChange}
         />
       )}
@@ -253,8 +341,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: color.gray94,
     borderRadius: 12,
     padding: 16,
@@ -293,8 +381,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   detailText: {
@@ -312,12 +400,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   required: {
-    color: '#FF3B30',
+    color: "#FF3B30",
   },
   dateTimeInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
     borderColor: color.gray94,
     borderRadius: 12,
@@ -354,6 +442,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
+  },
+  submitButtonDisabled: {
+    backgroundColor: color.gray94,
+    opacity: 0.7,
   },
   submitButtonText: {
     fontSize: 16,

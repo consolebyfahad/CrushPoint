@@ -1,87 +1,125 @@
-import MeetupCard from '@/components/meetup_card';
-import SuggestChanges from '@/components/suggest_changes';
-import { color, font } from '@/utils/constants';
-import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, ListRenderItem, Modal, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import MeetupCard from "@/components/meetup_card";
+import SuggestChanges from "@/components/suggest_changes";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
+import { color, font } from "@/utils/constants";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  ListRenderItem,
+  Modal,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface IncomingMeetupProps {
   requests: any[];
   searchText: string;
 }
 
-export default function IncomingMeetup({ requests, searchText }: IncomingMeetupProps) {
+export default function IncomingMeetup({
+  requests,
+  searchText,
+}: IncomingMeetupProps) {
+  const { user } = useAppContext();
   const [showSuggestChanges, setShowSuggestChanges] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Filter requests based on search text
   const filteredRequests = useMemo(() => {
     if (!searchText.trim()) return requests;
-    return requests.filter(request =>
-      request.user.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      request.location.toLowerCase().includes(searchText.toLowerCase()) ||
-      request.message.toLowerCase().includes(searchText.toLowerCase())
+    return requests.filter(
+      (request) =>
+        request.user.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        request.location.toLowerCase().includes(searchText.toLowerCase()) ||
+        request.message.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [requests, searchText]);
 
   // Action handlers - replace with your API calls
-  const handleAccept = useCallback(async (requestId: string) => {
-    try {
-      console.log('Accepting request:', requestId);
-      // Add your API call here
-      // const response = await apiCall({...});
-      // Update local state or refetch data
-    } catch (error) {
-      console.error('Error accepting request:', error);
-    }
-  }, []);
+  const handleAccept = useCallback(
+    async (requestId: string) => {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", requestId);
+      formData.append("table_name", "meetup_requests");
+      formData.append("status", "accept");
+
+      const response = await apiCall(formData);
+      // Success/error handling with alerts
+    },
+    [user?.user_id]
+  );
 
   const handleAcceptChanges = useCallback(async (requestId: string) => {
     try {
-      console.log('Accepting changes for request:', requestId);
+      console.log("Accepting changes for request:", requestId);
       // Add your API call here
       // const response = await apiCall({...});
       // Update local state or refetch data
     } catch (error) {
-      console.error('Error accepting changes:', error);
+      console.error("Error accepting changes:", error);
     }
   }, []);
 
-  const handleChange = useCallback(async (requestId: string) => {
-    try {
-      const request = requests.find(r => r.id === requestId);
-      if (request) {
-        setSelectedRequest(request);
-        setShowSuggestChanges(true);
+  const handleChange = useCallback(
+    async (requestId: string) => {
+      try {
+        const request = requests.find((r) => r.id === requestId);
+        if (request) {
+          setSelectedRequest(request);
+          setShowSuggestChanges(true);
+        }
+      } catch (error) {
+        console.error("Error opening suggest changes:", error);
       }
-    } catch (error) {
-      console.error('Error opening suggest changes:', error);
-    }
-  }, [requests]);
+    },
+    [requests]
+  );
 
   const handleSuggestChanges = useCallback(async (changes: any) => {
     try {
-      console.log('Submitting suggested changes:', changes);
+      console.log("Submitting suggested changes:", changes);
       // Add your API call here to submit the suggested changes
       // const response = await apiCall({...});
       // Update local state or refetch data
-      
+
       setShowSuggestChanges(false);
       setSelectedRequest(null);
     } catch (error) {
-      console.error('Error submitting suggested changes:', error);
+      console.error("Error submitting suggested changes:", error);
     }
   }, []);
 
-  const handleDecline = useCallback(async (requestId: string) => {
-    try {
-      console.log('Declining request:', requestId);
-      // Add your API call here
-      // const response = await apiCall({...});
-      // Update local state or refetch data
-    } catch (error) {
-      console.error('Error declining request:', error);
-    }
-  }, []);
+  const handleDecline = useCallback(
+    async (requestId: string) => {
+      // Shows confirmation dialog first
+      Alert.alert("Decline Meetup Request", "Are you sure?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Decline",
+          style: "destructive",
+          onPress: async () => {
+            const formData = new FormData();
+            formData.append("type", "update_data");
+            formData.append("id", requestId);
+            formData.append("table_name", "meetup_requests");
+            formData.append("status", "cancel");
+
+            const response = await apiCall(formData);
+            // Success/error handling
+          },
+        },
+      ]);
+    },
+    [user?.user_id]
+  );
 
   const renderMeetupCard: ListRenderItem<any> = useCallback(
     ({ item }) => (
@@ -129,7 +167,7 @@ export default function IncomingMeetup({ requests, searchText }: IncomingMeetupP
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.listContainer,
-          filteredRequests.length === 0 && { flex: 1 }
+          filteredRequests.length === 0 && { flex: 1 },
         ]}
         ListEmptyComponent={
           searchText.trim() ? (
@@ -147,7 +185,7 @@ export default function IncomingMeetup({ requests, searchText }: IncomingMeetupP
             refreshing={false}
             onRefresh={() => {
               // Add your refresh logic here
-              console.log('Refreshing incoming requests...');
+              console.log("Refreshing incoming requests...");
             }}
             colors={[color.primary]}
             tintColor={color.primary}
@@ -181,6 +219,7 @@ export default function IncomingMeetup({ requests, searchText }: IncomingMeetupP
                 setSelectedRequest(null);
               }}
               onSubmit={handleSuggestChanges}
+              requestId={selectedRequest.id}
               originalRequest={{
                 user: selectedRequest.user,
                 timestamp: selectedRequest.timestamp,
@@ -207,8 +246,8 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 40,
     paddingVertical: 60,
   },
@@ -221,13 +260,13 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     color: color.black,
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   emptyText: {
     fontSize: 16,
     fontFamily: font.regular,
     color: color.gray55,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 24,
   },
   loadingText: {
@@ -235,18 +274,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.regular,
     color: color.gray55,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   modalBackground: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });

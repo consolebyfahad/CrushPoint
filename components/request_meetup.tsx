@@ -3,20 +3,20 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -48,18 +48,18 @@ export default function RequestMeetup({
   const [isLoading, setIsLoading] = useState(false);
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
     });
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -94,19 +94,13 @@ export default function RequestMeetup({
       formData.append("type", "add_data");
       formData.append("user_id", user.user_id);
       formData.append("table_name", "meetup_requests");
-      
-      // Format date for API (YYYY-MM-DD)
-      const formattedDate = selectedDate.toISOString().split('T')[0];
-      
-      // Format time for API (HH:MM:SS)
-      const formattedTime = selectedTime.toTimeString().split(' ')[0];
-      
+      const formattedDate = selectedDate.toISOString().split("T")[0];
+      const formattedTime = selectedTime.toTimeString().split(" ")[0];
       formData.append("match_id", matchData.id);
       formData.append("date", formattedDate);
       formData.append("time", formattedTime);
       formData.append("location", location.trim());
       formData.append("message", message.trim());
-      formData.append("status", "pending");
 
       console.log("📡 Sending meetup request:", {
         user_id: user.user_id,
@@ -114,41 +108,37 @@ export default function RequestMeetup({
         date: formattedDate,
         time: formattedTime,
         location: location.trim(),
-        message: message.trim()
+        message: message.trim(),
       });
 
       const response = await apiCall(formData);
 
       if (response.result) {
-        Alert.alert(
-          "Success", 
-          `Meetup request sent to ${matchData.name}!`,
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                onSubmit({
-                  matchId: matchData.id,
-                  date: formattedDate,
-                  time: formattedTime,
-                  location: location.trim(),
-                  message: message.trim(),
-                });
-                onClose();
-              }
-            }
-          ]
-        );
+        Alert.alert("Success", `Meetup request sent to ${matchData.name}!`, [
+          {
+            text: "OK",
+            onPress: () => {
+              onSubmit({
+                matchId: matchData.id,
+                date: formattedDate,
+                time: formattedTime,
+                location: location.trim(),
+                message: message.trim(),
+              });
+              onClose();
+            },
+          },
+        ]);
       } else {
         Alert.alert(
-          "Error", 
+          "Error",
           response.message || "Failed to send meetup request. Please try again."
         );
       }
     } catch (error) {
       console.error("❌ Meetup request error:", error);
       Alert.alert(
-        "Error", 
+        "Error",
         "Failed to send meetup request. Please check your connection and try again."
       );
     } finally {
@@ -271,7 +261,7 @@ export default function RequestMeetup({
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (!location.trim() || isLoading) && styles.submitButtonDisabled
+            (!location.trim() || isLoading) && styles.submitButtonDisabled,
           ]}
           onPress={handleSubmit}
           disabled={!location.trim() || isLoading}
@@ -290,7 +280,7 @@ export default function RequestMeetup({
         <DateTimePicker
           value={selectedDate}
           mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleDateChange}
           minimumDate={new Date()}
         />
@@ -301,7 +291,7 @@ export default function RequestMeetup({
         <DateTimePicker
           value={selectedTime}
           mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleTimeChange}
         />
       )}
@@ -348,8 +338,8 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   userImage: {
     width: 50,
@@ -359,8 +349,8 @@ const styles = StyleSheet.create({
   },
   placeholderImage: {
     backgroundColor: color.white,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   userDetails: {
     flex: 1,
@@ -372,8 +362,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   userMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   metaText: {
     fontSize: 14,
@@ -398,12 +388,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   required: {
-    color: '#FF3B30',
+    color: "#FF3B30",
   },
   dateTimeInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
     borderColor: color.gray94,
     borderRadius: 12,

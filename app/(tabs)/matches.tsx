@@ -1,57 +1,83 @@
-import { color, font } from '@/utils/constants';
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Matches from '../matches/matches';
-import Requests from '../matches/requests';
+import CustomButton from "@/components/custom_button";
+import { MatchesTabsHeader } from "@/components/tabs_header";
+import { color, font } from "@/utils/constants";
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Matches from "../matches/matches";
+import Requests from "../matches/requests";
 
 export default function MatchesMain() {
-  const [activeTab, setActiveTab] = useState('matches');
+  const [activeTab, setActiveTab] = useState("matches");
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{activeTab === "matches" ? "Your Matches" : "Meetup Requests"}</Text>
-        <Text style={styles.matchCount}>{`${activeTab === "matches" ? "3 matches" : "3 requests"}`}</Text>
-      </View>
+      <MatchesTabsHeader
+        title={activeTab === "matches" ? "Your Matches" : "Meetup Requests"}
+        matches={activeTab === "matches" ? "3 matches" : "3 requests"}
+      />
+      {/* <View style={styles.header}>
+        <Text style={styles.headerTitle}>
+          {activeTab === "matches" ? "Your Matches" : "Meetup Requests"}
+        </Text>
+        <Text style={styles.matchCount}>{`${
+          activeTab === "matches" ? "3 matches" : "3 requests"
+        }`}</Text>
+      </View> */}
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === 'matches' && styles.activeTab
-          ]}
-          onPress={() => setActiveTab('matches')}
+        {/* <TouchableOpacity
+          style={[styles.tab, activeTab === "matches" && styles.activeTab]}
+          onPress={() => setActiveTab("matches")}
         >
-          <Text style={[
-            styles.tabText,
-            activeTab === 'matches' && styles.activeTabText
-          ]}>
-            Matches 
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "matches" && styles.activeTabText,
+            ]}
+          >
+            Matches
           </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === 'requests' && styles.activeTab
-          ]}
-          onPress={() => setActiveTab('requests')}
-        >
-          <Text style={[
+        </TouchableOpacity> */}
+        <CustomButton
+          title=" Matches"
+          style={[styles.tab, activeTab === "matches" && styles.activeTab]}
+          fontstyle={[
             styles.tabText,
-            activeTab === 'requests' && styles.activeTabText
-          ]}>
+            activeTab === "matches" && styles.activeTabText,
+          ]}
+          onPress={() => setActiveTab("matches")}
+        />
+        <CustomButton
+          title=" Meetup Requests"
+          style={[styles.tab, activeTab === "requests" && styles.activeTab]}
+          fontstyle={[
+            styles.tabText,
+            activeTab === "requests" && styles.activeTabText,
+          ]}
+          onPress={() => setActiveTab("requests")}
+        />
+
+        {/* <TouchableOpacity
+          style={[styles.tab, activeTab === "requests" && styles.activeTab]}
+          onPress={() => setActiveTab("requests")}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "requests" && styles.activeTabText,
+            ]}
+          >
             Meetup Requests
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Tab Content */}
       <View style={styles.tabContent}>
-        {activeTab === 'matches' ? <Matches /> : <Requests />}
+        {activeTab === "matches" ? <Matches /> : <Requests />}
       </View>
     </SafeAreaView>
   );
@@ -63,9 +89,9 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
@@ -80,21 +106,21 @@ const styles = StyleSheet.create({
     color: color.gray55,
   },
   tabContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
+    gap: 8,
     marginHorizontal: 20,
     marginBottom: 16,
   },
   tab: {
-    flex: 1,
+    width: "50%",
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginRight: 8,
-    borderRadius: 25,
-    alignItems: 'center',
-    backgroundColor: color.gray94,
+    backgroundColor: color.white,
+    borderWidth: 1,
+    borderColor: color.gray87,
   },
   activeTab: {
     backgroundColor: color.primary,
+    borderColor: color.white,
   },
   tabText: {
     fontSize: 14,

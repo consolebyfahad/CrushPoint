@@ -5,10 +5,8 @@ import {
   GestureResponderEvent,
   StyleSheet,
   Text,
-  TextStyle,
   TouchableOpacity,
   View,
-  ViewStyle,
 } from "react-native";
 
 interface CustomButtonProps {
@@ -19,8 +17,8 @@ interface CustomButtonProps {
   variant?: "primary" | "secondary";
   icon?: React.ReactElement<{ color?: string }>;
   rightIcon?: React.ReactElement<{ color?: string }>;
-  style?: ViewStyle;
-  fontstyle?: TextStyle;
+  style?: any;
+  fontstyle?: any;
 }
 
 export default function CustomButton({
