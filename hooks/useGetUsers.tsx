@@ -82,15 +82,28 @@ interface ApiResponse {
   result: boolean;
   data: ApiUserData[];
 }
+interface UserFilters {
+  gender?: string;
+  ageFrom?: string;
+  ageTo?: string;
+  distance?: number;
+  lookingFor?: string;
+  height?: { from?: string; to?: string };
+  nationality?: string;
+  religion?: string;
+  zodiacSign?: string;
+}
 
 const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
 
-export default function useGetUsers() {
+export default function useGetUsers(filters: UserFilters = {}) {
   const { user } = useAppContext();
   const [users, setUsers] = useState<TransformedUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
+  const filtersString = JSON.stringify(filters);
+  console.log("filters", filters);
+  console.log("filtersString", filtersString);
   const fetchUsers = async (): Promise<void> => {
     if (!user?.user_id) {
       setError("User ID not available");
@@ -105,6 +118,35 @@ export default function useGetUsers() {
       formData.append("type", "get_map_users");
       formData.append("id", user.user_id);
 
+      if (filters.gender && filters.gender !== "Both") {
+        formData.append("gender", filters.gender);
+      }
+      if (filters.ageFrom) {
+        formData.append("age_from", filters.ageFrom);
+      }
+      if (filters.ageTo) {
+        formData.append("age_to", filters.ageTo);
+      }
+      if (filters.distance) {
+        formData.append("distance", filters.distance.toString());
+      }
+      if (filters.lookingFor) {
+        formData.append("looking_for", filters.lookingFor);
+      }
+      if (filters.height) {
+        formData.append("height_from", filters.height.from || "");
+        formData.append("height_to", filters.height.to || "");
+      }
+      if (filters.nationality) {
+        formData.append("nationality", filters.nationality);
+      }
+      if (filters.religion) {
+        formData.append("religion", filters.religion);
+      }
+      if (filters.zodiacSign) {
+        formData.append("zodiac", filters.zodiacSign);
+      }
+      console.log("formData", formData);
       const response: ApiResponse = await apiCall(formData);
 
       if (response.result && response.data && Array.isArray(response.data)) {
@@ -371,7 +413,7 @@ export default function useGetUsers() {
     if (user?.user_id) {
       fetchUsers();
     }
-  }, [user?.user_id]);
+  }, [user?.user_id, filtersString]);
 
   return {
     users,

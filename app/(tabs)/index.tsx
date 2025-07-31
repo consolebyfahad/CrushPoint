@@ -8,6 +8,7 @@ import Nationality from "@/components/nationality";
 import Religion from "@/components/religion";
 import ZodiacSign from "@/components/zodic";
 import { useAppContext } from "@/context/app_context";
+import useGetUsers from "@/hooks/useGetUsers";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
@@ -33,8 +34,34 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+interface UserFilters {
+  gender?: string;
+  ageFrom?: string;
+  ageTo?: string;
+  distance?: number;
+  lookingFor?: string;
+  height?: { from?: string; to?: string };
+  nationality?: string;
+  religion?: string;
+  zodiacSign?: string;
+}
+
 export default function Index() {
   const { user, updateUserData } = useAppContext();
+  // Filter data state
+  const [filterData, setFilterData] = useState<UserFilters>({
+    gender: "Male",
+    ageFrom: "18",
+    ageTo: "35",
+    distance: 10,
+    lookingFor: undefined,
+    height: undefined,
+    nationality: undefined,
+    religion: undefined,
+    zodiacSign: undefined,
+  });
+  const { users, loading, error, refetch } = useGetUsers(filterData);
   const [viewType, setViewType] = useState("Map");
   const [showFilters, setShowFilters] = useState(false);
   const [showLookingFor, setShowLookingFor] = useState(false);
@@ -44,26 +71,79 @@ export default function Index() {
   const [showZodiac, setShowZodiac] = useState(false);
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
-  const [showLocationModal, setShowLocationModal] = useState(true);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
+  // Update location every time user comes to this screen
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
 
-      (async () => {
-        const { status } = await Location.getForegroundPermissionsAsync();
-        if (isActive && status === "granted") {
-          setLocationPermissionGranted(true);
-          setShowLocationModal(false);
-          handleAllowLocation();
+      const updateCurrentLocation = async () => {
+        try {
+          const { status } = await Location.getForegroundPermissionsAsync();
+
+          if (status === "granted") {
+            setLocationPermissionGranted(true);
+            setShowLocationModal(false);
+
+            // Get fresh location data
+            const location = await requestUserLocation();
+            console.log("Fresh location obtained:", location);
+
+            if (location && isActive) {
+              setCurrentLocation(location);
+
+              // Update location in database
+              await updateLocationInDatabase(location);
+            }
+          } else {
+            setLocationPermissionGranted(false);
+            setShowLocationModal(true);
+          }
+        } catch (error) {
+          console.error("Error updating location:", error);
         }
-      })();
+      };
+
+      updateCurrentLocation();
 
       return () => {
         isActive = false;
       };
     }, [])
   );
+
+  // Update location in database
+  const updateLocationInDatabase = async (location: any) => {
+    if (!user?.user_id || !location) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("table_name", "user_locations");
+      formData.append("user_id", user.user_id);
+      formData.append("lat", location.latitude.toString());
+      formData.append("lng", location.longitude.toString());
+
+      const response = await apiCall(formData);
+      console.log("Location update response:", response);
+
+      if (response.result || response.success) {
+        // Update user data in context
+        updateUserData({
+          lat: location.latitude,
+          lng: location.longitude,
+        });
+        console.log("✅ Location updated successfully");
+      }
+    } catch (error) {
+      console.error("❌ Failed to update location in database:", error);
+    }
+  };
 
   useEffect(() => {
     requestNotificationPermissions();
@@ -121,7 +201,7 @@ export default function Index() {
       formData.append("deviceModel", deviceInfo.model);
 
       const response = await apiCall(formData);
-      console.log("✅ FCM token registered:", response.success);
+      console.log("✅ FCM token registered:", response.result);
     } catch (error) {
       console.error("❌ FCM registration failed:", error);
     }
@@ -130,7 +210,10 @@ export default function Index() {
   const handleAllowLocation = async () => {
     const location = await requestUserLocation();
     console.log("location", location);
+
     if (location) {
+      setCurrentLocation(location);
+
       try {
         const formData = new FormData();
         formData.append("type", "add_data");
@@ -140,8 +223,9 @@ export default function Index() {
         formData.append("lng", location.longitude.toString());
 
         const response = await apiCall(formData);
-        console.log("responseresponse", response);
-        if (response.result) {
+        console.log("Initial location save response:", response);
+
+        if (response.result || response.success) {
           updateUserData({
             lat: location.latitude,
             lng: location.longitude,
@@ -154,19 +238,6 @@ export default function Index() {
       }
     }
   };
-
-  // Filter data state
-  const [filterData, setFilterData] = useState({
-    gender: "Male",
-    ageFrom: "18",
-    ageTo: "35",
-    distance: 10,
-    lookingFor: null,
-    height: null,
-    nationality: null,
-    religion: null,
-    zodiacSign: null,
-  });
 
   // Header handlers
   const handleNotifications = () => {
@@ -255,9 +326,20 @@ export default function Index() {
         <ListView
           onViewProfile={handleViewProfile}
           onBookmark={handleBookmark}
+          users={users}
+          loading={loading}
+          error={error}
+          refetch={refetch}
         />
       ) : (
-        <MapView onUserPress={handleViewProfile} />
+        <MapView
+          onUserPress={handleViewProfile}
+          currentLocation={currentLocation}
+          users={users}
+          loading={loading}
+          error={error}
+          refetch={refetch}
+        />
       )}
 
       {/* Top Header */}
@@ -332,7 +414,7 @@ export default function Index() {
         </View>
       </SafeAreaView>
 
-      {/* Filters Modal */}
+      {/* All Modals remain the same */}
       <Modal
         visible={showFilters}
         transparent={true}
@@ -354,11 +436,11 @@ export default function Index() {
             onNavigateToZodiac={handleNavigateToZodiac}
             filterData={filterData}
             setFilterData={setFilterData}
+            refetch={refetch}
           />
         </View>
       </Modal>
 
-      {/* Looking For Modal */}
       <Modal
         visible={showLookingFor}
         transparent={true}
@@ -380,7 +462,6 @@ export default function Index() {
         </View>
       </Modal>
 
-      {/* Height Modal */}
       <Modal
         visible={showHeight}
         transparent={true}
@@ -402,7 +483,6 @@ export default function Index() {
         </View>
       </Modal>
 
-      {/* Nationality Modal */}
       <Modal
         visible={showNationality}
         transparent={true}
@@ -425,7 +505,6 @@ export default function Index() {
         </View>
       </Modal>
 
-      {/* Religion Modal */}
       <Modal
         visible={showReligion}
         transparent={true}
@@ -448,7 +527,6 @@ export default function Index() {
         </View>
       </Modal>
 
-      {/* Zodiac Sign Modal */}
       <Modal
         visible={showZodiac}
         transparent={true}
@@ -549,7 +627,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-
   toggleText: {
     fontSize: 14,
     fontFamily: font.semiBold,

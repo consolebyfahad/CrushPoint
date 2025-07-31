@@ -1,5 +1,4 @@
 import UserCard from "@/components/user_card";
-import useGetUsers from "@/hooks/useGetUsers";
 import { color, font } from "@/utils/constants";
 import React, { useCallback } from "react";
 import {
@@ -17,6 +16,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 interface ListViewProps {
   onViewProfile: (user: any) => void;
   onBookmark: (user: any) => void;
+  users: any[];
+  loading: boolean;
+  error: string | null;
+  refetch?: any;
 }
 
 interface User {
@@ -26,8 +29,15 @@ interface User {
   // Add other user properties as needed
 }
 
-export default function ListView({ onViewProfile, onBookmark }: ListViewProps) {
-  const { users, loading, error, refetch } = useGetUsers();
+export default function ListView({
+  onViewProfile,
+  onBookmark,
+  users,
+  loading,
+  error,
+  refetch,
+}: ListViewProps) {
+  // const { users, loading, error, refetch } = useGetUsers(filterData);
 
   // Memoized render function for better performance
   const renderUserCard: ListRenderItem<User> = useCallback(

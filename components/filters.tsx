@@ -24,6 +24,7 @@ export default function Filters({
   onNavigateToZodiac,
   filterData,
   setFilterData,
+  refetch,
 }: any) {
   const [selectedGender, setSelectedGender] = useState(
     filterData.gender || "Male"
@@ -90,7 +91,6 @@ export default function Filters({
   };
 
   const handleApply = () => {
-    // Update filter data with current selections
     const updatedFilterData = {
       ...filterData,
       gender: selectedGender,
@@ -100,6 +100,10 @@ export default function Filters({
     };
 
     setFilterData(updatedFilterData);
+
+    // setTimeout(() => {
+    //   refetch();
+    // }, 100);
 
     console.log("Applying filters:", updatedFilterData);
     onClose();
@@ -198,8 +202,7 @@ export default function Filters({
               step={1}
               minimumTrackTintColor={color.primary}
               maximumTrackTintColor="#ECECEC"
-              trackStyle={{ height: 6 }}
-              thumbStyle={styles.sliderThumb}
+              thumbTintColor={color.primary}
             />
             <View style={styles.sliderLabels}>
               <Text style={styles.sliderLabel}>1 km</Text>
@@ -355,11 +358,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 40,
   },
-  sliderThumb: {
-    backgroundColor: color.primary,
-    width: 20,
-    height: 20,
-  },
+  // sliderThumb: {
+  //   backgroundColor: color.primary,
+  //   width: 20,
+  //   height: 20,
+  // },
   sliderLabels: {
     flexDirection: "row",
     justifyContent: "space-between",

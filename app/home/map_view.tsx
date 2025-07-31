@@ -1,12 +1,9 @@
 import { useAppContext } from "@/context/app_context";
-import useGetUsers from "@/hooks/useGetUsers";
 import { color } from "@/utils/constants";
 import { MarkerIcon } from "@/utils/SvgIcons";
-import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Platform,
   StyleSheet,
@@ -22,6 +19,14 @@ import MapView, {
 
 interface MapViewProps {
   onUserPress: (user: any) => void;
+  currentLocation?: {
+    latitude: number;
+    longitude: number;
+  } | null;
+  users: any[];
+  loading: boolean;
+  error: string | null;
+  refetch?: any;
 }
 
 interface UserLocation {
@@ -29,86 +34,55 @@ interface UserLocation {
   longitude: number;
 }
 
-export default function Map({ onUserPress }: MapViewProps) {
+export default function Map({
+  onUserPress,
+  currentLocation,
+  users,
+  loading,
+  error,
+  refetch,
+}: MapViewProps) {
   const { userData } = useAppContext();
-  const { users, loading, error } = useGetUsers();
+  // const { users, loading, error, refetch } = useGetUsers(filterData);
   console.log("users", users);
-  const [currentLocation, setCurrentLocation] = useState<UserLocation | null>(
-    null
-  );
+  // const [currentLocation, setCurrentLocation] = useState<UserLocation | null>(
+  //   null
+  // );
   const [mapRegion, setMapRegion] = useState<Region | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
 
   // Get user's current location
   useEffect(() => {
-    getCurrentLocation();
-  }, []);
-
-  // Update map region when current location changes
-  useEffect(() => {
-    if (currentLocation) {
-      setMapRegion({
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-        latitudeDelta: 0.001,
-        longitudeDelta: 0.001,
-      });
-    }
-  }, [currentLocation]);
-
-  const getCurrentLocation = async () => {
-    try {
-      setLocationLoading(true);
-
-      // Check if we already have location from context
-      if (userData?.lat && userData?.lng) {
-        const location = {
+    const getLocationForMap = () => {
+      if (currentLocation) {
+        return currentLocation;
+      } else if (userData?.lat && userData?.lng) {
+        return {
           latitude: parseFloat(userData.lat.toString()),
           longitude: parseFloat(userData.lng.toString()),
         };
-        setCurrentLocation(location);
-        setLocationLoading(false);
-        return;
       }
+      return null;
+    };
 
-      // Check location permissions
-      const { status } = await Location.getForegroundPermissionsAsync();
-      if (status !== "granted") {
-        const { status: newStatus } =
-          await Location.requestForegroundPermissionsAsync();
-        if (newStatus !== "granted") {
-          Alert.alert(
-            "Location Permission Required",
-            "Please enable location permissions to view the map.",
-            [{ text: "OK" }]
-          );
-          setLocationLoading(false);
-          return;
-        }
-      }
+    const locationForMap = getLocationForMap();
+    console.log("Location for map:", locationForMap);
 
-      // Get current position
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-
-      const currentPos = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+    if (locationForMap) {
+      const newRegion = {
+        latitude: locationForMap.latitude,
+        longitude: locationForMap.longitude,
+        latitudeDelta: 0.001,
+        longitudeDelta: 0.001,
       };
 
-      setCurrentLocation(currentPos);
-    } catch (error) {
-      console.error("Error getting current location:", error);
-      Alert.alert(
-        "Location Error",
-        "Unable to get your current location. Please check your location settings.",
-        [{ text: "OK" }]
-      );
-    } finally {
+      setMapRegion(newRegion);
       setLocationLoading(false);
+    } else {
+      // If no location available, show loading
+      setLocationLoading(true);
     }
-  };
+  }, [currentLocation, userData?.lat, userData?.lng]);
 
   // Filter users that have valid coordinates
   const usersWithLocation = users.filter(
@@ -119,8 +93,18 @@ export default function Map({ onUserPress }: MapViewProps) {
       !isNaN(parseFloat(user.actualLocation.lng.toString()))
   );
 
+  // Get the location to display
+  const displayLocation =
+    currentLocation ||
+    (userData?.lat && userData?.lng
+      ? {
+          latitude: parseFloat(userData.lat.toString()),
+          longitude: parseFloat(userData.lng.toString()),
+        }
+      : null);
+
   // Loading state
-  if (locationLoading || !mapRegion) {
+  if (locationLoading || !mapRegion || !displayLocation) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={color.primary} />
@@ -154,8 +138,8 @@ export default function Map({ onUserPress }: MapViewProps) {
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
-        scrollEnabled={true}
-        zoomEnabled={true}
+        scrollEnabled={false}
+        zoomEnabled={false}
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}
