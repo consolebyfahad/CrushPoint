@@ -1,10 +1,18 @@
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React, { useState } from "react";
-import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import CustomButton from "./custom_button";
 import RequestMeetup from "./request_meetup";
 
@@ -19,8 +27,12 @@ export default function MatchCard({
   onViewProfile,
   onOptions,
 }: MatchCardProps) {
+  const { user } = useAppContext();
   const [showRequestMeetup, setShowRequestMeetup] = useState(false);
-console.log("match", match)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  console.log("match", match);
+
   // Map emoji actions to SVG icons and get the appropriate emoji
   const getMatchEmoji = (emoji: any) => {
     const emojiMap: { [key: string]: any } = {
@@ -52,17 +64,61 @@ console.log("match", match)
   };
 
   const handleSubmitMeetupRequest = async (meetupData: any) => {
-    try {
-      console.log("Submitting meetup request:", meetupData);
-      // Add your API call here to submit meetup request
-      // const response = await apiCall({...});
-      
-      setShowRequestMeetup(false);
-      
-      // Optionally show success message or navigate
-    } catch (error) {
-      console.error("Error submitting meetup request:", error);
-    }
+    setIsSubmitting(true);
+    // if (!user?.user_id) {
+    //   Alert.alert("Error", "User not found. Please try again.");
+    //   return;
+    // }
+
+    // if (!match?.id && !match?.match_id) {
+    //   Alert.alert("Error", "Match information is missing. Please try again.");
+    //   return;
+    // }
+
+    // try {
+    //   setIsSubmitting(true);
+    //   console.log(
+    //     "Submitting meetup request:",
+    //     meetupData,
+    //     user.user_id,
+    //     match?.id
+    //   );
+
+    //   const formData = new FormData();
+    //   formData.append("type", "add_data");
+    //   formData.append("user_id", user.user_id);
+    //   formData.append("table_name", "meetup_requests");
+    //   formData.append("date_id", match?.id || match?.match_id);
+    //   formData.append("date", meetupData.date);
+    //   formData.append("time", meetupData.time);
+    //   formData.append("location", meetupData.location);
+    //   formData.append("message", meetupData.message || "Let's meet up!");
+    //   console.log("formDataformData", formData);
+    //   const response = await apiCall(formData);
+
+    //   if (response?.status === "Success" || response?.success) {
+    //     Alert.alert("Success", "Meetup request sent successfully!", [
+    //       {
+    //         text: "OK",
+    //         onPress: () => setShowRequestMeetup(false),
+    //       },
+    //     ]);
+    //   } else {
+    //     Alert.alert(
+    //       "Error",
+    //       response?.message ||
+    //         "Failed to send meetup request. Please try again."
+    //     );
+    //   }
+    // } catch (error: any) {
+    //   console.error("Error submitting meetup request:", error);
+    //   Alert.alert(
+    //     "Error",
+    //     "Network error occurred. Please check your connection and try again."
+    //   );
+    // } finally {
+    //   setIsSubmitting(false);
+    // }
   };
 
   const handleOptions = () => {
@@ -124,9 +180,13 @@ console.log("match", match)
                   size={14}
                   color={color.gray69}
                 />
-                <Text style={styles.distance}>{match?.distance || "2.5 km"}</Text>
+                <Text style={styles.distance}>
+                  {match?.distance || "2.5 km"}
+                </Text>
                 <View style={styles.separator} />
-                <Text style={styles.timeAgo}>{match?.timeAgo || "Recently"}</Text>
+                <Text style={styles.timeAgo}>
+                  {match?.timeAgo || "Recently"}
+                </Text>
               </View>
             </View>
 
@@ -135,7 +195,11 @@ console.log("match", match)
               onPress={handleOptions}
               activeOpacity={0.8}
             >
-              <Ionicons name="ellipsis-vertical" size={16} color={color.gray55} />
+              <Ionicons
+                name="ellipsis-vertical"
+                size={16}
+                color={color.gray55}
+              />
             </TouchableOpacity>
           </View>
 
@@ -143,9 +207,13 @@ console.log("match", match)
           <View style={styles.actionContainer}>
             <CustomButton
               title="Request Meetup"
-              style={styles.requestMeetupButton}
+              style={[
+                styles.requestMeetupButton,
+                isSubmitting && styles.disabledButton,
+              ]}
               fontstyle={styles.requestMeetupButtonText}
               onPress={handleRequestMeetup}
+              isDisabled={isSubmitting}
             />
 
             <View
@@ -311,6 +379,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: font.medium,
   },
+  disabledButton: {
+    opacity: 0.6,
+  },
   emojiContainer: {
     width: 40,
     height: 40,
@@ -324,14 +395,14 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   modalBackground: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });

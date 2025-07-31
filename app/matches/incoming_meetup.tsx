@@ -20,11 +20,19 @@ import {
 interface IncomingMeetupProps {
   requests: any[];
   searchText: string;
+  onUpdateStatus?: (requestId: string, status: string) => void;
+  onRemoveRequest?: (requestId: string) => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export default function IncomingMeetup({
   requests,
   searchText,
+  onUpdateStatus,
+  onRemoveRequest,
+  onRefresh,
+  isRefreshing = false,
 }: IncomingMeetupProps) {
   const { user } = useAppContext();
   const [showSuggestChanges, setShowSuggestChanges] = useState(false);
@@ -36,37 +44,73 @@ export default function IncomingMeetup({
     if (!searchText.trim()) return requests;
     return requests.filter(
       (request) =>
-        request.user.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        request.location.toLowerCase().includes(searchText.toLowerCase()) ||
-        request.message.toLowerCase().includes(searchText.toLowerCase())
+        request.user?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        request.location?.toLowerCase().includes(searchText.toLowerCase()) ||
+        request.message?.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [requests, searchText]);
 
-  // Action handlers - replace with your API calls
+  // Action handlers with proper API integration
   const handleAccept = useCallback(
     async (requestId: string) => {
-      const formData = new FormData();
-      formData.append("type", "update_data");
-      formData.append("id", requestId);
-      formData.append("table_name", "meetup_requests");
-      formData.append("status", "accept");
+      try {
+        setIsLoading(true);
 
-      const response = await apiCall(formData);
-      // Success/error handling with alerts
+        const formData = new FormData();
+        formData.append("type", "update_data");
+        formData.append("id", requestId);
+        formData.append("table_name", "meetup_requests");
+        formData.append("status", "accepted");
+        formData.append("user_id", user?.user_id || "");
+
+        const response = await apiCall(formData);
+
+        if (response?.status === "Success") {
+          Alert.alert("Success", "Meetup request accepted!");
+          onUpdateStatus?.(requestId, "accepted");
+        } else {
+          Alert.alert("Error", response?.message || "Failed to accept request");
+        }
+      } catch (error: any) {
+        console.error("Error accepting request:", error);
+        Alert.alert("Error", "Failed to accept request. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [user?.user_id]
+    [user?.user_id, onUpdateStatus]
   );
 
-  const handleAcceptChanges = useCallback(async (requestId: string) => {
-    try {
-      console.log("Accepting changes for request:", requestId);
-      // Add your API call here
-      // const response = await apiCall({...});
-      // Update local state or refetch data
-    } catch (error) {
-      console.error("Error accepting changes:", error);
-    }
-  }, []);
+  const handleAcceptChanges = useCallback(
+    async (requestId: string) => {
+      try {
+        setIsLoading(true);
+
+        const formData = new FormData();
+        formData.append("type", "update_data");
+        formData.append("id", requestId);
+        formData.append("table_name", "meetup_requests");
+        formData.append("status", "accepted");
+        formData.append("user_id", user?.user_id || "");
+        formData.append("accept_changes", "1");
+
+        const response = await apiCall(formData);
+
+        if (response?.status === "Success") {
+          Alert.alert("Success", "Changes accepted!");
+          onUpdateStatus?.(requestId, "accepted");
+        } else {
+          Alert.alert("Error", response?.message || "Failed to accept changes");
+        }
+      } catch (error: any) {
+        console.error("Error accepting changes:", error);
+        Alert.alert("Error", "Failed to accept changes. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [user?.user_id, onUpdateStatus]
+  );
 
   const handleChange = useCallback(
     async (requestId: string) => {
@@ -78,47 +122,101 @@ export default function IncomingMeetup({
         }
       } catch (error) {
         console.error("Error opening suggest changes:", error);
+        Alert.alert("Error", "Failed to open changes dialog");
       }
     },
     [requests]
   );
 
-  const handleSuggestChanges = useCallback(async (changes: any) => {
-    try {
-      console.log("Submitting suggested changes:", changes);
-      // Add your API call here to submit the suggested changes
-      // const response = await apiCall({...});
-      // Update local state or refetch data
+  const handleSuggestChanges = useCallback(
+    async (changes: any) => {
+      try {
+        setIsLoading(true);
 
-      setShowSuggestChanges(false);
-      setSelectedRequest(null);
-    } catch (error) {
-      console.error("Error submitting suggested changes:", error);
-    }
-  }, []);
+        const formData = new FormData();
+        formData.append("type", "update_data");
+        formData.append("id", selectedRequest?.id || "");
+        formData.append("table_name", "meetup_requests");
+        formData.append("status", "change");
+        formData.append("user_id", user?.user_id || "");
+
+        // Add the suggested changes
+        if (changes.date) formData.append("suggested_date", changes.date);
+        if (changes.time) formData.append("suggested_time", changes.time);
+        if (changes.location)
+          formData.append("suggested_location", changes.location);
+        if (changes.message) formData.append("change_message", changes.message);
+
+        const response = await apiCall(formData);
+
+        if (response?.status === "Success") {
+          Alert.alert("Success", "Changes suggested successfully!");
+          onUpdateStatus?.(selectedRequest?.id, "change");
+          setShowSuggestChanges(false);
+          setSelectedRequest(null);
+        } else {
+          Alert.alert(
+            "Error",
+            response?.message || "Failed to suggest changes"
+          );
+        }
+      } catch (error: any) {
+        console.error("Error submitting suggested changes:", error);
+        Alert.alert("Error", "Failed to suggest changes. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedRequest, user?.user_id, onUpdateStatus]
+  );
 
   const handleDecline = useCallback(
     async (requestId: string) => {
-      // Shows confirmation dialog first
-      Alert.alert("Decline Meetup Request", "Are you sure?", [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Decline",
-          style: "destructive",
-          onPress: async () => {
-            const formData = new FormData();
-            formData.append("type", "update_data");
-            formData.append("id", requestId);
-            formData.append("table_name", "meetup_requests");
-            formData.append("status", "cancel");
+      Alert.alert(
+        "Decline Meetup Request",
+        "Are you sure you want to decline this meetup request?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Decline",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                setIsLoading(true);
 
-            const response = await apiCall(formData);
-            // Success/error handling
+                const formData = new FormData();
+                formData.append("type", "update_data");
+                formData.append("id", requestId);
+                formData.append("table_name", "meetup_requests");
+                formData.append("status", "declined");
+                formData.append("user_id", user?.user_id || "");
+
+                const response = await apiCall(formData);
+
+                if (response?.status === "Success") {
+                  Alert.alert("Success", "Meetup request declined");
+                  onRemoveRequest?.(requestId);
+                } else {
+                  Alert.alert(
+                    "Error",
+                    response?.message || "Failed to decline request"
+                  );
+                }
+              } catch (error: any) {
+                console.error("Error declining request:", error);
+                Alert.alert(
+                  "Error",
+                  "Failed to decline request. Please try again."
+                );
+              } finally {
+                setIsLoading(false);
+              }
+            },
           },
-        },
-      ]);
+        ]
+      );
     },
-    [user?.user_id]
+    [user?.user_id, onRemoveRequest]
   );
 
   const renderMeetupCard: ListRenderItem<any> = useCallback(
@@ -130,9 +228,10 @@ export default function IncomingMeetup({
         onAcceptChanges={handleAcceptChanges}
         onChange={handleChange}
         onDecline={handleDecline}
+        isLoading={isLoading}
       />
     ),
-    [handleAccept, handleAcceptChanges, handleChange, handleDecline]
+    [handleAccept, handleAcceptChanges, handleChange, handleDecline, isLoading]
   );
 
   const keyExtractor = useCallback((item: any) => `incoming-${item.id}`, []);
@@ -147,10 +246,13 @@ export default function IncomingMeetup({
     </View>
   );
 
-  const renderLoadingState = () => (
+  const renderSearchEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <ActivityIndicator size="large" color={color.primary} />
-      <Text style={styles.loadingText}>Loading requests...</Text>
+      <Text style={styles.emptyEmoji}>🔍</Text>
+      <Text style={styles.emptyTitle}>No results found</Text>
+      <Text style={styles.emptyText}>
+        Try searching with different keywords.
+      </Text>
     </View>
   );
 
@@ -169,29 +271,15 @@ export default function IncomingMeetup({
           styles.listContainer,
           filteredRequests.length === 0 && { flex: 1 },
         ]}
-        ListEmptyComponent={
-          searchText.trim() ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyEmoji}>🔍</Text>
-              <Text style={styles.emptyTitle}>No results found</Text>
-              <Text style={styles.emptyText}>
-                Try searching with different keywords.
-              </Text>
-            </View>
-          ) : null
-        }
+        ListEmptyComponent={searchText.trim() ? renderSearchEmptyState() : null}
         refreshControl={
           <RefreshControl
-            refreshing={false}
-            onRefresh={() => {
-              // Add your refresh logic here
-              console.log("Refreshing incoming requests...");
-            }}
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
             colors={[color.primary]}
             tintColor={color.primary}
           />
         }
-        // Performance optimizations
         removeClippedSubviews={true}
         maxToRenderPerBatch={5}
         updateCellsBatchingPeriod={30}
@@ -231,6 +319,16 @@ export default function IncomingMeetup({
           )}
         </View>
       </Modal>
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={color.primary} />
+            <Text style={styles.loadingText}>Processing...</Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -269,13 +367,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 24,
   },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    fontFamily: font.regular,
-    color: color.gray55,
-    textAlign: "center",
-  },
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -287,5 +378,35 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingContainer: {
+    backgroundColor: color.white,
+    padding: 20,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: color.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray55,
   },
 });

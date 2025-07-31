@@ -1,77 +1,70 @@
-import CustomSearchBar from '@/components/custom_search';
-import { color, font } from '@/utils/constants';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import IncomingMeetup from './incoming_meetup';
-import OutgoingMeetup from './outgoing_meetup';
+import CustomButton from "@/components/custom_button";
+import CustomSearchBar from "@/components/custom_search";
+import useGetRequests from "@/hooks/useGetRequests";
+import { color, font } from "@/utils/constants";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import IncomingMeetup from "./incoming_meetup";
+import OutgoingMeetup from "./outgoing_meetup";
 
 export default function Requests() {
-  const [activeTab, setActiveTab] = useState('incoming');
-  const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState("incoming");
+  const [searchText, setSearchText] = useState("");
 
-  // Mock data - replace with your API calls
-  const incomingRequests = [
-    {
-      id: '1',
-      user: {
-        id: 'user1',
-        name: 'Alex',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&crop=face'
-      },
-      status: 'pending',
-      timestamp: '2 hrs ago',
-      date: 'Thu, Feb 15',
-      time: '7:00 PM',
-      location: 'Central Park Cafe',
-      message: 'Would love to meet for coffee and get to know each other better!',
-      hasChanges: false
-    },
-    {
-      id: '2',
-      user: {
-        id: 'user2',
-        name: 'Julia',
-        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop&crop=face'
-      },
-      status: 'change',
-      timestamp: '3 days ago',
-      date: 'Tue, Feb 20',
-      time: '6:30 PM',
-      location: 'Times Square',
-      message: 'How about we meet at a quieter place?',
-      hasChanges: true
-    }
-  ];
-
-  const outgoingRequests = [
-    {
-      id: '3',
-      user: {
-        id: 'user3',
-        name: 'Sam',
-        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'
-      },
-      status: 'accepted',
-      timestamp: '1 day ago',
-      date: 'Sun, Feb 18',
-      time: '2:00 PM',
-      location: 'Brooklyn Bridge Park',
-      message: 'Perfect weather for a walk in the park!',
-      responseMessage: 'Your request was accepted!'
-    }
-  ];
+  const {
+    loading,
+    incomingRequests,
+    outgoingRequests,
+    error,
+    refetch,
+    removeRequest,
+    updateRequestStatus,
+  } = useGetRequests();
 
   const totalRequests = incomingRequests.length + outgoingRequests.length;
   const incomingCount = incomingRequests.length;
   const outgoingCount = outgoingRequests.length;
 
-  const handleBack = () => {
-    router.back();
+  // Filter requests based on search text
+  const filterRequests = (requests: any[]) => {
+    if (!searchText.trim()) return requests;
+
+    return requests.filter(
+      (request) =>
+        request.user?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        request.location?.toLowerCase().includes(searchText.toLowerCase()) ||
+        request.message?.toLowerCase().includes(searchText.toLowerCase())
+    );
+  };
+
+  const filteredIncomingRequests = filterRequests(incomingRequests);
+  const filteredOutgoingRequests = filterRequests(outgoingRequests);
+
+  // Handle refresh
+  const onRefresh = () => {
+    refetch();
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={loading}
+          onRefresh={onRefresh}
+          colors={[color.primary]}
+          tintColor={color.primary}
+        />
+      }
+    >
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <CustomSearchBar
@@ -83,52 +76,82 @@ export default function Requests() {
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === 'incoming' && styles.activeTab
-          ]}
-          onPress={() => setActiveTab('incoming')}
-        >
-          <Text style={[
+        <CustomButton
+          title={`Incoming ${incomingCount}`}
+          style={[styles.tab, activeTab === "incoming" && styles.activeTab]}
+          fontstyle={[
             styles.tabText,
-            activeTab === 'incoming' && styles.activeTabText
-          ]}>
-            Incoming ({incomingCount})
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === 'outgoing' && styles.activeTab
+            activeTab === "incoming" && styles.activeTabText,
           ]}
-          onPress={() => setActiveTab('outgoing')}
-        >
-          <Text style={[
+          onPress={() => setActiveTab("incoming")}
+        />
+        <CustomButton
+          title={`Outgoing ${outgoingCount}`}
+          style={[styles.tab, activeTab === "outgoing" && styles.activeTab]}
+          fontstyle={[
             styles.tabText,
-            activeTab === 'outgoing' && styles.activeTabText
-          ]}>
-            Outgoing ({outgoingCount})
-          </Text>
-        </TouchableOpacity>
+            activeTab === "outgoing" && styles.activeTabText,
+          ]}
+          onPress={() => setActiveTab("outgoing")}
+        />
       </View>
 
       {/* Tab Content */}
-      <View style={styles.tabContent}>
-        {activeTab === 'incoming' ? (
-          <IncomingMeetup 
-            requests={incomingRequests}
-            searchText={searchText}
-          />
-        ) : (
-          <OutgoingMeetup 
-            requests={outgoingRequests}
-            searchText={searchText}
-          />
+      {error && totalRequests === 0 ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      ) : loading && totalRequests === 0 ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={color.primary} />
+          <Text style={styles.loadingText}>Loading requests...</Text>
+        </View>
+      ) : (
+        <View style={styles.tabContent}>
+          {activeTab === "incoming" ? (
+            <IncomingMeetup
+              requests={filteredIncomingRequests}
+              searchText={searchText}
+              onUpdateStatus={(requestId, status) =>
+                updateRequestStatus(requestId, status, "incoming")
+              }
+              onRemoveRequest={(requestId) =>
+                removeRequest(requestId, "incoming")
+              }
+              onRefresh={onRefresh}
+              isRefreshing={loading}
+            />
+          ) : (
+            <OutgoingMeetup
+              requests={filteredOutgoingRequests}
+              searchText={searchText}
+              onUpdateStatus={(requestId, status) =>
+                updateRequestStatus(requestId, status, "outgoing")
+              }
+              onRemoveRequest={(requestId) =>
+                removeRequest(requestId, "outgoing")
+              }
+              onRefresh={onRefresh}
+              isRefreshing={loading}
+            />
+          )}
+        </View>
+      )}
+      {/* Show message when no requests found after search */}
+      {searchText.trim() &&
+        ((activeTab === "incoming" && filteredIncomingRequests.length === 0) ||
+          (activeTab === "outgoing" &&
+            filteredOutgoingRequests.length === 0)) && (
+          <View style={styles.noResultsContainer}>
+            <Text style={styles.noResultsText}>
+              No requests found matching "{searchText}"
+            </Text>
+          </View>
         )}
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -141,21 +164,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   tabContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: 20,
     marginBottom: 16,
     gap: 8,
   },
   tab: {
-    flex: 1,
+    width: "50%",
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 25,
-    alignItems: 'center',
-    backgroundColor: color.gray94,
+    backgroundColor: color.white,
+    borderWidth: 1,
+    borderColor: color.gray87,
   },
   activeTab: {
     backgroundColor: color.primary,
+    borderColor: color.white,
   },
   tabText: {
     fontSize: 14,
@@ -168,5 +191,53 @@ const styles = StyleSheet.create({
   },
   tabContent: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 50,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray55,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 50,
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray55,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: color.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  retryButtonText: {
+    color: color.white,
+    fontSize: 14,
+    fontFamily: font.semiBold,
+  },
+  noResultsContainer: {
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  noResultsText: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray55,
+    textAlign: "center",
   },
 });

@@ -12,7 +12,7 @@ import {
 interface CustomButtonProps {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  isDisabled?: boolean;
+  isDisabled?: any;
   isLoading?: boolean;
   variant?: "primary" | "secondary";
   icon?: React.ReactElement<{ color?: string }>;

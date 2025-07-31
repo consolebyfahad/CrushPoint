@@ -370,7 +370,7 @@ export const AddCalender = () => (
   </Svg>
 );
 export const MarkerIcon = () => (
-  <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+  <Svg width="30" height="30" viewBox="0 0 50 50" fill="none">
     <Circle
       cx="24.8092"
       cy="24.8092"

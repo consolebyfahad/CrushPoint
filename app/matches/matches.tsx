@@ -11,14 +11,14 @@ import { color, font } from "@/utils/constants";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    ListRenderItem,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  ListRenderItem,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface Match {
@@ -208,7 +208,7 @@ export default function Matches() {
     ({ item }) => (
       <MatchCard
         match={item}
-        onViewProfile={handleViewProfile} // Keep this for potential profile viewing from options
+        onViewProfile={handleViewProfile}
         onOptions={handleMatchOptions}
       />
     ),

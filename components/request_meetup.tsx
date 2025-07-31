@@ -87,6 +87,8 @@ export default function RequestMeetup({
       Alert.alert("Error", "User session expired. Please login again.");
       return;
     }
+    const formattedDate = selectedDate.toISOString().split("T")[0];
+    const formattedTime = selectedTime.toTimeString().split(" ")[0];
 
     setIsLoading(true);
     try {
@@ -94,9 +96,7 @@ export default function RequestMeetup({
       formData.append("type", "add_data");
       formData.append("user_id", user.user_id);
       formData.append("table_name", "meetup_requests");
-      const formattedDate = selectedDate.toISOString().split("T")[0];
-      const formattedTime = selectedTime.toTimeString().split(" ")[0];
-      formData.append("match_id", matchData.id);
+      formData.append("date_id", matchData.id);
       formData.append("date", formattedDate);
       formData.append("time", formattedTime);
       formData.append("location", location.trim());

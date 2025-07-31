@@ -137,7 +137,7 @@ const useGetMatches = () => {
       formData.append("type", "get_data");
       formData.append("table_name", "matches");
       formData.append("user_id", user.user_id);
-
+      console.log("formData", formData);
       const response = await apiCall(formData);
 
       if (Array.isArray(response?.data)) {

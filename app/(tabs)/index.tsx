@@ -22,8 +22,8 @@ import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Device from "expo-device";
 import * as Location from "expo-location";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   Modal,
   Platform,
@@ -46,16 +46,24 @@ export default function Index() {
     useState(false);
   const [showLocationModal, setShowLocationModal] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.getForegroundPermissionsAsync();
-      if (status === "granted") {
-        setLocationPermissionGranted(true);
-        setShowLocationModal(false);
-        handleAllowLocation();
-      }
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      (async () => {
+        const { status } = await Location.getForegroundPermissionsAsync();
+        if (isActive && status === "granted") {
+          setLocationPermissionGranted(true);
+          setShowLocationModal(false);
+          handleAllowLocation();
+        }
+      })();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
 
   useEffect(() => {
     requestNotificationPermissions();
@@ -121,6 +129,7 @@ export default function Index() {
 
   const handleAllowLocation = async () => {
     const location = await requestUserLocation();
+    console.log("location", location);
     if (location) {
       try {
         const formData = new FormData();
@@ -131,6 +140,7 @@ export default function Index() {
         formData.append("lng", location.longitude.toString());
 
         const response = await apiCall(formData);
+        console.log("responseresponse", response);
         if (response.result) {
           updateUserData({
             lat: location.latitude,
