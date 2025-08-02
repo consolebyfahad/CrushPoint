@@ -22,7 +22,8 @@ import {
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ProfileTab() {
-  const { userData } = useAppContext();
+  const { userData, user } = useAppContext();
+  console.log(user?.user_id);
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const handleCamera = () => {

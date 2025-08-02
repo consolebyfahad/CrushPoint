@@ -3,7 +3,7 @@ import { color, font } from "@/utils/constants";
 import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -16,11 +16,22 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function MatchScreen({ route, navigation }: any) {
-  const matchData = route?.params?.matchData || {
+  const params = useLocalSearchParams();
+
+  let matchData;
+  try {
+    matchData = params?.matchData
+      ? JSON.parse(params.matchData as string)
+      : route?.params?.matchData;
+  } catch (error) {
+    console.error("Error parsing matchData:", error);
+    matchData = null;
+  }
+
+  const finalMatchData = matchData || {
     currentUser: {
       name: "You",
       image:
@@ -34,6 +45,21 @@ export default function MatchScreen({ route, navigation }: any) {
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
     },
   };
+
+  // const matchData = route?.params?.matchData || {
+  //   currentUser: {
+  //     name: "You",
+  //     image:
+  //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
+  //   },
+  //   matchedUser: {
+  //     name: "Julia",
+  //     age: 24,
+  //     distance: "1.2 km away",
+  //     image:
+  //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
+  //   },
+  // };
 
   // Animation values
   const blurOpacity = useRef(new Animated.Value(0)).current;
@@ -237,9 +263,7 @@ export default function MatchScreen({ route, navigation }: any) {
   };
 
   const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    }
+    router.back();
   };
 
   const handleOptions = () => {
@@ -247,7 +271,17 @@ export default function MatchScreen({ route, navigation }: any) {
   };
 
   const handleViewProfile = () => {
-    router.push("/profile/user_profile");
+    if (finalMatchData.matchedUser.id) {
+      router.push({
+        pathname: "/profile/user_profile",
+        params: {
+          userId: finalMatchData.matchedUser.id,
+          user: JSON.stringify(finalMatchData.matchedUser),
+        },
+      });
+    } else {
+      router.push("/profile/user_profile");
+    }
   };
 
   const handleKeepExploring = () => {
@@ -372,7 +406,7 @@ export default function MatchScreen({ route, navigation }: any) {
             ]}
           >
             <Image
-              source={{ uri: matchData.currentUser.image }}
+              source={{ uri: finalMatchData.matchedUser.image }}
               style={styles.userImage}
             />
             <View style={styles.sparkleContainer}>
@@ -432,7 +466,7 @@ export default function MatchScreen({ route, navigation }: any) {
             ]}
           >
             <Image
-              source={{ uri: matchData.matchedUser.image }}
+              source={{ uri: finalMatchData.currentUser.image }}
               style={styles.userImage}
             />
             <View style={styles.sparkleContainer}>

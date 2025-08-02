@@ -48,7 +48,7 @@ interface UserFilters {
 }
 
 export default function Index() {
-  const { user, updateUserData } = useAppContext();
+  const { user, updateUserData, userData } = useAppContext();
   // Filter data state
   const [filterData, setFilterData] = useState<UserFilters>({
     gender: "Male",
@@ -147,14 +147,102 @@ export default function Index() {
 
   useEffect(() => {
     requestNotificationPermissions();
-    const handleNotificationPress = (data: any) => {
+    const handleNotificationPress = async (data: any) => {
       console.log("🔔 Notification Pressed:", data);
+      if (data?.date_id) {
+        try {
+          // Show loading or handle UI feedback if needed
+          console.log(
+            "🔥 New match notification received, fetching match data..."
+          );
+
+          // Fetch match data from your API using the date_id
+          const matchData = await fetchMatchData(data.date_id);
+
+          if (matchData) {
+            console.log("matchData", matchData);
+            router.push({
+              pathname: "/profile/match",
+              params: {
+                matchData: JSON.stringify(matchData),
+              },
+            });
+          }
+        } catch (error) {
+          console.error("❌ Failed to fetch match data:", error);
+          // Optionally show an error message to user
+        }
+      }
     };
     const unsubscribe = setupNotificationListeners(handleNotificationPress);
     return () => {
       unsubscribe();
     };
   }, []);
+
+  const fetchMatchData = async (dateId: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("type", "get_data");
+      formData.append("table_name", "users");
+      formData.append("id", dateId);
+
+      const response = await apiCall(formData);
+
+      if (response) {
+        return {
+          currentUser: {
+            name: userData.name,
+            image:
+              "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
+          },
+          matchedUser: {
+            name: response.data?.name || "Unknown",
+            age: response.data?.age || 0,
+            distance: response.data?.distance || "Unknown",
+            image:
+              response.data?.profile_image ||
+              "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
+            id: response.data?.id || response.data?.user_id,
+          },
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error("❌ Error fetching match data:", error);
+      return null;
+    }
+  };
+
+  const handleNotificationPressWithDirectData = (data: any) => {
+    console.log("🔔 Notification Pressed:", data);
+
+    // If your notification payload includes match data directly
+    if (data?.match_user_name && data?.match_user_image) {
+      const matchData = {
+        currentUser: {
+          name: "You",
+          image:
+            user?.profile_image ||
+            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
+        },
+        matchedUser: {
+          name: data.match_user_name,
+          age: parseInt(data.match_user_age) || 0,
+          distance: data.match_user_distance || "Unknown",
+          image: data.match_user_image,
+          id: data.match_user_id,
+        },
+      };
+
+      router.push({
+        pathname: "/profile/match",
+        params: {
+          matchData: JSON.stringify(matchData),
+        },
+      });
+    }
+  };
 
   const getDeviceInfo = async () => {
     try {

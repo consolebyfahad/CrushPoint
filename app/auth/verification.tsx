@@ -8,27 +8,96 @@ import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import { CameraView } from "expo-camera";
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useRef, useState } from "react";
+import { Alert, Platform, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { compareSimpleFaces } from "../../utils/FaceVerificationService";
 
+type VerificationState =
+  | "idle"
+  | "capturing"
+  | "processing"
+  | "uploading"
+  | "submitting";
+
 export default function FaceVerification() {
   const { userData, user, userImages } = useAppContext();
-  console.log("userData,", userData);
-  console.log("userImages,", userImages);
   const defaultImage =
     userImages.length > 0
       ? `https://7tracking.com/crushpoint/images/${userImages[0]}`
       : null;
   const { showToast } = useToast();
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [verificationState, setVerificationState] =
+    useState<VerificationState>("idle");
   const [uploadedSelfieFileName, setUploadedSelfieFileName] = useState<
     string | null
   >(null);
   const cameraRef = useRef<any>(null);
+
+  // Centralized state check
+  const isProcessing = verificationState !== "idle";
+
+  // Handle verification result separately from UI
+  const handleVerificationResult = useCallback(
+    async (isVerified: boolean, message: string, photoUri: string) => {
+      const title = isVerified
+        ? "✅ Verification Successful!"
+        : "❌ Verification Failed!";
+
+      return new Promise<void>((resolve) => {
+        Alert.alert(title, message, [
+          {
+            text: "Try Again",
+            onPress: () => resolve(),
+          },
+          {
+            text: isVerified ? "Continue" : "Skip",
+            style: "default",
+            onPress: () => {
+              // Don't do async work here - just resolve and handle outside
+              if (isVerified) {
+                processVerifiedPhoto(photoUri);
+              } else {
+                skipVerificationAndSubmit();
+              }
+              resolve();
+            },
+          },
+        ]);
+      });
+    },
+    []
+  );
+
+  // Process verified photo upload
+  const processVerifiedPhoto = useCallback(async (photoUri: string) => {
+    try {
+      setVerificationState("uploading");
+      const fileName = await uploadImageToServer(photoUri);
+      setUploadedSelfieFileName(fileName);
+      showToast("Selfie uploaded successfully!", "success");
+
+      // Small delay to ensure state is updated
+      setTimeout(() => {
+        submitAllData(fileName);
+      }, 100);
+    } catch (error) {
+      console.error("Upload error:", error);
+      showToast("Failed to upload selfie", "error");
+      // Continue with submission without selfie
+      setTimeout(() => {
+        submitAllData(null);
+      }, 100);
+    }
+  }, []);
+
+  // Skip verification and submit
+  const skipVerificationAndSubmit = useCallback(() => {
+    setTimeout(() => {
+      submitAllData(null);
+    }, 100);
+  }, []);
 
   // Simplified face comparison
   const compareFaces = async (
@@ -36,28 +105,23 @@ export default function FaceVerification() {
     referenceImageUri: string
   ) => {
     try {
-      setIsProcessing(true);
-
       if (!referenceImageUri) {
         throw new Error("No reference image available");
       }
 
-      // Use the simple comparison function
       const result = await compareSimpleFaces(
         capturedImageUri,
         referenceImageUri
       );
-
       return result;
     } catch (error) {
       console.error("Face verification error:", error);
       throw error;
-    } finally {
-      setIsProcessing(false);
     }
   };
 
-  const uploadImageToServer = async (imageUri: string) => {
+  // Fixed image upload for iOS
+  const uploadImageToServer = async (imageUri: string): Promise<string> => {
     if (!user?.user_id) {
       throw new Error("User ID not found. Please login again.");
     }
@@ -66,11 +130,15 @@ export default function FaceVerification() {
       const formData = new FormData();
       formData.append("type", "upload_data");
       formData.append("user_id", user.user_id);
-      formData.append("file", {
-        uri: imageUri,
+
+      // Handle iOS photo URI properly
+      const photoData: any = {
+        uri: Platform.OS === "ios" ? imageUri.replace("file://", "") : imageUri,
         type: "image/jpeg",
         name: "selfie.jpg",
-      } as any);
+      };
+
+      formData.append("file", photoData);
 
       const response = await apiCall(formData);
 
@@ -85,124 +153,152 @@ export default function FaceVerification() {
     }
   };
 
+  // Main photo capture function
   const takePicture = async () => {
-    if (!cameraRef.current || isCapturing) return;
+    if (!cameraRef.current || isProcessing) return;
 
     if (!defaultImage) {
       Alert.alert("Error", "No reference image available for comparison.");
       return;
     }
 
-    setIsCapturing(true);
-
     try {
+      setVerificationState("capturing");
+
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.8,
         base64: false,
         exif: false,
       });
 
-      // Compare with the simple function
-      const verificationResult = await compareFaces(photo.uri, defaultImage);
+      setVerificationState("processing");
 
-      // Show result to user
-      const title = verificationResult.verified
-        ? "✅ Verification Successful!"
-        : "❌ Verification Failed!";
+      let verificationResult;
 
+      if (Platform.OS === "ios") {
+        // Skip actual verification on iOS to avoid crashes
+        verificationResult = await compareFaces(photo.uri, defaultImage);
+        // verificationResult = {
+        //   verified: true,
+        //   confidence: 100,
+        //   message: "✅ Identity verification completed!",
+        // };
+      } else {
+        verificationResult = await compareFaces(photo.uri, defaultImage);
+      }
+
+      // Reset state before showing alert
+      setVerificationState("idle");
+
+      // Handle result with delay to ensure UI is stable
       setTimeout(() => {
-        Alert.alert(title, verificationResult.message, [
-          {
-            text: "Try Again",
-            onPress: () => {},
-          },
-          {
-            text: verificationResult.verified ? "OK" : "Skip",
-            style: "default",
-            onPress: async () => {
-              if (verificationResult.verified) {
-                try {
-                  setIsProcessing(true);
-                  const fileName = await uploadImageToServer(photo.uri);
-                  setUploadedSelfieFileName(fileName);
-                  showToast("Selfie uploaded successfully!", "success");
-                  submitAllData(fileName);
-                } catch (error) {
-                  showToast("Failed to upload selfie", "error");
-                  submitAllData(null);
-                } finally {
-                  setIsProcessing(false);
-                }
-              } else {
-                submitAllData(null);
-              }
-            },
-          },
-        ]);
+        handleVerificationResult(
+          verificationResult.verified,
+          verificationResult.message,
+          photo.uri
+        );
       }, 100);
     } catch (error: any) {
+      console.error("Camera/Verification error:", error);
+      setVerificationState("idle");
+
       showToast("Error in face verification", "error");
-      Alert.alert(
-        "Verification Error",
-        error.message || "Failed to verify face. Please try again.",
-        [
-          {
-            text: "Try Again",
-            onPress: () => {},
-          },
-          {
-            text: "Skip",
-            style: "destructive",
-            onPress: () => submitAllData(null),
-          },
-        ]
-      );
-    } finally {
-      setIsCapturing(false);
+
+      setTimeout(() => {
+        Alert.alert(
+          "Verification Error",
+          error.message || "Failed to verify face. Please try again.",
+          [
+            {
+              text: "Try Again",
+              onPress: () => {},
+            },
+            {
+              text: "Skip",
+              style: "destructive",
+              onPress: () => skipVerificationAndSubmit(),
+            },
+          ]
+        );
+      }, 100);
     }
   };
 
+  // Improved data submission with better error handling
   const submitAllData = async (selfieFileName?: string | null) => {
     if (!user?.user_id) {
       showToast("User session expired. Please login again.", "error");
       return;
     }
 
-    setIsSubmitting(true);
+    if (verificationState === "submitting") {
+      return; // Prevent double submission
+    }
+
+    setVerificationState("submitting");
+
     try {
       const submissionData = new FormData();
       submissionData.append("type", "update_data");
       submissionData.append("table_name", "users");
       submissionData.append("id", user.user_id);
-      submissionData.append("gender", userData.gender);
-      submissionData.append("gender_interest", userData.gender_interest);
-      submissionData.append("interests", JSON.stringify(userData.interests));
-      submissionData.append("name", userData.name);
-      submissionData.append("dob", userData.dob);
+      submissionData.append("gender", userData?.gender || "");
+      submissionData.append("gender_interest", userData?.gender_interest || "");
+      submissionData.append(
+        "interests",
+        JSON.stringify(userData?.interests || [])
+      );
+      submissionData.append("name", userData?.name || "");
+      submissionData.append("dob", userData?.dob || "");
+
       const finalSelfieFileName = selfieFileName || uploadedSelfieFileName;
       if (finalSelfieFileName) {
         submissionData.append("uploaded_selfie", finalSelfieFileName);
       }
-      submissionData.append("images", JSON.stringify(userImages));
+
+      submissionData.append("images", JSON.stringify(userImages || []));
       submissionData.append(
         "looking_for",
-        JSON.stringify(userData.looking_for)
+        JSON.stringify(userData?.looking_for || [])
       );
-      submissionData.append("radius", userData.radius.toString());
-      submissionData.append("lat", userData.lat.toString());
-      submissionData.append("lng", userData.lng.toString());
+      submissionData.append("radius", (userData?.radius || 50).toString());
+      submissionData.append("lat", (userData?.lat || 0).toString());
+      submissionData.append("lng", (userData?.lng || 0).toString());
+
       const response = await apiCall(submissionData);
 
       if (response.result) {
-        router.push("/(tabs)");
+        // Add small delay before navigation to ensure state is clean
+        setTimeout(() => {
+          router.push("/(tabs)");
+        }, 100);
       } else {
-        showToast(response.message || "Failed to create profile", "error");
+        throw new Error(response.message || "Failed to create profile");
       }
-    } catch (error) {
-      showToast("Something went wrong. Please try again.", "error");
+    } catch (error: any) {
       console.error("Submission error:", error);
+      showToast(
+        error.message || "Something went wrong. Please try again.",
+        "error"
+      );
     } finally {
-      setIsSubmitting(false);
+      setVerificationState("idle");
+    }
+  };
+
+  // Get appropriate button text
+  const getButtonText = () => {
+    switch (verificationState) {
+      case "capturing":
+        return "Capturing...";
+      case "processing":
+        return "Processing...";
+      case "uploading":
+        return "Uploading...";
+      case "submitting":
+        return "Creating Profile...";
+      default:
+        return "Start Scan";
     }
   };
 
@@ -216,38 +312,37 @@ export default function FaceVerification() {
           face in the frame and ensure good lighting
         </Text>
       </View>
+
       <View style={styles.content}>
         <View style={styles.cameraContainer}>
           <View style={styles.cameraFrame}>
-            <CameraView ref={cameraRef} style={styles.camera} facing="front">
-              {/* Face guide overlay */}
-              <View style={styles.faceGuide} />
+            {/* Camera without children */}
+            <CameraView ref={cameraRef} style={styles.camera} facing="front" />
 
-              {/* Processing overlay */}
-              {isProcessing && (
-                <View style={styles.processingOverlay}>
-                  <Text style={styles.processingOverlayText}>
-                    Processing...
-                  </Text>
-                </View>
-              )}
-            </CameraView>
+            {/* Face guide overlay - positioned absolutely */}
+            <View style={styles.faceGuide} />
+
+            {/* Processing overlay - positioned absolutely */}
+            {isProcessing && (
+              <View style={styles.processingOverlay}>
+                <Text style={styles.processingOverlayText}>
+                  {verificationState === "capturing" && "Capturing..."}
+                  {verificationState === "processing" && "Processing..."}
+                  {verificationState === "uploading" && "Uploading..."}
+                  {verificationState === "submitting" && "Submitting..."}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </View>
 
       <View style={styles.buttonContainer}>
         <CustomButton
-          title={
-            isSubmitting
-              ? "Creating Profile..."
-              : isProcessing
-              ? "Scanning..."
-              : "Start Scan"
-          }
+          title={getButtonText()}
           onPress={takePicture}
-          isDisabled={isProcessing || isCapturing || !defaultImage}
-          isLoading={isProcessing || isCapturing}
+          isDisabled={isProcessing || !defaultImage}
+          isLoading={isProcessing}
           icon={<Feather name="camera" size={20} color="white" />}
         />
       </View>
@@ -255,7 +350,6 @@ export default function FaceVerification() {
   );
 }
 
-// Keep your existing styles...
 const styles = StyleSheet.create({
   container: {
     flex: 1,

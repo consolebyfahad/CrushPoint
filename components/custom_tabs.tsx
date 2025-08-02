@@ -9,9 +9,11 @@ import Profile from "@/assets/images/profile.svg";
 import { color } from "@/utils/constants";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function CustomTabBar({ state, descriptors, navigation }: any) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.tabBar}>
+    <View style={[styles.tabBar, { marginBottom: insets.bottom }]}>
       {state.routes.map((route: any, index: number) => {
         const focused = state.index === index;
 

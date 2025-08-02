@@ -1,7 +1,9 @@
 import CustomTabBar from "@/components/custom_tabs";
 import { Tabs } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
