@@ -246,7 +246,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "flex-start",
     backgroundColor: color.gray95,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 99,
   },
   lookingForText: {
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: color.gray94,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 20,
   },
   interestText: {

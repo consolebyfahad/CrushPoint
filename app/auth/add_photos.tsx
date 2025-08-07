@@ -50,7 +50,7 @@ export default function AddPhotos() {
       const existingPhotos: UploadedPhoto[] = userImages.map(
         (fileName, index) => ({
           id: `existing_${index}`,
-          uri: `https://your-server.com/uploads/${fileName}`, // Replace with your actual image URL
+          uri: `https://your-server.com/uploads/${fileName}`,
           width: 300,
           height: 400,
           fileName: fileName,
@@ -142,7 +142,7 @@ export default function AddPhotos() {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: false,
+        allowsMultipleSelection: true,
         quality: 0.8,
         aspect: [1, 1],
       });

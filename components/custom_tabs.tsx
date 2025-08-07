@@ -8,57 +8,66 @@ import Matches from "@/assets/images/match.svg";
 import Profile from "@/assets/images/profile.svg";
 import { color } from "@/utils/constants";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const { width: screenWidth } = Dimensions.get("window");
+
 export default function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
+
   return (
-    <View style={[styles.tabBar, { marginBottom: insets.bottom }]}>
-      {state.routes.map((route: any, index: number) => {
-        const focused = state.index === index;
+    <View style={[styles.tabBarContainer, { marginBottom: insets.bottom }]}>
+      <View style={styles.tabBar}>
+        {state.routes.map((route: any, index: number) => {
+          const focused = state.index === index;
+          const onPress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!focused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
 
-        const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!focused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-          }
-        };
-
-        return (
-          <TouchableOpacity
-            key={route.key}
-            onPress={onPress}
-            style={[styles.tabItem, focused && styles.activeTab]}
-          >
-            {route.name === "index" && (focused ? <ActiveHome /> : <Home />)}
-            {route.name === "matches" &&
-              (focused ? <ActiveMatches /> : <Matches />)}
-            {route.name === "events" && (focused ? <ActiveEvent /> : <Event />)}
-            {route.name === "profile" &&
-              (focused ? <ActiveProfile /> : <Profile />)}
-          </TouchableOpacity>
-        );
-      })}
+          return (
+            <TouchableOpacity
+              key={route.key}
+              onPress={onPress}
+              style={[styles.tabItem, focused && styles.activeTab]}
+            >
+              {route.name === "index" && (focused ? <ActiveHome /> : <Home />)}
+              {route.name === "matches" &&
+                (focused ? <ActiveMatches /> : <Matches />)}
+              {route.name === "events" &&
+                (focused ? <ActiveEvent /> : <Event />)}
+              {route.name === "profile" &&
+                (focused ? <ActiveProfile /> : <Profile />)}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  tabBarContainer: {
+    position: "absolute",
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    paddingHorizontal: screenWidth > 400 ? 70 : screenWidth * 0.15, // Responsive padding
+  },
   tabBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
     backgroundColor: color.white,
-    position: "absolute",
-    bottom: 40,
-    left: 70,
-    right: 70,
     height: 64,
     borderRadius: 99,
     elevation: 10,
@@ -66,6 +75,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    paddingHorizontal: 16,
+    minWidth: 240,
   },
   tabItem: {
     borderRadius: 99,

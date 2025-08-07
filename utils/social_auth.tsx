@@ -31,9 +31,7 @@ GoogleSignin.configure({
   webClientId:
     "247710361352-tpf24aqbsl6cldmat3m6377hh27mv8mo.apps.googleusercontent.com",
   iosClientId:
-    "247710361352-7dkl9r2vu65cclb0rq7s8g273kq7iobm.apps.googleusercontent.com",
-  // Add your Android client ID here
-  // androidClientId: "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com",
+    "247710361352-4783hk46dnrgqqj6rtqel6nl8q5i3rhp.apps.googleusercontent.com",
 });
 
 export default function SocialAuth({

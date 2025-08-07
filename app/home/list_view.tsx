@@ -192,11 +192,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
   },
   listContainer: {
-    paddingTop: 20,
+    paddingTop: 60,
     flexGrow: 1,
   },
   listFooter: {
-    height: 100, // Extra space at bottom
+    height: 100,
   },
   centerContainer: {
     flex: 1,

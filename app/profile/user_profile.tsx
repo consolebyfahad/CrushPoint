@@ -4,6 +4,7 @@ import ReportUser from "@/components/report_user";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import { FloatingBubbleAnimation } from "@/utils/matchAnimation";
 import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -29,8 +30,13 @@ export default function UserProfile() {
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
   const [showReportUser, setShowReportUser] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [animationProps, setAnimationProps] = useState<{
+    svgEmoji?: any;
+    color?: string;
+  }>({});
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  // Parse user data from params with fallback
   const userData = useMemo(() => {
     try {
       if (params.user && typeof params.user === "string") {
@@ -39,15 +45,13 @@ export default function UserProfile() {
       } else if (params.user && typeof params.user === "object") {
         return params.user;
       }
-      // Fallback: check if match data is directly in params
       return params;
     } catch (error) {
       console.error("Error parsing user data:", error);
-      return params; // Return raw params as fallback
+      return params;
     }
   }, [params]);
 
-  // Map API data to component structure
   const userInfo = useMemo(() => {
     if (!userData || typeof userData !== "object") {
       return {
@@ -73,7 +77,7 @@ export default function UserProfile() {
       id: userData.id || "unknown",
       name: userData.name || "Unknown User",
       age: userData.age || 0,
-      distance: "2.5 km", // or calculate as needed
+      distance: "2.5 km",
       isOnline: userData.isOnline || true,
       lookingFor: userData.lookingFor || [],
       interests: userData.interests || [],
@@ -93,7 +97,7 @@ export default function UserProfile() {
       languages: Array.isArray(userData.languages)
         ? userData.languages
         : userData.languages
-        ? userData.languages.split(",").map((lang: string) => lang.trim())
+        ? userData.languages.split(",").map((lang: any) => lang.trim())
         : [],
       images:
         userData.images && userData.images.length > 0
@@ -130,24 +134,58 @@ export default function UserProfile() {
     { emoji: svgIcon.Hi, action: "friend", color: "#F97316" },
   ];
 
-  const handleEmojiAction = async (action: string) => {
+  const handleEmojiAction = async (action: any) => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+
     try {
       const formData = new FormData();
-      formData.append("type", "add_data"),
-        formData.append("table_name", "matches"),
-        formData.append("match_id", userInfo.id),
-        formData.append("user_id", user?.user_id || ""),
-        formData.append("emoji", action);
+      formData.append("type", "add_data");
+      formData.append("table_name", "matches");
+      formData.append("match_id", userInfo.id);
+      formData.append("user_id", user?.user_id || "");
+      formData.append("emoji", action);
+
       console.log("formData", formData);
       const response = await apiCall(formData);
+
       if (response.result) {
+        // Find the corresponding emoji and color for animation
+        const emojiData = actionEmojis.find((item) => item.action === action);
+
+        setAnimationProps({
+          svgEmoji: emojiData?.emoji || svgIcon.Like,
+          color: emojiData?.color || "#3B82F6",
+        });
+        setShowAnimation(true);
       }
-    } catch (error) {}
-    // if (action === "like") {
-    //   router.push("/profile/match");
-    // }
+    } catch (error) {
+      console.error("Animation error:", error);
+    }
+
     console.log("Emoji action:", action, "for user:", userInfo.name);
   };
+
+  const handleAnimationComplete = () => {
+    setShowAnimation(false);
+    setIsAnimating(false);
+    setAnimationProps({});
+  };
+
+  const renderEmojiButton = ({ item, index }: { item: any; index: number }) => (
+    <TouchableOpacity
+      key={index}
+      style={[styles.emojiButton, isAnimating && styles.emojiButtonDisabled]}
+      onPress={() => handleEmojiAction(item.action)}
+      activeOpacity={isAnimating ? 1 : 0.8}
+      disabled={isAnimating}
+    >
+      <Text style={[styles.emojiText, isAnimating && styles.emojiTextDisabled]}>
+        {item.emoji}
+      </Text>
+      {isAnimating && <View style={styles.loadingOverlay}>{item.emoji}</View>}
+    </TouchableOpacity>
+  );
 
   const handleBlock = () => {
     setShowProfileOptions(false);
@@ -159,11 +197,11 @@ export default function UserProfile() {
     // Handle block logic here
     try {
       const formData = new FormData();
-      formData.append("type", "add_data"),
-        formData.append("table_name", "blocked_users"),
-        formData.append("block_id", userInfo.id),
-        formData.append("user_id", user?.user_id || ""),
-        console.log("formData", formData);
+      formData.append("type", "add_data");
+      formData.append("table_name", "blocked_users");
+      formData.append("block_id", userInfo.id);
+      formData.append("user_id", user?.user_id || "");
+      console.log("formData", formData);
       const response = await apiCall(formData);
       if (response.result) {
         setShowBlockConfirmation(false);
@@ -181,12 +219,12 @@ export default function UserProfile() {
     console.log("Report submitted:", reportData);
     try {
       const formData = new FormData();
-      formData.append("type", "add_data"),
-        formData.append("table_name", "reported_users"),
-        formData.append("block_id", userInfo.id),
-        formData.append("additional_details", reportData.additionalDetails),
-        formData.append("reason", reportData.reason),
-        formData.append("user_id", user?.user_id || "");
+      formData.append("type", "add_data");
+      formData.append("table_name", "reported_users");
+      formData.append("block_id", userInfo.id);
+      formData.append("additional_details", reportData.additionalDetails);
+      formData.append("reason", reportData.reason);
+      formData.append("user_id", user?.user_id || "");
       const response = await apiCall(formData);
       if (response.result) {
         setShowReportUser(false);
@@ -202,166 +240,171 @@ export default function UserProfile() {
 
   return (
     <View style={styles.container}>
-      {/* Image Slider */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: userInfo.images[currentImageIndex] }}
-          style={styles.profileImage}
-        />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Image Slider */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: userInfo.images[currentImageIndex] }}
+            style={styles.profileImage}
+          />
 
-        {/* Navigation Overlay */}
-        <View style={styles.imageOverlay}>
-          {/* Back Button */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleBack}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="arrow-back" size={20} color={color.white} />
-          </TouchableOpacity>
-          {/* Image Indicators */}
-          {userInfo.images.length > 1 && (
-            <View style={styles.imageIndicators}>
-              {userInfo.images.map((_: any, index: number) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.indicator,
-                    index === currentImageIndex && styles.activeIndicator,
-                  ]}
-                />
-              ))}
-            </View>
-          )}
-          {/* Options Button */}
-          <TouchableOpacity
-            style={styles.optionsButton}
-            onPress={handleOptions}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="ellipsis-vertical" size={20} color={color.white} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Image Navigation Areas */}
-        {userInfo.images.length > 1 && (
-          <>
+          {/* Navigation Overlay */}
+          <View style={styles.imageOverlay}>
+            {/* Back Button */}
             <TouchableOpacity
-              style={styles.leftImageArea}
-              onPress={handlePreviousImage}
-              activeOpacity={0.1}
-            />
-            <TouchableOpacity
-              style={styles.rightImageArea}
-              onPress={handleNextImage}
-              activeOpacity={0.1}
-            />
-          </>
-        )}
-
-        {/* Action Emojis */}
-        <View style={styles.actionEmojis}>
-          {actionEmojis.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.emojiButton}
-              onPress={() => handleEmojiAction(item.action)}
+              style={styles.backButton}
+              onPress={handleBack}
               activeOpacity={0.8}
             >
-              <Text style={styles.emojiText}>{item.emoji}</Text>
+              <Ionicons name="arrow-back" size={20} color={color.white} />
             </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      {/* Profile Info */}
-      <ScrollView
-        style={styles.profileInfo}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Name, Age, Distance */}
-        <View style={styles.nameSection}>
-          <View style={styles.nameRow}>
-            <Text style={styles.userName}>
-              {userInfo.name}
-              {userInfo.age > 0 ? `, ${userInfo.age}` : ""}
-            </Text>
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={styles.distanceContainer}>
-              <SimpleLineIcons
-                name="location-pin"
-                size={14}
-                color={color.gray55}
+            {/* Image Indicators */}
+            {userInfo.images.length > 1 && (
+              <View style={styles.imageIndicators}>
+                {userInfo.images.map((index: any) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.indicator,
+                      index === currentImageIndex && styles.activeIndicator,
+                    ]}
+                  />
+                ))}
+              </View>
+            )}
+            {/* Options Button */}
+            <TouchableOpacity
+              style={styles.optionsButton}
+              onPress={handleOptions}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="ellipsis-vertical"
+                size={20}
+                color={color.white}
               />
-              <Text style={styles.distance}>{userInfo.distance}</Text>
-            </View>
-            <TouchableOpacity style={styles.bookmarkButton}>
-              <Feather name="bookmark" size={20} color={color.black} />
             </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Looking For */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Looking for</Text>
-          <View style={styles.lookingForContainer}>
-            {userInfo.lookingFor.map((item: string, index: number) => (
-              <View key={index} style={styles.lookingForTag}>
-                <Text style={styles.lookingForText}>{item}</Text>
-              </View>
-            ))}
+          {/* Image Navigation Areas */}
+          {userInfo.images.length > 1 && (
+            <>
+              <TouchableOpacity
+                style={styles.leftImageArea}
+                onPress={handlePreviousImage}
+                activeOpacity={0.1}
+              />
+              <TouchableOpacity
+                style={styles.rightImageArea}
+                onPress={handleNextImage}
+                activeOpacity={0.1}
+              />
+            </>
+          )}
+
+          {/* Action Emojis */}
+          <View style={styles.actionEmojis}>
+            {actionEmojis.map((item, index) =>
+              renderEmojiButton({ item, index })
+            )}
           </View>
-        </View>
 
-        {/* Interests */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Interests</Text>
-          <View style={styles.interestsContainer}>
-            {userInfo.interests.map((interest: string, index: number) => (
-              <View key={index} style={styles.interestTag}>
-                <Text style={styles.interestText}>{interest}</Text>
+          {/* Floating Bubble Animation */}
+          {showAnimation && (
+            <FloatingBubbleAnimation
+              visible={showAnimation}
+              svgEmoji={animationProps.svgEmoji}
+              color={animationProps.color}
+              onComplete={handleAnimationComplete}
+            />
+          )}
+        </View>
+        {/* Profile Info */}
+        <View style={styles.profileInfo}>
+          {/* Name, Age, Distance */}
+          <View style={styles.nameSection}>
+            <View style={styles.nameRow}>
+              <Text style={styles.userName}>
+                {userInfo.name}
+                {userInfo.age > 0 ? `, ${userInfo.age}` : ""}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={styles.distanceContainer}>
+                <SimpleLineIcons
+                  name="location-pin"
+                  size={14}
+                  color={color.gray55}
+                />
+                <Text style={styles.distance}>{userInfo.distance}</Text>
               </View>
-            ))}
+              <TouchableOpacity style={styles.bookmarkButton}>
+                <Feather name="bookmark" size={20} color={color.black} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        {/* Languages */}
-        {userInfo.languages.length > 0 && (
+          {/* Looking For */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Languages</Text>
-            <View style={styles.interestsContainer}>
-              {userInfo.languages.map((language: string, index: number) => (
-                <View key={index} style={styles.languageTag}>
-                  <Text style={styles.languageText}>{language}</Text>
+            <Text style={styles.sectionTitle}>Looking for</Text>
+            <View style={styles.lookingForContainer}>
+              {userInfo.lookingFor.map((item: any, index: number) => (
+                <View key={index} style={styles.lookingForTag}>
+                  <Text style={styles.lookingForText}>{item}</Text>
                 </View>
               ))}
             </View>
           </View>
-        )}
 
-        {/* Other Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Information</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Height</Text>
-            <Text style={styles.infoValue}>{userInfo.height}</Text>
+          {/* Interests */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Interests</Text>
+            <View style={styles.interestsContainer}>
+              {userInfo.interests.map((item: any, index: number) => (
+                <View key={index} style={styles.interestTag}>
+                  <Text style={styles.interestText}>{item}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Nationality</Text>
-            <Text style={styles.infoValue}>{userInfo.nationality}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Religion</Text>
-            <Text style={styles.infoValue}>{userInfo.religion}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Zodiac</Text>
-            <Text style={styles.infoValue}>{userInfo.zodiac}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Gender</Text>
-            <Text style={styles.infoValue}>{userInfo.gender}</Text>
+
+          {/* Languages */}
+          {userInfo.languages.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Languages</Text>
+              <View style={styles.interestsContainer}>
+                {userInfo.languages.map((item: any, index: number) => (
+                  <View key={index} style={styles.languageTag}>
+                    <Text style={styles.languageText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Other Information */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Basic Information</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Height</Text>
+              <Text style={styles.infoValue}>{userInfo.height}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Nationality</Text>
+              <Text style={styles.infoValue}>{userInfo.nationality}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Religion</Text>
+              <Text style={styles.infoValue}>{userInfo.religion}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Zodiac</Text>
+              <Text style={styles.infoValue}>{userInfo.zodiac}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Gender</Text>
+              <Text style={styles.infoValue}>{userInfo.gender}</Text>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -502,6 +545,29 @@ const styles = StyleSheet.create({
   emojiText: {
     fontSize: 20,
   },
+  emojiButtonDisabled: {
+    opacity: 0.6,
+  },
+  emojiTextDisabled: {
+    opacity: 0.5,
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#666",
+  },
+  // Profile Info Styles
   profileInfo: {
     flex: 1,
     paddingHorizontal: 20,

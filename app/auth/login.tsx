@@ -149,6 +149,11 @@ export default function Login() {
               value={activeTab === "phone" ? phoneNumber : email}
               onChangeText={(text) => {
                 if (activeTab === "phone") {
+                  const digitsOnly = text.replace(/\D/g, "");
+
+                  if (digitsOnly.length > 13) {
+                    return;
+                  }
                   const raw = text.replace(/\s/g, "");
                   const withPlus = raw.startsWith("+")
                     ? raw

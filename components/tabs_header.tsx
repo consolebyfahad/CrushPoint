@@ -45,12 +45,21 @@ export function NotificationsTabsHeader({ title, notifications, close }: any) {
 }
 
 // TabsHeader for Matches
-export function MatchesTabsHeader({ title, matches }: any) {
+export function MatchesTabsHeader({
+  title,
+  matches,
+  activeTab,
+  matchesCount,
+  totalRequestsCount,
+}: any) {
   return (
     <View style={styles.header}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.eventCount}>{matches.length} Matches</Text>
+        <Text style={styles.eventCount}>
+          {activeTab === "matches" ? matchesCount : totalRequestsCount}{" "}
+          {matches}
+        </Text>
       </View>
     </View>
   );

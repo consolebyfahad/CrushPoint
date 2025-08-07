@@ -59,6 +59,7 @@
       "expo-router",
       "expo-web-browser",
       "@react-native-firebase/app",
+      "@react-native-firebase/auth",
       "expo-apple-authentication",
       "@react-native-google-signin/google-signin",
       [

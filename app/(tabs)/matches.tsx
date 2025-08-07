@@ -1,5 +1,7 @@
 import CustomButton from "@/components/custom_button";
 import { MatchesTabsHeader } from "@/components/tabs_header";
+import useGetMatches from "@/hooks/useGetMatches";
+import useGetRequests from "@/hooks/useGetRequests";
 import { color, font } from "@/utils/constants";
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -9,38 +11,23 @@ import Requests from "../matches/requests";
 
 export default function MatchesMain() {
   const [activeTab, setActiveTab] = useState("matches");
-
+  const { matches } = useGetMatches();
+  const { incomingRequests, outgoingRequests } = useGetRequests();
+  const matchesCount = matches.length;
+  const totalRequestsCount = incomingRequests.length + outgoingRequests.length;
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <MatchesTabsHeader
         title={activeTab === "matches" ? "Your Matches" : "Meetup Requests"}
-        matches={activeTab === "matches" ? "3 matches" : "3 requests"}
+        matches={activeTab === "matches" ? "matches" : "requests"}
+        matchesCount={matchesCount}
+        totalRequestsCount={totalRequestsCount}
+        activeTab={activeTab}
       />
-      {/* <View style={styles.header}>
-        <Text style={styles.headerTitle}>
-          {activeTab === "matches" ? "Your Matches" : "Meetup Requests"}
-        </Text>
-        <Text style={styles.matchCount}>{`${
-          activeTab === "matches" ? "3 matches" : "3 requests"
-        }`}</Text>
-      </View> */}
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
-        {/* <TouchableOpacity
-          style={[styles.tab, activeTab === "matches" && styles.activeTab]}
-          onPress={() => setActiveTab("matches")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "matches" && styles.activeTabText,
-            ]}
-          >
-            Matches
-          </Text>
-        </TouchableOpacity> */}
         <CustomButton
           title=" Matches"
           style={[styles.tab, activeTab === "matches" && styles.activeTab]}
@@ -59,20 +46,6 @@ export default function MatchesMain() {
           ]}
           onPress={() => setActiveTab("requests")}
         />
-
-        {/* <TouchableOpacity
-          style={[styles.tab, activeTab === "requests" && styles.activeTab]}
-          onPress={() => setActiveTab("requests")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "requests" && styles.activeTabText,
-            ]}
-          >
-            Meetup Requests
-          </Text>
-        </TouchableOpacity> */}
       </View>
 
       {/* Tab Content */}

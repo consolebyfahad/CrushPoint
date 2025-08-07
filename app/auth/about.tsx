@@ -7,14 +7,20 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Dimensions,
+  Keyboard,
+  Modal,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const About = () => {
   const { updateUserData } = useAppContext();
@@ -33,77 +39,139 @@ const About = () => {
   };
 
   const onDateChange = (event: any, selectedDate: any) => {
-    const currentDate = selectedDate || date;
-    setShowDatePicker(Platform.OS === "ios");
-    setDate(currentDate);
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+    }
 
-    // Format date as mm/dd/yyyy
-    const formattedDate = `${(currentDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}/${currentDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}/${currentDate.getFullYear()}`;
-    setDateOfBirth(formattedDate);
+    if (selectedDate) {
+      const currentDate = selectedDate;
+      setDate(currentDate);
+
+      // Format date as mm/dd/yyyy
+      const formattedDate = `${(currentDate.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}/${currentDate
+        .getDate()
+        .toString()
+        .padStart(2, "0")}/${currentDate.getFullYear()}`;
+      setDateOfBirth(formattedDate);
+    }
+  };
+
+  const handleDateConfirm = () => {
+    setShowDatePicker(false);
+  };
+
+  const handleDateCancel = () => {
+    setShowDatePicker(false);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Header />
-      <View style={styles.content}>
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>Tell us about you</Text>
-          <Text style={styles.disclaimerText}>
-            <Octicons name="info" size={14} color={color.gray55} />{" "}
-            {"We don't display your age publicly without your consent"}
-          </Text>
-        </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.content}>
+          <View style={styles.titleSection}>
+            <Text style={styles.title}>Tell us about you</Text>
+            <Text style={styles.disclaimerText}>
+              <Octicons name="info" size={14} color={color.gray55} />{" "}
+              {"We don't display your age publicly without your consent"}
+            </Text>
+          </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Your Name</Text>
-          <TextInput
-            style={[
-              styles.input,
-              Platform.OS === "ios" && { paddingVertical: 14 },
-            ]}
-            placeholder="Enter your name"
-            placeholderTextColor="#999"
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Date of Birth</Text>
-          <TouchableOpacity onPress={handleDatePress} style={styles.dateInput}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Your Name</Text>
             <TextInput
               style={[
-                styles.dateTextInput,
+                styles.input,
                 Platform.OS === "ios" && { paddingVertical: 14 },
               ]}
-              placeholder="mm/dd/yyyy"
+              placeholder="Enter your name"
               placeholderTextColor="#999"
-              value={dateOfBirth}
-              onChangeText={setDateOfBirth}
-              editable={false}
+              value={name}
+              onChangeText={setName}
             />
+          </View>
 
-            <Octicons name="calendar" size={18} color={color.gray55} />
-          </TouchableOpacity>
-          {showDatePicker && (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Date of Birth</Text>
+            <TouchableOpacity
+              onPress={handleDatePress}
+              style={styles.dateInput}
+            >
+              <TextInput
+                style={[
+                  styles.dateTextInput,
+                  Platform.OS === "ios" && { paddingVertical: 14 },
+                ]}
+                placeholder="mm/dd/yyyy"
+                placeholderTextColor="#999"
+                value={dateOfBirth}
+                editable={false}
+                pointerEvents="none"
+              />
+
+              <Octicons name="calendar" size={18} color={color.gray55} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Android Date Picker (inline) */}
+          {Platform.OS === "android" && showDatePicker && (
             <DateTimePicker
               testID="dateTimePicker"
               value={date}
               mode="date"
               is24Hour={true}
-              display={Platform.OS === "ios" ? "spinner" : "default"}
+              display="default"
               onChange={onDateChange}
               maximumDate={new Date()}
               themeVariant="light"
             />
           )}
         </View>
-      </View>
+      </TouchableWithoutFeedback>
+      {/* iOS Date Picker Modal */}
+      {Platform.OS === "ios" && (
+        <Modal
+          visible={showDatePicker}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity
+              style={styles.modalBackground}
+              activeOpacity={1}
+              onPress={() => setShowDatePicker(false)}
+            />
+            <View style={styles.datePickerContainer}>
+              {/* Header */}
+              <View style={styles.datePickerHeader}>
+                <TouchableOpacity onPress={handleDateCancel}>
+                  <Text style={styles.cancelButton}>Cancel</Text>
+                </TouchableOpacity>
+                <Text style={styles.datePickerTitle}>Select Date</Text>
+                <TouchableOpacity onPress={handleDateConfirm}>
+                  <Text style={styles.confirmButton}>Done</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Date Picker */}
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode="date"
+                is24Hour={true}
+                display="spinner"
+                onChange={onDateChange}
+                maximumDate={new Date()}
+                themeVariant="light"
+                style={styles.datePicker}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {/* Continue Button */}
       <View style={styles.buttonContainer}>
@@ -176,11 +244,59 @@ const styles = StyleSheet.create({
   },
   dateTextInput: {
     color: color.black,
+    flex: 1,
   },
   buttonContainer: {
     borderTopWidth: 1,
     padding: 16,
     borderColor: color.gray95,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  datePickerContainer: {
+    backgroundColor: color.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 34,
+  },
+  datePickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray94,
+  },
+  datePickerTitle: {
+    fontSize: 18,
+    fontFamily: font.semiBold,
+    color: color.black,
+  },
+  cancelButton: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray55,
+  },
+  confirmButton: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.primary,
+  },
+  datePicker: {
+    backgroundColor: color.white,
+    alignSelf: "center",
   },
 });
 
