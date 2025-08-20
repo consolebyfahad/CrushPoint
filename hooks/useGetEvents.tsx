@@ -104,16 +104,16 @@ const useGetEvents = () => {
 
           return {
             id: event.id || Math.random().toString(),
-            title: event.title || event.name || "Untitled Event",
-            category: event.category || event.type || "General",
-            date: event.date || event.event_date || new Date().toISOString(),
+            title: event.title || "Untitled Event",
+            category: event.category || "General",
+            date: event.date || new Date().toISOString(),
+            time: event.time,
             location: event.location || event.venue || "Location TBD",
             description:
               event.description || event.details || "No description available",
             image: parseEventImage(event.image || event.event_image),
             organizer: {
-              name:
-                event.organizer_name || event.organizer || "Event Organizer",
+              name: event.organized_by || "Event Organizer",
               image:
                 event.organizer_image ||
                 "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",

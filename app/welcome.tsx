@@ -7,7 +7,7 @@ import { color, font } from "@/utils/constants";
 import SocialAuth from "@/utils/social_auth";
 import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BackHandler,
   StyleSheet,
@@ -84,7 +84,7 @@ export default function Welcome() {
         <View style={styles.logo}>
           <AnimatedLogo />
         </View>
-        <Text style={styles.appName}>CrushPoint</Text>
+        <Text style={styles.appName}>Andra</Text>
         <View style={styles.contentContainer}>
           <Text style={styles.title}>Create Your Account</Text>
           <Text style={styles.subtitle}>

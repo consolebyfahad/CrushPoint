@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "CrushPoint",
+    "name": "Andra",
     "slug": "CrushPoint",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -59,7 +59,6 @@
       "expo-router",
       "expo-web-browser",
       "@react-native-firebase/app",
-      "@react-native-firebase/auth",
       "expo-apple-authentication",
       "@react-native-google-signin/google-signin",
       [

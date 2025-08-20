@@ -15,6 +15,7 @@ export default function MatchesMain() {
   const { incomingRequests, outgoingRequests } = useGetRequests();
   const matchesCount = matches.length;
   const totalRequestsCount = incomingRequests.length + outgoingRequests.length;
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}

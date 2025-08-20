@@ -77,7 +77,7 @@ export default function index() {
         )}
       </Animated.View>
       <Animated.Text style={[styles.appName, animatedTextStyle]}>
-        CrushPoint
+        Andra
       </Animated.Text>
     </View>
   );

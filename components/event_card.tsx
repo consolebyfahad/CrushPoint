@@ -4,23 +4,6 @@ import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function EventCard({ event, onPress, onToggleAttending }: any) {
-  const formatDate = (dateString: string) => {
-    // Format date to "Jul 15" format
-    const date = new Date(dateString);
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const day = date.getDate();
-    return `${month} ${day}`;
-  };
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
   const handlePress = () => {
     if (onPress) {
       onPress(event);
@@ -55,7 +38,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
             color={color.black}
             style={styles.calendarIcon}
           />
-          <Text style={styles.dateText}>{formatDate(event.date)}</Text>
+          <Text style={styles.dateText}>{event.date}</Text>
         </View>
 
         {/* Category Badge */}
@@ -89,7 +72,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
         {/* Time Info */}
         <View style={styles.timeRow}>
           <Ionicons name="time-outline" size={14} color={color.gray69} />
-          <Text style={styles.timeText}>{formatTime(event.date)}</Text>
+          <Text style={styles.timeText}>{event.time}</Text>
         </View>
 
         <Text style={styles.description} numberOfLines={2}>

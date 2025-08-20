@@ -181,8 +181,8 @@ export default function EventDetails({ route }: any) {
           <View style={styles.infoRow}>
             <Ionicons name="calendar-outline" size={20} color={color.gray14} />
             <View style={styles.infoContent}>
-              <Text style={styles.infoText}>{formatDate(event.date)}</Text>
-              <Text style={styles.infoSubtext}>{formatTime(event.date)}</Text>
+              <Text style={styles.infoText}>{event.date}</Text>
+              <Text style={styles.infoSubtext}>{event.time}</Text>
             </View>
           </View>
         </View>
