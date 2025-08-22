@@ -7,14 +7,24 @@ const INTEREST_MAPPING: { [key: string]: string } = {
   "1": "💻 Tech",
   "2": "🎨 Art",
   "3": "🧪 Test",
-  "4": "Music",
-  "5": "Sports",
-  "6": "Travel",
-  "7": "Food",
-  "8": "Movies",
-  "9": "Books",
-  "10": "Gaming",
-  // Add more mappings as needed
+  "4": "🎵 Music",
+  "5": "⚽ Sports",
+  "6": "✈️ Travel",
+  "7": "🍔 Food",
+  "8": "🎬 Movies",
+  "9": "📚 Books",
+  "10": "🎮 Gaming",
+  // skipping 11–17
+  "18": "💃 Dancing",
+  "19": "✍️ Writing",
+  "20": "⚽ Sports",
+  "21": "👗 Fashion",
+  "22": "🧘‍♀️ Yoga",
+  "23": "☕ Coffee",
+  "24": "🍷 Wine",
+  "25": "🥾 Hiking",
+  "26": "🗣️ Languages",
+  "27": "🔬 Science",
 };
 
 const convertInterestIdsToNames = (interestIds: string[]): string[] => {

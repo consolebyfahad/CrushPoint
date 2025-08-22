@@ -90,7 +90,7 @@ export default function useGetProfile() {
           state: userData.state || "Not Specified",
           city: userData.city || "Not Specified",
           languages: userData.languages || "Not Specified",
-          height: userData.height !== "0" ? userData.height : "Not Specified",
+          height: userData.height !== "0" ? userData.height : "0.0",
           nationality: userData.nationality || "Not Specified",
           religion: userData.religion || "Not Specified",
           zodiac: userData.zodiac || "Not Specified",

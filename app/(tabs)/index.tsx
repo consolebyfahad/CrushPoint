@@ -49,6 +49,7 @@ interface UserFilters {
 
 export default function Index() {
   const { user, updateUserData, userData } = useAppContext();
+
   // Filter data state
   const [filterData, setFilterData] = useState<UserFilters>({
     gender: "Male",
@@ -61,14 +62,20 @@ export default function Index() {
     religion: undefined,
     zodiacSign: undefined,
   });
+
   const { users, loading, error, refetch } = useGetUsers(filterData);
   const [viewType, setViewType] = useState("Map");
+  const [selectedUser, setSelectedUser] = useState<any>(null); // Selected user for map highlighting
+
+  // Modal states
   const [showFilters, setShowFilters] = useState(false);
   const [showLookingFor, setShowLookingFor] = useState(false);
   const [showHeight, setShowHeight] = useState(false);
   const [showNationality, setShowNationality] = useState(false);
   const [showReligion, setShowReligion] = useState(false);
   const [showZodiac, setShowZodiac] = useState(false);
+
+  // Location states
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -90,14 +97,11 @@ export default function Index() {
             setLocationPermissionGranted(true);
             setShowLocationModal(false);
 
-            // Get fresh location data
             const location = await requestUserLocation();
             console.log("Fresh location obtained:", location);
 
             if (location && isActive) {
               setCurrentLocation(location);
-
-              // Update location in database
               await updateLocationInDatabase(location);
             }
           } else {
@@ -133,7 +137,6 @@ export default function Index() {
       console.log("Location update response:", response);
 
       if (response.result || response.success) {
-        // Update user data in context
         updateUserData({
           lat: location.latitude,
           lng: location.longitude,
@@ -145,18 +148,16 @@ export default function Index() {
     }
   };
 
+  // Notification setup
   useEffect(() => {
     requestNotificationPermissions();
     const handleNotificationPress = async (data: any) => {
       console.log("🔔 Notification Pressed:", data);
       if (data?.date_id) {
         try {
-          // Show loading or handle UI feedback if needed
           console.log(
             "🔥 New match notification received, fetching match data..."
           );
-
-          // Fetch match data from your API using the date_id
           const matchData = await fetchMatchData(data.date_id);
 
           if (matchData) {
@@ -170,10 +171,10 @@ export default function Index() {
           }
         } catch (error) {
           console.error("❌ Failed to fetch match data:", error);
-          // Optionally show an error message to user
         }
       }
     };
+
     const unsubscribe = setupNotificationListeners(handleNotificationPress);
     return () => {
       unsubscribe();
@@ -211,36 +212,6 @@ export default function Index() {
     } catch (error) {
       console.error("❌ Error fetching match data:", error);
       return null;
-    }
-  };
-
-  const handleNotificationPressWithDirectData = (data: any) => {
-    console.log("🔔 Notification Pressed:", data);
-
-    // If your notification payload includes match data directly
-    if (data?.match_user_name && data?.match_user_image) {
-      const matchData = {
-        currentUser: {
-          name: "You",
-          image:
-            user?.profile_image ||
-            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
-        },
-        matchedUser: {
-          name: data.match_user_name,
-          age: parseInt(data.match_user_age) || 0,
-          distance: data.match_user_distance || "Unknown",
-          image: data.match_user_image,
-          id: data.match_user_id,
-        },
-      };
-
-      router.push({
-        pathname: "/profile/match",
-        params: {
-          matchData: JSON.stringify(matchData),
-        },
-      });
     }
   };
 
@@ -372,7 +343,6 @@ export default function Index() {
     setShowZodiac(true);
   };
 
-  // Back to filters handler
   const handleBackToFilters = () => {
     closeAllModals();
     setShowFilters(true);
@@ -389,9 +359,25 @@ export default function Index() {
     });
   };
 
-  const handleBookmark = (user: any) => {
-    console.log("Bookmark user:", user);
-    // Handle bookmark logic
+  // FIXED: Keep the original prop name for compatibility
+  const handleBookmark = (selectedUser: any) => {
+    console.log("Show user on map:", selectedUser);
+
+    // Switch to map view
+    setViewType("Map");
+
+    // Set the selected user for highlighting
+    setSelectedUser(selectedUser);
+
+    // Auto-clear selection after 8 seconds
+    setTimeout(() => {
+      setSelectedUser(null);
+    }, 8000);
+  };
+
+  // Handle manual user deselection
+  const handleUserDeselect = () => {
+    setSelectedUser(null);
   };
 
   const handleClose = () => {
@@ -413,7 +399,7 @@ export default function Index() {
       {viewType === "List View" ? (
         <ListView
           onViewProfile={handleViewProfile}
-          onBookmark={handleBookmark}
+          onBookmark={handleBookmark} // FIXED: Keep original prop name
           users={users}
           loading={loading}
           error={error}
@@ -427,6 +413,8 @@ export default function Index() {
           loading={loading}
           error={error}
           refetch={refetch}
+          selectedUser={selectedUser}
+          onUserDeselect={handleUserDeselect}
         />
       )}
 

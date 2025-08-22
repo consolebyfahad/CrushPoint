@@ -138,8 +138,8 @@ export default function Map({
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
-        scrollEnabled={false}
-        zoomEnabled={false}
+        scrollEnabled={true}
+        zoomEnabled={true}
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}

@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    minHeight: SCREEN_HEIGHT * 0.9,
+    minHeight: SCREEN_HEIGHT * 0.8,
     paddingBottom: 24,
   },
   header: {

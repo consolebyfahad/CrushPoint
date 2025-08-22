@@ -3,22 +3,31 @@ import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import CustomButton from "./custom_button";
 
 interface UserCardProps {
   user: any;
   onViewProfile: (user: any) => void;
-  onBookmark: (user: any) => void;
+  onBookmark: (user: any) => void; // FIXED: Keep original prop name for compatibility
 }
 
 export default function UserCard({
   user,
   onViewProfile,
-  onBookmark,
+  onBookmark, // This now handles showing user on map
 }: UserCardProps) {
   const { userData: currentUser } = useAppContext();
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   // Calculate distance between current user and target user
   const distance = calculateDistance(
@@ -49,16 +58,44 @@ export default function UserCard({
       onViewProfile(user);
     } catch (error) {
       console.error("Error in onViewProfile:", error);
+      Alert.alert("Error", "Unable to view profile. Please try again.");
     }
   };
 
-  // Handle bookmark press
-  const handleBookmark = () => {
+  // Handle show on map press (using original onBookmark prop)
+  const handleShowOnMap = () => {
     try {
-      onBookmark(user);
+      // Check if user has valid location
+      if (!user?.actualLocation?.lat || !user?.actualLocation?.lng) {
+        Alert.alert(
+          "Location Unavailable",
+          "This user's location is not available on the map."
+        );
+        return;
+      }
+
+      setIsLoadingLocation(true);
+
+      // Add a small delay for better UX
+      setTimeout(() => {
+        onBookmark(user); // This will trigger the map navigation
+        setIsLoadingLocation(false);
+      }, 300);
     } catch (error) {
       console.error("Error in onBookmark:", error);
+      setIsLoadingLocation(false);
+      Alert.alert("Error", "Unable to show location. Please try again.");
     }
+  };
+
+  // Format interests for display
+  const formatInterests = (interests: string[] = []) => {
+    return interests.slice(0, 3);
+  };
+
+  // Format looking for items
+  const formatLookingFor = (lookingFor: string[] = []) => {
+    return lookingFor.slice(0, 2);
   };
 
   return (
@@ -80,12 +117,21 @@ export default function UserCard({
             <Text style={styles.onlineText}>Online</Text>
           </View>
         )}
+
+        {/* Image overlay for viewing more photos */}
+        {user?.images && user.images.length > 1 && (
+          <View style={styles.imageOverlay}>
+            <Text style={styles.imageCount}>
+              +{user.images.length - 1} more
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* User Info */}
       <View style={styles.userInfo}>
         <View style={styles.nameRow}>
-          <Text style={styles.userName}>
+          <Text style={styles.userName} numberOfLines={1}>
             {user?.name || "Unknown"}, {user?.age || "N/A"}
           </Text>
           <View style={styles.distanceContainer}>
@@ -98,35 +144,55 @@ export default function UserCard({
           </View>
         </View>
 
-        {/* Looking For - Fixed key prop issue */}
+        {/* Looking For Section */}
         {user?.lookingFor && user.lookingFor.length > 0 && (
-          <View style={styles.interestsContainer}>
-            {user.lookingFor
-              .slice(0, 2)
-              .map((lookingFor: string, index: number) => (
-                <View
-                  key={`looking-for-${index}-${lookingFor}`}
-                  style={styles.lookingForContainer}
-                >
-                  <Text style={styles.lookingForText}>{lookingFor}</Text>
+          <View style={styles.lookingForSection}>
+            <Text style={styles.sectionLabel}>Looking for:</Text>
+            <View style={styles.lookingForContainer}>
+              {formatLookingFor(user.lookingFor).map(
+                (lookingFor: string, index: number) => (
+                  <View
+                    key={`looking-for-${index}-${lookingFor}`}
+                    style={styles.lookingForTag}
+                  >
+                    <Text style={styles.lookingForText}>{lookingFor}</Text>
+                  </View>
+                )
+              )}
+              {user.lookingFor.length > 2 && (
+                <View style={styles.moreTag}>
+                  <Text style={styles.moreText}>
+                    +{user.lookingFor.length - 2}
+                  </Text>
                 </View>
-              ))}
+              )}
+            </View>
           </View>
         )}
 
-        {/* Interests - Fixed key prop issue */}
+        {/* Interests Section */}
         {user?.interests && user.interests.length > 0 && (
-          <View style={styles.interestsContainer}>
-            {user.interests
-              .slice(0, 3)
-              .map((interest: string, index: number) => (
-                <View
-                  key={`interest-${index}-${interest}`}
-                  style={styles.interestTag}
-                >
-                  <Text style={styles.interestText}>{interest}</Text>
+          <View style={styles.interestsSection}>
+            <Text style={styles.sectionLabel}>Interests:</Text>
+            <View style={styles.interestsContainer}>
+              {formatInterests(user.interests).map(
+                (interest: string, index: number) => (
+                  <View
+                    key={`interest-${index}-${interest}`}
+                    style={styles.interestTag}
+                  >
+                    <Text style={styles.interestText}>{interest}</Text>
+                  </View>
+                )
+              )}
+              {user.interests.length > 3 && (
+                <View style={styles.moreTag}>
+                  <Text style={styles.moreText}>
+                    +{user.interests.length - 3}
+                  </Text>
                 </View>
-              ))}
+              )}
+            </View>
           </View>
         )}
 
@@ -145,15 +211,28 @@ export default function UserCard({
           <CustomButton
             title="View Profile"
             style={styles.viewProfileButton}
+            fontstyle={styles.viewProfileButtonText}
             onPress={handleViewProfile}
           />
 
           <TouchableOpacity
-            style={styles.bookmarkButton}
-            onPress={handleBookmark}
+            style={[
+              styles.mapButton,
+              isLoadingLocation && styles.mapButtonLoading,
+            ]}
+            onPress={handleShowOnMap}
             activeOpacity={0.8}
+            disabled={isLoadingLocation}
           >
-            <Feather name="map" size={18} color="black" />
+            {isLoadingLocation ? (
+              <ActivityIndicator size="small" color={color.primary} />
+            ) : (
+              <SimpleLineIcons
+                name="location-pin"
+                size={20}
+                color={color.primary}
+              />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -168,7 +247,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 8,
     borderWidth: 1,
-    borderColor: color.gray870,
+    borderColor: color.gray87,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -181,7 +260,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: "relative",
-    height: 300,
+    height: 280,
     width: "100%",
   },
   profileImage: {
@@ -200,10 +279,18 @@ const styles = StyleSheet.create({
     left: 16,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#5FB3D4",
+    backgroundColor: "#4CAF50",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   onlineDot: {
     width: 8,
@@ -217,6 +304,20 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
     color: color.white,
   },
+  imageOverlay: {
+    position: "absolute",
+    bottom: 16,
+    right: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  imageCount: {
+    fontSize: 12,
+    fontFamily: font.medium,
+    color: color.white,
+  },
   userInfo: {
     padding: 16,
   },
@@ -224,31 +325,50 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: font.semiBold,
     color: color.black,
     flex: 1,
+    marginRight: 8,
   },
   distanceContainer: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: color.gray95,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   distance: {
     fontSize: 14,
-    fontFamily: font.regular,
+    fontFamily: font.medium,
     color: color.gray55,
     marginLeft: 4,
   },
+  sectionLabel: {
+    fontSize: 14,
+    fontFamily: font.medium,
+    color: color.gray14,
+    marginBottom: 8,
+  },
+  lookingForSection: {
+    marginBottom: 12,
+  },
   lookingForContainer: {
     flexDirection: "row",
-    alignSelf: "flex-start",
-    backgroundColor: color.gray95,
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  lookingForTag: {
+    backgroundColor: color.primary + "15", // 15% opacity
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 99,
+    borderWidth: 1,
+    borderColor: color.primary + "30",
   },
   lookingForText: {
     fontSize: 14,
@@ -256,19 +376,21 @@ const styles = StyleSheet.create({
     color: color.primary,
     textTransform: "capitalize",
   },
+  interestsSection: {
+    marginBottom: 12,
+  },
   interestsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 12,
     gap: 8,
   },
   interestTag: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: color.gray94,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: color.gray87,
   },
   interestText: {
     fontSize: 14,
@@ -276,9 +398,22 @@ const styles = StyleSheet.create({
     color: color.black,
     textTransform: "capitalize",
   },
+  moreTag: {
+    backgroundColor: color.gray87,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moreText: {
+    fontSize: 12,
+    fontFamily: font.medium,
+    color: color.gray14,
+  },
   noInfoContainer: {
-    paddingVertical: 12,
-    marginBottom: 8,
+    paddingVertical: 16,
+    alignItems: "center",
   },
   noInfoText: {
     fontSize: 14,
@@ -290,20 +425,36 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 8,
+    marginTop: 16,
   },
   viewProfileButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    backgroundColor: color.primary,
   },
-  bookmarkButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: color.gray87,
+  viewProfileButtonText: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+  },
+  mapButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: color.primary,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: color.white,
+    shadowColor: color.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  mapButtonLoading: {
+    borderColor: color.gray87,
   },
 });

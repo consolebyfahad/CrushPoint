@@ -94,7 +94,7 @@ export default function Interests() {
       Alert.alert("Validation Error", "Please select at least one interest.");
       return;
     }
-
+    console.log("selectedInterests", selectedInterests);
     setIsLoading(true);
     try {
       const formData = new FormData();

@@ -18,14 +18,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Swiper from "react-native-swiper";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ProfileTab() {
   const { userData, user } = useAppContext();
-  console.log(user?.user_id);
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   const handleCamera = () => {
     console.log("Open camera");
     // Handle camera functionality
@@ -37,23 +38,11 @@ export default function ProfileTab() {
 
   const handleEditPrivateSpot = () => {
     router.push({
-      pathname: "/auth/private_spot",
+      pathname: "/profile/private_spots",
       params: {
         fromEdit: "true",
       },
     });
-  };
-
-  const handlePreviousImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? (userData.photos?.length || 1) - 1 : prev - 1
-    );
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === (userData.photos?.length || 1) - 1 ? 0 : prev + 1
-    );
   };
 
   const handleEditPhotos = () => {
@@ -62,6 +51,7 @@ export default function ProfileTab() {
       params: { fromEdit: "true" },
     });
   };
+
   const handleEditProfile = () => {
     router.push({
       pathname: "/profile/basic_info",
@@ -70,6 +60,7 @@ export default function ProfileTab() {
       },
     });
   };
+
   const handleEditInterests = () => {
     router.push({
       pathname: "/auth/interests",
@@ -99,65 +90,11 @@ export default function ProfileTab() {
     );
   }
 
+  const photos = userData.photos || [];
+  const hasMultiplePhotos = photos.length > 1;
+
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.mainPhotoContainer}>
-        <Image
-          source={{ uri: userData.photos?.[currentImageIndex] ?? "" }}
-          style={styles.mainPhoto}
-        />
-
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={handleCamera}
-            activeOpacity={0.8}
-          >
-            <Feather name="camera" size={20} color={color.black} />
-          </TouchableOpacity>
-
-          {/* Image Indicators */}
-          {(userData.photos?.length || 0) > 1 && (
-            <View style={styles.imageIndicators}>
-              {userData.photos?.map((_, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.indicator,
-                    index === currentImageIndex && styles.activeIndicator,
-                  ]}
-                />
-              ))}
-            </View>
-          )}
-
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={handleSettings}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="settings-outline" size={20} color={color.black} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Image Navigation Areas */}
-        {(userData.photos?.length || 0) > 1 && (
-          <>
-            <TouchableOpacity
-              style={styles.leftImageArea}
-              onPress={handlePreviousImage}
-              activeOpacity={0.1}
-            />
-            <TouchableOpacity
-              style={styles.rightImageArea}
-              onPress={handleNextImage}
-              activeOpacity={0.1}
-            />
-          </>
-        )}
-      </View>
-
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -169,6 +106,93 @@ export default function ProfileTab() {
           />
         }
       >
+        {/* Header with Swipeable Image */}
+        <View style={styles.mainPhotoContainer}>
+          {hasMultiplePhotos ? (
+            <Swiper
+              style={styles.swiperWrapper}
+              showsButtons={false}
+              showsPagination={false}
+              loop={true}
+              index={currentImageIndex}
+              onIndexChanged={(index) => setCurrentImageIndex(index)}
+              removeClippedSubviews={false}
+            >
+              {photos.map((photo, index) => (
+                <View key={index} style={styles.slideContainer}>
+                  <Image
+                    source={{ uri: photo }}
+                    style={styles.mainPhoto}
+                    resizeMode="cover"
+                  />
+                </View>
+              ))}
+            </Swiper>
+          ) : (
+            <Image
+              source={{ uri: photos[0] || "" }}
+              style={styles.mainPhoto}
+              resizeMode="cover"
+            />
+          )}
+
+          {/* Header Overlay */}
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={handleCamera}
+              activeOpacity={0.8}
+            >
+              <Feather name="camera" size={20} color={color.black} />
+            </TouchableOpacity>
+
+            {/* Custom Image Indicators */}
+            {hasMultiplePhotos && (
+              <View style={styles.imageIndicators}>
+                {photos.map((_, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.indicator,
+                      index === currentImageIndex && styles.activeIndicator,
+                    ]}
+                    onPress={() => setCurrentImageIndex(index)}
+                    activeOpacity={0.7}
+                  />
+                ))}
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={handleSettings}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="settings-outline" size={20} color={color.black} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Swipe Hint Overlay */}
+          {hasMultiplePhotos && (
+            <View style={styles.swipeHintOverlay}>
+              <View style={styles.swipeHintLeft}>
+                <Ionicons
+                  name="chevron-back"
+                  size={20}
+                  color="rgba(255,255,255,0.6)"
+                />
+              </View>
+              <View style={styles.swipeHintRight}>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color="rgba(255,255,255,0.6)"
+                />
+              </View>
+            </View>
+          )}
+        </View>
+
         {/* Name and Age */}
         <View style={styles.nameSection}>
           <Text style={styles.userName}>
@@ -199,18 +223,31 @@ export default function ProfileTab() {
           <View
             style={[
               styles.photosContainer,
-              userData.photos.length === 3 && {
+              photos.length === 3 && {
                 justifyContent: "space-between",
               },
             ]}
           >
-            {(userData.photos ?? []).slice(0, 3).map((photo, index) => (
-              <View key={index} style={styles.photoItem}>
+            {photos.slice(0, 3).map((photo, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.photoItem}
+                onPress={() => setCurrentImageIndex(index)}
+                activeOpacity={0.8}
+              >
                 <Image source={{ uri: photo }} style={styles.photo} />
-              </View>
+                {index === currentImageIndex && (
+                  <View style={styles.currentPhotoIndicator}>
+                    <View style={styles.currentPhotoDot} />
+                  </View>
+                )}
+              </TouchableOpacity>
             ))}
-            {(userData.photos ?? []).length < 3 && (
-              <TouchableOpacity style={styles.addPhotoButton}>
+            {photos.length < 3 && (
+              <TouchableOpacity
+                style={styles.addPhotoButton}
+                onPress={handleEditPhotos}
+              >
                 <Feather name="camera" size={24} color={color.gray900} />
               </TouchableOpacity>
             )}
@@ -323,16 +360,22 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
   },
-  retryButton: {
-    backgroundColor: color.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+  content: {
+    flex: 1,
   },
-  retryText: {
-    color: color.white,
-    fontSize: 16,
-    fontFamily: font.medium,
+  mainPhotoContainer: {
+    height: SCREEN_HEIGHT * 0.55,
+    position: "relative",
+  },
+  swiperWrapper: {
+    height: "100%",
+  },
+  slideContainer: {
+    flex: 1,
+  },
+  mainPhoto: {
+    width: "100%",
+    height: "100%",
   },
   header: {
     position: "absolute",
@@ -341,6 +384,7 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     zIndex: 10,
   },
@@ -360,49 +404,38 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  content: {
-    flex: 1,
-  },
-  mainPhotoContainer: {
-    height: SCREEN_HEIGHT * 0.55,
-    position: "relative",
-  },
-  mainPhoto: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  leftImageArea: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    width: SCREEN_WIDTH / 2,
-    height: "100%",
-  },
-  rightImageArea: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    width: SCREEN_WIDTH / 2,
-    height: "100%",
-  },
   imageIndicators: {
-    position: "absolute",
-    top: 20,
-    left: 120,
-    right: 120,
     flexDirection: "row",
     gap: 6,
-    zIndex: 5,
+    alignItems: "center",
   },
   indicator: {
-    flex: 1,
+    width: 24,
     height: 6,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    borderRadius: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderRadius: 3,
   },
   activeIndicator: {
     backgroundColor: color.white,
+  },
+  swipeHintOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 30,
+    pointerEvents: "none",
+    zIndex: 5,
+  },
+  swipeHintLeft: {
+    opacity: 0.8,
+  },
+  swipeHintRight: {
+    opacity: 0.8,
   },
   nameSection: {
     padding: 16,
@@ -451,7 +484,6 @@ const styles = StyleSheet.create({
   },
   photosContainer: {
     flexDirection: "row",
-
     gap: 12,
   },
   photoItem: {
@@ -463,16 +495,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     resizeMode: "cover",
   },
-  removePhotoButton: {
+  currentPhotoIndicator: {
     position: "absolute",
-    top: 6,
-    right: 6,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    top: 8,
+    right: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "rgba(0,0,0,0.6)",
     alignItems: "center",
     justifyContent: "center",
+  },
+  currentPhotoDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: color.white,
   },
   addPhotoButton: {
     width: 103,
@@ -501,10 +539,6 @@ const styles = StyleSheet.create({
     color: color.black,
     textTransform: "capitalize",
   },
-  relationshipGoals: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
   additionalGoals: {
     fontSize: 16,
     fontFamily: font.medium,
@@ -522,10 +556,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-  },
-  interestIcon: {
-    fontSize: 14,
-    marginRight: 6,
   },
   interestText: {
     fontSize: 14,
