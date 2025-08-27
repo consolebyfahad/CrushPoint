@@ -7,7 +7,6 @@ import Home from "@/assets/images/home.svg";
 import Matches from "@/assets/images/match.svg";
 import Profile from "@/assets/images/profile.svg";
 import { color } from "@/utils/constants";
-import React from "react";
 import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -56,11 +55,11 @@ export default function CustomTabBar({ state, descriptors, navigation }: any) {
 const styles = StyleSheet.create({
   tabBarContainer: {
     position: "absolute",
-    bottom: 40,
+    bottom: 20,
     left: 0,
     right: 0,
     alignItems: "center",
-    paddingHorizontal: screenWidth > 400 ? 70 : screenWidth * 0.15, // Responsive padding
+    paddingHorizontal: screenWidth > 400 ? 70 : screenWidth * 0.15,
   },
   tabBar: {
     flexDirection: "row",
@@ -68,14 +67,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
     backgroundColor: color.white,
-    height: 64,
+    // height: 64,
     borderRadius: 99,
     elevation: 10,
     shadowColor: color.gray55,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    paddingHorizontal: 16,
+    padding: 10,
     minWidth: 240,
   },
   tabItem: {

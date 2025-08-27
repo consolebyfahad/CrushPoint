@@ -62,11 +62,19 @@ export default function UserCard({
     }
   };
 
-  // Handle show on map press (using original onBookmark prop)
+  // Updated handleShowOnMap function in UserCard component
+
   const handleShowOnMap = () => {
     try {
-      // Check if user has valid location
-      if (!user?.actualLocation?.lat || !user?.actualLocation?.lng) {
+      // Check if user has valid location in actualLocation
+      const hasActualLocation =
+        user?.actualLocation?.lat && user?.actualLocation?.lng;
+
+      // Check if user has valid location in loc object
+      const hasLocLocation = user?.loc?.lat && user?.loc?.lng;
+
+      // If no valid location found
+      if (!hasActualLocation && !hasLocLocation) {
         Alert.alert(
           "Location Unavailable",
           "This user's location is not available on the map."
@@ -87,7 +95,6 @@ export default function UserCard({
       Alert.alert("Error", "Unable to show location. Please try again.");
     }
   };
-
   // Format interests for display
   const formatInterests = (interests: string[] = []) => {
     return interests.slice(0, 3);

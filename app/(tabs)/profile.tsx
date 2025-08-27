@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -18,7 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Swiper from "react-native-swiper";
+import PagerView from "react-native-pager-view";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -26,6 +26,7 @@ export default function ProfileTab() {
   const { userData, user } = useAppContext();
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const pagerRef = useRef(null);
 
   const handleCamera = () => {
     console.log("Open camera");
@@ -70,6 +71,15 @@ export default function ProfileTab() {
     });
   };
 
+  const handleIndicatorPress = (index) => {
+    setCurrentImageIndex(index);
+    pagerRef.current?.setPage(index);
+  };
+
+  const handlePageSelected = (event) => {
+    setCurrentImageIndex(event.nativeEvent.position);
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -109,17 +119,14 @@ export default function ProfileTab() {
         {/* Header with Swipeable Image */}
         <View style={styles.mainPhotoContainer}>
           {hasMultiplePhotos ? (
-            <Swiper
-              style={styles.swiperWrapper}
-              showsButtons={false}
-              showsPagination={false}
-              loop={true}
-              index={currentImageIndex}
-              onIndexChanged={(index) => setCurrentImageIndex(index)}
-              removeClippedSubviews={false}
+            <PagerView
+              ref={pagerRef}
+              style={styles.pagerView}
+              initialPage={0}
+              onPageSelected={handlePageSelected}
             >
               {photos.map((photo, index) => (
-                <View key={index} style={styles.slideContainer}>
+                <View key={index} style={styles.page}>
                   <Image
                     source={{ uri: photo }}
                     style={styles.mainPhoto}
@@ -127,7 +134,7 @@ export default function ProfileTab() {
                   />
                 </View>
               ))}
-            </Swiper>
+            </PagerView>
           ) : (
             <Image
               source={{ uri: photos[0] || "" }}
@@ -156,7 +163,7 @@ export default function ProfileTab() {
                       styles.indicator,
                       index === currentImageIndex && styles.activeIndicator,
                     ]}
-                    onPress={() => setCurrentImageIndex(index)}
+                    onPress={() => handleIndicatorPress(index)}
                     activeOpacity={0.7}
                   />
                 ))}
@@ -175,20 +182,38 @@ export default function ProfileTab() {
           {/* Swipe Hint Overlay */}
           {hasMultiplePhotos && (
             <View style={styles.swipeHintOverlay}>
-              <View style={styles.swipeHintLeft}>
+              <TouchableOpacity
+                style={styles.swipeHintLeft}
+                onPress={() => {
+                  const prevIndex =
+                    currentImageIndex > 0
+                      ? currentImageIndex - 1
+                      : photos.length - 1;
+                  handleIndicatorPress(prevIndex);
+                }}
+              >
                 <Ionicons
                   name="chevron-back"
                   size={20}
                   color="rgba(255,255,255,0.6)"
                 />
-              </View>
-              <View style={styles.swipeHintRight}>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.swipeHintRight}
+                onPress={() => {
+                  const nextIndex =
+                    currentImageIndex < photos.length - 1
+                      ? currentImageIndex + 1
+                      : 0;
+                  handleIndicatorPress(nextIndex);
+                }}
+              >
                 <Ionicons
                   name="chevron-forward"
                   size={20}
                   color="rgba(255,255,255,0.6)"
                 />
-              </View>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -232,7 +257,7 @@ export default function ProfileTab() {
               <TouchableOpacity
                 key={index}
                 style={styles.photoItem}
-                onPress={() => setCurrentImageIndex(index)}
+                onPress={() => handleIndicatorPress(index)}
                 activeOpacity={0.8}
               >
                 <Image source={{ uri: photo }} style={styles.photo} />
@@ -367,11 +392,14 @@ const styles = StyleSheet.create({
     height: SCREEN_HEIGHT * 0.55,
     position: "relative",
   },
-  swiperWrapper: {
-    height: "100%",
-  },
-  slideContainer: {
+  pagerView: {
     flex: 1,
+    width: SCREEN_WIDTH,
+  },
+  page: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   mainPhoto: {
     width: "100%",
@@ -428,13 +456,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 30,
-    pointerEvents: "none",
     zIndex: 5,
   },
   swipeHintLeft: {
+    padding: 20,
     opacity: 0.8,
   },
   swipeHintRight: {
+    padding: 20,
     opacity: 0.8,
   },
   nameSection: {
@@ -563,6 +592,6 @@ const styles = StyleSheet.create({
     color: color.black,
   },
   bottomSpacing: {
-    height: 100,
+    height: 110,
   },
 });

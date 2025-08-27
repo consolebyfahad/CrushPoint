@@ -24,6 +24,7 @@ export default function PrivateSpot() {
   const { updateUserData, userData, user } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
+  console.log("params", params);
   const isEdit = params?.fromEdit === "true";
   const [selectedRadius, setSelectedRadius] = useState("100m");
   const [mapRegion, setMapRegion] = useState<Region>({
@@ -39,9 +40,25 @@ export default function PrivateSpot() {
 
   useEffect(() => {
     if (isEdit) {
-      const lat = userData?.lat;
-      const lng = userData?.lng;
-      const radius = userData?.radius;
+      // Check URL params first, then fallback to userData
+      const paramLat = params?.latitude
+        ? parseFloat(params.latitude as string)
+        : null;
+      const paramLng = params?.longitude
+        ? parseFloat(params.longitude as string)
+        : null;
+      const paramRadius = params?.radius
+        ? parseInt(params.radius as string)
+        : null;
+
+      // Use params if available, otherwise fallback to userData
+      const lat =
+        paramLat ||
+        (userData?.lat ? parseFloat(userData.lat.toString()) : null);
+      const lng =
+        paramLng ||
+        (userData?.lng ? parseFloat(userData.lng.toString()) : null);
+      const radius = paramRadius || userData?.radius;
 
       if (lat && lng) {
         const existingRegion: Region = {
@@ -61,7 +78,16 @@ export default function PrivateSpot() {
     } else {
       getUserLocation();
     }
-  }, [isEdit, userData?.lat, userData?.lng, userData?.radius]);
+  }, [
+    isEdit,
+    userData?.lat,
+    userData?.lng,
+    userData?.radius,
+    params?.latitude, // Extract specific param values
+    params?.longitude, // instead of entire params object
+    params?.longitude,
+    params?.spotId,
+  ]);
 
   const getUserLocation = async () => {
     setIsLoadingLocation(true);
@@ -102,7 +128,12 @@ export default function PrivateSpot() {
   };
 
   const handleMapRegionChange = (region: Region) => {
-    setMapRegion(region);
+    setMapRegion({
+      latitude: parseFloat(region.latitude.toString()),
+      longitude: parseFloat(region.longitude.toString()),
+      latitudeDelta: region.latitudeDelta,
+      longitudeDelta: region.longitudeDelta,
+    });
   };
 
   const handleSaveAndContinue = () => {
@@ -144,7 +175,7 @@ export default function PrivateSpot() {
         showToast("Private spot updated successfully!", "success");
         setTimeout(() => {
           router.back();
-        }, 1000);
+        }, 500);
       } else {
         showToast("Failed to update private spot", "error");
       }
@@ -207,8 +238,8 @@ export default function PrivateSpot() {
             {/* Privacy Circle - always centered on current map region */}
             <Circle
               center={{
-                latitude: mapRegion.latitude,
-                longitude: mapRegion.longitude,
+                latitude: parseFloat(mapRegion.latitude.toString()),
+                longitude: parseFloat(mapRegion.longitude.toString()),
               }}
               radius={getRadiusInMeters()}
               fillColor="rgba(99, 179, 206, 0.2)"
@@ -219,8 +250,8 @@ export default function PrivateSpot() {
             {/* Center Marker - always at map center */}
             <Marker
               coordinate={{
-                latitude: mapRegion.latitude,
-                longitude: mapRegion.longitude,
+                latitude: parseFloat(mapRegion.latitude.toString()),
+                longitude: parseFloat(mapRegion.longitude.toString()),
               }}
               anchor={{ x: 0.5, y: 0.5 }}
             >

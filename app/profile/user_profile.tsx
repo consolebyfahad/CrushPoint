@@ -10,7 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import PagerView from "react-native-pager-view";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -36,6 +37,9 @@ export default function UserProfile() {
     color?: string;
   }>({});
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Ref for PagerView
+  const pagerRef = useRef<PagerView>(null);
 
   const userData = useMemo(() => {
     try {
@@ -114,16 +118,27 @@ export default function UserProfile() {
     setShowProfileOptions(true);
   };
 
-  const handlePreviousImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? userInfo.images.length - 1 : prev - 1
-    );
+  // Handle page change from PagerView
+  const handlePageSelected = (event: any) => {
+    setCurrentImageIndex(event.nativeEvent.position);
   };
 
+  // Navigate to previous image programmatically
+  const handlePreviousImage = () => {
+    const prevIndex =
+      currentImageIndex === 0
+        ? userInfo.images.length - 1
+        : currentImageIndex - 1;
+    pagerRef.current?.setPage(prevIndex);
+  };
+
+  // Navigate to next image programmatically
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === userInfo.images.length - 1 ? 0 : prev + 1
-    );
+    const nextIndex =
+      currentImageIndex === userInfo.images.length - 1
+        ? 0
+        : currentImageIndex + 1;
+    pagerRef.current?.setPage(nextIndex);
   };
 
   const actionEmojis = [
@@ -243,10 +258,18 @@ export default function UserProfile() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Image Slider */}
         <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: userInfo.images[currentImageIndex] }}
-            style={styles.profileImage}
-          />
+          <PagerView
+            ref={pagerRef}
+            style={styles.pagerView}
+            initialPage={0}
+            onPageSelected={handlePageSelected}
+          >
+            {userInfo.images.map((imageUri: any, index: any) => (
+              <View key={index} style={styles.page}>
+                <Image source={{ uri: imageUri }} style={styles.profileImage} />
+              </View>
+            ))}
+          </PagerView>
 
           {/* Navigation Overlay */}
           <View style={styles.imageOverlay}>
@@ -258,10 +281,11 @@ export default function UserProfile() {
             >
               <Ionicons name="arrow-back" size={20} color={color.white} />
             </TouchableOpacity>
+
             {/* Image Indicators */}
             {userInfo.images.length > 1 && (
               <View style={styles.imageIndicators}>
-                {userInfo.images.map((index: any) => (
+                {userInfo.images.map((_, index) => (
                   <View
                     key={index}
                     style={[
@@ -272,6 +296,7 @@ export default function UserProfile() {
                 ))}
               </View>
             )}
+
             {/* Options Button */}
             <TouchableOpacity
               style={styles.optionsButton}
@@ -286,7 +311,7 @@ export default function UserProfile() {
             </TouchableOpacity>
           </View>
 
-          {/* Image Navigation Areas */}
+          {/* Image Navigation Areas (Optional - for manual navigation) */}
           {userInfo.images.length > 1 && (
             <>
               <TouchableOpacity
@@ -319,6 +344,7 @@ export default function UserProfile() {
             />
           )}
         </View>
+
         {/* Profile Info */}
         <View style={styles.profileInfo}>
           {/* Name, Age, Distance */}
@@ -453,6 +479,14 @@ const styles = StyleSheet.create({
     height: SCREEN_HEIGHT * 0.55,
     position: "relative",
   },
+  pagerView: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  page: {
+    flex: 1,
+  },
   profileImage: {
     width: "100%",
     height: "100%",
@@ -465,6 +499,7 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     zIndex: 10,
   },
@@ -490,6 +525,7 @@ const styles = StyleSheet.create({
     top: 0,
     width: SCREEN_WIDTH / 2,
     height: "100%",
+    zIndex: 5,
   },
   rightImageArea: {
     position: "absolute",
@@ -497,19 +533,16 @@ const styles = StyleSheet.create({
     top: 0,
     width: SCREEN_WIDTH / 2,
     height: "100%",
+    zIndex: 5,
   },
   imageIndicators: {
-    position: "absolute",
-    top: 20,
-    left: 120,
-    right: 120,
     flexDirection: "row",
     gap: 6,
     zIndex: 5,
   },
   indicator: {
-    flex: 1,
-    height: 6,
+    width: 30,
+    height: 4,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 2,
   },

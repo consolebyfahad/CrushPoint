@@ -1,7 +1,7 @@
 import { useAppContext } from "@/context/app_context";
 import { color } from "@/utils/constants";
 import { MarkerIcon } from "@/utils/SvgIcons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -27,6 +27,8 @@ interface MapViewProps {
   loading: boolean;
   error: string | null;
   refetch?: any;
+  selectedUser?: any; // Add this prop
+  onUserDeselect?: () => void; // Add this prop
 }
 
 interface UserLocation {
@@ -41,15 +43,13 @@ export default function Map({
   loading,
   error,
   refetch,
+  selectedUser, // New prop for selected user
+  onUserDeselect, // New prop for deselecting user
 }: MapViewProps) {
   const { userData } = useAppContext();
-  // const { users, loading, error, refetch } = useGetUsers(filterData);
-  console.log("users", users);
-  // const [currentLocation, setCurrentLocation] = useState<UserLocation | null>(
-  //   null
-  // );
   const [mapRegion, setMapRegion] = useState<Region | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
+  const mapRef = useRef<MapView>(null); // Add map reference
 
   // Get user's current location
   useEffect(() => {
@@ -79,19 +79,59 @@ export default function Map({
       setMapRegion(newRegion);
       setLocationLoading(false);
     } else {
-      // If no location available, show loading
       setLocationLoading(true);
     }
   }, [currentLocation, userData?.lat, userData?.lng]);
 
+  // NEW: Animate to selected user location
+  useEffect(() => {
+    if (selectedUser && mapRef.current) {
+      // Get coordinates from either actualLocation or loc
+      const userLocation = getUserCoordinates(selectedUser);
+
+      if (userLocation) {
+        console.log("Animating to user location:", userLocation);
+
+        // Create region for selected user with appropriate zoom level
+        const selectedUserRegion = {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 0.005, // Zoom in closer to show the user
+          longitudeDelta: 0.005,
+        };
+
+        // Animate to the selected user's location
+        mapRef.current.animateToRegion(selectedUserRegion, 1000);
+      }
+    }
+  }, [selectedUser]);
+
+  // NEW: Helper function to get coordinates from user object
+  const getUserCoordinates = (user: any) => {
+    // Try actualLocation first (preferred)
+    if (user?.actualLocation?.lat && user?.actualLocation?.lng) {
+      return {
+        latitude: parseFloat(user.actualLocation.lat.toString()),
+        longitude: parseFloat(user.actualLocation.lng.toString()),
+      };
+    }
+
+    // Fallback to loc object
+    if (user?.loc?.lat && user?.loc?.lng) {
+      return {
+        latitude: parseFloat(user.loc.lat.toString()),
+        longitude: parseFloat(user.loc.lng.toString()),
+      };
+    }
+
+    return null;
+  };
+
   // Filter users that have valid coordinates
-  const usersWithLocation = users.filter(
-    (user) =>
-      user.actualLocation.lat &&
-      user.actualLocation.lng &&
-      !isNaN(parseFloat(user.actualLocation.lat.toString())) &&
-      !isNaN(parseFloat(user.actualLocation.lng.toString()))
-  );
+  const usersWithLocation = users.filter((user) => {
+    const coords = getUserCoordinates(user);
+    return coords && !isNaN(coords.latitude) && !isNaN(coords.longitude);
+  });
 
   // Get the location to display
   const displayLocation =
@@ -130,13 +170,14 @@ export default function Map({
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         provider={
           Platform.OS === "android" ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
         }
         style={styles.map}
         region={mapRegion}
         showsUserLocation={false}
-        showsMyLocationButton={false}
+        showsMyLocationButton={true}
         showsCompass={false}
         scrollEnabled={true}
         zoomEnabled={true}
@@ -146,6 +187,7 @@ export default function Map({
         loadingEnabled={true}
         loadingIndicatorColor={color.primary}
         loadingBackgroundColor={color.white}
+        onPress={onUserDeselect}
       >
         {/* Current user location marker */}
         <Marker
@@ -157,34 +199,47 @@ export default function Map({
         </Marker>
 
         {/* Other users markers */}
-        {usersWithLocation.map((mapUser) => (
-          <Marker
-            key={`user-${mapUser.id}`}
-            coordinate={{
-              latitude: parseFloat(mapUser.actualLocation.lat.toString()),
-              longitude: parseFloat(mapUser.actualLocation.lng.toString()),
-            }}
-            onPress={() => onUserPress(mapUser)}
-            identifier={`user-${mapUser.id}`}
-            tracksViewChanges={true}
-            anchor={{ x: 0.5, y: 1 }}
-            centerOffset={{ x: 0, y: 0 }}
-          >
-            <View style={styles.userMarker} pointerEvents="box-none">
-              <Image
-                source={{
-                  uri:
-                    mapUser.images?.[0] ||
-                    "https://via.placeholder.com/60x60.png?text=User",
-                }}
-                style={styles.userImage}
-                defaultSource={{
-                  uri: "https://via.placeholder.com/60x60.png?text=User",
-                }}
-              />
-            </View>
-          </Marker>
-        ))}
+        {usersWithLocation.map((mapUser) => {
+          const userCoords = getUserCoordinates(mapUser);
+          if (!userCoords) return null;
+
+          return (
+            <Marker
+              key={`user-${mapUser.id}`}
+              coordinate={userCoords}
+              onPress={() => onUserPress(mapUser)}
+              identifier={`user-${mapUser.id}`}
+              tracksViewChanges={true}
+              anchor={{ x: 0.5, y: 1 }}
+              centerOffset={{ x: 0, y: 0 }}
+            >
+              <View
+                style={[
+                  styles.userMarker,
+                  // NEW: Highlight selected user
+                  selectedUser?.id === mapUser.id && styles.selectedUserMarker,
+                ]}
+                pointerEvents="box-none"
+              >
+                <Image
+                  source={{
+                    uri:
+                      mapUser.images?.[0] ||
+                      "https://via.placeholder.com/60x60.png?text=User",
+                  }}
+                  style={styles.userImage}
+                  defaultSource={{
+                    uri: "https://via.placeholder.com/60x60.png?text=User",
+                  }}
+                />
+                {/* NEW: Add selection indicator */}
+                {selectedUser?.id === mapUser.id && (
+                  <View style={styles.selectionRing} />
+                )}
+              </View>
+            </Marker>
+          );
+        })}
       </MapView>
 
       {/* Users loading indicator */}
@@ -266,11 +321,29 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: color.white,
     overflow: "hidden",
+    position: "relative",
+  },
+  // NEW: Style for selected user marker
+  selectedUserMarker: {
+    borderColor: color.primary,
+    borderWidth: 3,
   },
   userImage: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
+  },
+  // NEW: Selection ring animation
+  selectionRing: {
+    position: "absolute",
+    top: -8,
+    left: -8,
+    right: -8,
+    bottom: -8,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: color.primary,
+    opacity: 0.6,
   },
   // Users loading overlay
   usersLoadingContainer: {

@@ -18,6 +18,7 @@ export const color = {
   gray900: "#BFBFBF",
   gray870: "#DADADA",
 
+  soft200: "#E1E4EA",
   success: "#40AF53",
   error: "#E04134",
   error100: "#FFECEB",

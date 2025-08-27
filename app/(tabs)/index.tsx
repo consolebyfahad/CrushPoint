@@ -22,6 +22,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Device from "expo-device";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -418,6 +419,12 @@ export default function Index() {
         />
       )}
 
+      <LinearGradient
+        colors={["rgba(255,255,255,1)", "rgba(255,255,255,0)"]}
+        style={styles.gradientOverlay}
+        pointerEvents="none"
+      />
+
       {/* Top Header */}
       <SafeAreaView style={styles.topHeader}>
         <View style={styles.headerContent}>
@@ -644,6 +651,14 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 10,
   },
+  gradientOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 130,
+    zIndex: 8,
+  },
   headerContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -660,7 +675,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: color.gray69,
+    borderColor: color.soft200,
     shadowColor: color.gray55,
     shadowOffset: {
       width: 0,
