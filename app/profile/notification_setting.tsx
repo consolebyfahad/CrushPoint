@@ -20,14 +20,15 @@ export default function NotificationSettings({ navigation }: any) {
 
   const [notificationSettings, setNotificationSettings] = useState({
     newMatches: true,
+    newMeetup: true,
     emojiReceived: true,
     nearbyMatches: true,
-    nearbyUsers: false,
-    profileVisits: false,
-    newEventPosted: false,
-    eventInvitationAccepted: false,
+    nearbyUsers: true,
+    profileVisits: true,
+    newEventPosted: true,
+    eventInvitationAccepted: true,
     eventReminder: true,
-    offersPromotions: false,
+    offersPromotions: true,
   });
 
   const [isChanged, setIsChanged] = useState(false);
@@ -151,6 +152,12 @@ export default function NotificationSettings({ navigation }: any) {
       title: "New Matches",
       description: "When you get a new match",
       enabled: notificationSettings.newMatches,
+    },
+    {
+      key: "newMeetup",
+      title: "Meetup",
+      description: "When you get a new meetup request",
+      enabled: notificationSettings.newMeetup,
     },
     {
       key: "emojiReceived",

@@ -7,6 +7,7 @@ import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
 import { MarkerIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
+import * as Location from "expo-location";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,28 +20,88 @@ import {
 } from "react-native";
 import MapView, { Circle, Marker, Region } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
+type PrivateSpotData = {
+  id?: string;
+  address: string;
+  lat: string;
+  lng: string;
+  radius: string;
+};
 
 export default function PrivateSpot() {
   const { updateUserData, userData, user } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
   console.log("params", params);
+
+  // Determine mode - check for spot data to determine if editing
   const isEdit = params?.fromEdit === "true";
-  const [selectedRadius, setSelectedRadius] = useState("100m");
-  const [mapRegion, setMapRegion] = useState<Region>({
-    latitude: 45.4408474,
-    longitude: 12.3155151,
-    latitudeDelta: 0.005,
-    longitudeDelta: 0.005,
+  const isEditingExistingSpot = params?.mode === "edit" && params?.spotData;
+
+  // Parse existing spot data if editing
+  const existingSpotData: PrivateSpotData | null = React.useMemo(() => {
+    if (
+      isEditingExistingSpot &&
+      params.spotData &&
+      typeof params.spotData === "string"
+    ) {
+      try {
+        return JSON.parse(params.spotData) as PrivateSpotData;
+      } catch (error) {
+        console.error("Error parsing spot data:", error);
+        return null;
+      }
+    }
+    return null;
+  }, [isEditingExistingSpot, params.spotData]);
+
+  const [selectedRadius, setSelectedRadius] = useState(() => {
+    if (existingSpotData) {
+      const radius = parseInt(existingSpotData.radius);
+      return radius <= 100 ? "100m" : "200m";
+    }
+    return "100m";
   });
+
+  const [mapRegion, setMapRegion] = useState<Region>(() => {
+    if (existingSpotData) {
+      return {
+        latitude: parseFloat(existingSpotData.lat),
+        longitude: parseFloat(existingSpotData.lng),
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      };
+    }
+    return {
+      latitude: 45.4408474,
+      longitude: 12.3155151,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+  });
+
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (isEdit) {
-      // Check URL params first, then fallback to userData
+    if (existingSpotData) {
+      // Editing existing spot - use provided data
+      const lat = parseFloat(existingSpotData.lat);
+      const lng = parseFloat(existingSpotData.lng);
+
+      const existingRegion: Region = {
+        latitude: lat,
+        longitude: lng,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      };
+      setMapRegion(existingRegion);
+      setLocationPermissionGranted(true);
+      setIsLoadingLocation(false);
+    } else if (isEdit) {
+      // Edit mode but using user's current data
       const paramLat = params?.latitude
         ? parseFloat(params.latitude as string)
         : null;
@@ -51,7 +112,6 @@ export default function PrivateSpot() {
         ? parseInt(params.radius as string)
         : null;
 
-      // Use params if available, otherwise fallback to userData
       const lat =
         paramLat ||
         (userData?.lat ? parseFloat(userData.lat.toString()) : null);
@@ -76,17 +136,18 @@ export default function PrivateSpot() {
         setSelectedRadius(radius === 100 ? "100m" : "200m");
       }
     } else {
+      // Adding new spot - get user's current location
       getUserLocation();
     }
   }, [
+    existingSpotData,
     isEdit,
     userData?.lat,
     userData?.lng,
     userData?.radius,
-    params?.latitude, // Extract specific param values
-    params?.longitude, // instead of entire params object
+    params?.latitude,
     params?.longitude,
-    params?.spotId,
+    params?.radius,
   ]);
 
   const getUserLocation = async () => {
@@ -105,7 +166,6 @@ export default function PrivateSpot() {
         setMapRegion(newRegion);
       } else {
         setLocationPermissionGranted(false);
-        // Keep default location if permission denied
       }
     } catch (error) {
       console.error("Error getting user location:", error);
@@ -152,17 +212,46 @@ export default function PrivateSpot() {
     }
 
     setIsSaving(true);
+
     try {
       const formData = new FormData();
-      formData.append("type", "update_data");
-      formData.append("id", user.user_id);
-      formData.append("table_name", "users");
-      formData.append(
-        "radius",
-        (selectedRadius === "100m" ? 100 : 200).toString()
-      );
-      formData.append("lat", mapRegion.latitude.toString());
-      formData.append("lng", mapRegion.longitude.toString());
+      const location = await Location.reverseGeocodeAsync({
+        latitude: mapRegion.latitude,
+        longitude: mapRegion.longitude,
+      });
+      const address = location[0]
+        ? `${location[0].street || ""} ${location[0].city || ""} ${
+            location[0].region || ""
+          }`.trim()
+        : "Private Spot";
+
+      if (existingSpotData?.id) {
+        // Update existing private spot
+        formData.append("type", "update_data");
+        formData.append("user_id", user.user_id);
+        formData.append("table_name", "private_spots");
+        formData.append("lat", mapRegion.latitude.toString());
+        formData.append("lng", mapRegion.longitude.toString());
+        formData.append("address", address);
+        formData.append(
+          "radius",
+          (selectedRadius === "100m" ? 100 : 200).toString()
+        );
+        formData.append("id", existingSpotData.id);
+      } else {
+        // Add new private spot
+        formData.append("type", "add_data");
+        formData.append("table_name", "private_spots");
+        formData.append("user_id", user.user_id);
+        formData.append("address", address);
+        formData.append(
+          "radius",
+          (selectedRadius === "100m" ? 100 : 200).toString()
+        );
+        formData.append("lat", mapRegion.latitude.toString());
+        formData.append("lng", mapRegion.longitude.toString());
+      }
+
       const response = await apiCall(formData);
 
       if (response.result) {
@@ -172,15 +261,28 @@ export default function PrivateSpot() {
           lat: mapRegion.latitude,
           lng: mapRegion.longitude,
         });
-        showToast("Private spot updated successfully!", "success");
+
+        showToast(
+          existingSpotData?.id
+            ? "Private spot updated successfully!"
+            : "Private spot added successfully!",
+          "success"
+        );
+
         setTimeout(() => {
-          router.back();
+          router.back(); // Go back to private spots list
         }, 500);
       } else {
-        showToast("Failed to update private spot", "error");
+        throw new Error(response.message || "Failed to save private spot");
       }
     } catch (error) {
-      showToast("Failed to update private spot. Please try again.", "error");
+      console.error("Error saving private spot:", error);
+      showToast(
+        existingSpotData?.id
+          ? "Failed to update private spot. Please try again."
+          : "Failed to add private spot. Please try again.",
+        "error"
+      );
     } finally {
       setIsSaving(false);
     }
@@ -190,7 +292,53 @@ export default function PrivateSpot() {
     return selectedRadius === "100m" ? 100 : 200;
   };
 
-  if (isLoadingLocation && !isEdit) {
+  const getTitle = () => {
+    if (existingSpotData?.id) {
+      return "Edit Private Spot";
+    } else if (isEdit) {
+      return "Edit Your Private Spot";
+    } else {
+      return "Set Your Private Spot";
+    }
+  };
+
+  const getSubtitle = () => {
+    if (existingSpotData?.id) {
+      return "Update this private spot location and radius";
+    } else if (isEdit) {
+      return "Update the area where you don't want to be visible to others";
+    } else if (locationPermissionGranted) {
+      return "Drag the map to choose an area where you don't want to be visible to others";
+    } else {
+      return "Choose an area on the map where you don't want to be visible to others";
+    }
+  };
+
+  const getButtonTitle = () => {
+    if (isSaving) {
+      return existingSpotData?.id
+        ? "Updating..."
+        : isEdit
+        ? "Saving..."
+        : "Saving...";
+    } else if (existingSpotData?.id) {
+      return "Update Spot";
+    } else if (isEdit) {
+      return "Save Changes";
+    } else {
+      return "Continue";
+    }
+  };
+
+  const handleButtonPress = () => {
+    if (existingSpotData?.id || isEdit) {
+      handleSaveChanges();
+    } else {
+      handleSaveAndContinue();
+    }
+  };
+
+  if (isLoadingLocation && !isEdit && !existingSpotData) {
     return (
       <SafeAreaView style={styles.container}>
         <Header />
@@ -207,17 +355,11 @@ export default function PrivateSpot() {
       <Header />
       <View style={styles.content}>
         <View style={styles.titleSection}>
-          <Text style={styles.title}>
-            {isEdit ? "Edit Your Private Spot" : "Set Your Private Spot"}
-          </Text>
+          <Text style={styles.title}>{getTitle()}</Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>
               <Octicons name="info" size={14} color={color.gray55} />{" "}
-              {isEdit
-                ? "Update the area where you don't want to be visible to others"
-                : locationPermissionGranted
-                ? "Drag the map to choose an area where you don't want to be visible to others"
-                : "Choose an area on the map where you don't want to be visible to others"}
+              {getSubtitle()}
             </Text>
           </View>
         </View>
@@ -228,7 +370,9 @@ export default function PrivateSpot() {
             style={styles.map}
             region={mapRegion}
             onRegionChangeComplete={handleMapRegionChange}
-            showsUserLocation={locationPermissionGranted && !isEdit}
+            showsUserLocation={
+              locationPermissionGranted && !isEdit && !existingSpotData
+            }
             showsMyLocationButton={false}
             scrollEnabled={true}
             zoomEnabled={true}
@@ -309,7 +453,7 @@ export default function PrivateSpot() {
           </View>
         </View>
 
-        {!locationPermissionGranted && !isEdit && (
+        {!locationPermissionGranted && !isEdit && !existingSpotData && (
           <View style={styles.retryContainer}>
             <TouchableOpacity
               style={styles.retryButton}
@@ -324,8 +468,8 @@ export default function PrivateSpot() {
 
       <View style={styles.buttonContainer}>
         <CustomButton
-          title={isSaving ? "Saving..." : isEdit ? "Save Changes" : "Continue"}
-          onPress={isEdit ? handleSaveChanges : handleSaveAndContinue}
+          title={getButtonTitle()}
+          onPress={handleButtonPress}
           isDisabled={isSaving}
           isLoading={isSaving}
         />

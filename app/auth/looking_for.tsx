@@ -40,8 +40,8 @@ export default function LookingFor() {
           <Text style={styles.title}>What are you looking for?</Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>
-              <Octicons name="info" size={14} color={color.gray55} /> This helps
-              others understand your intentions
+              <Octicons name="info" size={14} color={color.gray55} /> Select all
+              that apply to help others understand your intentions
             </Text>
           </View>
         </View>
@@ -50,11 +50,21 @@ export default function LookingFor() {
           options={options}
           selectedOptions={selectedOptions}
           onSelectionChange={handleSelectionChange}
-          multiSelect={false}
+          multiSelect={true}
           staggerAnimation={true}
           staggerDelay={80}
           containerStyle={styles.optionsContainer}
         />
+
+        {/* Selection Counter */}
+        {selectedOptions.length > 0 && (
+          <View style={styles.selectionCounter}>
+            <Text style={styles.selectionCountText}>
+              {selectedOptions.length} option
+              {selectedOptions.length !== 1 ? "s" : ""} selected
+            </Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.buttonContainer}>
@@ -101,6 +111,19 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     paddingHorizontal: 0,
+  },
+  selectionCounter: {
+    marginTop: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#F0F9FF",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  selectionCountText: {
+    fontSize: 14,
+    fontFamily: font.medium,
+    color: color.primary,
   },
   buttonContainer: {
     borderTopWidth: 1,

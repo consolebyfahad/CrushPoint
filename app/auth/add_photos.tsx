@@ -33,9 +33,28 @@ type UploadedPhoto = {
 };
 
 export default function AddPhotos() {
-  const { user, addUserImage, removeUserImage, userImages } = useAppContext();
+  const { user, addUserImage, removeUserImage } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
+  const photosParam = params.photos;
+
+  // Convert photos parameter to array
+  const photos = React.useMemo(() => {
+    if (!photosParam) return [];
+
+    // If it's already an array, return it
+    if (Array.isArray(photosParam)) return photosParam;
+
+    // If it's a string, split by comma and filter out empty strings
+    if (typeof photosParam === "string") {
+      return photosParam.split(",").filter((url) => url.trim().length > 0);
+    }
+
+    return [];
+  }, [photosParam]);
+
+  console.log("photos processed", photos);
+
   const [selectedPhotos, setSelectedPhotos] = useState<UploadedPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,21 +65,25 @@ export default function AddPhotos() {
 
   // Load existing images when in edit mode
   useEffect(() => {
-    if (isEditMode && userImages && userImages.length > 0) {
-      const existingPhotos: UploadedPhoto[] = userImages.map(
-        (fileName, index) => ({
+    if (isEditMode && photos && photos.length > 0) {
+      const existingPhotos: UploadedPhoto[] = photos.map((photoUrl, index) => {
+        // Extract filename from URL for fileName field
+        const urlParts = photoUrl.split("/");
+        const fileName = urlParts[urlParts.length - 1];
+
+        return {
           id: `existing_${index}`,
-          uri: `https://your-server.com/uploads/${fileName}`,
+          uri: photoUrl, // Use the full URL directly since it's already provided
           width: 300,
           height: 400,
           fileName: fileName,
           isExisting: true,
           isUploading: false,
-        })
-      );
+        };
+      });
       setSelectedPhotos(existingPhotos);
     }
-  }, [isEditMode, userImages]);
+  }, [isEditMode, photos]);
 
   const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -231,7 +254,12 @@ export default function AddPhotos() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        userImages.forEach((fileName) => removeUserImage(fileName));
+        // Remove old photos and add new ones to context
+        photos.forEach((photoUrl) => {
+          const urlParts = photoUrl.split("/");
+          const fileName = urlParts[urlParts.length - 1];
+          removeUserImage(fileName);
+        });
         imageFileNames.forEach((fileName) => addUserImage(fileName));
 
         Alert.alert("Success", "Photos updated successfully!", [

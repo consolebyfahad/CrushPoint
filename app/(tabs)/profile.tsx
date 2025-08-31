@@ -26,7 +26,9 @@ export default function ProfileTab() {
   const { userData, user } = useAppContext();
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const pagerRef = useRef(null);
+  const pagerRef = useRef<PagerView>(null);
+  const photos = userData.photos || [];
+  const hasMultiplePhotos = photos.length > 1;
 
   const handleCamera = () => {
     console.log("Open camera");
@@ -49,7 +51,7 @@ export default function ProfileTab() {
   const handleEditPhotos = () => {
     router.push({
       pathname: "/auth/add_photos",
-      params: { fromEdit: "true" },
+      params: { fromEdit: "true", photos: photos },
     });
   };
 
@@ -71,13 +73,23 @@ export default function ProfileTab() {
     });
   };
 
-  const handleIndicatorPress = (index) => {
-    setCurrentImageIndex(index);
-    pagerRef.current?.setPage(index);
+  // Handle page change from PagerView
+  const handlePageSelected = (event: any) => {
+    setCurrentImageIndex(event.nativeEvent.position);
   };
 
-  const handlePageSelected = (event) => {
-    setCurrentImageIndex(event.nativeEvent.position);
+  // Navigate to previous image programmatically
+  const handlePreviousImage = () => {
+    const prevIndex =
+      currentImageIndex === 0 ? photos.length - 1 : currentImageIndex - 1;
+    pagerRef.current?.setPage(prevIndex);
+  };
+
+  // Navigate to next image programmatically
+  const handleNextImage = () => {
+    const nextIndex =
+      currentImageIndex === photos.length - 1 ? 0 : currentImageIndex + 1;
+    pagerRef.current?.setPage(nextIndex);
   };
 
   // Loading state
@@ -99,9 +111,6 @@ export default function ProfileTab() {
       </View>
     );
   }
-
-  const photos = userData.photos || [];
-  const hasMultiplePhotos = photos.length > 1;
 
   return (
     <View style={styles.container}>
@@ -145,26 +154,18 @@ export default function ProfileTab() {
 
           {/* Header Overlay */}
           <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={handleCamera}
-              activeOpacity={0.8}
-            >
-              <Feather name="camera" size={20} color={color.black} />
-            </TouchableOpacity>
+            <View style={{ width: 44, height: 44 }} />
 
             {/* Custom Image Indicators */}
             {hasMultiplePhotos && (
               <View style={styles.imageIndicators}>
                 {photos.map((_, index) => (
-                  <TouchableOpacity
+                  <View
                     key={index}
                     style={[
                       styles.indicator,
                       index === currentImageIndex && styles.activeIndicator,
                     ]}
-                    onPress={() => handleIndicatorPress(index)}
-                    activeOpacity={0.7}
                   />
                 ))}
               </View>
@@ -179,42 +180,20 @@ export default function ProfileTab() {
             </TouchableOpacity>
           </View>
 
-          {/* Swipe Hint Overlay */}
+          {/* Image Navigation Areas (like UserProfile) */}
           {hasMultiplePhotos && (
-            <View style={styles.swipeHintOverlay}>
+            <>
               <TouchableOpacity
-                style={styles.swipeHintLeft}
-                onPress={() => {
-                  const prevIndex =
-                    currentImageIndex > 0
-                      ? currentImageIndex - 1
-                      : photos.length - 1;
-                  handleIndicatorPress(prevIndex);
-                }}
-              >
-                <Ionicons
-                  name="chevron-back"
-                  size={20}
-                  color="rgba(255,255,255,0.6)"
-                />
-              </TouchableOpacity>
+                style={styles.leftImageArea}
+                onPress={handlePreviousImage}
+                activeOpacity={0.1}
+              />
               <TouchableOpacity
-                style={styles.swipeHintRight}
-                onPress={() => {
-                  const nextIndex =
-                    currentImageIndex < photos.length - 1
-                      ? currentImageIndex + 1
-                      : 0;
-                  handleIndicatorPress(nextIndex);
-                }}
-              >
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color="rgba(255,255,255,0.6)"
-                />
-              </TouchableOpacity>
-            </View>
+                style={styles.rightImageArea}
+                onPress={handleNextImage}
+                activeOpacity={0.1}
+              />
+            </>
           )}
         </View>
 
@@ -257,7 +236,10 @@ export default function ProfileTab() {
               <TouchableOpacity
                 key={index}
                 style={styles.photoItem}
-                onPress={() => handleIndicatorPress(index)}
+                onPress={() => {
+                  setCurrentImageIndex(index);
+                  pagerRef.current?.setPage(index);
+                }}
                 activeOpacity={0.8}
               >
                 <Image source={{ uri: photo }} style={styles.photo} />
@@ -308,10 +290,10 @@ export default function ProfileTab() {
               </View>
             </View>
 
-            <View style={styles.infoRow}>
+            {/* <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Height</Text>
               <Text style={styles.infoValue}>{userData.height}</Text>
-            </View>
+            </View> */}
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Nationality</Text>
@@ -438,33 +420,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   indicator: {
-    width: 24,
-    height: 6,
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
-    borderRadius: 3,
+    width: 30,
+    height: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 2,
   },
   activeIndicator: {
     backgroundColor: color.white,
   },
-  swipeHintOverlay: {
+  leftImageArea: {
     position: "absolute",
-    top: 0,
     left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 30,
+    top: 0,
+    width: SCREEN_WIDTH / 2,
+    height: "100%",
     zIndex: 5,
   },
-  swipeHintLeft: {
-    padding: 20,
-    opacity: 0.8,
-  },
-  swipeHintRight: {
-    padding: 20,
-    opacity: 0.8,
+  rightImageArea: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    width: SCREEN_WIDTH / 2,
+    height: "100%",
+    zIndex: 5,
   },
   nameSection: {
     padding: 16,

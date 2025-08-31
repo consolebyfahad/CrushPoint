@@ -27,29 +27,48 @@ export default function Filters({
   refetch,
 }: any) {
   const [selectedGender, setSelectedGender] = useState(
-    filterData.gender || "Male"
+    filterData.gender || "Men"
   );
   const [ageFrom, setAgeFrom] = useState(filterData.ageFrom || "18");
   const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");
   const [distance, setDistance] = useState(filterData.distance || 10);
 
-  const genderOptions = ["Male", "Female", "Both"];
+  const genderOptions = ["Men", "Women", "Both"];
+
+  // Helper function to format looking for display
+  const formatLookingForDisplay = (lookingFor: any) => {
+    if (!lookingFor || (Array.isArray(lookingFor) && lookingFor.length === 0)) {
+      return null;
+    }
+
+    if (Array.isArray(lookingFor)) {
+      if (lookingFor.length === 1) {
+        return lookingFor[0];
+      } else if (lookingFor.length > 1) {
+        const additionalCount = lookingFor.length - 1;
+        return `${lookingFor[0]} ${additionalCount}+`;
+      }
+    }
+
+    // If it's a string (backward compatibility)
+    return lookingFor;
+  };
 
   const expandableOptions = [
     {
       title: "Looking for",
       hasNavigation: true,
-      value: filterData.lookingFor || null,
+      value: formatLookingForDisplay(filterData.lookingFor),
       onPress: onNavigateToLookingFor,
     },
-    {
-      title: "Height",
-      hasNavigation: true,
-      value: filterData.height
-        ? `${filterData.height.from}-${filterData.height.to}cm`
-        : null,
-      onPress: onNavigateToHeight,
-    },
+    // {
+    //   title: "Height",
+    //   hasNavigation: true,
+    //   value: filterData.height
+    //     ? `${filterData.height.from}-${filterData.height.to}cm`
+    //     : null,
+    //   onPress: onNavigateToHeight,
+    // },
     {
       title: "Nationality",
       hasNavigation: true,
@@ -71,19 +90,19 @@ export default function Filters({
   ];
 
   const handleReset = () => {
-    setSelectedGender("Male");
+    setSelectedGender("Men");
     setAgeFrom("18");
     setAgeTo("35");
     setDistance(10);
 
     // Reset all filter data
     setFilterData({
-      gender: "Male",
+      gender: "Men",
       ageFrom: "18",
-      ageTo: "35",
+      ageTo: "99",
       distance: 10,
-      lookingFor: null,
-      height: null,
+      lookingFor: [],
+      // height: null,
       nationality: null,
       religion: null,
       zodiacSign: null,
@@ -158,6 +177,13 @@ export default function Filters({
           <Text style={styles.sectionTitle}>Age Range</Text>
           <View style={styles.ageContainer}>
             <View style={styles.ageInputContainer}>
+              <TouchableOpacity
+                onPress={() =>
+                  setAgeFrom(Math.max(18, parseInt(ageFrom) - 1).toString())
+                }
+              >
+                <Text>-</Text>
+              </TouchableOpacity>
               <TextInput
                 style={[
                   styles.ageInput,
@@ -168,9 +194,28 @@ export default function Filters({
                 keyboardType="numeric"
                 maxLength={2}
               />
+              <TouchableOpacity
+                onPress={() =>
+                  setAgeFrom(
+                    Math.min(
+                      parseInt(ageTo) - 1,
+                      parseInt(ageFrom) + 1
+                    ).toString()
+                  )
+                }
+              >
+                <Text>+</Text>
+              </TouchableOpacity>
             </View>
             <Text style={styles.ageToText}>to</Text>
             <View style={styles.ageInputContainer}>
+              <TouchableOpacity
+                onPress={() =>
+                  setAgeTo(Math.max(18, parseInt(ageTo) - 1).toString())
+                }
+              >
+                <Text>-</Text>
+              </TouchableOpacity>
               <TextInput
                 style={[
                   styles.ageInput,
@@ -181,6 +226,13 @@ export default function Filters({
                 keyboardType="numeric"
                 maxLength={2}
               />
+              <TouchableOpacity
+                onPress={() =>
+                  setAgeTo(Math.min(99, parseInt(ageTo) + 1).toString())
+                }
+              >
+                <Text>+</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -331,6 +383,9 @@ const styles = StyleSheet.create({
   },
   ageInputContainer: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
     borderColor: "#E5E5E5",
     borderRadius: 12,
@@ -358,11 +413,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 40,
   },
-  // sliderThumb: {
-  //   backgroundColor: color.primary,
-  //   width: 20,
-  //   height: 20,
-  // },
   sliderLabels: {
     flexDirection: "row",
     justifyContent: "space-between",

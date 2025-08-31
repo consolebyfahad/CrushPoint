@@ -17,7 +17,10 @@ export default function LookingFor({
   filterData,
   setFilterData,
 }: any) {
-  const [selectedOption, setSelectedOption] = useState(filterData.lookingFor);
+  // Changed to array to support multiple selections
+  const [selectedOptions, setSelectedOptions] = useState<string[]>(
+    Array.isArray(filterData.lookingFor) ? filterData.lookingFor : []
+  );
 
   const lookingForOptions = [
     {
@@ -46,17 +49,30 @@ export default function LookingFor({
     },
   ];
 
-  const handleOptionSelect = (optionId: any) => {
-    setSelectedOption(optionId);
+  const handleOptionSelect = (optionTitle: string) => {
+    setSelectedOptions((prev) => {
+      if (prev.includes(optionTitle)) {
+        // Remove option if already selected
+        return prev.filter((option) => option !== optionTitle);
+      } else {
+        // Add option if not selected
+        return [...prev, optionTitle];
+      }
+    });
   };
 
   const handleSave = () => {
     setFilterData({
       ...filterData,
-      lookingFor: selectedOption,
+      lookingFor: selectedOptions,
     });
-    console.log("Selected looking for:", selectedOption);
+    console.log("Selected looking for:", selectedOptions);
     onClose();
+  };
+
+  // Check if option is selected
+  const isSelected = (optionTitle: string) => {
+    return selectedOptions.includes(optionTitle);
   };
 
   return (
@@ -79,7 +95,7 @@ export default function LookingFor({
             key={option.id}
             style={[
               styles.optionItem,
-              selectedOption === option.title && styles.selectedOption,
+              isSelected(option.title) && styles.selectedOption,
             ]}
             onPress={() => handleOptionSelect(option.title)}
             activeOpacity={0.8}
@@ -89,27 +105,48 @@ export default function LookingFor({
               <Text
                 style={[
                   styles.optionText,
-                  selectedOption === option.title && styles.selectedOptionText,
+                  isSelected(option.title) && styles.selectedOptionText,
                 ]}
               >
                 {option.title}
               </Text>
             </View>
-            {selectedOption === option.title && (
+            {isSelected(option.title) && (
               <Ionicons name="checkmark" size={24} color={color.primary} />
             )}
           </TouchableOpacity>
         ))}
       </View>
 
+      {/* Selected count */}
+      {/* {selectedOptions.length > 0 && (
+        <View style={styles.selectedCountContainer}>
+          <Text style={styles.selectedCountText}>
+            {selectedOptions.length} option
+            {selectedOptions.length !== 1 ? "s" : ""} selected
+          </Text>
+        </View>
+      )} */}
+
       {/* Bottom Save Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
-          style={styles.saveButton}
+          style={[
+            styles.saveButton,
+            selectedOptions.length === 0 && styles.saveButtonDisabled,
+          ]}
           onPress={handleSave}
           activeOpacity={0.8}
+          disabled={selectedOptions.length === 0}
         >
-          <Text style={styles.saveButtonText}>Save</Text>
+          <Text
+            style={[
+              styles.saveButtonText,
+              selectedOptions.length === 0 && styles.saveButtonTextDisabled,
+            ]}
+          >
+            Save
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -150,6 +187,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  subtitleContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray,
+    textAlign: "center",
+  },
   content: {
     flex: 1,
     paddingHorizontal: 20,
@@ -189,6 +236,16 @@ const styles = StyleSheet.create({
   selectedOptionText: {
     color: color.primary,
   },
+  selectedCountContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  selectedCountText: {
+    fontSize: 14,
+    fontFamily: font.medium,
+    color: color.primary,
+  },
   bottomContainer: {
     paddingHorizontal: 20,
     paddingTop: 24,
@@ -200,9 +257,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: color.primary,
   },
+  saveButtonDisabled: {
+    backgroundColor: "#E5E5E5",
+  },
   saveButtonText: {
     fontSize: 16,
     fontFamily: font.semiBold,
     color: color.white,
+  },
+  saveButtonTextDisabled: {
+    color: "#9CA3AF",
   },
 });

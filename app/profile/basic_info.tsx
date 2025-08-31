@@ -17,10 +17,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
+import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BasicInfo() {
@@ -32,21 +32,22 @@ export default function BasicInfo() {
   // Initialize state properly from params
   const [basicInfo, setBasicInfo] = useState({
     interestedIn: userData.gender_interest || "",
-    height: userData.height || "",
+    // height: userData.height || "",
     nationality: userData.nationality || "",
     religion: userData.religion || "",
     zodiacSign: userData.zodiac || "",
   });
 
-  const [relationshipGoal, setRelationshipGoal] = useState(
-    userData.originalLookingForIds?.[0] || ""
+  // Changed to array for multi-select
+  const [relationshipGoals, setRelationshipGoals] = useState(
+    userData.originalLookingForIds || []
   );
   const [isLoading, setIsLoading] = useState(false);
 
   // Options for dropdowns
   const interestedInOptions = [
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
+    { label: "Men", value: "male" },
+    { label: "Women", value: "female" },
     { label: "Both", value: "both" },
   ];
 
@@ -64,6 +65,12 @@ export default function BasicInfo() {
       return;
     }
 
+    // Validation: require at least one relationship goal
+    if (relationshipGoals.length === 0) {
+      Alert.alert("Error", "Please select at least one relationship goal.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const formData = new FormData();
@@ -73,8 +80,8 @@ export default function BasicInfo() {
 
       // Append all basic info fields
       formData.append("gender_interest", basicInfo.interestedIn);
-      formData.append("looking_for", JSON.stringify([relationshipGoal]));
-      formData.append("height", basicInfo.height);
+      formData.append("looking_for", JSON.stringify(relationshipGoals));
+      // formData.append("height", basicInfo.height);
       formData.append("nationality", basicInfo.nationality);
       formData.append("religion", basicInfo.religion);
       formData.append("zodiac", basicInfo.zodiacSign);
@@ -84,9 +91,9 @@ export default function BasicInfo() {
       if (response.result) {
         updateUserData({
           gender_interest: basicInfo.interestedIn,
-          looking_for: [relationshipGoal],
-          originalLookingForIds: [relationshipGoal],
-          height: basicInfo.height,
+          looking_for: relationshipGoals,
+          originalLookingForIds: relationshipGoals,
+          // height: basicInfo.height,
           nationality: basicInfo.nationality,
           religion: basicInfo.religion,
           zodiac: basicInfo.zodiacSign,
@@ -115,6 +122,52 @@ export default function BasicInfo() {
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Function to handle relationship goal selection
+  const toggleRelationshipGoal = (value: string) => {
+    setRelationshipGoals((prev) => {
+      if (prev.includes(value)) {
+        // Remove if already selected
+        return prev.filter((goal) => goal !== value);
+      } else {
+        // Add if not selected
+        return [...prev, value];
+      }
+    });
+  };
+
+  const renderRelationshipGoalItem = (option: {
+    label: string;
+    value: string;
+  }) => {
+    const isSelected = relationshipGoals.includes(option.value);
+
+    return (
+      <TouchableOpacity
+        key={option.value}
+        style={[
+          styles.relationshipGoalItem,
+          isSelected && styles.relationshipGoalItemSelected,
+        ]}
+        onPress={() => toggleRelationshipGoal(option.value)}
+        activeOpacity={0.7}
+      >
+        <Text
+          style={[
+            styles.relationshipGoalText,
+            isSelected && styles.relationshipGoalTextSelected,
+          ]}
+        >
+          {option.label}
+        </Text>
+        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+          {isSelected && (
+            <Ionicons name="checkmark" size={16} color={color.white} />
+          )}
+        </View>
+      </TouchableOpacity>
+    );
   };
 
   return (
@@ -149,11 +202,15 @@ export default function BasicInfo() {
           />
         </View>
 
-        {/* Relationship Goal - Single Select */}
+        {/* Relationship Goals - Multi Select Dropdown */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Relationship Goal</Text>
-          <Dropdown
-            style={[styles.dropdown, !relationshipGoal && styles.errorBorder]}
+          <Text style={styles.fieldLabel}>Relationship Goals</Text>
+          <Text style={styles.fieldSubLabel}>Select one or more goals</Text>
+          <MultiSelect
+            style={[
+              styles.dropdown,
+              relationshipGoals.length === 0 && styles.errorBorder,
+            ]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
             iconStyle={styles.iconStyle}
@@ -161,27 +218,24 @@ export default function BasicInfo() {
             maxHeight={300}
             labelField="label"
             valueField="value"
-            placeholder="Select relationship goal"
-            value={relationshipGoal}
-            onChange={(item) => {
-              setRelationshipGoal(item.value);
+            placeholder="Select relationship goals"
+            value={relationshipGoals}
+            onChange={(items) => {
+              setRelationshipGoals(items);
             }}
             renderRightIcon={() => (
               <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
-          />
-        </View>
-
-        {/* Height - Text Input */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Height (cm)</Text>
-          <TextInput
-            style={[styles.textInput, !basicInfo.height && styles.errorBorder]}
-            value={basicInfo.height}
-            onChangeText={(text) => updateField("height", text)}
-            placeholder="Enter height in cm"
-            keyboardType="numeric"
-            maxLength={3}
+            selectedStyle={styles.selectedItem}
+            renderSelectedItem={(item, unSelect) => (
+              <TouchableOpacity
+                style={styles.selectedItem}
+                onPress={() => unSelect && unSelect(item)}
+              >
+                <Text style={styles.selectedItemText}>{item.label}</Text>
+                <Ionicons name="close" size={16} color={color.gray55} />
+              </TouchableOpacity>
+            )}
           />
         </View>
 
@@ -296,6 +350,12 @@ const styles = StyleSheet.create({
     color: color.gray700,
     marginBottom: 8,
   },
+  fieldSubLabel: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray55,
+    marginBottom: 12,
+  },
   dropdown: {
     borderWidth: 1,
     borderColor: color.gray600,
@@ -322,6 +382,23 @@ const styles = StyleSheet.create({
   iconStyle: {
     width: 20,
     height: 20,
+  },
+  // Multi-select dropdown styles
+  selectedItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: color.primary || "#E3F2FD",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginTop: 4,
+    marginRight: 4,
+    borderRadius: 20,
+  },
+  selectedItemText: {
+    fontSize: 12,
+    fontFamily: font.regular,
+    color: color.white,
+    marginRight: 4,
   },
   // Text input styles
   textInput: {

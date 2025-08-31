@@ -10,8 +10,14 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interested() {
-  const { updateUserData } = useAppContext();
-  const [selectedInterest, setSelectedInterest] = useState("both");
+  const { updateUserData, userData } = useAppContext();
+  const [selectedInterest, setSelectedInterest] = useState(
+    userData?.gender === "female"
+      ? "male"
+      : userData?.gender === "male"
+      ? "female"
+      : "both"
+  );
 
   const handleInterestSelect = (interest: any) => {
     setSelectedInterest(interest);
