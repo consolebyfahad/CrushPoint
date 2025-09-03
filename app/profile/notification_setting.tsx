@@ -155,7 +155,7 @@ export default function NotificationSettings({ navigation }: any) {
     },
     {
       key: "newMeetup",
-      title: "Meetup",
+      title: "Meetup Requests",
       description: "When you get a new meetup request",
       enabled: notificationSettings.newMeetup,
     },

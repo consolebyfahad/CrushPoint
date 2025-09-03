@@ -52,7 +52,7 @@ export default function FaceVerification() {
             onPress: () => resolve(),
           },
           {
-            text: isVerified ? "Continue" : "Skip",
+            text: isVerified ? "Continue" : "Continue",
             style: "default",
             onPress: () => {
               // Don't do async work here - just resolve and handle outside

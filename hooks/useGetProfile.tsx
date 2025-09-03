@@ -2,6 +2,7 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import {
   calculateAge,
+  convertNationalityValuesToLabels,
   parseInterestsWithNames,
   parseJsonString,
   parseLookingForWithLabels,
@@ -75,16 +76,55 @@ export default function useGetProfile() {
         const originalLookingForIds = userData.looking_for
           ? parseJsonString(userData.looking_for)
           : [];
-        const parsedNationality = userData.nationality
-          ? parseNationalityWithLabels(userData.nationality)
-          : [];
-        const originalNationalityValues = userData.nationality
-          ? parseJsonString(userData.nationality)
-          : [];
+        console.log("userData.nationality", userData.nationality);
 
-        const { images, ...userDataWithoutImages } = userData;
-        const extendedUserData = {
-          ...userDataWithoutImages,
+        // Handle nationality parsing more carefully
+        let parsedNationality: string[] = [];
+        let originalNationalityValues: string[] = [];
+
+        if (userData.nationality) {
+          try {
+            // First try to parse as JSON
+            const parsed = parseJsonString(userData.nationality);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              originalNationalityValues = parsed;
+              parsedNationality = parseNationalityWithLabels(
+                userData.nationality
+              );
+            } else {
+              // If parsing fails, try to extract values manually
+              const matches = userData.nationality.match(/"([^"]+)"/g);
+              if (matches) {
+                const values = matches.map((match: string) =>
+                  match.replace(/"/g, "")
+                );
+                originalNationalityValues = values.filter(
+                  (v) => v && v !== "Not Specified"
+                );
+                parsedNationality = convertNationalityValuesToLabels(
+                  originalNationalityValues
+                );
+              }
+            }
+          } catch (error) {
+            console.error("Error parsing nationality:", error);
+            // Fallback: if it's a simple string, use it directly
+            if (
+              typeof userData.nationality === "string" &&
+              userData.nationality !== "Not Specified"
+            ) {
+              originalNationalityValues = [userData.nationality];
+              parsedNationality = convertNationalityValuesToLabels([
+                userData.nationality,
+              ]);
+            }
+          }
+        }
+
+        // Create data for local state (using types/userData.d.ts interface)
+        const localUserData: UserData = {
+          ...userData,
+          images: userData.images, // Keep original format for local state
           age,
           photos, // This now contains full URLs
           parsedInterests,
@@ -108,8 +148,39 @@ export default function useGetProfile() {
           phone: userData.phone || "Not Specified",
         };
 
-        setUserProfile(extendedUserData);
-        updateUserData(extendedUserData);
+        // Create data for context (using context/app_context.tsx interface)
+        const contextUserData = {
+          ...userData,
+          images: userData.images ? [userData.images] : [], // Convert to array format expected by context
+          looking_for: userData.looking_for
+            ? parseJsonString(userData.looking_for)
+            : [], // Convert to array
+          radius: parseInt(userData.radius) || 100, // Convert string to number
+          age,
+          photos, // This now contains full URLs
+          parsedInterests,
+          parsedLookingFor,
+          originalLookingForIds,
+          originalInterestIds,
+          parsedNationality,
+          originalNationalityValues,
+          email: userData.email || "Not Specified",
+          gender: userData.gender || "Not Specified",
+          gender_interest: userData.gender_interest || "Not Specified",
+          country: userData.country || "Not Specified",
+          state: userData.state || "Not Specified",
+          city: userData.city || "Not Specified",
+          languages: userData.languages || "Not Specified",
+          height: userData.height !== "0" ? userData.height : "0.0",
+          nationality: userData.nationality || "Not Specified",
+          religion: userData.religion || "Not Specified",
+          zodiac: userData.zodiac || "Not Specified",
+          about: userData.about || "Not Specified",
+          phone: userData.phone || "Not Specified",
+        };
+
+        setUserProfile(localUserData);
+        updateUserData(contextUserData);
       } else {
         setError("No user data found");
       }

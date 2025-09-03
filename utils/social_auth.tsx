@@ -32,6 +32,8 @@ GoogleSignin.configure({
     "247710361352-tpf24aqbsl6cldmat3m6377hh27mv8mo.apps.googleusercontent.com",
   iosClientId:
     "247710361352-4783hk46dnrgqqj6rtqel6nl8q5i3rhp.apps.googleusercontent.com",
+  offlineAccess: true,
+  forceCodeForRefreshToken: true,
 });
 
 export default function SocialAuth({
@@ -46,12 +48,28 @@ export default function SocialAuth({
     setGoogleLoading(true);
 
     try {
-      await GoogleSignin.hasPlayServices();
+      console.log("Starting Google Sign-In process...");
 
+      // Check if Google Play Services are available
+      await GoogleSignin.hasPlayServices();
+      console.log("Google Play Services available");
+
+      // Sign out any existing user before signing in
+      try {
+        await GoogleSignin.signOut();
+        console.log("Signed out existing user");
+      } catch (signOutError) {
+        // Ignore sign out errors (user might not be signed in)
+        console.log("No existing session to sign out");
+      }
+
+      console.log("Attempting Google Sign-In...");
       const response = await GoogleSignin.signIn();
+      console.log("Google Sign-In response:", response);
 
       if (isSuccessResponse(response)) {
         const { user } = response.data;
+        console.log("Google Sign-In successful, user data:", user);
 
         // Prepare data for your API
         const formData = new FormData();
@@ -65,7 +83,9 @@ export default function SocialAuth({
           formData.append("image", user.photo);
         }
 
+        console.log("Sending data to API...");
         const apiResponse = await apiCall(formData);
+        console.log("API Response:", apiResponse);
 
         if (apiResponse.success) {
           const userData: UserData = {
@@ -77,12 +97,14 @@ export default function SocialAuth({
             new: apiResponse?.new,
           };
 
+          console.log("Google Sign-In completed successfully");
           onAuthSuccess(userData, "google");
         } else {
           onAuthError(apiResponse.message || "Google Sign-In failed");
           console.error("Google Sign-In API Error:", apiResponse.message);
         }
       } else {
+        console.log("Google Sign-In was cancelled or failed");
         onAuthError("Google sign in was cancelled");
       }
     } catch (error) {
@@ -99,8 +121,18 @@ export default function SocialAuth({
           case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
             onAuthError("Google Play Services not available");
             break;
+          case "DEVELOPER_ERROR":
+            onAuthError(
+              "Configuration error. Please check Google Sign-In setup."
+            );
+            console.error(
+              "DEVELOPER_ERROR - Check configuration files and client IDs"
+            );
+            break;
           default:
-            onAuthError("Google sign in failed");
+            onAuthError(
+              `Google sign in failed: ${error.message || error.code}`
+            );
         }
       } else {
         onAuthError("Something went wrong with Google Sign-In");

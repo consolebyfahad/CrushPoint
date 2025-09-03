@@ -125,7 +125,7 @@ const NATIONALITY_MAPPING: { [key: string]: string } =
     return acc;
   }, {} as { [key: string]: string });
 
-const convertNationalityValuesToLabels = (
+export const convertNationalityValuesToLabels = (
   nationalityValues: string[]
 ): string[] => {
   return nationalityValues

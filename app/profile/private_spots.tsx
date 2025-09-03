@@ -50,7 +50,6 @@ export default function PrivateSpots() {
       } else {
         setLoading(true);
       }
-
       const formData = new FormData();
       formData.append("type", "get_data");
       formData.append("table_name", "private_spots");
@@ -130,8 +129,7 @@ export default function PrivateSpots() {
       formData.append("type", "delete_data");
       formData.append("table_name", "private_spots");
       formData.append("id", spotId);
-      formData.append("user_id", user.user_id);
-
+      console.log(formData);
       const response = await apiCall(formData);
 
       if (response.result) {
@@ -149,7 +147,6 @@ export default function PrivateSpots() {
   const handleBack = () => {
     router.back();
   };
-  console.log(privateSpots.length);
   const renderPrivateSpot = (spot: PrivateSpot) => (
     <View key={spot.id} style={styles.spotCard}>
       <View style={styles.spotInfo}>
@@ -171,13 +168,6 @@ export default function PrivateSpots() {
             <Text style={styles.detailLabel}>Radius:</Text>
             <Text style={styles.detailValue}>{spot.radius} km</Text>
           </View>
-          {/* <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Coordinates:</Text>
-            <Text style={styles.detailValue}>
-              {parseFloat(spot.lat).toFixed(4)},{" "}
-              {parseFloat(spot.lng).toFixed(4)}
-            </Text>
-          </View> */}
         </View>
       </View>
 

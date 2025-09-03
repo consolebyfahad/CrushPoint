@@ -17,6 +17,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -33,11 +34,7 @@ export default function BasicInfo() {
   const [basicInfo, setBasicInfo] = useState({
     interestedIn: userData.gender_interest || "",
     height: userData.height || "",
-    nationality: Array.isArray(userData.nationality)
-      ? userData.nationality
-      : userData.nationality
-      ? [userData.nationality]
-      : [],
+    nationality: userData.originalNationalityValues || [],
     religion: userData.religion || "",
     zodiacSign: userData.zodiac || "",
   });
@@ -85,11 +82,18 @@ export default function BasicInfo() {
       // Append all basic info fields
       formData.append("gender_interest", basicInfo.interestedIn);
       formData.append("looking_for", JSON.stringify(relationshipGoals));
-      // formData.append("height", basicInfo.height);
-      formData.append("nationality", JSON.stringify(basicInfo.nationality));
+      formData.append("height", basicInfo.height);
+
+      // Handle nationality properly - ensure it's a clean array
+      const cleanNationality = Array.isArray(basicInfo.nationality)
+        ? basicInfo.nationality.filter((n) => n && n !== "Not Specified")
+        : [];
+      console.log("cleanNationality before sending:", cleanNationality);
+      formData.append("nationality", JSON.stringify(cleanNationality));
+
       formData.append("religion", basicInfo.religion);
       formData.append("zodiac", basicInfo.zodiacSign);
-
+      console.log(formData);
       const response = await apiCall(formData);
 
       if (response.result) {
@@ -98,7 +102,8 @@ export default function BasicInfo() {
           looking_for: relationshipGoals,
           originalLookingForIds: relationshipGoals,
           height: basicInfo.height,
-          nationality: basicInfo.nationality,
+          nationality: cleanNationality,
+          originalNationalityValues: cleanNationality,
           religion: basicInfo.religion,
           zodiac: basicInfo.zodiacSign,
         });
@@ -230,6 +235,21 @@ export default function BasicInfo() {
             {relationshipGoalOptions.map((option) =>
               renderRelationshipGoalItem(option)
             )}
+          </View>
+        </View>
+
+        {/* Height */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.fieldLabel}>Height</Text>
+          <View style={styles.heightInputContainer}>
+            <TextInput
+              style={styles.heightInput}
+              placeholder="5.8"
+              value={basicInfo.height}
+              onChangeText={(value) => updateField("height", value)}
+              keyboardType="numeric"
+            />
+            <Text style={styles.heightUnit}>ft</Text>
           </View>
         </View>
 
@@ -474,5 +494,28 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 8,
     backgroundColor: color.white,
+  },
+  // Height field styles
+  heightInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: color.gray600,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: color.white,
+  },
+  heightInput: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.black,
+    flex: 1,
+  },
+  heightUnit: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray55,
+    marginLeft: 8,
   },
 });

@@ -30,11 +30,6 @@ export default function ProfileTab() {
   const photos = userData.photos || [];
   const hasMultiplePhotos = photos.length > 1;
 
-  const handleCamera = () => {
-    console.log("Open camera");
-    // Handle camera functionality
-  };
-
   const handleSettings = () => {
     router.push("/profile/setting");
   };
