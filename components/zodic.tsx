@@ -17,10 +17,9 @@ export default function ZodiacSign({
   onBack,
   filterData,
   setFilterData,
-  onSelect,
 }: any) {
-  const [selectedZodiac, setSelectedZodiac] = useState(
-    filterData.zodiacSign || "Cancer"
+  const [selectedZodiacs, setSelectedZodiacs] = useState<string[]>(
+    Array.isArray(filterData.zodiacSign) ? filterData.zodiacSign : []
   );
 
   const zodiacSigns = [
@@ -39,16 +38,29 @@ export default function ZodiacSign({
   ];
 
   const handleZodiacSelect = (zodiac: string) => {
-    setSelectedZodiac(zodiac);
-    // Save the selection and auto close after selection
+    setSelectedZodiacs((prev) => {
+      if (prev.includes(zodiac)) {
+        // Remove zodiac if already selected
+        return prev.filter((z) => z !== zodiac);
+      } else {
+        // Add zodiac if not selected
+        return [...prev, zodiac];
+      }
+    });
+  };
+
+  const handleSave = () => {
     setFilterData({
       ...filterData,
-      zodiacSign: zodiac,
+      zodiacSign: selectedZodiacs,
     });
-    setTimeout(() => {
-      console.log("Selected zodiac sign:", zodiac);
-      onSelect();
-    }, 200);
+    console.log("Selected zodiac signs:", selectedZodiacs);
+    onClose();
+  };
+
+  // Check if zodiac is selected
+  const isSelected = (zodiac: string) => {
+    return selectedZodiacs.includes(zodiac);
   };
 
   return (
@@ -71,6 +83,7 @@ export default function ZodiacSign({
             key={zodiac.id}
             style={[
               styles.zodiacItem,
+              isSelected(zodiac.name) && styles.selectedZodiacItem,
               index === zodiacSigns.length - 1 && styles.lastZodiacItem,
             ]}
             onPress={() => handleZodiacSelect(zodiac.name)}
@@ -80,14 +93,43 @@ export default function ZodiacSign({
               <View style={styles.iconContainer}>
                 <Text style={styles.zodiacIcon}>{zodiac.icon}</Text>
               </View>
-              <Text style={styles.zodiacText}>{zodiac.name}</Text>
+              <Text
+                style={[
+                  styles.zodiacText,
+                  isSelected(zodiac.name) && styles.selectedZodiacText,
+                ]}
+              >
+                {zodiac.name}
+              </Text>
             </View>
-            {selectedZodiac === zodiac.name && (
-              <Ionicons name="checkmark" size={20} color="#5FB3D4" />
+            {isSelected(zodiac.name) && (
+              <Ionicons name="checkmark" size={20} color={color.primary} />
             )}
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* Bottom Save Button */}
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            selectedZodiacs.length === 0 && styles.saveButtonDisabled,
+          ]}
+          onPress={handleSave}
+          activeOpacity={0.8}
+          disabled={selectedZodiacs.length === 0}
+        >
+          <Text
+            style={[
+              styles.saveButtonText,
+              selectedZodiacs.length === 0 && styles.saveButtonTextDisabled,
+            ]}
+          >
+            Save
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -166,5 +208,34 @@ const styles = StyleSheet.create({
     fontFamily: font.regular,
     color: color.black,
     flex: 1,
+  },
+  selectedZodiacItem: {
+    backgroundColor: "#F0F9FF",
+    borderColor: color.primary,
+  },
+  selectedZodiacText: {
+    color: color.primary,
+  },
+  bottomContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+  },
+  saveButton: {
+    width: "100%",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: color.primary,
+  },
+  saveButtonDisabled: {
+    backgroundColor: "#E5E5E5",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.white,
+  },
+  saveButtonTextDisabled: {
+    color: "#9CA3AF",
   },
 });

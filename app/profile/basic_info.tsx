@@ -32,14 +32,18 @@ export default function BasicInfo() {
   // Initialize state properly from params
   const [basicInfo, setBasicInfo] = useState({
     interestedIn: userData.gender_interest || "",
-    // height: userData.height || "",
-    nationality: userData.nationality || "",
+    height: userData.height || "",
+    nationality: Array.isArray(userData.nationality)
+      ? userData.nationality
+      : userData.nationality
+      ? [userData.nationality]
+      : [],
     religion: userData.religion || "",
     zodiacSign: userData.zodiac || "",
   });
 
   // Changed to array for multi-select
-  const [relationshipGoals, setRelationshipGoals] = useState(
+  const [relationshipGoals, setRelationshipGoals] = useState<string[]>(
     userData.originalLookingForIds || []
   );
   const [isLoading, setIsLoading] = useState(false);
@@ -82,7 +86,7 @@ export default function BasicInfo() {
       formData.append("gender_interest", basicInfo.interestedIn);
       formData.append("looking_for", JSON.stringify(relationshipGoals));
       // formData.append("height", basicInfo.height);
-      formData.append("nationality", basicInfo.nationality);
+      formData.append("nationality", JSON.stringify(basicInfo.nationality));
       formData.append("religion", basicInfo.religion);
       formData.append("zodiac", basicInfo.zodiacSign);
 
@@ -93,7 +97,7 @@ export default function BasicInfo() {
           gender_interest: basicInfo.interestedIn,
           looking_for: relationshipGoals,
           originalLookingForIds: relationshipGoals,
-          // height: basicInfo.height,
+          height: basicInfo.height,
           nationality: basicInfo.nationality,
           religion: basicInfo.religion,
           zodiac: basicInfo.zodiacSign,
@@ -126,13 +130,24 @@ export default function BasicInfo() {
 
   // Function to handle relationship goal selection
   const toggleRelationshipGoal = (value: string) => {
-    setRelationshipGoals((prev) => {
-      if (prev.includes(value)) {
-        // Remove if already selected
-        return prev.filter((goal) => goal !== value);
+    setRelationshipGoals((prev: string[]) => {
+      // Check if "prefer-not" is being selected
+      if (value === "prefer-not") {
+        // If "prefer not to say" is selected, only keep that option
+        return ["prefer-not"];
       } else {
-        // Add if not selected
-        return [...prev, value];
+        // If any other option is selected, remove "prefer not to say" if it exists
+        const filteredPrev = prev.filter(
+          (goal: string) => goal !== "prefer-not"
+        );
+
+        if (filteredPrev.includes(value)) {
+          // Remove if already selected
+          return filteredPrev.filter((goal: string) => goal !== value);
+        } else {
+          // Add if not selected
+          return [...filteredPrev, value];
+        }
       }
     });
   };
@@ -202,26 +217,47 @@ export default function BasicInfo() {
           />
         </View>
 
-        {/* Relationship Goals - Multi Select Dropdown */}
+        {/* Relationship Goals - Custom Multi Select */}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>Relationship Goals</Text>
           <Text style={styles.fieldSubLabel}>Select one or more goals</Text>
+          <View
+            style={[
+              styles.relationshipGoalsContainer,
+              relationshipGoals.length === 0 && styles.errorBorder,
+            ]}
+          >
+            {relationshipGoalOptions.map((option) =>
+              renderRelationshipGoalItem(option)
+            )}
+          </View>
+        </View>
+
+        {/* Nationality - Multi Select */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.fieldLabel}>Nationality</Text>
+          <Text style={styles.fieldSubLabel}>Select up to 3 nationalities</Text>
           <MultiSelect
             style={[
               styles.dropdown,
-              relationshipGoals.length === 0 && styles.errorBorder,
+              basicInfo.nationality.length === 0 && styles.errorBorder,
             ]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
             iconStyle={styles.iconStyle}
-            data={relationshipGoalOptions}
+            data={nationalityOptions}
             maxHeight={300}
             labelField="label"
             valueField="value"
-            placeholder="Select relationship goals"
-            value={relationshipGoals}
+            placeholder="Select nationalities"
+            value={basicInfo.nationality}
             onChange={(items) => {
-              setRelationshipGoals(items);
+              // Limit to 3 nationalities
+              const limitedItems = items.slice(0, 4);
+              setBasicInfo((prev) => ({
+                ...prev,
+                nationality: limitedItems,
+              }));
             }}
             renderRightIcon={() => (
               <Ionicons name="chevron-down" size={20} color={color.gray55} />
@@ -235,32 +271,6 @@ export default function BasicInfo() {
                 <Text style={styles.selectedItemText}>{item.label}</Text>
                 <Ionicons name="close" size={16} color={color.gray55} />
               </TouchableOpacity>
-            )}
-          />
-        </View>
-
-        {/* Nationality */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Nationality</Text>
-          <Dropdown
-            style={[
-              styles.dropdown,
-              !basicInfo.nationality && styles.errorBorder,
-            ]}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            iconStyle={styles.iconStyle}
-            data={nationalityOptions}
-            maxHeight={300}
-            labelField="label"
-            valueField="value"
-            placeholder="Select nationality"
-            value={basicInfo.nationality}
-            onChange={(item) => {
-              updateField("nationality", item.value);
-            }}
-            renderRightIcon={() => (
-              <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
           />
         </View>
@@ -418,5 +428,51 @@ const styles = StyleSheet.create({
   saveContainer: {
     paddingHorizontal: 16,
     paddingBottom: 16,
+  },
+  // Relationship goal styles
+  relationshipGoalItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: color.gray600,
+    backgroundColor: color.white,
+  },
+  relationshipGoalItemSelected: {
+    borderColor: color.primary,
+    backgroundColor: "#F0F9FF",
+  },
+  relationshipGoalText: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.black,
+    flex: 1,
+  },
+  relationshipGoalTextSelected: {
+    color: color.primary,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: color.gray600,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxSelected: {
+    backgroundColor: color.primary,
+    borderColor: color.primary,
+  },
+  relationshipGoalsContainer: {
+    borderWidth: 1,
+    borderColor: color.gray600,
+    borderRadius: 12,
+    padding: 8,
+    backgroundColor: color.white,
   },
 });

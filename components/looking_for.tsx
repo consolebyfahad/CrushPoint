@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     fontFamily: font.regular,
-    color: color.gray,
+    color: color.gray69,
     textAlign: "center",
   },
   content: {

@@ -1,3 +1,4 @@
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
@@ -26,39 +27,45 @@ export default function Filters({
   setFilterData,
   refetch,
 }: any) {
-  const [selectedGender, setSelectedGender] = useState(
-    filterData.gender || "Men"
-  );
+  const { userData } = useAppContext();
+  console.log("userData", userData.gender_interest);
+  const [selectedGender, setSelectedGender] = useState(() => {
+    if (userData?.gender_interest === "female") {
+      return "Women";
+    } else if (userData?.gender_interest === "male") {
+      return "Men";
+    }
+    return filterData.gender || "Men";
+  });
   const [ageFrom, setAgeFrom] = useState(filterData.ageFrom || "18");
   const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");
   const [distance, setDistance] = useState(filterData.distance || 10);
-
   const genderOptions = ["Men", "Women", "Both"];
 
-  // Helper function to format looking for display
-  const formatLookingForDisplay = (lookingFor: any) => {
-    if (!lookingFor || (Array.isArray(lookingFor) && lookingFor.length === 0)) {
+  // Helper function to format multiple selection display
+  const formatMultipleSelectionDisplay = (selection: any) => {
+    if (!selection || (Array.isArray(selection) && selection.length === 0)) {
       return null;
     }
 
-    if (Array.isArray(lookingFor)) {
-      if (lookingFor.length === 1) {
-        return lookingFor[0];
-      } else if (lookingFor.length > 1) {
-        const additionalCount = lookingFor.length - 1;
-        return `${lookingFor[0]} ${additionalCount}+`;
+    if (Array.isArray(selection)) {
+      if (selection.length === 1) {
+        return selection[0];
+      } else if (selection.length > 1) {
+        const additionalCount = selection.length - 1;
+        return `${selection[0]} ${additionalCount}+`;
       }
     }
 
     // If it's a string (backward compatibility)
-    return lookingFor;
+    return selection;
   };
 
   const expandableOptions = [
     {
       title: "Looking for",
       hasNavigation: true,
-      value: formatLookingForDisplay(filterData.lookingFor),
+      value: formatMultipleSelectionDisplay(filterData.lookingFor),
       onPress: onNavigateToLookingFor,
     },
     // {
@@ -72,19 +79,19 @@ export default function Filters({
     {
       title: "Nationality",
       hasNavigation: true,
-      value: filterData.nationality || null,
+      value: formatMultipleSelectionDisplay(filterData.nationality),
       onPress: onNavigateToNationality,
     },
     {
       title: "Religion",
       hasNavigation: true,
-      value: filterData.religion || null,
+      value: formatMultipleSelectionDisplay(filterData.religion),
       onPress: onNavigateToReligion,
     },
     {
       title: "Zodiac Sign",
       hasNavigation: true,
-      value: filterData.zodiacSign || null,
+      value: formatMultipleSelectionDisplay(filterData.zodiacSign),
       onPress: onNavigateToZodiac,
     },
   ];
@@ -103,9 +110,9 @@ export default function Filters({
       distance: 10,
       lookingFor: [],
       // height: null,
-      nationality: null,
-      religion: null,
-      zodiacSign: null,
+      nationality: [],
+      religion: [],
+      zodiacSign: [],
     });
   };
 
@@ -178,11 +185,15 @@ export default function Filters({
           <View style={styles.ageContainer}>
             <View style={styles.ageInputContainer}>
               <TouchableOpacity
+                style={{
+                  paddingVertical: 6,
+                  paddingHorizontal: 16,
+                }}
                 onPress={() =>
                   setAgeFrom(Math.max(18, parseInt(ageFrom) - 1).toString())
                 }
               >
-                <Text>-</Text>
+                <Text style={{ fontSize: 24 }}>-</Text>
               </TouchableOpacity>
               <TextInput
                 style={[
@@ -195,6 +206,10 @@ export default function Filters({
                 maxLength={2}
               />
               <TouchableOpacity
+                style={{
+                  paddingVertical: 6,
+                  paddingHorizontal: 16,
+                }}
                 onPress={() =>
                   setAgeFrom(
                     Math.min(
@@ -204,17 +219,21 @@ export default function Filters({
                   )
                 }
               >
-                <Text>+</Text>
+                <Text style={{ fontSize: 24 }}>+</Text>
               </TouchableOpacity>
             </View>
             <Text style={styles.ageToText}>to</Text>
             <View style={styles.ageInputContainer}>
               <TouchableOpacity
+                style={{
+                  paddingVertical: 6,
+                  paddingHorizontal: 16,
+                }}
                 onPress={() =>
                   setAgeTo(Math.max(18, parseInt(ageTo) - 1).toString())
                 }
               >
-                <Text>-</Text>
+                <Text style={{ fontSize: 24 }}>-</Text>
               </TouchableOpacity>
               <TextInput
                 style={[
@@ -227,11 +246,15 @@ export default function Filters({
                 maxLength={2}
               />
               <TouchableOpacity
+                style={{
+                  paddingVertical: 6,
+                  paddingHorizontal: 16,
+                }}
                 onPress={() =>
                   setAgeTo(Math.min(99, parseInt(ageTo) + 1).toString())
                 }
               >
-                <Text>+</Text>
+                <Text style={{ fontSize: 24 }}>+</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -314,7 +337,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    minHeight: SCREEN_HEIGHT * 0.8,
+    minHeight: SCREEN_HEIGHT * 0.75,
     paddingBottom: 24,
   },
   header: {

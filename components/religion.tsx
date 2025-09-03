@@ -17,10 +17,9 @@ export default function Religion({
   onBack,
   filterData,
   setFilterData,
-  onSelect,
 }: any) {
-  const [selectedReligion, setSelectedReligion] = useState(
-    filterData.religion || "Christianity"
+  const [selectedReligions, setSelectedReligions] = useState<string[]>(
+    Array.isArray(filterData.religion) ? filterData.religion : []
   );
 
   const religions = [
@@ -30,20 +29,33 @@ export default function Religion({
     { id: "buddhism", name: "Buddhism", icon: "☸️", color: "#8B5CF6" },
     { id: "judaism", name: "Judaism", icon: "✡️", color: "#8B5CF6" },
     { id: "others", name: "Others", icon: "🌍", color: "#60A5FA" },
-    { id: "any", name: "Any", icon: "🤲", color: "#A3A3A3" },
+    // { id: "any", name: "Any", icon: "🤲", color: "#A3A3A3" },
   ];
 
   const handleReligionSelect = (religion: string) => {
-    setSelectedReligion(religion);
-    // Save the selection and auto close after selection
+    setSelectedReligions((prev) => {
+      if (prev.includes(religion)) {
+        // Remove religion if already selected
+        return prev.filter((r) => r !== religion);
+      } else {
+        // Add religion if not selected
+        return [...prev, religion];
+      }
+    });
+  };
+
+  const handleSave = () => {
     setFilterData({
       ...filterData,
-      religion: religion,
+      religion: selectedReligions,
     });
-    setTimeout(() => {
-      console.log("Selected religion:", religion);
-      onSelect();
-    }, 200);
+    console.log("Selected religions:", selectedReligions);
+    onClose();
+  };
+
+  // Check if religion is selected
+  const isSelected = (religion: string) => {
+    return selectedReligions.includes(religion);
   };
 
   return (
@@ -66,6 +78,7 @@ export default function Religion({
             key={religion.id}
             style={[
               styles.religionItem,
+              isSelected(religion.name) && styles.selectedReligionItem,
               index === religions.length - 1 && styles.lastReligionItem,
             ]}
             onPress={() => handleReligionSelect(religion.name)}
@@ -80,14 +93,43 @@ export default function Religion({
               >
                 <Text style={styles.religionIcon}>{religion.icon}</Text>
               </View>
-              <Text style={styles.religionText}>{religion.name}</Text>
+              <Text
+                style={[
+                  styles.religionText,
+                  isSelected(religion.name) && styles.selectedReligionText,
+                ]}
+              >
+                {religion.name}
+              </Text>
             </View>
-            {selectedReligion === religion.name && (
-              <Ionicons name="checkmark" size={20} color="#5FB3D4" />
+            {isSelected(religion.name) && (
+              <Ionicons name="checkmark" size={20} color={color.primary} />
             )}
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* Bottom Save Button */}
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            selectedReligions.length === 0 && styles.saveButtonDisabled,
+          ]}
+          onPress={handleSave}
+          activeOpacity={0.8}
+          disabled={selectedReligions.length === 0}
+        >
+          <Text
+            style={[
+              styles.saveButtonText,
+              selectedReligions.length === 0 && styles.saveButtonTextDisabled,
+            ]}
+          >
+            Save
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -164,5 +206,34 @@ const styles = StyleSheet.create({
     fontFamily: font.regular,
     color: color.black,
     flex: 1,
+  },
+  selectedReligionItem: {
+    backgroundColor: "#F0F9FF",
+    borderColor: color.primary,
+  },
+  selectedReligionText: {
+    color: color.primary,
+  },
+  bottomContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+  },
+  saveButton: {
+    width: "100%",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: color.primary,
+  },
+  saveButtonDisabled: {
+    backgroundColor: "#E5E5E5",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.white,
+  },
+  saveButtonTextDisabled: {
+    color: "#9CA3AF",
   },
 });

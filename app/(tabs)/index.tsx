@@ -2,7 +2,7 @@ import ListView from "@/app/home/list_view";
 import MapView from "@/app/home/map_view";
 import AccessLocation from "@/components/enable_location";
 import Filters from "@/components/filters";
-import Height from "@/components/height";
+// import Height from "@/components/height";
 import LookingFor from "@/components/looking_for";
 import Nationality from "@/components/nationality";
 import Religion from "@/components/religion";
@@ -42,7 +42,7 @@ interface UserFilters {
   ageTo?: string;
   distance?: number;
   lookingFor?: string;
-  height?: { from?: string; to?: string };
+  // height?: { from?: string; to?: string };
   nationality?: string;
   religion?: string;
   zodiacSign?: string;
@@ -58,7 +58,7 @@ export default function Index() {
     ageTo: "35",
     distance: 10,
     lookingFor: undefined,
-    height: undefined,
+    // height: undefined,
     nationality: undefined,
     religion: undefined,
     zodiacSign: undefined,
@@ -384,10 +384,6 @@ export default function Index() {
   const handleClose = () => {
     setShowHeight(false);
     setShowLookingFor(false);
-    setShowFilters(true);
-  };
-
-  const handleSelect = () => {
     setShowNationality(false);
     setShowReligion(false);
     setShowZodiac(false);
@@ -545,7 +541,7 @@ export default function Index() {
         </View>
       </Modal>
 
-      <Modal
+      {/* <Modal
         visible={showHeight}
         transparent={true}
         animationType="slide"
@@ -564,7 +560,7 @@ export default function Index() {
             setFilterData={setFilterData}
           />
         </View>
-      </Modal>
+      </Modal> */}
 
       <Modal
         visible={showNationality}
@@ -579,11 +575,10 @@ export default function Index() {
             onPress={() => setShowNationality(false)}
           />
           <Nationality
-            onClose={() => setShowNationality(false)}
+            onClose={handleClose}
             onBack={handleBackToFilters}
             filterData={filterData}
             setFilterData={setFilterData}
-            onSelect={handleSelect}
           />
         </View>
       </Modal>
@@ -601,11 +596,10 @@ export default function Index() {
             onPress={() => setShowReligion(false)}
           />
           <Religion
-            onClose={() => setShowReligion(false)}
+            onClose={handleClose}
             onBack={handleBackToFilters}
             filterData={filterData}
             setFilterData={setFilterData}
-            onSelect={handleSelect}
           />
         </View>
       </Modal>
@@ -623,11 +617,10 @@ export default function Index() {
             onPress={() => setShowZodiac(false)}
           />
           <ZodiacSign
-            onClose={() => setShowZodiac(false)}
+            onClose={handleClose}
             onBack={handleBackToFilters}
             filterData={filterData}
             setFilterData={setFilterData}
-            onSelect={handleSelect}
           />
         </View>
       </Modal>

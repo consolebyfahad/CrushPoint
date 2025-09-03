@@ -35,4 +35,6 @@ interface UserData {
   parsedLookingFor: string[];
   originalInterestIds: string[];
   originalLookingForIds: string[];
+  parsedNationality: string[];
+  originalNationalityValues: string[];
 }

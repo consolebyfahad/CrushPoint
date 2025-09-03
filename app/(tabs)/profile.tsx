@@ -297,7 +297,16 @@ export default function ProfileTab() {
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Nationality</Text>
-              <Text style={styles.infoValue}>{userData.nationality}</Text>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoValue}>
+                  {userData.parsedNationality?.[0] ?? ""}
+                </Text>
+                {(userData.parsedNationality?.length ?? 0) > 1 && (
+                  <Text style={styles.additionalGoals}>
+                    , +{userData.parsedNationality!.length - 1}
+                  </Text>
+                )}
+              </View>
             </View>
 
             <View style={styles.infoRow}>

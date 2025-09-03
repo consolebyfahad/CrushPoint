@@ -308,7 +308,7 @@ export default function PrivateSpot() {
     } else if (isEdit) {
       return "Update the area where you don't want to be visible to others";
     } else if (locationPermissionGranted) {
-      return "Drag the map to choose an area where you don't want to be visible to others";
+      return "Drag the map to choose an area where you don't want to be visible to others, \nYou can add up to 3 Private Spots in profile setting.";
     } else {
       return "Choose an area on the map where you don't want to be visible to others";
     }

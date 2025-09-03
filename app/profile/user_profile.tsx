@@ -67,7 +67,7 @@ export default function UserProfile() {
         lookingFor: [],
         interests: [],
         height: "Not specified",
-        nationality: "Not specified",
+        nationality: [],
         religion: "Not specified",
         zodiac: "Not specified",
         about: "",
@@ -76,6 +76,24 @@ export default function UserProfile() {
         ],
       };
     }
+
+    // Parse nationality from JSON string or array
+    const parseNationality = (nationalityData: any) => {
+      if (!nationalityData) return [];
+      if (Array.isArray(nationalityData)) return nationalityData;
+      if (typeof nationalityData === "string") {
+        try {
+          // Handle escaped JSON strings like "[\\\"Not Specified\\\",\\\"American\\\"]"
+          const cleaned = nationalityData.replace(/\\"/g, '"');
+          const parsed = JSON.parse(cleaned);
+          return Array.isArray(parsed) ? parsed : [parsed];
+        } catch (error) {
+          // If parsing fails, treat as single string
+          return [nationalityData];
+        }
+      }
+      return [nationalityData];
+    };
 
     return {
       id: userData.id || "unknown",
@@ -86,7 +104,7 @@ export default function UserProfile() {
       lookingFor: userData.lookingFor || [],
       interests: userData.interests || [],
       height: userData.height || "Not specified",
-      nationality: userData.nationality || "Not specified",
+      nationality: parseNationality(userData.nationality),
       religion: userData.religion || "Not specified",
       zodiac: userData.zodiac || "Not specified",
       about: userData.about || "This is me",
@@ -285,7 +303,7 @@ export default function UserProfile() {
             {/* Image Indicators */}
             {userInfo.images.length > 1 && (
               <View style={styles.imageIndicators}>
-                {userInfo.images.map((_, index) => (
+                {userInfo.images.map((_: any, index: number) => (
                   <View
                     key={index}
                     style={[
@@ -417,7 +435,21 @@ export default function UserProfile() {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Nationality</Text>
-              <Text style={styles.infoValue}>{userInfo.nationality}</Text>
+              <View style={styles.nationalityContainer}>
+                {userInfo.nationality.length > 0 ? (
+                  userInfo.nationality.map(
+                    (nationality: string, index: number) => (
+                      <View key={index} style={styles.nationalityTag}>
+                        <Text style={styles.nationalityText}>
+                          {nationality}
+                        </Text>
+                      </View>
+                    )
+                  )
+                ) : (
+                  <Text style={styles.infoValue}>Not specified</Text>
+                )}
+              </View>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Religion</Text>
@@ -732,6 +764,26 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 16,
+    fontFamily: font.medium,
+    color: "#5FB3D4",
+  },
+  nationalityContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  nationalityTag: {
+    backgroundColor: "#F0F9FF",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#5FB3D4",
+  },
+  nationalityText: {
+    fontSize: 14,
     fontFamily: font.medium,
     color: "#5FB3D4",
   },

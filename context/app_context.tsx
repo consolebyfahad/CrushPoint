@@ -28,7 +28,7 @@ export interface UserData {
   looking_for: string[];
   radius: number;
   height: string;
-  nationality: string;
+  nationality: string | string[];
   religion: string;
   zodiac: string;
   lat: any;
@@ -40,12 +40,14 @@ export interface UserData {
   photos?: string[];
   parsedInterests?: string[];
   parsedLookingFor?: string[];
+  parsedNationality?: string[];
+  originalLookingForIds: any;
+  originalNationalityValues?: string[];
   country?: string;
   state?: string;
   city?: string;
   languages?: string;
   about?: string;
-  originalLookingForIds: any;
 }
 
 interface AppContextType {
@@ -156,12 +158,14 @@ const defaultUserData: UserData = {
   photos: [],
   parsedInterests: [],
   parsedLookingFor: [],
+  parsedNationality: [],
+  originalLookingForIds: [],
+  originalNationalityValues: [],
   country: "",
   state: "",
   city: "",
   languages: "",
   about: "",
-  originalLookingForIds: [],
 };
 
 const STORAGE_KEY = "@AppContext";

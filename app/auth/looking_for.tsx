@@ -22,7 +22,14 @@ export default function LookingFor() {
   ];
 
   const handleSelectionChange = (newSelection: string[]) => {
-    setSelectedOptions(newSelection);
+    if (newSelection.includes("prefer-not")) {
+      setSelectedOptions(["prefer-not"]);
+    } else {
+      const filteredSelection = newSelection.filter(
+        (option) => option !== "prefer-not"
+      );
+      setSelectedOptions(filteredSelection);
+    }
   };
 
   const handleContinue = () => {
@@ -55,16 +62,6 @@ export default function LookingFor() {
           staggerDelay={80}
           containerStyle={styles.optionsContainer}
         />
-
-        {/* Selection Counter */}
-        {selectedOptions.length > 0 && (
-          <View style={styles.selectionCounter}>
-            <Text style={styles.selectionCountText}>
-              {selectedOptions.length} option
-              {selectedOptions.length !== 1 ? "s" : ""} selected
-            </Text>
-          </View>
-        )}
       </View>
 
       <View style={styles.buttonContainer}>
@@ -111,19 +108,6 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     paddingHorizontal: 0,
-  },
-  selectionCounter: {
-    marginTop: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "#F0F9FF",
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  selectionCountText: {
-    fontSize: 14,
-    fontFamily: font.medium,
-    color: color.primary,
   },
   buttonContainer: {
     borderTopWidth: 1,

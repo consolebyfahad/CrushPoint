@@ -5,7 +5,7 @@ import { color, font } from "@/utils/constants";
 import Octicons from "@expo/vector-icons/Octicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   Keyboard,
@@ -28,8 +28,33 @@ const About = () => {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [ageError, setAgeError] = useState("");
+
+  // Dismiss keyboard when date picker is closed on Android
+  useEffect(() => {
+    if (Platform.OS === "android" && !showDatePicker) {
+      Keyboard.dismiss();
+    }
+  }, [showDatePicker]);
+
+  const calculateAge = (birthDate: Date) => {
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
 
   const handleContinue = () => {
+    if (ageError) return; // Don't continue if there's an age error
+
     updateUserData({ name: name, dob: dateOfBirth });
     router.push("/auth/looking_for");
   };
@@ -47,23 +72,35 @@ const About = () => {
       const currentDate = selectedDate;
       setDate(currentDate);
 
-      // Format date as mm/dd/yyyy
-      const formattedDate = `${(currentDate.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}/${currentDate
-        .getDate()
-        .toString()
-        .padStart(2, "0")}/${currentDate.getFullYear()}`;
-      setDateOfBirth(formattedDate);
+      // Check if user is 18 or older
+      const age = calculateAge(currentDate);
+      if (age < 18) {
+        setAgeError("You must be 18 or older to use this app");
+        setDateOfBirth("");
+      } else {
+        setAgeError("");
+        // Format date as mm/dd/yyyy
+        const formattedDate = `${(currentDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}/${currentDate
+          .getDate()
+          .toString()
+          .padStart(2, "0")}/${currentDate.getFullYear()}`;
+        setDateOfBirth(formattedDate);
+      }
     }
   };
 
   const handleDateConfirm = () => {
     setShowDatePicker(false);
+    // Dismiss keyboard after date selection
+    Keyboard.dismiss();
   };
 
   const handleDateCancel = () => {
     setShowDatePicker(false);
+    // Dismiss keyboard after canceling date selection
+    Keyboard.dismiss();
   };
 
   return (
@@ -97,7 +134,7 @@ const About = () => {
             <Text style={styles.label}>Date of Birth</Text>
             <TouchableOpacity
               onPress={handleDatePress}
-              style={styles.dateInput}
+              style={[styles.dateInput, ageError && styles.dateInputError]}
             >
               <TextInput
                 style={[
@@ -113,6 +150,7 @@ const About = () => {
 
               <Octicons name="calendar" size={18} color={color.gray55} />
             </TouchableOpacity>
+            {ageError ? <Text style={styles.errorText}>{ageError}</Text> : null}
           </View>
 
           {/* Android Date Picker (inline) */}
@@ -178,7 +216,7 @@ const About = () => {
         <CustomButton
           title="Continue"
           onPress={handleContinue}
-          isDisabled={!name.trim() || !dateOfBirth.trim()}
+          isDisabled={!name.trim() || !dateOfBirth.trim() || !!ageError}
         />
       </View>
     </SafeAreaView>
@@ -245,6 +283,16 @@ const styles = StyleSheet.create({
   dateTextInput: {
     color: color.black,
     flex: 1,
+  },
+  dateInputError: {
+    borderColor: color.error,
+  },
+  errorText: {
+    fontSize: 14,
+    color: color.error,
+    fontFamily: font.regular,
+    marginTop: 8,
+    marginLeft: 4,
   },
   buttonContainer: {
     borderTopWidth: 1,

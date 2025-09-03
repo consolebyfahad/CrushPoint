@@ -5,6 +5,7 @@ import {
   parseInterestsWithNames,
   parseJsonString,
   parseLookingForWithLabels,
+  parseNationalityWithLabels,
 } from "@/utils/helper";
 import { useEffect, useState } from "react";
 
@@ -74,15 +75,24 @@ export default function useGetProfile() {
         const originalLookingForIds = userData.looking_for
           ? parseJsonString(userData.looking_for)
           : [];
+        const parsedNationality = userData.nationality
+          ? parseNationalityWithLabels(userData.nationality)
+          : [];
+        const originalNationalityValues = userData.nationality
+          ? parseJsonString(userData.nationality)
+          : [];
 
+        const { images, ...userDataWithoutImages } = userData;
         const extendedUserData = {
-          ...userData,
+          ...userDataWithoutImages,
           age,
           photos, // This now contains full URLs
           parsedInterests,
           parsedLookingFor,
           originalLookingForIds,
           originalInterestIds,
+          parsedNationality,
+          originalNationalityValues,
           email: userData.email || "Not Specified",
           gender: userData.gender || "Not Specified",
           gender_interest: userData.gender_interest || "Not Specified",

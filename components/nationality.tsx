@@ -15,14 +15,13 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function Nationality({
   onClose,
-  onSelect,
   onBack,
   filterData,
   setFilterData,
 }: any) {
   const [searchText, setSearchText] = useState("");
-  const [selectedNationality, setSelectedNationality] = useState(
-    filterData.nationality || "Algerian"
+  const [selectedNationalities, setSelectedNationalities] = useState<string[]>(
+    Array.isArray(filterData.nationality) ? filterData.nationality : []
   );
 
   const nationalities = [
@@ -53,30 +52,53 @@ export default function Nationality({
   );
 
   const handleNationalitySelect = (nationality: string) => {
-    setSelectedNationality(nationality);
-    // Save the selection and auto close after selection
+    setSelectedNationalities((prev) => {
+      if (prev.includes(nationality)) {
+        // Remove nationality if already selected
+        return prev.filter((n) => n !== nationality);
+      } else {
+        // Add nationality if not selected
+        return [...prev, nationality];
+      }
+    });
+  };
+
+  const handleSave = () => {
     setFilterData({
       ...filterData,
-      nationality: nationality,
+      nationality: selectedNationalities,
     });
-    setTimeout(() => {
-      console.log("Selected nationality:", nationality);
-      onSelect();
-    }, 200);
+    console.log("Selected nationalities:", selectedNationalities);
+    onClose();
+  };
+
+  // Check if nationality is selected
+  const isSelected = (nationality: string) => {
+    return selectedNationalities.includes(nationality);
   };
 
   const renderNationalityItem = ({ item }: any) => (
     <TouchableOpacity
-      style={styles.nationalityItem}
+      style={[
+        styles.nationalityItem,
+        isSelected(item.name) && styles.selectedNationalityItem,
+      ]}
       onPress={() => handleNationalitySelect(item.name)}
       activeOpacity={0.7}
     >
       <View style={styles.nationalityContent}>
         <Text style={styles.flag}>{item.flag}</Text>
-        <Text style={styles.nationalityText}>{item.name}</Text>
+        <Text
+          style={[
+            styles.nationalityText,
+            isSelected(item.name) && styles.selectedNationalityText,
+          ]}
+        >
+          {item.name}
+        </Text>
       </View>
-      {selectedNationality === item.name && (
-        <Ionicons name="checkmark" size={20} color="#5FB3D4" />
+      {isSelected(item.name) && (
+        <Ionicons name="checkmark" size={20} color={color.primary} />
       )}
     </TouchableOpacity>
   );
@@ -122,6 +144,29 @@ export default function Nationality({
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
+
+      {/* Bottom Save Button */}
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            selectedNationalities.length === 0 && styles.saveButtonDisabled,
+          ]}
+          onPress={handleSave}
+          activeOpacity={0.8}
+          disabled={selectedNationalities.length === 0}
+        >
+          <Text
+            style={[
+              styles.saveButtonText,
+              selectedNationalities.length === 0 &&
+                styles.saveButtonTextDisabled,
+            ]}
+          >
+            Save
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -212,5 +257,33 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#F5F5F5",
     marginLeft: 52, // Aligns with text after flag
+  },
+  selectedNationalityItem: {
+    backgroundColor: "#F0F9FF",
+  },
+  selectedNationalityText: {
+    color: color.primary,
+  },
+  bottomContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+  },
+  saveButton: {
+    width: "100%",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: color.primary,
+  },
+  saveButtonDisabled: {
+    backgroundColor: "#E5E5E5",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.white,
+  },
+  saveButtonTextDisabled: {
+    color: "#9CA3AF",
   },
 });

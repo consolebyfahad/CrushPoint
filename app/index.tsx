@@ -11,7 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function index() {
-  const { isLoggedIn } = useAppContext();
+  const { isLoggedIn, isHydrated } = useAppContext();
   const containerScale = useSharedValue(0);
   const imageScale = useSharedValue(0);
   const textOpacity = useSharedValue(0);
@@ -52,15 +52,32 @@ export default function index() {
     opacity: textOpacity.value,
     transform: [{ translateY: textTranslateY.value }],
   }));
+
   useEffect(() => {
-    setTimeout(() => {
+    if (!isHydrated) return; // Wait for context to hydrate
+
+    const timer = setTimeout(() => {
       if (isLoggedIn) {
         router.replace("/(tabs)");
       } else {
         router.replace("/onboarding");
       }
     }, 2000);
-  }, [isLoggedIn]);
+
+    return () => clearTimeout(timer);
+  }, [isLoggedIn, isHydrated]);
+
+  // Show loading state while context is hydrating
+  if (!isHydrated) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.imageContainer}>
+          <Text style={styles.fallbackText}>CP</Text>
+        </View>
+        <Text style={styles.appName}>Andra</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -69,6 +86,7 @@ export default function index() {
           <Animated.Image
             style={[styles.image, animatedImageStyle]}
             source={image.splash}
+            onError={() => setImageError(true)}
           />
         ) : (
           <Animated.View style={[styles.fallbackContainer, animatedImageStyle]}>

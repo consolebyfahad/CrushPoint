@@ -119,6 +119,61 @@ export const nationalityOptions = [
   { label: "🇰🇷 Korean", value: "Korean" },
 ];
 
+const NATIONALITY_MAPPING: { [key: string]: string } =
+  nationalityOptions.reduce((acc, option) => {
+    acc[option.value] = option.label;
+    return acc;
+  }, {} as { [key: string]: string });
+
+const convertNationalityValuesToLabels = (
+  nationalityValues: string[]
+): string[] => {
+  return nationalityValues
+    .map((value) => NATIONALITY_MAPPING[value] || value) // Fallback to original value if not found
+    .filter((label) => label && label !== "Not Specified"); // Filter out empty or "Not Specified" values
+};
+
+// Add new function specifically for nationality
+export const parseNationalityWithLabels = (jsonString: string): string[] => {
+  try {
+    // Handle heavily escaped JSON strings like the one in the data
+    let cleanedString = jsonString;
+
+    // Remove excessive backslashes and quotes
+    cleanedString = cleanedString.replace(/\\\\+/g, "\\");
+    cleanedString = cleanedString.replace(/\\\"/g, '"');
+
+    // If the string starts with [ and contains nested arrays, extract the inner array
+    if (cleanedString.startsWith('["[') && cleanedString.endsWith('"]')) {
+      // Extract the inner array string
+      const innerArrayMatch = cleanedString.match(/\["\[(.*)\]"\]/);
+      if (innerArrayMatch) {
+        const innerArrayString = `[${innerArrayMatch[1]}]`;
+        const nationalityValues = JSON.parse(innerArrayString);
+        return convertNationalityValuesToLabels(nationalityValues);
+      }
+    }
+
+    // Try normal parsing
+    const nationalityValues = JSON.parse(cleanedString);
+    return convertNationalityValuesToLabels(nationalityValues);
+  } catch (error) {
+    console.error("Error parsing nationality:", error);
+    // Fallback: try to extract values manually if JSON parsing fails
+    try {
+      // Extract values between quotes
+      const matches = jsonString.match(/"([^"]+)"/g);
+      if (matches) {
+        const values = matches.map((match) => match.replace(/"/g, ""));
+        return convertNationalityValuesToLabels(values);
+      }
+    } catch (fallbackError) {
+      console.error("Fallback parsing also failed:", fallbackError);
+    }
+    return [];
+  }
+};
+
 export const religionOptions = [
   { label: "✝️ Christianity", value: "Christianity" },
   { label: "☪️ Islam", value: "Islam" },
