@@ -1,6 +1,7 @@
 import { useAppContext } from "@/context/app_context";
-import { color } from "@/utils/constants";
+import { color, font } from "@/utils/constants";
 import { MarkerIcon } from "@/utils/SvgIcons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -8,6 +9,7 @@ import {
   Platform,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import MapView, {
@@ -27,8 +29,9 @@ interface MapViewProps {
   loading: boolean;
   error: string | null;
   refetch?: any;
-  selectedUser?: any; // Add this prop
-  onUserDeselect?: () => void; // Add this prop
+  selectedUser?: any;
+  onUserDeselect?: () => void;
+  onShowMyLocation?: () => void; // NEW: Show my location handler
 }
 
 interface UserLocation {
@@ -43,13 +46,14 @@ export default function Map({
   loading,
   error,
   refetch,
-  selectedUser, // New prop for selected user
-  onUserDeselect, // New prop for deselecting user
+  selectedUser,
+  onUserDeselect,
+  onShowMyLocation, // NEW: Prop for showing current user location
 }: MapViewProps) {
   const { userData } = useAppContext();
   const [mapRegion, setMapRegion] = useState<Region | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
-  const mapRef = useRef<MapView>(null); // Add map reference
+  const mapRef = useRef<MapView>(null);
 
   // Get user's current location
   useEffect(() => {
@@ -72,8 +76,8 @@ export default function Map({
       const newRegion = {
         latitude: locationForMap.latitude,
         longitude: locationForMap.longitude,
-        latitudeDelta: 0.001,
-        longitudeDelta: 0.001,
+        latitudeDelta: 0.01, // UPDATED: Slightly wider view for better context
+        longitudeDelta: 0.01,
       };
 
       setMapRegion(newRegion);
@@ -83,45 +87,71 @@ export default function Map({
     }
   }, [currentLocation, userData?.lat, userData?.lng]);
 
-  // NEW: Animate to selected user location
+  // ENHANCED: Better animation to selected user location
   useEffect(() => {
     if (selectedUser && mapRef.current) {
-      // Get coordinates from either actualLocation or loc
       const userLocation = getUserCoordinates(selectedUser);
 
       if (userLocation) {
-        console.log("Animating to user location:", userLocation);
+        console.log("Animating to selected user location:", userLocation);
 
         // Create region for selected user with appropriate zoom level
         const selectedUserRegion = {
           latitude: userLocation.latitude,
           longitude: userLocation.longitude,
-          latitudeDelta: 0.005, // Zoom in closer to show the user
-          longitudeDelta: 0.005,
+          latitudeDelta: 0.003, // UPDATED: Closer zoom for better focus
+          longitudeDelta: 0.003,
         };
 
-        // Animate to the selected user's location
-        mapRef.current.animateToRegion(selectedUserRegion, 1000);
+        // Animate to the selected user's location with longer duration for smoother animation
+        mapRef.current.animateToRegion(selectedUserRegion, 1500);
       }
     }
   }, [selectedUser]);
 
-  // NEW: Helper function to get coordinates from user object
+  // NEW: Handle showing current user location
+  const handleShowMyLocation = () => {
+    if (currentLocation && mapRef.current) {
+      console.log("Animating to current user location:", currentLocation);
+
+      const currentUserRegion = {
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        latitudeDelta: 0.01, // Slightly wider view for current location
+        longitudeDelta: 0.01,
+      };
+
+      mapRef.current.animateToRegion(currentUserRegion, 1000);
+
+      // Call the parent handler if provided
+      if (onShowMyLocation) {
+        onShowMyLocation();
+      }
+    }
+  };
+
+  // ENHANCED: Helper function to get coordinates from user object with better error handling
   const getUserCoordinates = (user: any) => {
     // Try actualLocation first (preferred)
     if (user?.actualLocation?.lat && user?.actualLocation?.lng) {
-      return {
-        latitude: parseFloat(user.actualLocation.lat.toString()),
-        longitude: parseFloat(user.actualLocation.lng.toString()),
-      };
+      const lat = parseFloat(user.actualLocation.lat.toString());
+      const lng = parseFloat(user.actualLocation.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { latitude: lat, longitude: lng };
+      }
     }
 
     // Fallback to loc object
     if (user?.loc?.lat && user?.loc?.lng) {
-      return {
-        latitude: parseFloat(user.loc.lat.toString()),
-        longitude: parseFloat(user.loc.lng.toString()),
-      };
+      const lat = parseFloat(user.loc.lat.toString());
+      const lng = parseFloat(user.loc.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { latitude: lat, longitude: lng };
+      }
     }
 
     return null;
@@ -130,7 +160,7 @@ export default function Map({
   // Filter users that have valid coordinates
   const usersWithLocation = users.filter((user) => {
     const coords = getUserCoordinates(user);
-    return coords && !isNaN(coords.latitude) && !isNaN(coords.longitude);
+    return coords && coords.latitude !== 0 && coords.longitude !== 0;
   });
 
   // Get the location to display
@@ -177,7 +207,7 @@ export default function Map({
         style={styles.map}
         region={mapRegion}
         showsUserLocation={false}
-        showsMyLocationButton={true}
+        showsMyLocationButton={false} // UPDATED: We'll use custom button
         showsCompass={false}
         scrollEnabled={true}
         zoomEnabled={true}
@@ -188,12 +218,20 @@ export default function Map({
         loadingIndicatorColor={color.primary}
         loadingBackgroundColor={color.white}
         onPress={onUserDeselect}
+        // UPDATED: Better map styling
+        mapType="standard"
+        showsTraffic={false}
+        showsBuildings={true}
+        showsIndoors={false}
+        showsScale={false}
       >
         {/* Current user location marker */}
         <Marker
           coordinate={currentLocation}
           anchor={{ x: 0.5, y: 0.5 }}
           identifier="current-user"
+          title="You are here"
+          description="Your current location"
         >
           <MarkerIcon />
         </Marker>
@@ -203,21 +241,28 @@ export default function Map({
           const userCoords = getUserCoordinates(mapUser);
           if (!userCoords) return null;
 
+          const isSelected = selectedUser?.id === mapUser.id;
+
           return (
             <Marker
               key={`user-${mapUser.id}`}
               coordinate={userCoords}
               onPress={() => onUserPress(mapUser)}
               identifier={`user-${mapUser.id}`}
-              tracksViewChanges={true}
+              tracksViewChanges={false} // UPDATED: Better performance
               anchor={{ x: 0.5, y: 1 }}
-              centerOffset={{ x: 0, y: 0 }}
+              centerOffset={{ x: 0, y: -5 }}
+              title={
+                mapUser.name
+                  ? `${mapUser.name}, ${mapUser.age || "N/A"}`
+                  : "User"
+              }
+              description={isSelected ? "Selected user" : undefined}
             >
               <View
                 style={[
                   styles.userMarker,
-                  // NEW: Highlight selected user
-                  selectedUser?.id === mapUser.id && styles.selectedUserMarker,
+                  isSelected && styles.selectedUserMarker,
                 ]}
                 pointerEvents="box-none"
               >
@@ -227,20 +272,35 @@ export default function Map({
                       mapUser.images?.[0] ||
                       "https://via.placeholder.com/60x60.png?text=User",
                   }}
-                  style={styles.userImage}
+                  style={[
+                    styles.userImage,
+                    isSelected && styles.selectedUserImage,
+                  ]}
                   defaultSource={{
                     uri: "https://via.placeholder.com/60x60.png?text=User",
                   }}
                 />
-                {/* NEW: Add selection indicator */}
-                {selectedUser?.id === mapUser.id && (
-                  <View style={styles.selectionRing} />
+                {/* ENHANCED: Better selection indicator */}
+                {isSelected && (
+                  <>
+                    <View style={styles.selectionRing} />
+                    <View style={styles.selectionPulse} />
+                  </>
                 )}
               </View>
             </Marker>
           );
         })}
       </MapView>
+
+      {/* NEW: Custom My Location Button */}
+      <TouchableOpacity
+        style={styles.myLocationButton}
+        onPress={handleShowMyLocation}
+        activeOpacity={0.8}
+      >
+        <MaterialIcons name="my-location" size={24} color={color.primary} />
+      </TouchableOpacity>
 
       {/* Users loading indicator */}
       {loading && (
@@ -265,6 +325,31 @@ export default function Map({
           <Text style={styles.noUsersText}>No users found in your area</Text>
         </View>
       )}
+
+      {/* NEW: Selected user info card */}
+      {selectedUser && (
+        <View style={styles.selectedUserCard}>
+          <View style={styles.selectedUserInfo}>
+            <Image
+              source={{
+                uri:
+                  selectedUser.images?.[0] ||
+                  "https://via.placeholder.com/40x40.png?text=U",
+              }}
+              style={styles.selectedUserAvatar}
+            />
+            <View style={styles.selectedUserDetails}>
+              <Text style={styles.selectedUserName}>
+                {selectedUser.name || "Unknown"}, {selectedUser.age || "N/A"}
+              </Text>
+              <Text style={styles.selectedUserNote}>Selected on map</Text>
+            </View>
+          </View>
+          <TouchableOpacity onPress={onUserDeselect} style={styles.closeButton}>
+            <MaterialIcons name="close" size={20} color={color.gray55} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -286,6 +371,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+    fontFamily: font.regular,
     color: color.gray55,
     textAlign: "center",
   },
@@ -303,58 +389,104 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 20,
-    fontWeight: "600",
+    fontFamily: font.semiBold,
     color: color.black,
     marginBottom: 8,
     textAlign: "center",
   },
   errorMessage: {
     fontSize: 16,
+    fontFamily: font.regular,
     color: color.gray55,
     textAlign: "center",
     lineHeight: 22,
   },
+  // User markers
   userMarker: {
-    width: 38,
-    height: 38,
+    width: 40, // UPDATED: Slightly larger for better visibility
+    height: 40,
     borderRadius: 30,
     borderWidth: 2,
     borderColor: color.white,
     overflow: "hidden",
     position: "relative",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  // NEW: Style for selected user marker
   selectedUserMarker: {
     borderColor: color.primary,
     borderWidth: 3,
+    transform: [{ scale: 1.2 }], // UPDATED: Scale up selected marker
   },
   userImage: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
   },
-  // NEW: Selection ring animation
+  selectedUserImage: {
+    // Additional styling for selected user image if needed
+  },
+  // ENHANCED: Better selection indicators
   selectionRing: {
     position: "absolute",
-    top: -8,
-    left: -8,
-    right: -8,
-    bottom: -8,
+    top: -6,
+    left: -6,
+    right: -6,
+    bottom: -6,
     borderRadius: 30,
     borderWidth: 2,
     borderColor: color.primary,
-    opacity: 0.6,
+    opacity: 0.8,
+  },
+  selectionPulse: {
+    position: "absolute",
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    borderRadius: 35,
+    borderWidth: 1,
+    borderColor: color.primary,
+    opacity: 0.4,
+  },
+  // NEW: My Location Button
+  myLocationButton: {
+    position: "absolute",
+    bottom: 140, // UPDATED: Position above potential selected user card
+    right: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: color.white,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: color.gray87,
   },
   // Users loading overlay
   usersLoadingContainer: {
     position: "absolute",
-    top: 20,
+    top: 80, // UPDATED: Position below header
     left: 20,
     right: 20,
     backgroundColor: color.white,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
@@ -369,37 +501,38 @@ const styles = StyleSheet.create({
   usersLoadingText: {
     marginLeft: 8,
     fontSize: 14,
+    fontFamily: font.regular,
     color: color.gray55,
   },
   // Error banner
   errorBanner: {
     position: "absolute",
-    top: "50%",
-    left: "50%",
-    right: "50%",
+    top: 80,
+    left: 20,
+    right: 20,
     backgroundColor: "#FFF3CD",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     borderColor: "#FFEAA7",
     borderWidth: 1,
   },
   errorBannerText: {
     color: "#856404",
     fontSize: 14,
+    fontFamily: font.medium,
     textAlign: "center",
   },
   // No users indicator
   noUsersContainer: {
     position: "absolute",
-    bottom: 100,
-    left: "50%",
-    right: "50%",
-    top: "50%",
+    top: 80,
+    left: 20,
+    right: 20,
     backgroundColor: color.white,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -412,6 +545,65 @@ const styles = StyleSheet.create({
   noUsersText: {
     color: color.gray55,
     fontSize: 14,
+    fontFamily: font.regular,
     textAlign: "center",
+  },
+  // NEW: Selected user card
+  selectedUserCard: {
+    position: "absolute",
+    bottom: 30,
+    left: 20,
+    right: 20,
+    backgroundColor: color.white,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: color.primary + "20", // 20% opacity
+  },
+  selectedUserInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  selectedUserAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: color.primary,
+  },
+  selectedUserDetails: {
+    flex: 1,
+  },
+  selectedUserName: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.black,
+    marginBottom: 2,
+  },
+  selectedUserNote: {
+    fontSize: 12,
+    fontFamily: font.regular,
+    color: color.primary,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: color.gray94,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

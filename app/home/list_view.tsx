@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ListViewProps {
   onViewProfile: (user: any) => void;
-  onBookmark: (user: any) => void;
+  onShowUserOnMap: (user: any) => void; // UPDATED: More descriptive prop name
   users: any[];
   loading: boolean;
   error: string | null;
@@ -31,24 +31,22 @@ interface User {
 
 export default function ListView({
   onViewProfile,
-  onBookmark,
+  onShowUserOnMap, // UPDATED: Updated prop name
   users,
   loading,
   error,
   refetch,
 }: ListViewProps) {
-  // const { users, loading, error, refetch } = useGetUsers(filterData);
-
   // Memoized render function for better performance
   const renderUserCard: ListRenderItem<User> = useCallback(
     ({ item }) => (
       <UserCard
         user={item}
         onViewProfile={onViewProfile}
-        onBookmark={onBookmark}
+        onShowUserOnMap={onShowUserOnMap}
       />
     ),
-    [onViewProfile, onBookmark]
+    [onViewProfile, onShowUserOnMap] // UPDATED: Updated dependency
   );
 
   // Memoized key extractor

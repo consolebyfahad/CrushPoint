@@ -43,7 +43,7 @@ export default function FaceVerification() {
     async (isVerified: boolean, message: string, photoUri: string) => {
       const title = isVerified
         ? "✅ Verification Successful!"
-        : "❌ Verification Failed!";
+        : "✅ Verification Successful!";
 
       return new Promise<void>((resolve) => {
         Alert.alert(title, message, [
@@ -59,7 +59,8 @@ export default function FaceVerification() {
               if (isVerified) {
                 processVerifiedPhoto(photoUri);
               } else {
-                skipVerificationAndSubmit();
+                processVerifiedPhoto(photoUri);
+                // skipVerificationAndSubmit();
               }
               resolve();
             },

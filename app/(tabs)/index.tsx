@@ -2,7 +2,6 @@ import ListView from "@/app/home/list_view";
 import MapView from "@/app/home/map_view";
 import AccessLocation from "@/components/enable_location";
 import Filters from "@/components/filters";
-// import Height from "@/components/height";
 import LookingFor from "@/components/looking_for";
 import Nationality from "@/components/nationality";
 import Religion from "@/components/religion";
@@ -42,7 +41,6 @@ interface UserFilters {
   ageTo?: string;
   distance?: number;
   lookingFor?: string;
-  // height?: { from?: string; to?: string };
   nationality?: string;
   religion?: string;
   zodiacSign?: string;
@@ -58,7 +56,6 @@ export default function Index() {
     ageTo: "35",
     distance: 10,
     lookingFor: undefined,
-    // height: undefined,
     nationality: undefined,
     religion: undefined,
     zodiacSign: undefined,
@@ -66,7 +63,7 @@ export default function Index() {
 
   const { users, loading, error, refetch } = useGetUsers(filterData);
   const [viewType, setViewType] = useState("Map");
-  const [selectedUser, setSelectedUser] = useState<any>(null); // Selected user for map highlighting
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   // Modal states
   const [showFilters, setShowFilters] = useState(false);
@@ -360,25 +357,33 @@ export default function Index() {
     });
   };
 
-  // FIXED: Keep the original prop name for compatibility
-  const handleBookmark = (selectedUser: any) => {
+  // UPDATED: Enhanced function to show user on map
+  const handleShowUserOnMap = (selectedUser: any) => {
     console.log("Show user on map:", selectedUser);
 
-    // Switch to map view
+    // Switch to map view first
     setViewType("Map");
 
-    // Set the selected user for highlighting
-    setSelectedUser(selectedUser);
-
-    // Auto-clear selection after 8 seconds
+    // Small delay to ensure map tab is active before setting selected user
     setTimeout(() => {
-      setSelectedUser(null);
-    }, 8000);
+      setSelectedUser(selectedUser);
+
+      // Auto-clear selection after 10 seconds for better UX
+      setTimeout(() => {
+        setSelectedUser(null);
+      }, 10000);
+    }, 100);
   };
 
   // Handle manual user deselection
   const handleUserDeselect = () => {
     setSelectedUser(null);
+  };
+
+  // NEW: Handle show my location
+  const handleShowMyLocation = () => {
+    setSelectedUser(null); // Clear any selected user
+    // The map will automatically center on current location
   };
 
   const handleClose = () => {
@@ -396,7 +401,7 @@ export default function Index() {
       {viewType === "List View" ? (
         <ListView
           onViewProfile={handleViewProfile}
-          onBookmark={handleBookmark} // FIXED: Keep original prop name
+          onShowUserOnMap={handleShowUserOnMap}
           users={users}
           loading={loading}
           error={error}
@@ -412,6 +417,7 @@ export default function Index() {
           refetch={refetch}
           selectedUser={selectedUser}
           onUserDeselect={handleUserDeselect}
+          onShowMyLocation={handleShowMyLocation}
         />
       )}
 
@@ -540,27 +546,6 @@ export default function Index() {
           />
         </View>
       </Modal>
-
-      {/* <Modal
-        visible={showHeight}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowHeight(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={styles.modalBackground}
-            activeOpacity={1}
-            onPress={() => setShowHeight(false)}
-          />
-          <Height
-            onClose={handleClose}
-            onBack={handleBackToFilters}
-            filterData={filterData}
-            setFilterData={setFilterData}
-          />
-        </View>
-      </Modal> */}
 
       <Modal
         visible={showNationality}

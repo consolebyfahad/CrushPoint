@@ -5,8 +5,8 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -26,9 +26,39 @@ export default function ProfileTab() {
   const { userData, user } = useAppContext();
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const pagerRef = useRef<PagerView>(null);
+
   const photos = userData.photos || [];
   const hasMultiplePhotos = photos.length > 1;
+
+  // NEW: Auto refresh when screen comes into focus (returning from edit screens)
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      // Only refresh if we have user data and we're not currently loading
+      if (user?.user_id && !loading && isActive) {
+        console.log("ProfileTab focused - refreshing profile data");
+        setIsRefreshing(true);
+
+        // Small delay to ensure smooth navigation
+        setTimeout(() => {
+          if (isActive) {
+            refetch().finally(() => {
+              if (isActive) {
+                setIsRefreshing(false);
+              }
+            });
+          }
+        }, 200);
+      }
+
+      return () => {
+        isActive = false;
+      };
+    }, [user?.user_id]) // FIXED: Only depend on user_id, not refetch or loading
+  );
 
   const handleSettings = () => {
     router.push("/profile/setting");
@@ -87,8 +117,22 @@ export default function ProfileTab() {
     pagerRef.current?.setPage(nextIndex);
   };
 
+  // ENHANCED: Manual refresh handler
+  const handleManualRefresh = useCallback(async () => {
+    if (loading) return;
+
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } catch (error) {
+      console.error("Error during manual refresh:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetch, loading]);
+
   // Loading state
-  if (loading) {
+  if (loading && !userData?.name) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={color.primary} />
@@ -114,9 +158,12 @@ export default function ProfileTab() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={loading}
-            onRefresh={refetch}
+            refreshing={isRefreshing}
+            onRefresh={handleManualRefresh}
             colors={[color.primary]}
+            tintColor={color.primary}
+            title="Pull to refresh"
+            titleColor={color.gray55}
           />
         }
       >
@@ -337,6 +384,16 @@ export default function ProfileTab() {
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* NEW: Loading overlay when refreshing */}
+      {isRefreshing && !loading && (
+        <View style={styles.refreshOverlay}>
+          <View style={styles.refreshIndicator}>
+            <ActivityIndicator size="small" color={color.primary} />
+            <Text style={styles.refreshText}>Updating profile...</Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -575,5 +632,35 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: 110,
+  },
+  // NEW: Refresh overlay styles
+  refreshOverlay: {
+    position: "absolute",
+    top: 100,
+    left: 20,
+    right: 20,
+    zIndex: 1000,
+  },
+  refreshIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: color.white,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  refreshText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontFamily: font.medium,
+    color: color.gray55,
   },
 });

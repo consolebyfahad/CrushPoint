@@ -16,7 +16,7 @@ export default function Interested() {
       ? "male"
       : userData?.gender === "male"
       ? "female"
-      : "both"
+      : "other"
   );
 
   const handleInterestSelect = (interest: any) => {
@@ -92,23 +92,23 @@ export default function Interested() {
             </Text>
           </TouchableOpacity>
 
-          {/* Both Option */}
+          {/* other Option */}
           <TouchableOpacity
             style={[
               styles.interestOption,
               styles.bothOption,
-              selectedInterest === "both"
+              selectedInterest === "other"
                 ? styles.selectedOption
                 : styles.unselectedOption,
             ]}
-            onPress={() => handleInterestSelect("both")}
+            onPress={() => handleInterestSelect("other")}
             activeOpacity={0.8}
           >
             <Text
               style={[
                 styles.interestText,
                 styles.interestText,
-                selectedInterest === "both"
+                selectedInterest === "other"
                   ? styles.selectedText
                   : styles.unselectedText,
               ]}

@@ -14,7 +14,7 @@ export const FloatingBubbleAnimation = ({
       scaleAnim: new Animated.Value(0),
       opacityAnim: new Animated.Value(0),
       horizontalOffset: (Math.random() - 0.5) * 100,
-      delay: i * 300,
+      delay: i * 200,
     }))
   ).current;
 
@@ -41,19 +41,19 @@ export const FloatingBubbleAnimation = ({
             Animated.sequence([
               Animated.timing(bubble.scaleAnim, {
                 toValue: 1.2 + Math.random() * 0.8,
-                duration: 300,
+                duration: 200,
                 useNativeDriver: true,
               }),
               Animated.timing(bubble.scaleAnim, {
                 toValue: 0.8 + Math.random() * 0.2,
-                duration: 200,
+                duration: 100,
                 useNativeDriver: true,
               }),
             ]),
             // Fade out
             Animated.timing(bubble.opacityAnim, {
               toValue: 0,
-              duration: 2000,
+              duration: 1000,
               useNativeDriver: true,
             }),
           ]),

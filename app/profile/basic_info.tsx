@@ -49,7 +49,7 @@ export default function BasicInfo() {
   const interestedInOptions = [
     { label: "Men", value: "male" },
     { label: "Women", value: "female" },
-    { label: "Both", value: "both" },
+    { label: "Both", value: "other" },
   ];
 
   const relationshipGoalOptions = [

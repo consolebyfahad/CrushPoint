@@ -18,13 +18,13 @@ import CustomButton from "./custom_button";
 interface UserCardProps {
   user: any;
   onViewProfile: (user: any) => void;
-  onBookmark: (user: any) => void; // FIXED: Keep original prop name for compatibility
+  onShowUserOnMap: (user: any) => void; // UPDATED: More descriptive prop name
 }
 
 export default function UserCard({
   user,
   onViewProfile,
-  onBookmark, // This now handles showing user on map
+  onShowUserOnMap, // UPDATED: Updated prop name
 }: UserCardProps) {
   const { userData: currentUser } = useAppContext();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
@@ -46,7 +46,6 @@ export default function UserCard({
     if (user?.images && user.images.length > 0 && user.images[0]) {
       return { uri: user.images[0] };
     }
-    // Return undefined if no valid image, will trigger fallback
     return undefined;
   };
 
@@ -62,39 +61,70 @@ export default function UserCard({
     }
   };
 
-  // Updated handleShowOnMap function in UserCard component
+  // ENHANCED: Better location validation and error handling
+  const hasValidLocation = () => {
+    // Check if user has valid location in actualLocation
+    const hasActualLocation =
+      user?.actualLocation?.lat &&
+      user?.actualLocation?.lng &&
+      parseFloat(user.actualLocation.lat.toString()) !== 0 &&
+      parseFloat(user.actualLocation.lng.toString()) !== 0 &&
+      !isNaN(parseFloat(user.actualLocation.lat.toString())) &&
+      !isNaN(parseFloat(user.actualLocation.lng.toString()));
 
-  const handleShowOnMap = () => {
+    // Check if user has valid location in loc object
+    const hasLocLocation =
+      user?.loc?.lat &&
+      user?.loc?.lng &&
+      parseFloat(user.loc.lat.toString()) !== 0 &&
+      parseFloat(user.loc.lng.toString()) !== 0 &&
+      !isNaN(parseFloat(user.loc.lat.toString())) &&
+      !isNaN(parseFloat(user.loc.lng.toString()));
+
+    return hasActualLocation || hasLocLocation;
+  };
+
+  // UPDATED: Enhanced show on map function
+  const handleShowOnMap = async () => {
     try {
-      // Check if user has valid location in actualLocation
-      const hasActualLocation =
-        user?.actualLocation?.lat && user?.actualLocation?.lng;
-
-      // Check if user has valid location in loc object
-      const hasLocLocation = user?.loc?.lat && user?.loc?.lng;
-
-      // If no valid location found
-      if (!hasActualLocation && !hasLocLocation) {
+      // Validate location before proceeding
+      if (!hasValidLocation()) {
         Alert.alert(
           "Location Unavailable",
-          "This user's location is not available on the map."
+          "This user's location is not available on the map.",
+          [{ text: "OK", style: "default" }]
         );
         return;
       }
 
       setIsLoadingLocation(true);
 
-      // Add a small delay for better UX
-      setTimeout(() => {
-        onBookmark(user); // This will trigger the map navigation
-        setIsLoadingLocation(false);
-      }, 300);
-    } catch (error) {
-      console.error("Error in onBookmark:", error);
+      // Simulate a brief loading state for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Log the action for debugging
+      console.log("Showing user on map:", {
+        userId: user.id,
+        name: user.name,
+        actualLocation: user.actualLocation,
+        loc: user.loc,
+      });
+
+      // Trigger the map navigation
+      onShowUserOnMap(user);
+
       setIsLoadingLocation(false);
-      Alert.alert("Error", "Unable to show location. Please try again.");
+    } catch (error) {
+      console.error("Error in handleShowOnMap:", error);
+      setIsLoadingLocation(false);
+      Alert.alert(
+        "Error",
+        "Unable to show location on map. Please try again.",
+        [{ text: "OK", style: "default" }]
+      );
     }
   };
+
   // Format interests for display
   const formatInterests = (interests: string[] = []) => {
     return interests.slice(0, 3);
@@ -226,10 +256,11 @@ export default function UserCard({
             style={[
               styles.mapButton,
               isLoadingLocation && styles.mapButtonLoading,
+              !hasValidLocation() && styles.mapButtonDisabled, // NEW: Style for disabled state
             ]}
             onPress={handleShowOnMap}
             activeOpacity={0.8}
-            disabled={isLoadingLocation}
+            disabled={isLoadingLocation || !hasValidLocation()} // NEW: Disable if no valid location
           >
             {isLoadingLocation ? (
               <ActivityIndicator size="small" color={color.primary} />
@@ -237,7 +268,7 @@ export default function UserCard({
               <SimpleLineIcons
                 name="location-pin"
                 size={20}
-                color={color.primary}
+                color={hasValidLocation() ? color.primary : color.gray55} // NEW: Different color for disabled state
               />
             )}
           </TouchableOpacity>
@@ -463,5 +494,11 @@ const styles = StyleSheet.create({
   },
   mapButtonLoading: {
     borderColor: color.gray87,
+  },
+  // NEW: Style for disabled map button
+  mapButtonDisabled: {
+    borderColor: color.gray87,
+    backgroundColor: color.gray95,
+    opacity: 0.6,
   },
 });
