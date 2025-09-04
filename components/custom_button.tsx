@@ -19,6 +19,7 @@ interface CustomButtonProps {
   rightIcon?: React.ReactElement<{ color?: string }>;
   style?: any;
   fontstyle?: any;
+  count?: any;
 }
 
 export default function CustomButton({
@@ -31,6 +32,7 @@ export default function CustomButton({
   rightIcon,
   style,
   fontstyle,
+  count,
 }: CustomButtonProps) {
   const buttonDisabled =
     typeof isDisabled === "boolean" ? isDisabled || isLoading : isLoading;
@@ -81,6 +83,12 @@ export default function CustomButton({
               })}
             </View>
           )}
+
+          {/* Count before text for secondary */}
+          {variant === "secondary" && count && (
+            <Text style={styles.count}>{count}</Text>
+          )}
+
           <Text
             style={[
               getTextStyle(),
@@ -90,6 +98,19 @@ export default function CustomButton({
           >
             {title}
           </Text>
+
+          {/* Count after text for primary */}
+          {count && (
+            <Text
+              style={[
+                styles.count,
+                title === "Outgoing" && styles.outgoingCount,
+              ]}
+            >
+              {count}
+            </Text>
+          )}
+
           {rightIcon && <View>{React.cloneElement(rightIcon)}</View>}
         </View>
       )}
@@ -123,6 +144,27 @@ const styles = StyleSheet.create({
   disabledText: {
     color: color.gray900,
   },
+  count: {
+    backgroundColor: color.primary,
+    color: color.white,
+    fontSize: 12,
+    fontFamily: font.medium,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
+    overflow: "hidden",
+    textAlign: "center",
+    minWidth: 20,
+    borderWidth: 1,
+    borderColor: color.white,
+  },
+  outgoingCount: {
+    backgroundColor: color.white,
+    color: color.primary,
+    borderWidth: 1,
+    borderColor: color.primary,
+  },
+
   primaryText: {
     fontSize: 16,
     fontFamily: font.medium,

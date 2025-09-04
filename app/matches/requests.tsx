@@ -77,7 +77,8 @@ export default function Requests() {
       {/* Tabs */}
       <View style={styles.tabContainer}>
         <CustomButton
-          title={`Incoming ${incomingCount}`}
+          title={`Incoming`}
+          count={incomingCount}
           style={[styles.tab, activeTab === "incoming" && styles.activeTab]}
           fontstyle={[
             styles.tabText,
@@ -86,7 +87,8 @@ export default function Requests() {
           onPress={() => setActiveTab("incoming")}
         />
         <CustomButton
-          title={`Outgoing ${outgoingCount}`}
+          title={`Outgoing`}
+          count={outgoingCount}
           style={[styles.tab, activeTab === "outgoing" && styles.activeTab]}
           fontstyle={[
             styles.tabText,

@@ -48,23 +48,6 @@ export default function MeetupCard({
   onEdit,
   isLoading = false,
 }: MeetupCardProps) {
-  const getStatusBadge = () => {
-    switch (request.status) {
-      case "pending":
-        return <Text style={styles.pendingBadge}>Pending</Text>;
-      case "change":
-        return <Text style={styles.changeBadge}>Changes Requested</Text>;
-      case "accepted":
-        return <Text style={styles.acceptedBadge}>Accepted</Text>;
-      case "declined":
-        return <Text style={styles.declinedBadge}>Declined</Text>;
-      case "cancelled":
-        return <Text style={styles.cancelledBadge}>Cancelled</Text>;
-      default:
-        return null;
-    }
-  };
-
   const getStatusIcon = () => {
     switch (request.status) {
       case "accepted":
@@ -77,6 +60,29 @@ export default function MeetupCard({
         return <Ionicons name="refresh-circle" size={20} color="#007AFF" />;
       default:
         return <Ionicons name="time" size={20} color="#FF9500" />;
+    }
+  };
+  const getStatusBadge = () => {
+    const renderBadge = (style: any, label: any) => (
+      <View style={style}>
+        {getStatusIcon()}
+        <Text style={style}>{label}</Text>
+      </View>
+    );
+
+    switch (request.status) {
+      case "pending":
+        return renderBadge(styles.pendingBadge, "Pending");
+      case "change":
+        return renderBadge(styles.changeBadge, "Changes Requested");
+      case "accepted":
+        return renderBadge(styles.acceptedBadge, "Accepted");
+      case "declined":
+        return renderBadge(styles.declinedBadge, "Declined");
+      case "cancelled":
+        return renderBadge(styles.cancelledBadge, "Cancelled");
+      default:
+        return null;
     }
   };
 
@@ -200,7 +206,6 @@ export default function MeetupCard({
                 ? `${request.user.name} wants to meet`
                 : `Request to ${request.user.name}`}
             </Text>
-            {getStatusIcon()}
           </View>
           <Text style={styles.timestamp}>{request.timestamp}</Text>
         </View>
@@ -314,6 +319,8 @@ const styles = StyleSheet.create({
     color: color.gray55,
   },
   pendingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#FFF3CD",
     color: "#856404",
     fontSize: 12,
