@@ -36,11 +36,9 @@ export default function RootLayout() {
       <ToastProvider>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <Stack
-          screenOptions={{ headerShown: false, animation: "fade" }}
+          screenOptions={{ headerShown: false, animation: "default" }}
           initialRouteName="index"
-        >
-          <Stack.Screen name="index"></Stack.Screen>
-        </Stack>
+        />
       </ToastProvider>
     </AppProvider>
   );

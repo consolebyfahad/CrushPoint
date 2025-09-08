@@ -327,7 +327,7 @@ export default function Map({
       )}
 
       {/* NEW: Selected user info card */}
-      {selectedUser && (
+      {/* {selectedUser && (
         <View style={styles.selectedUserCard}>
           <View style={styles.selectedUserInfo}>
             <Image
@@ -349,7 +349,7 @@ export default function Map({
             <MaterialIcons name="close" size={20} color={color.gray55} />
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
     </View>
   );
 }

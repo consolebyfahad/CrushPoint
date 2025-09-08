@@ -1,6 +1,6 @@
 import UserCard from "@/components/user_card";
 import { color, font } from "@/utils/constants";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -37,6 +37,9 @@ export default function ListView({
   error,
   refetch,
 }: ListViewProps) {
+  // State to track if refresh control is showing
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   // Memoized render function for better performance
   const renderUserCard: ListRenderItem<User> = useCallback(
     ({ item }) => (
@@ -58,6 +61,16 @@ export default function ListView({
       refetch();
     }
   }, [loading, refetch]);
+
+  // Handle refresh control state changes
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetch]);
 
   // Render error state when no users and there's an error
   const renderErrorState = () => (
@@ -151,7 +164,9 @@ export default function ListView({
 
   // Main content with users list
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { paddingTop: isRefreshing ? 70 : 0 }]}
+    >
       <FlatList
         data={users}
         renderItem={renderUserCard}
@@ -161,11 +176,11 @@ export default function ListView({
         ListHeaderComponent={renderErrorBanner}
         refreshControl={
           <RefreshControl
-            refreshing={loading}
-            onRefresh={refetch}
+            refreshing={loading || isRefreshing}
+            onRefresh={handleRefresh}
             colors={[color.primary]}
             tintColor={color.primary}
-            title="Pull to refresh"
+            // title="Pull to refresh"
             titleColor={color.gray55}
           />
         }
