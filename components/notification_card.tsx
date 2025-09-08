@@ -98,13 +98,13 @@ export default function NotificationCard({
       </View>
 
       {/* Delete Button */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.deleteButton}
         onPress={handleDelete}
         activeOpacity={0.7}
       >
         <Feather name="trash-2" size={18} color={color.gray69} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </TouchableOpacity>
   );
 }

@@ -96,19 +96,20 @@ export default function Notifications({ navigation }: any) {
 
     try {
       const formData = new FormData();
-      formData.append("type", "notifications");
+      formData.append("type", "get_data");
+      formData.append("table_name", "notifications");
       formData.append("user_id", user.user_id);
 
       const response = await apiCall(formData);
 
-      if (response.result && Array.isArray(response.data)) {
+      if (Array.isArray(response.data)) {
         // Process the notifications data
         const processedNotifications = response.data.map(
           (notif: any, index: number) => ({
             id: notif.id || `notif_${index}`,
             type: notif.type || "general",
             title: notif.title || getNotificationTitle(notif.type),
-            message: notif.message || notif.content || "",
+            message: notif.notification,
             timeAgo: notif.created_at
               ? formatTimeAgo(notif.created_at)
               : "recently",

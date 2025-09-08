@@ -252,7 +252,7 @@ export default function MatchCard({
             onClose={() => setShowRequestMeetup(false)}
             onSubmit={handleSubmitMeetupRequest}
             matchData={{
-              id: match?.id || match?.match_id,
+              id: match?.match_id,
               name: match?.name || "Unknown",
               image: match?.image || (match?.images && match.images[0]),
               distance: match?.distance || "2.5 km",

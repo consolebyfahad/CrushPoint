@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 interface CustomButtonProps {
-  title: string;
+  title: any;
   onPress?: (event: GestureResponderEvent) => void;
   isDisabled?: any;
   isLoading?: boolean;

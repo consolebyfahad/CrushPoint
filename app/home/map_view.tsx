@@ -303,28 +303,28 @@ export default function Map({
       </TouchableOpacity>
 
       {/* Users loading indicator */}
-      {loading && (
+      {/* {loading && (
         <View style={styles.usersLoadingContainer}>
           <ActivityIndicator size="small" color={color.primary} />
           <Text style={styles.usersLoadingText}>Loading users...</Text>
         </View>
-      )}
+      )} */}
 
       {/* Error indicator for users data */}
-      {error && !loading && (
+      {/* {error && !loading && (
         <View style={styles.errorBanner}>
           <Text style={styles.errorBannerText}>
             ⚠️ Unable to load users nearby
           </Text>
         </View>
-      )}
+      )} */}
 
       {/* No users indicator */}
-      {!loading && !error && usersWithLocation.length === 0 && (
+      {/* {!loading && !error && usersWithLocation.length === 0 && (
         <View style={styles.noUsersContainer}>
           <Text style={styles.noUsersText}>No users found in your area</Text>
         </View>
-      )}
+      )} */}
 
       {/* NEW: Selected user info card */}
       {/* {selectedUser && (

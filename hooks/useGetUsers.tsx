@@ -146,7 +146,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
       if (filters.zodiacSign) {
         formData.append("zodiac", filters.zodiacSign);
       }
-      console.log("formData", formData);
+      console.log("formData filter", formData);
       const response: ApiResponse = await apiCall(formData);
 
       if (response.result && response.data && Array.isArray(response.data)) {

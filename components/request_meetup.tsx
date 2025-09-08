@@ -102,14 +102,7 @@ export default function RequestMeetup({
       formData.append("location", location.trim());
       formData.append("message", message.trim());
 
-      console.log("📡 Sending meetup request:", {
-        user_id: user.user_id,
-        match_id: matchData.id,
-        date: formattedDate,
-        time: formattedTime,
-        location: location.trim(),
-        message: message.trim(),
-      });
+      console.log("📡 Sending meetup request:", JSON.stringify(formData));
 
       const response = await apiCall(formData);
 
