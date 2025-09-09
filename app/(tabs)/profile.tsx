@@ -25,6 +25,7 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ProfileTab() {
   const { userData, user } = useAppContext();
+  console.log("userData", user);
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);

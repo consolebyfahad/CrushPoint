@@ -111,17 +111,18 @@ export default function Matches() {
   const handleRemoveMatch = useCallback(async () => {
     try {
       if (selectedMatch) {
+        console.log("selectedMatch", selectedMatch);
         // Call API to remove match
         const formData = new FormData();
         formData.append("type", "delete_data");
         formData.append("table_name", "matches");
-        formData.append("id", selectedMatch.id);
-
+        formData.append("id", selectedMatch.match_id);
+        console.log("Remove match", JSON.stringify(formData));
         const response = await apiCall(formData);
 
         if (response.result) {
           // Remove from local state using the hook function
-          removeMatch(selectedMatch.id);
+          removeMatch(selectedMatch.match_id);
         } else {
           console.error("Failed to remove match:", response.message);
         }
@@ -151,13 +152,13 @@ export default function Matches() {
           const removeFormData = new FormData();
           removeFormData.append("type", "delete_data");
           removeFormData.append("table_name", "matches");
-          removeFormData.append("id", selectedMatch.id);
+          removeFormData.append("id", selectedMatch.match_id);
 
           const removeResponse = await apiCall(removeFormData);
 
           if (removeResponse.result) {
             // Remove from local state using the hook function
-            removeMatch(selectedMatch.id);
+            removeMatch(selectedMatch.match_id);
           }
         } else {
           console.error("Block failed:", blockResponse.message);
@@ -188,7 +189,7 @@ export default function Matches() {
 
           if (response.result) {
             // Optionally remove the match after reporting
-            removeMatch(selectedMatch.id);
+            removeMatch(selectedMatch.match_id);
           } else {
             console.error("Report submission failed:", response.message);
           }

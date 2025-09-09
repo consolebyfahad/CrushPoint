@@ -34,6 +34,8 @@ export default function Filters({
       return "Women";
     } else if (userData?.gender_interest === "male") {
       return "Men";
+    } else if (userData?.gender_interest === "other") {
+      return "Both";
     }
     return filterData.gender || "Men";
   });

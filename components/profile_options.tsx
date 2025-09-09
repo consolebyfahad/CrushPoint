@@ -42,7 +42,7 @@ export default function ProfileOptions({
       console.log("Remove match");
     }
   };
-
+  console.log("userdata", userData);
   // Default user data if not provided
   const defaultUser = {
     name: "User",
