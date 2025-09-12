@@ -1,6 +1,14 @@
 import * as Location from "expo-location";
 import { Alert, Linking, Platform } from "react-native";
 
+export interface LocationSuggestion {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+}
+
 export async function requestUserLocation() {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -35,5 +43,54 @@ export async function requestUserLocation() {
   } catch (err) {
     console.error("Error requesting location:", err);
     return null;
+  }
+}
+
+export async function searchLocations(
+  query: string
+): Promise<LocationSuggestion[]> {
+  try {
+    if (!query.trim()) return [];
+
+    const results = await Location.geocodeAsync(query);
+
+    return results.map((location, index) => ({
+      id: `location_${index}`,
+      name: query,
+      address: `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(
+        6
+      )}`,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    }));
+  } catch (error) {
+    console.error("Error searching locations:", error);
+    return [];
+  }
+}
+
+export async function reverseGeocodeLocation(
+  latitude: number,
+  longitude: number
+): Promise<string> {
+  try {
+    const results = await Location.reverseGeocodeAsync({
+      latitude,
+      longitude,
+    });
+
+    if (results.length > 0) {
+      const location = results[0];
+      return (
+        `${location.street || ""} ${location.city || ""} ${
+          location.region || ""
+        }`.trim() || "Unknown Location"
+      );
+    }
+
+    return "Unknown Location";
+  } catch (error) {
+    console.error("Error reverse geocoding:", error);
+    return "Unknown Location";
   }
 }

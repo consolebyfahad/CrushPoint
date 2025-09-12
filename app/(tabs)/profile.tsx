@@ -386,16 +386,6 @@ export default function ProfileTab() {
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
-
-      {/* NEW: Loading overlay when refreshing */}
-      {isRefreshing && !loading && (
-        <View style={styles.refreshOverlay}>
-          <View style={styles.refreshIndicator}>
-            <ActivityIndicator size="small" color={color.primary} />
-            <Text style={styles.refreshText}>Updating profile...</Text>
-          </View>
-        </View>
-      )}
     </SafeAreaView>
   );
 }

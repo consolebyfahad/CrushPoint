@@ -77,6 +77,10 @@ interface AppContextType {
   // Utilities
   logout: () => Promise<boolean>;
   isHydrated: boolean;
+
+  // User management
+  loginUser: (userData: User) => Promise<void>;
+  updateUserProfile: (profileData: Partial<UserData>) => Promise<void>;
 }
 
 const defaultNotificationSettings: NotificationSetting[] = [
@@ -232,7 +236,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   }, [isLoggedIn, user, userData, userImages, isHydrated]);
 
   const updateUserData = (data: Partial<UserData>) => {
-    setUserData((prev) => ({ ...prev, ...data }));
+    setUserData((prev) => {
+      const updatedData = { ...prev, ...data };
+      console.log("📝 Updating user data:", data);
+      console.log("📝 New user data state:", updatedData);
+      return updatedData;
+    });
   };
 
   const clearUserData = () => {
@@ -264,6 +273,38 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const getNotificationSetting = (key: string): boolean => {
     const setting = userData.notification_settings?.find((s) => s.key === key);
     return setting?.enabled ?? false;
+  };
+
+  const loginUser = async (userData: User): Promise<void> => {
+    try {
+      console.log("🔐 Logging in user:", userData);
+      setUser(userData);
+      setIsLoggedIn(true);
+
+      // If user is new, don't clear existing userData
+      // If user is existing, we'll fetch their profile data separately
+      if (!userData.new) {
+        // For existing users, we might want to fetch their profile data
+        console.log(
+          "👤 Existing user - profile data will be fetched separately"
+        );
+      }
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      throw error;
+    }
+  };
+
+  const updateUserProfile = async (
+    profileData: Partial<UserData>
+  ): Promise<void> => {
+    try {
+      console.log("👤 Updating user profile:", profileData);
+      updateUserData(profileData);
+    } catch (error) {
+      console.error("❌ Profile update error:", error);
+      throw error;
+    }
   };
 
   const logout = async (): Promise<boolean> => {
@@ -298,6 +339,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     getNotificationSetting,
     logout,
     isHydrated,
+    loginUser,
+    updateUserProfile,
   };
 
   return (

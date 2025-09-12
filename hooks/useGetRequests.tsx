@@ -26,7 +26,7 @@ interface MeetupRequest {
 const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
 
 const useGetRequests = () => {
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
   const [incomingRequests, setIncomingRequests] = useState<MeetupRequest[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<MeetupRequest[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -135,7 +135,8 @@ const useGetRequests = () => {
         response.data.forEach((request: any) => {
           try {
             // Determine if it's incoming or outgoing based on the current user's ID
-            const isIncoming = request.id === user.user_id;
+            console.log(userData?.date_id, request.id);
+            const isIncoming = request.date_id === userData?.id;
 
             // Get the other user's information
             let otherUser;

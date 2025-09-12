@@ -10,16 +10,16 @@ import {
 } from "react-native";
 
 interface CustomButtonProps {
-  title: any;
+  title: string;
   onPress?: (event: GestureResponderEvent) => void;
-  isDisabled?: any;
+  isDisabled?: boolean;
   isLoading?: boolean;
   variant?: "primary" | "secondary";
   icon?: React.ReactElement<{ color?: string }>;
   rightIcon?: React.ReactElement<{ color?: string }>;
   style?: any;
   fontstyle?: any;
-  count?: any;
+  count?: number;
 }
 
 export default function CustomButton({

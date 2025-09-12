@@ -18,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Verify() {
   const params = useLocalSearchParams();
-  const { user, setIsLoggedIn } = useAppContext();
+  const { user, loginUser } = useAppContext();
   const { showToast } = useToast();
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [resendCountdown, setResendCountdown] = useState(59);
@@ -105,6 +105,23 @@ export default function Verify() {
     setIsVerifying(true);
 
     try {
+      // Development mode: Accept hardcoded PIN 123456 for testing
+      const isDevelopmentMode = __DEV__;
+      const isHardcodedPIN = fullCode === "123456";
+
+      if (isDevelopmentMode && isHardcodedPIN) {
+        console.log("🔧 Development mode: Using hardcoded PIN 123456");
+        await loginUser(user);
+        setCode(["", "", "", "", "", ""]);
+
+        if (user?.new) {
+          router.push("/auth/gender");
+        } else {
+          router.push("/(tabs)");
+        }
+        return;
+      }
+
       const formData = new FormData();
       formData.append("type", "verify_otp");
       formData.append("user_id", user?.user_id);
@@ -112,7 +129,7 @@ export default function Verify() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        setIsLoggedIn(true);
+        await loginUser(user);
         setCode(["", "", "", "", "", ""]);
         if (user?.new) {
           router.push("/auth/gender");

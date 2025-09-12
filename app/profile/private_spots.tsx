@@ -31,7 +31,8 @@ type PrivateSpot = {
 };
 
 export default function PrivateSpots() {
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
+  console.log("user", user);
   const { showToast } = useToast();
   const params = useLocalSearchParams();
   const [privateSpots, setPrivateSpots] = useState<PrivateSpot[]>([]);
@@ -128,6 +129,7 @@ export default function PrivateSpots() {
       const formData = new FormData();
       formData.append("type", "delete_data");
       formData.append("table_name", "private_spots");
+      formData.append("user_id", user.user_id);
       formData.append("id", spotId);
       console.log(formData);
       const response = await apiCall(formData);
@@ -144,9 +146,6 @@ export default function PrivateSpots() {
     }
   };
 
-  const handleBack = () => {
-    router.back();
-  };
   const renderPrivateSpot = (spot: PrivateSpot) => (
     <View key={spot.id} style={styles.spotCard}>
       <View style={styles.spotInfo}>

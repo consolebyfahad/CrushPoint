@@ -1,5 +1,6 @@
 import UserCard from "@/components/user_card";
 import { color, font } from "@/utils/constants";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -75,8 +76,13 @@ export default function ListView({
   // Render error state when no users and there's an error
   const renderErrorState = () => (
     <View style={styles.centerContainer}>
-      <Text style={styles.errorEmoji}>😔</Text>
-      <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
+      <Ionicons
+        name="alert-circle-outline"
+        size={64}
+        color={color.gray55}
+        style={styles.errorIcon}
+      />
+      <Text style={styles.errorTitle}>Oops! No User Available</Text>
       <Text style={styles.errorMessage}>
         {error || "Unable to load users. Please try again."}
       </Text>
@@ -226,8 +232,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   // Error states
-  errorEmoji: {
-    fontSize: 64,
+  errorIcon: {
     marginBottom: 16,
   },
   errorTitle: {

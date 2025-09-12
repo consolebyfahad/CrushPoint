@@ -142,9 +142,6 @@ export default function PrivateSpot() {
   }, [
     existingSpotData,
     isEdit,
-    userData?.lat,
-    userData?.lng,
-    userData?.radius,
     params?.latitude,
     params?.longitude,
     params?.radius,
