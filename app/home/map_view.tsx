@@ -403,8 +403,8 @@ const styles = StyleSheet.create({
   },
   // User markers
   userMarker: {
-    width: 40, // UPDATED: Slightly larger for better visibility
-    height: 40,
+    width: 60,
+    height: 60,
     borderRadius: 30,
     borderWidth: 2,
     borderColor: color.white,

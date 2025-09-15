@@ -1,6 +1,6 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
-import { formatTimeAgo } from "@/utils/helper";
+import { formatTimeAgo, formatTimeForDisplay } from "@/utils/helper";
 import { useEffect, useState } from "react";
 
 interface RequestUser {
@@ -177,7 +177,11 @@ const useGetRequests = () => {
                 )
               ),
               date: String(request.date || request.meetup_date || "TBD"),
-              time: String(request.time || request.meetup_time || "TBD"),
+              time: String(
+                formatTimeForDisplay(
+                  request.time || request.meetup_time || "TBD"
+                )
+              ),
               location: String(request.location || "Location TBD"),
               message: String(request.message || "Would love to meet up!"),
               hasChanges:

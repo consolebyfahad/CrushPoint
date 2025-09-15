@@ -1,6 +1,5 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import {
   ActivityIndicator,
   Image,
@@ -216,7 +215,7 @@ export default function MeetupCard({
       <View style={styles.detailsContainer}>
         <View style={styles.detailRow}>
           <Ionicons name="calendar-outline" size={16} color={color.gray55} />
-          <Text style={styles.detailText}>{request.date}</Text>
+          <Text style={styles.detailText}>{request.timestamp}</Text>
         </View>
         <View style={styles.detailRow}>
           <Ionicons name="time-outline" size={16} color={color.gray55} />

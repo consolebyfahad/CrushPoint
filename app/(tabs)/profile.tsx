@@ -19,7 +19,6 @@ import {
   View,
 } from "react-native";
 import PagerView from "react-native-pager-view";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -154,7 +153,7 @@ export default function ProfileTab() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -386,7 +385,7 @@ export default function ProfileTab() {
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

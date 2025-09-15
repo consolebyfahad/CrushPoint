@@ -201,9 +201,30 @@ export const zodiacOptions = [
   { label: "♓️ Pisces", value: "Pisces" },
 ];
 
+// Format time for display, handling timezone conversion
+export const formatTimeForDisplay = (time: string) => {
+  try {
+    // If time is already in 12-hour format with AM/PM, return as is
+    if (time.includes("AM") || time.includes("PM")) {
+      return time;
+    }
+
+    // If time is in 24-hour format (e.g., "18:31"), convert to 12-hour format
+    const [hours, minutes] = time.split(":").map(Number);
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, "0");
+
+    return `${displayHours}:${displayMinutes} ${ampm}`;
+  } catch (error) {
+    console.warn("Error formatting time for display:", error);
+    return time;
+  }
+};
+
 export const formatTimeAgo = (date: string, time: string) => {
   try {
-    // Parse the date format "Jul 22, 2025"
+    // Parse the date format "Jul 22, 2025" or "Sep 12, 2025 06:31 PM"
     const monthMap: { [key: string]: number } = {
       Jan: 0,
       Feb: 1,
@@ -219,14 +240,27 @@ export const formatTimeAgo = (date: string, time: string) => {
       Dec: 11,
     };
 
-    // Split date parts
-    const dateParts = date.split(" ");
+    let dateParts, timeParts;
+
+    // Check if date string contains time (e.g., "Sep 12, 2025 06:31 PM")
+    if (date.includes(":") && (date.includes("AM") || date.includes("PM"))) {
+      const spaceIndex = date.lastIndexOf(" ");
+      const dateOnly = date.substring(0, spaceIndex);
+      const timeOnly = date.substring(spaceIndex + 1);
+
+      dateParts = dateOnly.split(" ");
+      timeParts = timeOnly.split(" ");
+    } else {
+      // Original format "Jul 22, 2025"
+      dateParts = date.split(" ");
+      timeParts = time.split(" ");
+    }
+
     const month = monthMap[dateParts[0]]; // Convert month name to number (0-11)
     const day = parseInt(dateParts[1].replace(",", "")); // Remove comma and convert to number
     const year = parseInt(dateParts[2]);
 
-    // Parse time "10:04 PM"
-    const timeParts = time.split(" ");
+    // Parse time "10:04 PM" or "06:31 PM"
     const timeValue = timeParts[0];
     const ampm = timeParts[1];
     const [hours, minutes] = timeValue.split(":").map(Number);

@@ -4,7 +4,7 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -88,7 +88,17 @@ export default function RequestMeetup({
       return;
     }
     const formattedDate = selectedDate.toISOString().split("T")[0];
-    const formattedTime = selectedTime.toTimeString().split(" ")[0];
+    const formattedTime = selectedTime.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    // Debug logging
+    console.log("🕐 Selected time object:", selectedTime);
+    console.log("🕐 Formatted time:", formattedTime);
+    console.log("🕐 Selected date:", selectedDate);
+    console.log("🕐 Formatted date:", formattedDate);
 
     setIsLoading(true);
     try {

@@ -9,7 +9,6 @@ import Onboarding2 from "@/assets/images/onboarding2.svg";
 import Onboarding3 from "@/assets/images/onboarding3.svg";
 import Onboarding4 from "@/assets/images/onboarding4.svg";
 import Tea from "@/assets/images/tea.svg";
-import React from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 
 export const svgIcon = {
@@ -370,7 +369,7 @@ export const AddCalender = () => (
   </Svg>
 );
 export const MarkerIcon = () => (
-  <Svg width="30" height="30" viewBox="0 0 50 50" fill="none">
+  <Svg width="60" height="60" viewBox="0 0 50 50" fill="none">
     <Circle
       cx="24.8092"
       cy="24.8092"
