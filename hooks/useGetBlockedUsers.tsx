@@ -119,7 +119,6 @@ export default function useGetBlockedUsers() {
         setBlockedUsers((prev) =>
           prev.filter((user) => user.id !== blockedUserId)
         );
-        showToast("User unblocked successfully", "success");
         return true;
       } else {
         showToast(response.message || "Failed to unblock user", "error");

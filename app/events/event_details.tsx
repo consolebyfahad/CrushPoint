@@ -101,7 +101,6 @@ export default function EventDetails({ route }: any) {
 
       if (response.result) {
         setIsAttending(!isAttending);
-        showToast(isAttending ? "Left event" : "RSVP confirmed!", "success");
       } else {
         showToast(response.message || "Failed to RSVP", "error");
       }

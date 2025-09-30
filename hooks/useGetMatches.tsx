@@ -184,14 +184,14 @@ const useGetMatches = () => {
               height:
                 matchUser.height && matchUser.height !== "0"
                   ? `${matchUser.height} cm`
-                  : "Not specified",
-              nationality: matchUser.nationality || "Not specified",
-              religion: matchUser.religion || "Not specified",
-              zodiac: matchUser.zodiac || "Not specified",
-              gender: matchUser.gender || "Not specified",
-              country: matchUser.country || "Not specified",
-              state: matchUser.state || "Not specified",
-              city: matchUser.city || "Not specified",
+                  : "",
+              nationality: matchUser.nationality || "",
+              religion: matchUser.religion || "",
+              zodiac: matchUser.zodiac || "",
+              gender: matchUser.gender || "",
+              country: matchUser.country || "",
+              state: matchUser.state || "",
+              city: matchUser.city || "",
               languages,
               interests: parseUserInterests(matchUser.interests),
               lookingFor: parseUserLookingFor(matchUser.looking_for),

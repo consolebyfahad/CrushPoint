@@ -47,23 +47,21 @@ export default function Interests() {
 
   // Load existing interests when in edit mode
   useEffect(() => {
-    if (params.isEdit && userData?.interests) {
+    if (params.isEdit && userData?.originalInterestIds) {
       try {
-        // Parse the interests if they're passed as JSON string
-        const interestIds =
-          typeof userData.interests === "string"
-            ? JSON.parse(userData.interests)
-            : userData.interests;
-
-        setSelectedInterests(
-          Array.isArray(interestIds) ? interestIds : [interestIds]
-        );
+        // Use the already parsed interest IDs from the profile
+        const interestIds = userData.originalInterestIds;
+        console.log("Loading existing interests:", interestIds);
+        
+        const finalInterests = Array.isArray(interestIds) ? interestIds : [interestIds];
+        console.log("Setting selected interests:", finalInterests);
+        setSelectedInterests(finalInterests);
       } catch (error) {
-        console.error("Error parsing interests:", error);
+        console.error("Error loading existing interests:", error);
         setSelectedInterests([]);
       }
     }
-  }, [params.isEdit, userData?.interests]);
+  }, [params.isEdit, userData?.originalInterestIds]);
 
   useEffect(() => {
     counterProgress.value = withSpring(
@@ -107,7 +105,6 @@ export default function Interests() {
 
       if (response.result) {
         updateUserData({ interests: selectedInterests });
-        showToast("Interests updated successfully!", "success");
         setTimeout(() => {
           router.back();
         }, 1000);

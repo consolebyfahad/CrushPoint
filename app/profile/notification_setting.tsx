@@ -21,6 +21,7 @@ export default function NotificationSettings({ navigation }: any) {
   const [notificationSettings, setNotificationSettings] = useState({
     newMatches: true,
     newMeetup: true,
+    meetupRespondReceived: true,
     emojiReceived: true,
     nearbyMatches: true,
     nearbyUsers: true,
@@ -114,22 +115,12 @@ export default function NotificationSettings({ navigation }: any) {
 
         setIsChanged(false);
 
-        Alert.alert(
-          "Success",
-          "Your notification settings have been updated successfully.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                if (navigation) {
-                  navigation.goBack();
-                } else {
-                  router.back();
-                }
-              },
-            },
-          ]
-        );
+        // Navigate back without success message
+        if (navigation) {
+          navigation.goBack();
+        } else {
+          router.back();
+        }
       } else {
         throw new Error(
           response.message || "Failed to update notification settings"
@@ -158,6 +149,12 @@ export default function NotificationSettings({ navigation }: any) {
       title: "Meetup Requests",
       description: "When you get a new meetup request",
       enabled: notificationSettings.newMeetup,
+    },
+    {
+      key: "meetupRespondReceived",
+      title: "Meetup Respond Received",
+      description: "When someone responds to your meetup request",
+      enabled: notificationSettings.meetupRespondReceived,
     },
     {
       key: "emojiReceived",

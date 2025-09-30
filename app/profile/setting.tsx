@@ -144,8 +144,8 @@ export default function Settings() {
       title: "Community Guidelines",
       subtitle: "Last updated: 2023-12-01",
       icon: "people-outline",
-      hasExternal: true,
-      onPress: () => console.log("Community Guidelines"),
+      hasChevron: true,
+      onPress: () => router.push("/profile/community_guidelines"),
     },
   ];
 
@@ -154,15 +154,15 @@ export default function Settings() {
       id: "terms",
       title: "Terms of Service",
       icon: "document-text-outline",
-      hasExternal: true,
-      onPress: () => console.log("Terms of Service"),
+      hasChevron: true,
+      onPress: () => router.push("/profile/terms_of_service"),
     },
     {
       id: "privacy",
       title: "Privacy Policy",
       icon: "shield-outline",
-      hasExternal: true,
-      onPress: () => console.log("Privacy Policy"),
+      hasChevron: true,
+      onPress: () => router.push("/profile/privacy_policy"),
     },
     {
       id: "support",

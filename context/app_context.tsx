@@ -41,6 +41,7 @@ export interface UserData {
   parsedInterests?: string[];
   parsedLookingFor?: string[];
   parsedNationality?: string[];
+  originalInterestIds?: any;
   originalLookingForIds: any;
   originalNationalityValues?: string[];
   country?: string;
@@ -89,6 +90,18 @@ const defaultNotificationSettings: NotificationSetting[] = [
     enabled: true,
     title: "New Matches",
     description: "When you get a new match",
+  },
+  {
+    key: "newMeetup",
+    enabled: true,
+    title: "Meetup Requests",
+    description: "When you get a new meetup request",
+  },
+  {
+    key: "meetupRespondReceived",
+    enabled: true,
+    title: "Meetup Respond Received",
+    description: "When someone responds to your meetup request",
   },
   {
     key: "emojiReceived",

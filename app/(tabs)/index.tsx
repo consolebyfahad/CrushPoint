@@ -23,7 +23,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Device from "expo-device";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   Modal,
@@ -48,6 +48,7 @@ interface UserFilters {
 
 export default function Index() {
   const { user, updateUserData, userData } = useAppContext();
+  const params = useLocalSearchParams();
 
   // Filter data state
   const [filterData, setFilterData] = useState<UserFilters>({
@@ -178,6 +179,41 @@ export default function Index() {
       unsubscribe();
     };
   }, []);
+
+  // Handle navigation parameters from user profile
+  useEffect(() => {
+    if (params.viewType) {
+      setViewType(params.viewType as string);
+    }
+    
+    if (params.selectedUserId && params.selectedUserLocation) {
+      try {
+        const locationData = JSON.parse(params.selectedUserLocation as string);
+        const selectedUserData = {
+          id: params.selectedUserId,
+          name: params.selectedUserName,
+          ...locationData,
+        };
+        
+        console.log("Setting selected user from profile navigation:", selectedUserData);
+        
+        // Switch to map view first
+        setViewType("Map");
+        
+        // Small delay to ensure map tab is active before setting selected user
+        setTimeout(() => {
+          setSelectedUser(selectedUserData);
+          
+          // Auto-clear selection after 10 seconds for better UX
+          setTimeout(() => {
+            setSelectedUser(null);
+          }, 10000);
+        }, 100);
+      } catch (error) {
+        console.error("Error parsing selected user location:", error);
+      }
+    }
+  }, [params]);
 
   const fetchMatchData = async (dateId: string) => {
     try {

@@ -1,13 +1,12 @@
-// import { useAppContext } from "@/context/app_context";
-import { BASE_URL } from "@env";
-
+import { ENV } from "@/config/env";
 export const apiCall = async (payload, method = "POST") => {
     try {
+        const BASE_URL = ENV.API_BASE_URL;
         console.log("📡 API Request:", { url: BASE_URL, method });
 
         // Add timeout to prevent hanging requests
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 30000); 
 
         const response = await fetch(BASE_URL, {
             method,

@@ -77,7 +77,6 @@ export default function FaceVerification() {
       setVerificationState("uploading");
       const fileName = await uploadImageToServer(photoUri);
       setUploadedSelfieFileName(fileName);
-      showToast("Selfie uploaded successfully!", "success");
 
       // Small delay to ensure state is updated
       setTimeout(() => {

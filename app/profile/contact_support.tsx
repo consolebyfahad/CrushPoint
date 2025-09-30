@@ -9,14 +9,14 @@ import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -121,7 +121,6 @@ export default function ContactSupport() {
       const response = await apiCall(submissionData);
 
       if (response.result) {
-        showToast("Message sent successfully!", "success");
 
         // Reset form (keep name and email)
         setFormData((prev) => ({

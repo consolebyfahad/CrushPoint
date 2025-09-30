@@ -7,7 +7,7 @@ import { color, font } from "@/utils/constants";
 import {
   nationalityOptions,
   religionOptions,
-  zodiacOptions,
+  zodiacOptions
 } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -107,7 +107,6 @@ export default function BasicInfo() {
           religion: basicInfo.religion,
           zodiac: basicInfo.zodiacSign,
         });
-        showToast("Basic information updated successfully!");
         router.back();
       } else {
         showToast(
@@ -244,12 +243,12 @@ export default function BasicInfo() {
           <View style={styles.heightInputContainer}>
             <TextInput
               style={styles.heightInput}
-              placeholder="5.8"
+              placeholder="170"
               value={basicInfo.height}
               onChangeText={(value) => updateField("height", value)}
               keyboardType="numeric"
             />
-            <Text style={styles.heightUnit}>ft</Text>
+            <Text style={styles.heightUnit}>cm</Text>
           </View>
         </View>
 
@@ -273,7 +272,7 @@ export default function BasicInfo() {
             value={basicInfo.nationality}
             onChange={(items) => {
               // Limit to 3 nationalities
-              const limitedItems = items.slice(0, 4);
+              const limitedItems = items.slice(0, 3);
               setBasicInfo((prev) => ({
                 ...prev,
                 nationality: limitedItems,

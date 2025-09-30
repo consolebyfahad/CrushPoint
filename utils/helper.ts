@@ -3,6 +3,124 @@ const parseMMDDYYYY = (dateStr: string): Date => {
   return new Date(year, month - 1, day); // month is 0-indexed
 };
 
+// Format gender interest for display
+export const formatGenderInterest = (genderInterest: string): string => {
+  if (!genderInterest) return "All";
+  
+  const normalized = genderInterest.toLowerCase().trim();
+  
+  if (normalized === "female" || normalized === "f") {
+    return "Women";
+  } else if (normalized === "male" || normalized === "m") {
+    return "Men";
+  } else if (normalized === "both" || normalized === "all" || normalized === "other") {
+    return "All";
+  }
+  
+  // Fallback for any other values
+  return "All";
+};
+
+// Capitalize first letter of a string
+export const capitalizeFirstLetter = (text: string): string => {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+};
+
+// Add symbol to religion
+export const formatReligion = (religion: string): string => {
+  if (!religion) return "";
+  const capitalized = capitalizeFirstLetter(religion);
+  
+  const religionSymbols: { [key: string]: string } = {
+    "Christian": "✝️",
+    "Islam": "☪️",
+    "Muslim": "☪️",
+    "Hindu": "🕉️",
+    "Buddhist": "☸️",
+    "Jewish": "✡️",
+    "Judaism": "✡️",
+    "Sikh": "☬",
+    "Atheist": "🚫",
+    "Agnostic": "❓",
+    "Spiritual": "✨",
+    "Other": "🙏",
+  };
+  
+  const symbol = religionSymbols[capitalized] || "🙏";
+  return `${symbol} ${capitalized}`;
+};
+
+// Add symbol to zodiac
+export const formatZodiac = (zodiac: string): string => {
+  if (!zodiac) return "";
+  const capitalized = capitalizeFirstLetter(zodiac);
+  
+  const zodiacSymbols: { [key: string]: string } = {
+    "Aries": "♈",
+    "Taurus": "♉",
+    "Gemini": "♊",
+    "Cancer": "♋",
+    "Leo": "♌",
+    "Virgo": "♍",
+    "Libra": "♎",
+    "Scorpio": "♏",
+    "Sagittarius": "♐",
+    "Capricorn": "♑",
+    "Aquarius": "♒",
+    "Pisces": "♓",
+  };
+  
+  const symbol = zodiacSymbols[capitalized] || "⭐";
+  return `${symbol} ${capitalized}`;
+};
+
+// Add symbol to nationality
+export const formatNationality = (nationality: string): string => {
+  if (!nationality) return "";
+  const capitalized = capitalizeFirstLetter(nationality);
+  
+  const nationalitySymbols: { [key: string]: string } = {
+    "American": "🇺🇸",
+    "British": "🇬🇧",
+    "Canadian": "🇨🇦",
+    "Australian": "🇦🇺",
+    "French": "🇫🇷",
+    "German": "🇩🇪",
+    "Spanish": "🇪🇸",
+    "Italian": "🇮🇹",
+    "Japanese": "🇯🇵",
+    "Chinese": "🇨🇳",
+    "Korean": "🇰🇷",
+    "Indian": "🇮🇳",
+    "Brazilian": "🇧🇷",
+    "Mexican": "🇲🇽",
+    "Russian": "🇷🇺",
+    "Dutch": "🇳🇱",
+    "Swedish": "🇸🇪",
+    "Norwegian": "🇳🇴",
+    "Danish": "🇩🇰",
+    "Finnish": "🇫🇮",
+    "Polish": "🇵🇱",
+    "Greek": "🇬🇷",
+    "Turkish": "🇹🇷",
+    "Egyptian": "🇪🇬",
+    "South African": "🇿🇦",
+    "Nigerian": "🇳🇬",
+    "Pakistani": "🇵🇰",
+    "Bangladeshi": "🇧🇩",
+    "Indonesian": "🇮🇩",
+    "Thai": "🇹🇭",
+    "Vietnamese": "🇻🇳",
+    "Filipino": "🇵🇭",
+    "Malaysian": "🇲🇾",
+    "Singaporean": "🇸🇬",
+  };
+  
+  const symbol = nationalitySymbols[capitalized] || "🌍";
+  return `${symbol} ${capitalized}`;
+};
+
 const INTEREST_MAPPING: { [key: string]: string } = {
   "1": "💻 Tech",
   "2": "🎨 Art",

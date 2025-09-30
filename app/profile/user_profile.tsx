@@ -4,14 +4,17 @@ import ReportUser from "@/components/report_user";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import { calculateDistance } from "@/utils/distanceCalculator";
+import { capitalizeFirstLetter, formatNationality, formatReligion, formatZodiac } from "@/utils/helper";
 import { FloatingBubbleAnimation } from "@/utils/matchAnimation";
 import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
-import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   ScrollView,
@@ -25,7 +28,7 @@ import PagerView from "react-native-pager-view";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function UserProfile() {
-  const { user } = useAppContext();
+  const { user, userData: currentUser } = useAppContext();
   const params = useLocalSearchParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
@@ -37,6 +40,7 @@ export default function UserProfile() {
     color?: string;
   }>({});
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   // Ref for PagerView
   const pagerRef = useRef<PagerView>(null);
@@ -54,7 +58,7 @@ export default function UserProfile() {
       console.error("Error parsing user data:", error);
       return params;
     }
-  }, [params]);
+  }, [params, currentUser]);
 
   const userInfo = useMemo(() => {
     if (!userData || typeof userData !== "object") {
@@ -66,10 +70,10 @@ export default function UserProfile() {
         isOnline: false,
         lookingFor: [],
         interests: [],
-        height: "Not specified",
+        height: "",
         nationality: [],
-        religion: "Not specified",
-        zodiac: "Not specified",
+        religion: "",
+        zodiac: "",
         about: "",
         images: [
           "https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo",
@@ -95,27 +99,39 @@ export default function UserProfile() {
       return [nationalityData];
     };
 
+    // Calculate real distance between current user and profile user
+    const realDistance = calculateDistance(
+      {
+        lat: currentUser?.lat || 0,
+        lng: currentUser?.lng || 0,
+      },
+      {
+        lat: userData?.actualLocation?.lat || 0,
+        lng: userData?.actualLocation?.lng || 0,
+      }
+    );
+
     return {
       id: userData.id || "unknown",
       name: userData.name || "Unknown User",
       age: userData.age || 0,
-      distance: "2.5 km",
+      distance: realDistance,
       isOnline: userData.isOnline || true,
       lookingFor: userData.lookingFor || [],
       interests: userData.interests || [],
-      height: userData.height || "Not specified",
+      height: userData.height || "",
       nationality: parseNationality(userData.nationality),
-      religion: userData.religion || "Not specified",
-      zodiac: userData.zodiac || "Not specified",
+      religion: userData.religion || "",
+      zodiac: userData.zodiac || "",
       about: userData.about || "This is me",
       email: userData.email || "",
       gender:
         userData.gender === "female"
           ? "Female"
-          : userData.gender || "Not specified",
-      country: userData.country || "Not specified",
-      state: userData.state || "Not specified",
-      city: userData.city || "Not specified",
+          : userData.gender || "",
+      country: userData.country || "",
+      state: userData.state || "",
+      city: userData.city || "",
       languages: Array.isArray(userData.languages)
         ? userData.languages
         : userData.languages
@@ -126,7 +142,7 @@ export default function UserProfile() {
           ? userData.images
           : ["https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo"],
     };
-  }, [userData]);
+  }, [userData, currentUser]);
 
   const handleBack = () => {
     router.back();
@@ -271,6 +287,81 @@ export default function UserProfile() {
     setShowProfileOptions(true);
   };
 
+  // Location validation function (same as user card)
+  const hasValidLocation = () => {
+    const user = userInfo as any; // Type assertion for location properties
+    
+    // Check if user has valid location in actualLocation
+    const hasActualLocation =
+      user?.actualLocation?.lat &&
+      user?.actualLocation?.lng &&
+      parseFloat(user.actualLocation.lat.toString()) !== 0 &&
+      parseFloat(user.actualLocation.lng.toString()) !== 0 &&
+      !isNaN(parseFloat(user.actualLocation.lat.toString())) &&
+      !isNaN(parseFloat(user.actualLocation.lng.toString()));
+
+    // Check if user has valid location in loc object
+    const hasLocLocation =
+      user?.loc?.lat &&
+      user?.loc?.lng &&
+      parseFloat(user.loc.lat.toString()) !== 0 &&
+      parseFloat(user.loc.lng.toString()) !== 0 &&
+      !isNaN(parseFloat(user.loc.lat.toString())) &&
+      !isNaN(parseFloat(user.loc.lng.toString()));
+
+    return hasActualLocation || hasLocLocation;
+  };
+
+  // Handle show user location on map (same logic as user card)
+  const handleShowOnMap = async () => {
+    try {
+      setIsLoadingLocation(true);
+
+      // Validate location before proceeding
+      if (!hasValidLocation()) {
+        Alert.alert(
+          "Location Unavailable",
+          "This user's location is not available on the map.",
+          [{ text: "OK", style: "default" }]
+        );
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      const user = userInfo as any; // Type assertion for location properties
+      
+      console.log("Showing user on map:", {
+        name: userInfo.name,
+        actualLocation: user.actualLocation,
+        loc: user.loc,
+      });
+
+      // Navigate to home tab with map view and user data (same as list view)
+      router.push({
+        pathname: "/(tabs)",
+        params: {
+          viewType: "Map",
+          selectedUserId: userInfo.id,
+          selectedUserName: userInfo.name,
+          selectedUserLocation: JSON.stringify({
+            actualLocation: user.actualLocation,
+            loc: user.loc,
+          }),
+        },
+      });
+
+      setIsLoadingLocation(false);
+    } catch (error) {
+      console.error("Error in handleShowOnMap:", error);
+      setIsLoadingLocation(false);
+      Alert.alert(
+        "Error",
+        "Unable to show location on map. Please try again.",
+        [{ text: "OK", style: "default" }]
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -382,8 +473,25 @@ export default function UserProfile() {
                 />
                 <Text style={styles.distance}>{userInfo.distance}</Text>
               </View>
-              <TouchableOpacity style={styles.bookmarkButton}>
-                <Feather name="bookmark" size={20} color={color.black} />
+              <TouchableOpacity
+                style={[
+                  styles.locationButton,
+                  isLoadingLocation && styles.locationButtonLoading,
+                  !hasValidLocation() && styles.locationButtonDisabled,
+                ]}
+                onPress={handleShowOnMap}
+                activeOpacity={0.8}
+                disabled={isLoadingLocation || !hasValidLocation()}
+              >
+                {isLoadingLocation ? (
+                  <ActivityIndicator size="small" color={color.primary} />
+                ) : (
+                  <SimpleLineIcons
+                    name="location-pin"
+                    size={20}
+                    color={hasValidLocation() ? color.primary : color.gray55}
+                  />
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -429,40 +537,56 @@ export default function UserProfile() {
           {/* Other Information */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Basic Information</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Height</Text>
-              <Text style={styles.infoValue}>{userInfo.height}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Nationality</Text>
-              <View style={styles.nationalityContainer}>
-                {userInfo.nationality.length > 0 ? (
-                  userInfo.nationality.map(
+            
+            {/* Height - only show if specified */}
+            {userInfo.height && userInfo.height.trim() !== "" && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Height</Text>
+                <Text style={styles.infoValue}>{capitalizeFirstLetter(userInfo.height)}</Text>
+              </View>
+            )}
+            
+            {/* Nationality - only show if specified */}
+            {userInfo.nationality && userInfo.nationality.length > 0 && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Nationality</Text>
+                <View style={styles.nationalityContainer}>
+                  {userInfo.nationality.map(
                     (nationality: string, index: number) => (
                       <View key={index} style={styles.nationalityTag}>
                         <Text style={styles.nationalityText}>
-                          {nationality}
+                          {formatNationality(nationality)}
                         </Text>
                       </View>
                     )
-                  )
-                ) : (
-                  <Text style={styles.infoValue}>Not specified</Text>
-                )}
+                  )}
+                </View>
               </View>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Religion</Text>
-              <Text style={styles.infoValue}>{userInfo.religion}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Zodiac</Text>
-              <Text style={styles.infoValue}>{userInfo.zodiac}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Gender</Text>
-              <Text style={styles.infoValue}>{userInfo.gender}</Text>
-            </View>
+            )}
+            
+            {/* Religion - only show if specified */}
+            {userInfo.religion && userInfo.religion.trim() !== "" && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Religion</Text>
+                <Text style={styles.infoValue}>{formatReligion(userInfo.religion)}</Text>
+              </View>
+            )}
+            
+            {/* Zodiac - only show if specified */}
+            {userInfo.zodiac && userInfo.zodiac.trim() !== "" && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Zodiac</Text>
+                <Text style={styles.infoValue}>{formatZodiac(userInfo.zodiac)}</Text>
+              </View>
+            )}
+            
+            {/* Gender - only show if specified */}
+            {userInfo.gender && userInfo.gender.trim() !== "" && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Gender</Text>
+                <Text style={styles.infoValue}>{capitalizeFirstLetter(userInfo.gender)}</Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -665,7 +789,7 @@ const styles = StyleSheet.create({
     color: color.gray55,
     marginRight: 8,
   },
-  bookmarkButton: {
+  locationButton: {
     width: 44,
     height: 44,
     borderRadius: 12,
@@ -673,6 +797,14 @@ const styles = StyleSheet.create({
     borderColor: "#E5E5E5",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: color.white,
+  },
+  locationButtonLoading: {
+    backgroundColor: "#F8F8F8",
+  },
+  locationButtonDisabled: {
+    backgroundColor: "#F8F8F8",
+    borderColor: "#F0F0F0",
   },
   section: {
     marginBottom: 24,

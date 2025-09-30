@@ -2,6 +2,7 @@ import CustomButton from "@/components/custom_button";
 import { useAppContext } from "@/context/app_context";
 import useGetProfile from "@/hooks/useGetProfile";
 import { color, font } from "@/utils/constants";
+import { formatGenderInterest, formatNationality, formatReligion, formatZodiac } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
@@ -316,7 +317,7 @@ export default function ProfileTab() {
           <View style={styles.infoContainer}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Interested in</Text>
-              <Text style={styles.infoValue}>{userData.gender_interest}</Text>
+              <Text style={styles.infoValue}>{formatGenderInterest(userData.gender_interest)}</Text>
             </View>
 
             <View style={styles.infoRow}>
@@ -338,29 +339,38 @@ export default function ProfileTab() {
               <Text style={styles.infoValue}>{userData.height}</Text>
             </View> */}
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Nationality</Text>
+            {/* Nationality - only show if specified */}
+            {userData.parsedNationality && userData.parsedNationality.length > 0 && userData.parsedNationality[0] && userData.parsedNationality[0].trim() !== "" && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoValue}>
-                  {userData.parsedNationality?.[0] ?? ""}
-                </Text>
-                {(userData.parsedNationality?.length ?? 0) > 1 && (
-                  <Text style={styles.additionalGoals}>
-                    , +{userData.parsedNationality!.length - 1}
+                <Text style={styles.infoLabel}>Nationality</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoValue}>
+                    {formatNationality(userData.parsedNationality[0])}
                   </Text>
-                )}
+                  {userData.parsedNationality.length > 1 && (
+                    <Text style={styles.additionalGoals}>
+                      , +{userData.parsedNationality.length - 1}
+                    </Text>
+                  )}
+                </View>
               </View>
-            </View>
+            )}
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Religion</Text>
-              <Text style={styles.infoValue}>{userData.religion}</Text>
-            </View>
+            {/* Religion - only show if specified */}
+            {userData.religion && userData.religion.trim() !== "" && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Religion</Text>
+                <Text style={styles.infoValue}>{formatReligion(userData.religion)}</Text>
+              </View>
+            )}
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Zodiac Sign</Text>
-              <Text style={styles.infoValue}>{userData.zodiac}</Text>
-            </View>
+            {/* Zodiac - only show if specified */}
+            {userData.zodiac && userData.zodiac.trim() !== "" && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Zodiac Sign</Text>
+                <Text style={styles.infoValue}>{formatZodiac(userData.zodiac)}</Text>
+              </View>
+            )}
           </View>
         </View>
 

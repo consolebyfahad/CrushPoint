@@ -99,7 +99,7 @@ export default function useGetProfile() {
                   match.replace(/"/g, "")
                 );
                 originalNationalityValues = values.filter(
-                  (v) => v && v !== "Not Specified"
+                  (v) => v && v !== "Not Specified" && v.trim() !== ""
                 );
                 parsedNationality = convertNationalityValuesToLabels(
                   originalNationalityValues
@@ -111,7 +111,8 @@ export default function useGetProfile() {
             // Fallback: if it's a simple string, use it directly
             if (
               typeof userData.nationality === "string" &&
-              userData.nationality !== "Not Specified"
+              userData.nationality !== "Not Specified" &&
+              userData.nationality.trim() !== ""
             ) {
               originalNationalityValues = [userData.nationality];
               parsedNationality = convertNationalityValuesToLabels([
@@ -133,19 +134,19 @@ export default function useGetProfile() {
           originalInterestIds,
           parsedNationality,
           originalNationalityValues,
-          email: userData.email || "Not Specified",
-          gender: userData.gender || "Not Specified",
-          gender_interest: userData.gender_interest || "Not Specified",
-          country: userData.country || "Not Specified",
-          state: userData.state || "Not Specified",
-          city: userData.city || "Not Specified",
-          languages: userData.languages || "Not Specified",
-          height: userData.height !== "0" ? userData.height : "0.0",
-          nationality: userData.nationality || "Not Specified",
-          religion: userData.religion || "Not Specified",
-          zodiac: userData.zodiac || "Not Specified",
-          about: userData.about || "Not Specified",
-          phone: userData.phone || "Not Specified",
+          email: userData.email || "",
+          gender: userData.gender || "",
+          gender_interest: userData.gender_interest || "",
+          country: userData.country || "",
+          state: userData.state || "",
+          city: userData.city || "",
+          languages: userData.languages || "",
+          height: userData.height !== "0" ? userData.height : "",
+          nationality: userData.nationality || "",
+          religion: userData.religion || "",
+          zodiac: userData.zodiac || "",
+          about: userData.about || "",
+          phone: userData.phone || "",
         };
 
         // Create data for context (using context/app_context.tsx interface)
@@ -164,19 +165,19 @@ export default function useGetProfile() {
           originalInterestIds,
           parsedNationality,
           originalNationalityValues,
-          email: userData.email || "Not Specified",
-          gender: userData.gender || "Not Specified",
-          gender_interest: userData.gender_interest || "Not Specified",
-          country: userData.country || "Not Specified",
-          state: userData.state || "Not Specified",
-          city: userData.city || "Not Specified",
-          languages: userData.languages || "Not Specified",
-          height: userData.height !== "0" ? userData.height : "0.0",
-          nationality: userData.nationality || "Not Specified",
-          religion: userData.religion || "Not Specified",
-          zodiac: userData.zodiac || "Not Specified",
-          about: userData.about || "Not Specified",
-          phone: userData.phone || "Not Specified",
+          email: userData.email || "",
+          gender: userData.gender || "",
+          gender_interest: userData.gender_interest || "",
+          country: userData.country || "",
+          state: userData.state || "",
+          city: userData.city || "",
+          languages: userData.languages || "",
+          height: userData.height !== "0" ? userData.height : "",
+          nationality: userData.nationality || "",
+          religion: userData.religion || "",
+          zodiac: userData.zodiac || "",
+          about: userData.about || "",
+          phone: userData.phone || "",
         };
 
         setUserProfile(localUserData);

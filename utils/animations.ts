@@ -84,6 +84,8 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = () => {
     React.createElement(Image, {
       source: image.splash,
       style: {
+        width: 86,
+        height: 80,
         resizeMode: "cover" as const,
         marginBottom: 0,
       },

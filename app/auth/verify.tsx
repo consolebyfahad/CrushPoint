@@ -7,12 +7,12 @@ import { color, font } from "@/utils/constants";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Animated,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Animated,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -170,7 +170,6 @@ export default function Verify() {
       const response = await apiCall(formData);
 
       if (response.success) {
-        showToast("Verification code sent!", "success");
 
         // Reset countdown and state
         setResendCountdown(59);

@@ -1,5 +1,6 @@
 import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
+import { formatGenderInterest } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import React, { useState } from "react";
@@ -30,14 +31,7 @@ export default function Filters({
   const { userData } = useAppContext();
   console.log("userData", userData.gender_interest);
   const [selectedGender, setSelectedGender] = useState(() => {
-    if (userData?.gender_interest === "female") {
-      return "Women";
-    } else if (userData?.gender_interest === "male") {
-      return "Men";
-    } else if (userData?.gender_interest === "other") {
-      return "Both";
-    }
-    return filterData.gender || "Men";
+    return formatGenderInterest(userData?.gender_interest || "") || filterData.gender || "Men";
   });
   const [ageFrom, setAgeFrom] = useState(filterData.ageFrom || "18");
   const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");

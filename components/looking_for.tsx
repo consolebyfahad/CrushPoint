@@ -26,7 +26,7 @@ export default function LookingFor({
     {
       id: "serious",
       title: "Serious Relationship",
-      emoji: "💙",
+      emoji: "🩵",
       color: "#3B82F6",
     },
     {

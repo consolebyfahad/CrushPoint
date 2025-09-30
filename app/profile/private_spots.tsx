@@ -135,7 +135,6 @@ export default function PrivateSpots() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        showToast("Private spot deleted successfully");
         fetchPrivateSpots();
       } else {
         throw new Error(response.message || "Failed to delete private spot");
@@ -198,8 +197,8 @@ export default function PrivateSpots() {
       </View>
       <Text style={styles.emptyTitle}>No Private Spots</Text>
       <Text style={styles.emptySubtitle}>
-        Add your first private spot to get started. These locations will help
-        you connect with people nearby.
+      Add your first private spot to get started. You can add up to 3 private Spots. 
+
       </Text>
       <CustomButton
         title="Add First Spot"
@@ -238,8 +237,7 @@ export default function PrivateSpots() {
                 color={color.primary}
               />
               <Text style={styles.infoText}>
-                Private spots are locations where you're most active. They help
-                us show you people nearby and improve your matching experience.
+              Private spots are locations where you don’t want to be visible to others. These locations will help you protect your privacy.  
               </Text>
             </View>
           </View>

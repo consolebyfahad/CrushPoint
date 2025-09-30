@@ -301,12 +301,12 @@ export default function useGetUsers(filters: UserFilters = {}) {
   const formatHeight = (height: string): string => {
     const heightStr = safeString(height);
     if (!heightStr || heightStr === "0") {
-      return "Not specified";
+      return "";
     }
 
     const heightNum = parseFloat(heightStr);
     if (isNaN(heightNum)) {
-      return "Not specified";
+      return "";
     }
 
     return `${heightNum} cm`;
