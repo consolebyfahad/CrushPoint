@@ -64,18 +64,39 @@ export default function useGetProfile() {
         }
 
         const age = calculateAge(userData.dob);
-        const parsedInterests = userData.interests
-          ? parseInterestsWithNames(userData.interests)
-          : [];
-        const originalInterestIds = userData.interests
-          ? parseJsonString(userData.interests)
-          : [];
-        const parsedLookingFor = userData.looking_for
-          ? parseLookingForWithLabels(userData.looking_for)
-          : [];
-        const originalLookingForIds = userData.looking_for
-          ? parseJsonString(userData.looking_for)
-          : [];
+        
+        // Debug interests data
+        console.log("userData.interests", userData.interests);
+        
+        let parsedInterests: string[] = [];
+        let originalInterestIds: string[] = [];
+        
+        if (userData.interests) {
+          try {
+            parsedInterests = parseInterestsWithNames(userData.interests);
+            originalInterestIds = parseJsonString(userData.interests);
+          } catch (error) {
+            console.warn("Error parsing interests in profile:", error);
+            parsedInterests = [];
+            originalInterestIds = [];
+          }
+        }
+        // Debug looking_for data
+        console.log("userData.looking_for", userData.looking_for);
+        
+        let parsedLookingFor: string[] = [];
+        let originalLookingForIds: string[] = [];
+        
+        if (userData.looking_for) {
+          try {
+            parsedLookingFor = parseLookingForWithLabels(userData.looking_for);
+            originalLookingForIds = parseJsonString(userData.looking_for);
+          } catch (error) {
+            console.warn("Error parsing looking_for in profile:", error);
+            parsedLookingFor = [];
+            originalLookingForIds = [];
+          }
+        }
         console.log("userData.nationality", userData.nationality);
 
         // Handle nationality parsing more carefully
@@ -83,34 +104,48 @@ export default function useGetProfile() {
         let originalNationalityValues: string[] = [];
 
         if (userData.nationality) {
-          try {
-            // First try to parse as JSON
-            const parsed = parseJsonString(userData.nationality);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              originalNationalityValues = parsed;
-              parsedNationality = parseNationalityWithLabels(
-                userData.nationality
-              );
-            } else {
-              // If parsing fails, try to extract values manually
-              const matches = userData.nationality.match(/"([^"]+)"/g);
-              if (matches) {
-                const values = matches.map((match: string) =>
-                  match.replace(/"/g, "")
+          // Check if it's a JSON string first
+          if (userData.nationality.startsWith('[') && userData.nationality.endsWith(']')) {
+            try {
+              // Try to parse as JSON
+              const parsed = parseJsonString(userData.nationality);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                originalNationalityValues = parsed;
+                parsedNationality = parseNationalityWithLabels(
+                  userData.nationality
                 );
-                originalNationalityValues = values.filter(
-                  (v) => v && v !== "Not Specified" && v.trim() !== ""
-                );
-                parsedNationality = convertNationalityValuesToLabels(
-                  originalNationalityValues
-                );
+              } else {
+                // If parsing fails, try to extract values manually
+                const matches = userData.nationality.match(/"([^"]+)"/g);
+                if (matches) {
+                  const values = matches.map((match: string) =>
+                    match.replace(/"/g, "")
+                  );
+                  originalNationalityValues = values.filter(
+                    (v) => v && v !== "Not Specified" && v.trim() !== ""
+                  );
+                  parsedNationality = convertNationalityValuesToLabels(
+                    originalNationalityValues
+                  );
+                }
+              }
+            } catch (error) {
+              console.warn("Error parsing nationality JSON:", error);
+              // Fallback to simple string handling
+              if (
+                typeof userData.nationality === "string" &&
+                userData.nationality !== "Not Specified" &&
+                userData.nationality.trim() !== ""
+              ) {
+                originalNationalityValues = [userData.nationality];
+                parsedNationality = convertNationalityValuesToLabels([
+                  userData.nationality,
+                ]);
               }
             }
-          } catch (error) {
-            console.error("Error parsing nationality:", error);
-            // Fallback: if it's a simple string, use it directly
+          } else {
+            // It's a simple string, not JSON
             if (
-              typeof userData.nationality === "string" &&
               userData.nationality !== "Not Specified" &&
               userData.nationality.trim() !== ""
             ) {

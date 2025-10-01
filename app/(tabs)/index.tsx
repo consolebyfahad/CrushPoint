@@ -12,9 +12,9 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
 import {
-  getFCMToken,
-  requestFCMPermission,
-  setupNotificationListeners,
+    getFCMToken,
+    requestFCMPermission,
+    setupNotificationListeners,
 } from "@/utils/notification";
 import { BellIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,13 +25,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Modal,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Modal,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -47,6 +48,7 @@ interface UserFilters {
 }
 
 export default function Index() {
+  const { t } = useTranslation();
   const { user, updateUserData, userData } = useAppContext();
   const params = useLocalSearchParams();
 

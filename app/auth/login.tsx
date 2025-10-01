@@ -7,17 +7,19 @@ import { formatPhoneNumber } from "@/utils/formatPhone";
 import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { setUser } = useAppContext();
 
@@ -91,13 +93,13 @@ export default function Login() {
         <View style={styles.titleSection}>
           <Text style={styles.title}>
             {activeTab === "phone"
-              ? "Enter your phone number"
-              : "Enter your email"}
+              ? t("auth.enterPhone")
+              : t("auth.enterEmail")}
           </Text>
           <Text style={styles.subtitle}>
             {activeTab === "phone"
-              ? "We'll send you a code to verify your number"
-              : "We'll send you a code to verify your email"}
+              ? t("auth.phoneVerification")
+              : t("auth.emailVerification")}
           </Text>
         </View>
 
@@ -129,7 +131,7 @@ export default function Login() {
         {/* Input Section */}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>
-            {activeTab === "phone" ? "Phone Number" : "Email Address"}
+            {activeTab === "phone" ? t("auth.phoneNumber") : t("auth.emailAddress")}
           </Text>
 
           <View style={styles.inputContainer}>
@@ -175,7 +177,7 @@ export default function Login() {
 
         {/* Continue Button */}
         <CustomButton
-          title="Continue"
+          title={t("continue")}
           onPress={handleContinue}
           isDisabled={!isFormValid()}
           isLoading={loginLoading}

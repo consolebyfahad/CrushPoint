@@ -4,12 +4,14 @@ import useGetMatches from "@/hooks/useGetMatches";
 import useGetRequests from "@/hooks/useGetRequests";
 import { color, font } from "@/utils/constants";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Matches from "../matches/matches";
 import Requests from "../matches/requests";
 
 export default function MatchesMain() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("matches");
   const { matches } = useGetMatches();
   const { incomingRequests, outgoingRequests } = useGetRequests();
@@ -20,7 +22,7 @@ export default function MatchesMain() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <MatchesTabsHeader
-        title={activeTab === "matches" ? "Your Matches" : "Meetup Requests"}
+        title={activeTab === "matches" ? t("matches.matches") : t("meetups.requests")}
         matches={activeTab === "matches" ? "matches" : "requests"}
         matchesCount={matchesCount}
         totalRequestsCount={totalRequestsCount}
@@ -30,7 +32,7 @@ export default function MatchesMain() {
       {/* Tabs */}
       <View style={styles.tabContainer}>
         <CustomButton
-          title=" Matches"
+          title={t("matches.matches")}
           style={[styles.tab, activeTab === "matches" && styles.activeTab]}
           fontstyle={[
             styles.tabText,
@@ -39,7 +41,7 @@ export default function MatchesMain() {
           onPress={() => setActiveTab("matches")}
         />
         <CustomButton
-          title=" Meetup Requests"
+          title={t("meetups.requests")}
           style={[styles.tab, activeTab === "requests" && styles.activeTab]}
           fontstyle={[
             styles.tabText,

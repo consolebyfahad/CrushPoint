@@ -1,9 +1,12 @@
 import CustomButton from "@/components/custom_button";
+import LanguageModal from "@/components/language_modal";
 import { color, font } from "@/utils/constants";
+import { saveLanguagePreference } from "@/utils/i18n";
 import { svgIcon } from "@/utils/SvgIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   FadeIn,
@@ -16,42 +19,45 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export const onboardingData = [
-  {
-    id: 1,
-    IconComponent: svgIcon.Onboarding1,
-    title: "Love at first sight.",
-    description:
-      "Meet your soulmate in real life.\nForget swiping left and right.",
-  },
-  {
-    id: 2,
-    IconComponent: svgIcon.Onboarding2,
-    title: "See who's around you",
-    description: "Discover interesting people nearby and connect in real life",
-  },
-  {
-    id: 3,
-    IconComponent: svgIcon.Onboarding3,
-    title: "Send a reaction",
-    description: "Express interest with fun emojis - no chat needed",
-  },
-  {
-    id: 4,
-    IconComponent: svgIcon.Onboarding4,
-    title: "Meet people on events",
-    description: "See if someone interesting is joining the same event as you",
-  },
-];
+// This will be moved inside the component to use translations
 
 export default function Onboarding() {
+  const { t, i18n } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   const iconScale = useSharedValue(0);
   const iconOpacity = useSharedValue(0);
   const titleOpacity = useSharedValue(0);
   const descriptionOpacity = useSharedValue(0);
+
+  const onboardingData = [
+    {
+      id: 1,
+      IconComponent: svgIcon.Onboarding1,
+      title: t("onboarding.title1"),
+      description: t("onboarding.subtitle1"),
+    },
+    {
+      id: 2,
+      IconComponent: svgIcon.Onboarding2,
+      title: t("onboarding.title2"),
+      description: t("onboarding.subtitle2"),
+    },
+    {
+      id: 3,
+      IconComponent: svgIcon.Onboarding3,
+      title: t("onboarding.title3"),
+      description: t("onboarding.subtitle3"),
+    },
+    {
+      id: 4,
+      IconComponent: svgIcon.Onboarding4,
+      title: t("onboarding.title4"),
+      description: t("onboarding.subtitle4"),
+    },
+  ];
 
   const currentData = onboardingData[currentIndex];
   const isLastScreen = currentIndex === onboardingData.length - 1;
@@ -93,6 +99,15 @@ export default function Onboarding() {
     return () => clearTimeout(timer);
   }, [currentIndex]);
 
+  // Show language modal on first load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLanguageModal(true);
+    }, 1000); // Show after 1 second
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleContinue = () => {
     if (isAnimating) return;
 
@@ -108,6 +123,15 @@ export default function Onboarding() {
   };
 
   const handleSkip = () => {
+    router.push("/welcome");
+  };
+
+  const handleLanguageSelect = async (languageCode: string) => {
+    await saveLanguagePreference(languageCode);
+    setShowLanguageModal(false);
+  };
+
+  const handleGetStarted = () => {
     router.push("/welcome");
   };
 
@@ -143,7 +167,7 @@ export default function Onboarding() {
     <SafeAreaView style={styles.container}>
       <Animated.View entering={FadeIn.duration(300)} style={styles.skipButton}>
         <TouchableOpacity onPress={handleSkip}>
-          <Text style={styles.skipText}>Skip</Text>
+          <Text style={styles.skipText}>{t("skip")}</Text>
         </TouchableOpacity>
       </Animated.View>
 
@@ -177,8 +201,8 @@ export default function Onboarding() {
 
         <Animated.View style={styles.buttonContainer}>
           <CustomButton
-            title={isLastScreen ? "Get Started" : "Continue"}
-            onPress={handleContinue}
+            title={isLastScreen ? t("getStarted") : t("continue")}
+            onPress={isLastScreen ? handleGetStarted : handleContinue}
             isDisabled={isAnimating}
             rightIcon={
               <Feather name="arrow-right" size={18} color={color.white} />
@@ -186,6 +210,13 @@ export default function Onboarding() {
           />
         </Animated.View>
       </Animated.View>
+
+      <LanguageModal
+        visible={showLanguageModal}
+        onClose={() => setShowLanguageModal(false)}
+        onLanguageSelect={handleLanguageSelect}
+        currentLanguage={i18n.language}
+      />
     </SafeAreaView>
   );
 }

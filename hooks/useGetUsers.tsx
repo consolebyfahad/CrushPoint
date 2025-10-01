@@ -1,8 +1,10 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import {
+  calculateAge,
   parseInterestsWithNames,
   parseLookingForWithLabels,
+  parseUserImages
 } from "@/utils/helper";
 import { useEffect, useState } from "react";
 
@@ -317,97 +319,14 @@ export default function useGetUsers(filters: UserFilters = {}) {
     return str.replace(/\\"/g, '"');
   };
 
+  // Use the enhanced parseUserImages function from helper
   const parseImages = (imagesStr: string, gender: string): string[] => {
-    const safeImagesStr = safeString(imagesStr);
-
-    if (!safeImagesStr) {
-      return [getDefaultImage(gender)];
-    }
-
-    try {
-      const fixedJsonStr = unescapeJsonString(safeImagesStr);
-      const parsedImages = JSON.parse(fixedJsonStr);
-
-      if (!Array.isArray(parsedImages)) {
-        console.warn("Images field is not an array:", parsedImages);
-        return [getDefaultImage(gender)];
-      }
-
-      const validImages = parsedImages
-        .filter((imageName) => imageName && typeof imageName === "string")
-        .map((imageName) => `${IMAGE_BASE_URL}${imageName.trim()}`);
-
-      return validImages.length > 0 ? validImages : [getDefaultImage(gender)];
-    } catch (error) {
-      console.warn("Error parsing images:", error);
-      return [getDefaultImage(gender)];
-    }
+    return parseUserImages(imagesStr, gender);
   };
 
-  const calculateAge = (dob: string): number | null => {
-    const safeDob = safeString(dob);
+  // Using calculateAge from helper.ts
 
-    if (!safeDob) {
-      return null;
-    }
-
-    try {
-      const today = new Date();
-      let birthDate: Date;
-
-      if (safeDob.includes("/")) {
-        const [month, day, year] = safeDob
-          .split("/")
-          .map((num) => parseInt(num, 10));
-
-        if (isNaN(month) || isNaN(day) || isNaN(year)) {
-          console.warn("Invalid date components:", safeDob);
-          return null;
-        }
-
-        birthDate = new Date(year, month - 1, day);
-      } else {
-        birthDate = new Date(safeDob);
-      }
-
-      if (isNaN(birthDate.getTime())) {
-        console.warn("Invalid date format:", safeDob);
-        return null;
-      }
-
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birthDate.getDate())
-      ) {
-        age--;
-      }
-
-      if (age < 0 || age > 150) {
-        console.warn("Calculated age seems unreasonable:", age);
-        return null;
-      }
-
-      return age;
-    } catch (error) {
-      console.warn("Error calculating age:", error);
-      return null;
-    }
-  };
-
-  const getDefaultImage = (gender: string): string => {
-    const normalizedGender = safeString(gender).toLowerCase();
-
-    if (normalizedGender === "female" || normalizedGender === "f") {
-      return `https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg`;
-    } else if (normalizedGender === "male" || normalizedGender === "m") {
-      return `https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg`;
-    } else {
-      return `https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg`;
-    }
-  };
+  // Using getDefaultImage from helper.ts
 
   useEffect(() => {
     if (user?.user_id) {

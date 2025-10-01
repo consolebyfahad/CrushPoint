@@ -4,6 +4,7 @@ import { formatGenderInterest } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Platform,
@@ -28,6 +29,7 @@ export default function Filters({
   setFilterData,
   refetch,
 }: any) {
+  const { t } = useTranslation();
   const { userData } = useAppContext();
   console.log("userData", userData.gender_interest);
   const [selectedGender, setSelectedGender] = useState(() => {
@@ -36,7 +38,7 @@ export default function Filters({
   const [ageFrom, setAgeFrom] = useState(filterData.ageFrom || "18");
   const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");
   const [distance, setDistance] = useState(filterData.distance || 10);
-  const genderOptions = ["Men", "Women", "Both"];
+  const genderOptions = [t("filters.men"), t("filters.women"), t("filters.both")];
 
   // Helper function to format multiple selection display
   const formatMultipleSelectionDisplay = (selection: any) => {
@@ -59,7 +61,7 @@ export default function Filters({
 
   const expandableOptions = [
     {
-      title: "Looking for",
+      title: t("filters.lookingFor"),
       hasNavigation: true,
       value: formatMultipleSelectionDisplay(filterData.lookingFor),
       onPress: onNavigateToLookingFor,
@@ -73,19 +75,19 @@ export default function Filters({
     //   onPress: onNavigateToHeight,
     // },
     {
-      title: "Nationality",
+      title: t("filters.nationality"),
       hasNavigation: true,
       value: formatMultipleSelectionDisplay(filterData.nationality),
       onPress: onNavigateToNationality,
     },
     {
-      title: "Religion",
+      title: t("filters.religion"),
       hasNavigation: true,
       value: formatMultipleSelectionDisplay(filterData.religion),
       onPress: onNavigateToReligion,
     },
     {
-      title: "Zodiac Sign",
+      title: t("filters.zodiacSign"),
       hasNavigation: true,
       value: formatMultipleSelectionDisplay(filterData.zodiacSign),
       onPress: onNavigateToZodiac,
@@ -93,14 +95,14 @@ export default function Filters({
   ];
 
   const handleReset = () => {
-    setSelectedGender("Men");
+    setSelectedGender(t("filters.men"));
     setAgeFrom("18");
     setAgeTo("35");
     setDistance(10);
 
     // Reset all filter data
     setFilterData({
-      gender: "Men",
+      gender: t("filters.men"),
       ageFrom: "18",
       ageTo: "99",
       distance: 10,
@@ -141,7 +143,7 @@ export default function Filters({
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Filters</Text>
+        <Text style={styles.title}>{t("filters.filters")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={color.black} />
         </TouchableOpacity>
@@ -150,7 +152,7 @@ export default function Filters({
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Show me section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Show me</Text>
+          <Text style={styles.sectionTitle}>{t("filters.showMe")}</Text>
           <View style={styles.genderContainer}>
             {genderOptions.map((option) => (
               <TouchableOpacity
@@ -177,7 +179,7 @@ export default function Filters({
 
         {/* Age Range section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Age Range</Text>
+          <Text style={styles.sectionTitle}>{t("filters.ageRange")}</Text>
           <View style={styles.ageContainer}>
             <View style={styles.ageInputContainer}>
               <TouchableOpacity
@@ -218,7 +220,7 @@ export default function Filters({
                 <Text style={{ fontSize: 24 }}>+</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.ageToText}>to</Text>
+            <Text style={styles.ageToText}>{t("filters.to")}</Text>
             <View style={styles.ageInputContainer}>
               <TouchableOpacity
                 style={{
@@ -260,7 +262,7 @@ export default function Filters({
         <View style={styles.section}>
           <View style={styles.distanceHeader}>
             <Text style={styles.sectionTitle}>
-              Distance ({Math.round(distance)} km)
+              {t("filters.distance")} ({Math.round(distance)} km)
             </Text>
           </View>
           <View>
@@ -276,8 +278,8 @@ export default function Filters({
               thumbTintColor={color.primary}
             />
             <View style={styles.sliderLabels}>
-              <Text style={styles.sliderLabel}>1 km</Text>
-              <Text style={styles.sliderLabel}>200 km</Text>
+              <Text style={styles.sliderLabel}>1 {t("filters.km")}</Text>
+              <Text style={styles.sliderLabel}>200 {t("filters.km")}</Text>
             </View>
           </View>
         </View>
@@ -314,14 +316,14 @@ export default function Filters({
           onPress={handleReset}
           activeOpacity={0.8}
         >
-          <Text style={styles.resetButtonText}>Reset</Text>
+          <Text style={styles.resetButtonText}>{t("filters.reset")}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.applyButton}
           onPress={handleApply}
           activeOpacity={0.8}
         >
-          <Text style={styles.applyButtonText}>Apply</Text>
+          <Text style={styles.applyButtonText}>{t("filters.apply")}</Text>
         </TouchableOpacity>
       </View>
     </View>

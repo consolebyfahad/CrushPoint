@@ -8,6 +8,7 @@ import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Dimensions,
@@ -24,6 +25,7 @@ import PagerView from "react-native-pager-view";
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ProfileTab() {
+  const { t } = useTranslation();
   const { userData, user } = useAppContext();
   console.log("userData", user);
   const { loading, error, refetch } = useGetProfile();
@@ -255,16 +257,16 @@ export default function ProfileTab() {
               size={14}
               color={color.primary}
             />
-            <Text style={styles.editPrivateSpot}>Edit private spot</Text>
+            <Text style={styles.editPrivateSpot}>{t("profile.editPrivateSpot")}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Photos Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Photos</Text>
+            <Text style={styles.sectionTitle}>{t("profile.photos")}</Text>
             <TouchableOpacity onPress={handleEditPhotos}>
-              <Text style={styles.editText}>Edit Photos</Text>
+              <Text style={styles.editText}>{t("profile.editPhotos")}</Text>
             </TouchableOpacity>
           </View>
 
@@ -308,20 +310,20 @@ export default function ProfileTab() {
         {/* Basic Info Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Basic Info</Text>
+            <Text style={styles.sectionTitle}>{t("profile.basicInfo")}</Text>
             <TouchableOpacity onPress={handleEditProfile}>
-              <Text style={styles.editText}>Edit Profile</Text>
+              <Text style={styles.editText}>{t("profile.editProfile")}</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.infoContainer}>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Interested in</Text>
+              <Text style={styles.infoLabel}>{t("profile.interestedIn")}</Text>
               <Text style={styles.infoValue}>{formatGenderInterest(userData.gender_interest)}</Text>
             </View>
 
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Relationship goals</Text>
+              <Text style={styles.infoLabel}>{t("profile.relationshipGoals")}</Text>
               <View style={styles.infoRow}>
                 <Text style={styles.infoValue}>
                   {userData.parsedLookingFor?.[0] ?? ""}
@@ -342,7 +344,7 @@ export default function ProfileTab() {
             {/* Nationality - only show if specified */}
             {userData.parsedNationality && userData.parsedNationality.length > 0 && userData.parsedNationality[0] && userData.parsedNationality[0].trim() !== "" && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Nationality</Text>
+                <Text style={styles.infoLabel}>{t("profile.nationality")}</Text>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoValue}>
                     {formatNationality(userData.parsedNationality[0])}
@@ -359,7 +361,7 @@ export default function ProfileTab() {
             {/* Religion - only show if specified */}
             {userData.religion && userData.religion.trim() !== "" && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Religion</Text>
+                <Text style={styles.infoLabel}>{t("profile.religion")}</Text>
                 <Text style={styles.infoValue}>{formatReligion(userData.religion)}</Text>
               </View>
             )}
@@ -367,7 +369,7 @@ export default function ProfileTab() {
             {/* Zodiac - only show if specified */}
             {userData.zodiac && userData.zodiac.trim() !== "" && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Zodiac Sign</Text>
+                <Text style={styles.infoLabel}>{t("profile.zodiac")}</Text>
                 <Text style={styles.infoValue}>{formatZodiac(userData.zodiac)}</Text>
               </View>
             )}
@@ -377,9 +379,9 @@ export default function ProfileTab() {
         {/* Interests Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Interests</Text>
+            <Text style={styles.sectionTitle}>{t("profile.interests")}</Text>
             <TouchableOpacity onPress={handleEditInterests}>
-              <Text style={styles.editText}>Edit Interests</Text>
+              <Text style={styles.editText}>{t("profile.editInterests")}</Text>
             </TouchableOpacity>
           </View>
 

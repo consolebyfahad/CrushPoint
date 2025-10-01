@@ -1,6 +1,7 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   Modal,
@@ -19,6 +20,7 @@ export default function ProfileOptions({
   userData,
   isMatch = false,
 }: any) {
+  const { t } = useTranslation();
   const handleBlock = () => {
     if (onBlock) {
       onBlock();
@@ -82,13 +84,13 @@ export default function ProfileOptions({
                     {defaultUser.name}, {defaultUser.age}
                   </Text>
                   <Text style={styles.matchInfo}>
-                    Matched {defaultUser.timeAgo}
+                    {t("profile.matched")} {defaultUser.timeAgo}
                   </Text>
                 </View>
               </View>
             ) : (
               // Show simple title for regular profiles
-              <Text style={styles.title}>Profile Options</Text>
+              <Text style={styles.title}>{t("profile.profileOptions")}</Text>
             )}
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={color.black} />
@@ -110,7 +112,7 @@ export default function ProfileOptions({
                   >
                     <Ionicons name="close" size={20} color="#6B7280" />
                   </View>
-                  <Text style={styles.optionText}>Remove Match</Text>
+                  <Text style={styles.optionText}>{t("profile.removeMatch")}</Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -125,7 +127,7 @@ export default function ProfileOptions({
                 <View style={[styles.iconContainer, styles.blockIconContainer]}>
                   <Ionicons name="ban" size={20} color="#EF4444" />
                 </View>
-                <Text style={styles.optionText}>Block</Text>
+                <Text style={styles.optionText}>{t("profile.block")}</Text>
               </View>
             </TouchableOpacity>
 
@@ -141,7 +143,7 @@ export default function ProfileOptions({
                 >
                   <Ionicons name="warning" size={20} color="#F59E0B" />
                 </View>
-                <Text style={styles.optionText}>Report</Text>
+                <Text style={styles.optionText}>{t("profile.report")}</Text>
               </View>
             </TouchableOpacity>
           </View>

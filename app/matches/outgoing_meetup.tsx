@@ -5,13 +5,12 @@ import { color, font } from "@/utils/constants";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   ListRenderItem,
   RefreshControl,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 
 interface OutgoingMeetupProps {
@@ -48,49 +47,28 @@ export default function OutgoingMeetup({
   // Handle canceling outgoing request
   const handleCancel = useCallback(
     async (requestId: string) => {
-      Alert.alert(
-        "Cancel Request",
-        "Are you sure you want to cancel this meetup request?",
-        [
-          { text: "No", style: "cancel" },
-          {
-            text: "Yes, Cancel",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                setIsLoading(true);
+      try {
+        setIsLoading(true);
 
-                const formData = new FormData();
-                formData.append("type", "update_data");
-                formData.append("id", requestId);
-                formData.append("table_name", "meetup_requests");
-                formData.append("status", "cancelled");
-                formData.append("user_id", user?.user_id || "");
+        const formData = new FormData();
+        formData.append("type", "update_data");
+        formData.append("id", requestId);
+        formData.append("table_name", "meetup_requests");
+        formData.append("status", "cancelled");
+        formData.append("user_id", user?.user_id || "");
 
-                const response = await apiCall(formData);
+        const response = await apiCall(formData);
 
-                if (response?.status === "Success") {
-                  Alert.alert("Success", "Request cancelled successfully");
-                  onRemoveRequest?.(requestId);
-                } else {
-                  Alert.alert(
-                    "Error",
-                    response?.message || "Failed to cancel request"
-                  );
-                }
-              } catch (error: any) {
-                console.error("Error cancelling request:", error);
-                Alert.alert(
-                  "Error",
-                  "Failed to cancel request. Please try again."
-                );
-              } finally {
-                setIsLoading(false);
-              }
-            },
-          },
-        ]
-      );
+        if (response?.result === true) {
+          onRemoveRequest?.(requestId);
+        } else {
+          console.error("Failed to cancel request:", response?.message);
+        }
+      } catch (error: any) {
+        console.error("Error cancelling request:", error);
+      } finally {
+        setIsLoading(false);
+      }
     },
     [user?.user_id, onRemoveRequest]
   );
@@ -99,10 +77,7 @@ export default function OutgoingMeetup({
   const handleEdit = useCallback(async (requestId: string) => {
     try {
       console.log("Editing request:", requestId);
-      Alert.alert(
-        "Feature Coming Soon",
-        "Request editing will be available soon!"
-      );
+      // Feature coming soon - no alert needed
     } catch (error) {
       console.error("Error editing request:", error);
     }

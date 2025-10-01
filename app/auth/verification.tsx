@@ -9,6 +9,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { CameraView } from "expo-camera";
 import { router } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, Platform, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { compareSimpleFaces } from "../../utils/FaceVerificationService";
@@ -21,6 +22,7 @@ type VerificationState =
   | "submitting";
 
 export default function FaceVerification() {
+  const { t } = useTranslation();
   const { userData, user, userImages } = useAppContext();
   const defaultImage =
     userImages.length > 0
@@ -158,7 +160,7 @@ export default function FaceVerification() {
     if (!cameraRef.current || isProcessing) return;
 
     if (!defaultImage) {
-      Alert.alert("Error", "No reference image available for comparison.");
+      Alert.alert(t("error"), t("auth.noReferenceImage"));
       return;
     }
 
@@ -206,15 +208,15 @@ export default function FaceVerification() {
 
       setTimeout(() => {
         Alert.alert(
-          "Verification Error",
-          error.message || "Failed to verify face. Please try again.",
+          t("auth.verificationError"),
+          error.message || t("auth.verificationFailed"),
           [
             {
-              text: "Try Again",
+              text: t("auth.tryAgain"),
               onPress: () => {},
             },
             {
-              text: "Skip",
+              text: t("auth.skip"),
               style: "destructive",
               onPress: () => skipVerificationAndSubmit(),
             },
@@ -290,15 +292,15 @@ export default function FaceVerification() {
   const getButtonText = () => {
     switch (verificationState) {
       case "capturing":
-        return "Capturing...";
+        return t("auth.capturing");
       case "processing":
-        return "Processing...";
+        return t("auth.processing");
       case "uploading":
-        return "Uploading...";
+        return t("auth.uploading");
       case "submitting":
-        return "Creating Profile...";
+        return t("auth.creatingProfile");
       default:
-        return "Start Scan";
+        return t("auth.startScan");
     }
   };
 
@@ -306,10 +308,9 @@ export default function FaceVerification() {
     <SafeAreaView style={styles.container}>
       <Header />
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Verify Your Identity</Text>
+        <Text style={styles.title}>{t("auth.verifyIdentity")}</Text>
         <Text style={styles.instructionText}>
-          <Octicons name="info" size={14} color={color.gray55} /> Position your
-          face in the frame and ensure good lighting
+          <Octicons name="info" size={14} color={color.gray55} /> {t("auth.faceVerificationInstruction")}
         </Text>
       </View>
 
@@ -326,10 +327,10 @@ export default function FaceVerification() {
             {isProcessing && (
               <View style={styles.processingOverlay}>
                 <Text style={styles.processingOverlayText}>
-                  {verificationState === "capturing" && "Capturing..."}
-                  {verificationState === "processing" && "Processing..."}
-                  {verificationState === "uploading" && "Uploading..."}
-                  {verificationState === "submitting" && "Submitting..."}
+                  {verificationState === "capturing" && t("auth.capturing")}
+                  {verificationState === "processing" && t("auth.processing")}
+                  {verificationState === "uploading" && t("auth.uploading")}
+                  {verificationState === "submitting" && t("auth.submitting")}
                 </Text>
               </View>
             )}

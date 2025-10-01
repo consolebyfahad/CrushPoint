@@ -1,21 +1,22 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import { formatMeetupDate } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Image,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -187,7 +188,7 @@ export default function SuggestChanges({
                 size={16}
                 color={color.gray55}
               />
-              <Text style={styles.detailText}>{originalRequest.date}</Text>
+              <Text style={styles.detailText}>{formatMeetupDate(originalRequest.date)}</Text>
               <Ionicons
                 name="time-outline"
                 size={16}

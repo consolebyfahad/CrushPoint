@@ -8,16 +8,18 @@ import SocialAuth from "@/utils/social_auth";
 import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  BackHandler,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    BackHandler,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Welcome() {
+  const { t } = useTranslation();
   const { setUser } = useAppContext();
   const { showToast } = useToast();
   const [otherMethodsLoading, setOtherMethodsLoading] = useState(false);
@@ -86,9 +88,9 @@ export default function Welcome() {
         </View>
         <Text style={styles.appName}>Andra</Text>
         <View style={styles.contentContainer}>
-          <Text style={styles.title}>Create Your Account</Text>
+          <Text style={styles.title}>{t("auth.signup")}</Text>
           <Text style={styles.subtitle}>
-            Choose your preferred sign up method
+            {t("auth.chooseSignupMethod")}
           </Text>
 
           <View style={styles.buttonContainer}>
@@ -101,7 +103,7 @@ export default function Welcome() {
 
             {/* Other sign-up methods */}
             <CustomButton
-              title="Continue with Phone"
+              title={t("auth.continueWithPhone")}
               onPress={handlePhoneSignUp}
               icon={<PhoneIcon />}
               variant="secondary"
@@ -109,7 +111,7 @@ export default function Welcome() {
             />
 
             <CustomButton
-              title="Continue with Email"
+              title={t("auth.continueWithEmail")}
               onPress={handleEmailSignUp}
               icon={<EmailIcon />}
               variant="secondary"
@@ -118,9 +120,9 @@ export default function Welcome() {
           </View>
 
           <View style={styles.loginSection}>
-            <Text style={styles.loginText}>Already have an account? </Text>
+            <Text style={styles.loginText}>{t("auth.alreadyHaveAccount")} </Text>
             <TouchableOpacity onPress={handleLogin}>
-              <Text style={styles.loginLink}>Log In</Text>
+              <Text style={styles.loginLink}>{t("auth.login")}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -1,13 +1,14 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -18,6 +19,7 @@ export default function Religion({
   filterData,
   setFilterData,
 }: any) {
+  const { t } = useTranslation();
   const [selectedReligions, setSelectedReligions] = useState<string[]>(
     Array.isArray(filterData.religion) ? filterData.religion : []
   );
@@ -65,7 +67,7 @@ export default function Religion({
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.title}>Religion</Text>
+        <Text style={styles.title}>{t("filters.religion")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={color.black} />
         </TouchableOpacity>
@@ -126,7 +128,7 @@ export default function Religion({
               selectedReligions.length === 0 && styles.saveButtonTextDisabled,
             ]}
           >
-            Save
+{t("save")}
           </Text>
         </TouchableOpacity>
       </View>

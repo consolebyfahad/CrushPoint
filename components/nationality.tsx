@@ -1,14 +1,15 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    FlatList,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -19,6 +20,7 @@ export default function Nationality({
   filterData,
   setFilterData,
 }: any) {
+  const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const [selectedNationalities, setSelectedNationalities] = useState<string[]>(
     Array.isArray(filterData.nationality) ? filterData.nationality : []
@@ -110,7 +112,7 @@ export default function Nationality({
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.title}>Nationality</Text>
+        <Text style={styles.title}>{t("filters.nationality")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={color.black} />
         </TouchableOpacity>
@@ -129,7 +131,7 @@ export default function Nationality({
             style={styles.searchInput}
             value={searchText}
             onChangeText={setSearchText}
-            placeholder="Search nationality"
+            placeholder={t("filters.searchNationality")}
             placeholderTextColor={color.gray14}
           />
         </View>
@@ -163,7 +165,7 @@ export default function Nationality({
                 styles.saveButtonTextDisabled,
             ]}
           >
-            Save
+{t("save")}
           </Text>
         </TouchableOpacity>
       </View>

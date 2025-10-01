@@ -168,21 +168,105 @@ export const calculateAge = (dob: string): number => {
 
 export const parseJsonString = (jsonString: string): string[] => {
   try {
-    const cleanedString = jsonString.replace(/\\\"/g, '"');
-    return JSON.parse(cleanedString);
+    if (!jsonString) return [];
+    
+    // Check if it's a JSON array string
+    if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
+      // Handle heavily escaped JSON strings like the one in the API response
+      let cleanedString = jsonString;
+      
+      // Remove excessive backslashes and quotes
+      cleanedString = cleanedString.replace(/\\\\+/g, "\\");
+      cleanedString = cleanedString.replace(/\\\"/g, '"');
+      
+      // Parse the JSON
+      const parsed = JSON.parse(cleanedString);
+      
+      if (Array.isArray(parsed)) {
+        return parsed;
+      } else {
+        console.warn("JSON data is not an array:", parsed);
+        return [];
+      }
+    } else {
+      // It's not a JSON array, treat as a simple string
+      return [jsonString];
+    }
   } catch (error) {
-    console.error("Error parsing JSON string:", error);
-    return [];
+    console.warn("Error parsing JSON string:", error);
+    // Fallback: try to extract values manually if JSON parsing fails
+    try {
+      // Extract values between quotes
+      const matches = jsonString.match(/"([^"]+)"/g);
+      if (matches) {
+        const values = matches.map((match) => match.replace(/"/g, ""));
+        return values;
+      }
+    } catch (fallbackError) {
+      console.warn("Fallback parsing also failed:", fallbackError);
+    }
+    // Final fallback: return as single string
+    return [jsonString];
   }
 };
 
 export const parseInterestsWithNames = (jsonString: string): string[] => {
   try {
-    const cleanedString = jsonString.replace(/\\\"/g, '"');
-    const interestIds = JSON.parse(cleanedString);
-    return convertInterestIdsToNames(interestIds);
+    if (!jsonString) return [];
+    
+    // Check if it's a JSON array string
+    if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
+      // Handle heavily escaped JSON strings like the one in the API response
+      let cleanedString = jsonString;
+      
+      // Remove excessive backslashes and quotes
+      cleanedString = cleanedString.replace(/\\\\+/g, "\\");
+      cleanedString = cleanedString.replace(/\\\"/g, '"');
+      
+      // Parse the JSON
+      const interestIds = JSON.parse(cleanedString);
+      
+      if (Array.isArray(interestIds)) {
+        return convertInterestIdsToNames(interestIds);
+      } else {
+        console.warn("Interests data is not an array:", interestIds);
+        return [];
+      }
+    } else {
+      // It's not a JSON array, might be a single interest ID or comma-separated values
+      console.warn("Interests data is not JSON array format:", jsonString);
+      
+      // Try to parse as comma-separated values
+      if (jsonString.includes(',')) {
+        const values = jsonString.split(',').map(v => v.trim());
+        return convertInterestIdsToNames(values);
+      } else {
+        // Single value
+        return convertInterestIdsToNames([jsonString.trim()]);
+      }
+    }
   } catch (error) {
-    console.error("Error parsing interests:", error);
+    console.warn("Error parsing interests:", error);
+    // Fallback: try to extract values manually if JSON parsing fails
+    try {
+      // Extract values between quotes
+      const matches = jsonString.match(/"([^"]+)"/g);
+      if (matches) {
+        const values = matches.map((match) => match.replace(/"/g, ""));
+        return convertInterestIdsToNames(values);
+      }
+      
+      // Try comma-separated values
+      if (jsonString.includes(',')) {
+        const values = jsonString.split(',').map(v => v.trim());
+        return convertInterestIdsToNames(values);
+      } else {
+        // Single value
+        return convertInterestIdsToNames([jsonString.trim()]);
+      }
+    } catch (fallbackError) {
+      console.warn("Fallback parsing also failed:", fallbackError);
+    }
     return [];
   }
 };
@@ -210,11 +294,37 @@ const convertLookingForIdsToLabels = (lookingForIds: string[]): string[] => {
 // Add new function specifically for looking_for
 export const parseLookingForWithLabels = (jsonString: string): string[] => {
   try {
-    const cleanedString = jsonString.replace(/\\\"/g, '"');
+    if (!jsonString) return [];
+    
+    // Handle heavily escaped JSON strings like the one in the API response
+    let cleanedString = jsonString;
+    
+    // Remove excessive backslashes and quotes
+    cleanedString = cleanedString.replace(/\\\\+/g, "\\");
+    cleanedString = cleanedString.replace(/\\\"/g, '"');
+    
+    // Parse the JSON
     const lookingForIds = JSON.parse(cleanedString);
-    return convertLookingForIdsToLabels(lookingForIds);
+    
+    if (Array.isArray(lookingForIds)) {
+      return convertLookingForIdsToLabels(lookingForIds);
+    } else {
+      console.warn("Looking for data is not an array:", lookingForIds);
+      return [];
+    }
   } catch (error) {
     console.error("Error parsing looking_for:", error);
+    // Fallback: try to extract values manually if JSON parsing fails
+    try {
+      // Extract values between quotes
+      const matches = jsonString.match(/"([^"]+)"/g);
+      if (matches) {
+        const values = matches.map((match) => match.replace(/"/g, ""));
+        return convertLookingForIdsToLabels(values);
+      }
+    } catch (fallbackError) {
+      console.error("Fallback parsing also failed:", fallbackError);
+    }
     return [];
   }
 };
@@ -416,4 +526,225 @@ export const formatTimeAgo = (date: string, time: string) => {
     console.warn("Error formatting time ago:", error);
     return "Recently";
   }
+};
+
+// ==================== IMAGE PARSING UTILITIES ====================
+
+const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
+const DEFAULT_IMAGE_MALE = "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
+const DEFAULT_IMAGE_FEMALE = "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg";
+
+/**
+ * Parse user images from API response
+ * Handles the complex escaped JSON format from the API
+ */
+export const parseUserImages = (imagesStr: string, gender: string = "unknown"): string[] => {
+  if (!imagesStr || imagesStr.trim() === "") {
+    return [getDefaultImage(gender)];
+  }
+
+  try {
+    // Clean the heavily escaped JSON string
+    let cleanedString = imagesStr;
+    
+    // Remove excessive backslashes
+    cleanedString = cleanedString.replace(/\\\\+/g, "\\");
+    cleanedString = cleanedString.replace(/\\\"/g, '"');
+    
+    // Parse the JSON
+    const imageFilenames = JSON.parse(cleanedString);
+    
+    if (Array.isArray(imageFilenames) && imageFilenames.length > 0) {
+      const validImages = imageFilenames
+        .filter((filename: string) => filename && typeof filename === "string")
+        .map((filename: string) => {
+          const cleanFilename = filename.replace(/\\/g, "");
+          return `${IMAGE_BASE_URL}${cleanFilename}`;
+        });
+      
+      return validImages.length > 0 ? validImages : [getDefaultImage(gender)];
+    }
+    
+    return [getDefaultImage(gender)];
+  } catch (error) {
+    console.warn("Error parsing user images:", error);
+    return [getDefaultImage(gender)];
+  }
+};
+
+/**
+ * Get default image based on gender
+ */
+export const getDefaultImage = (gender: string): string => {
+  const normalizedGender = (gender || "").toLowerCase();
+  if (normalizedGender === "female" || normalizedGender === "f") {
+    return DEFAULT_IMAGE_FEMALE;
+  } else if (normalizedGender === "male" || normalizedGender === "m") {
+    return DEFAULT_IMAGE_MALE;
+  }
+  return DEFAULT_IMAGE_FEMALE; // Default fallback
+};
+
+/**
+ * Parse event image from API response
+ */
+export const parseEventImage = (imageStr: string): string => {
+  if (!imageStr) {
+    return "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
+  }
+
+  try {
+    // If it's already a full URL, return as is
+    if (imageStr.startsWith("http")) {
+      return imageStr;
+    }
+    
+    // Otherwise, construct URL with base path
+    return `${IMAGE_BASE_URL}${imageStr}`;
+  } catch (error) {
+    console.warn("Error parsing event image:", error);
+    return "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
+  }
+};
+
+// ==================== DISTANCE UTILITIES ====================
+
+/**
+ * Calculate distance between two coordinates using Haversine formula
+ */
+export const calculateDistance = (
+  coord1: { lat: number; lng: number },
+  coord2: { lat: number; lng: number }
+): string => {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (coord2.lat - coord1.lat) * (Math.PI / 180);
+  const dLng = (coord2.lng - coord1.lng) * (Math.PI / 180);
+  
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(coord1.lat * (Math.PI / 180)) * 
+    Math.cos(coord2.lat * (Math.PI / 180)) * 
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  
+  if (distance < 1) {
+    return `${Math.round(distance * 1000)}m`;
+  } else {
+    return `${Math.round(distance * 10) / 10}km`;
+  }
+};
+
+// ==================== UI DISPLAY UTILITIES ====================
+
+/**
+ * Get user display name with age
+ */
+export const getUserDisplayName = (name: string, age: number): string => {
+  return `${name}, ${age}`;
+};
+
+/**
+ * Get user location string
+ */
+export const getUserLocationString = (city: string, state: string, country: string): string => {
+  const parts = [city, state, country].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : "Location not specified";
+};
+
+/**
+ * Get user online status
+ */
+export const getUserOnlineStatus = (status: string): string => {
+  return status === "1" ? "Online" : "Offline";
+};
+
+/**
+ * Format height for display
+ */
+export const formatHeight = (heightStr: string): string => {
+  if (!heightStr || heightStr === "0") return "";
+  
+  const height = parseFloat(heightStr);
+  if (isNaN(height)) return "";
+  
+  return `${height} cm`;
+};
+
+/**
+ * Format date for meetup requests (e.g., "Thu, Feb 15")
+ */
+export const formatMeetupDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    };
+    return date.toLocaleDateString('en-US', options);
+  } catch (error) {
+    console.warn('Error formatting meetup date:', error);
+    return dateString;
+  }
+};
+
+/**
+ * Format date for display in cards (e.g., "Sun, Feb 18")
+ */
+export const formatCardDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    };
+    return date.toLocaleDateString('en-US', options);
+  } catch (error) {
+    console.warn('Error formatting card date:', error);
+    return dateString;
+  }
+};
+
+/**
+ * Check if a date is in the past
+ */
+export const isDateInPast = (dateString: string): boolean => {
+  try {
+    const date = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    return date < today;
+  } catch (error) {
+    console.warn('Error checking if date is in past:', error);
+    return false;
+  }
+};
+
+/**
+ * Sort requests by date (newest first)
+ */
+export const sortRequestsByDate = (requests: any[]): any[] => {
+  return requests.sort((a, b) => {
+    try {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime(); // Newest first
+    } catch (error) {
+      console.warn('Error sorting requests by date:', error);
+      return 0;
+    }
+  });
+};
+
+/**
+ * Filter out past dates
+ */
+export const filterOutPastDates = (requests: any[]): any[] => {
+  return requests.filter(request => {
+    if (!request.date) return false;
+    return !isDateInPast(request.date);
+  });
 };

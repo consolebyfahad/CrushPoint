@@ -5,26 +5,28 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import {
-  nationalityOptions,
-  religionOptions,
-  zodiacOptions
+    nationalityOptions,
+    religionOptions,
+    zodiacOptions
 } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BasicInfo() {
+  const { t } = useTranslation();
   const { user, userData, updateUserData } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
@@ -192,12 +194,12 @@ export default function BasicInfo() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <Header title={"Basic Info"} divider />
+      <Header title={t("profile.basicInfo")} divider />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Interested in */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Interested in</Text>
+          <Text style={styles.fieldLabel}>{t("profile.interestedIn")}</Text>
           <Dropdown
             style={[
               styles.dropdown,
@@ -210,7 +212,7 @@ export default function BasicInfo() {
             maxHeight={300}
             labelField="label"
             valueField="value"
-            placeholder="Select interested in"
+            placeholder={t("profile.selectInterestedIn")}
             value={basicInfo.interestedIn}
             onChange={(item) => {
               updateField("interestedIn", item.value);
@@ -223,8 +225,8 @@ export default function BasicInfo() {
 
         {/* Relationship Goals - Custom Multi Select */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Relationship Goals</Text>
-          <Text style={styles.fieldSubLabel}>Select one or more goals</Text>
+          <Text style={styles.fieldLabel}>{t("profile.relationshipGoals")}</Text>
+          <Text style={styles.fieldSubLabel}>{t("profile.selectOneOrMoreGoals")}</Text>
           <View
             style={[
               styles.relationshipGoalsContainer,
@@ -239,7 +241,7 @@ export default function BasicInfo() {
 
         {/* Height */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Height</Text>
+          <Text style={styles.fieldLabel}>{t("profile.height")}</Text>
           <View style={styles.heightInputContainer}>
             <TextInput
               style={styles.heightInput}
@@ -254,8 +256,8 @@ export default function BasicInfo() {
 
         {/* Nationality - Multi Select */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Nationality</Text>
-          <Text style={styles.fieldSubLabel}>Select up to 3 nationalities</Text>
+          <Text style={styles.fieldLabel}>{t("profile.nationality")}</Text>
+          <Text style={styles.fieldSubLabel}>{t("profile.selectUpTo3Nationalities")}</Text>
           <MultiSelect
             style={[
               styles.dropdown,
@@ -268,7 +270,7 @@ export default function BasicInfo() {
             maxHeight={300}
             labelField="label"
             valueField="value"
-            placeholder="Select nationalities"
+            placeholder={t("profile.selectNationalities")}
             value={basicInfo.nationality}
             onChange={(items) => {
               // Limit to 3 nationalities
@@ -296,7 +298,7 @@ export default function BasicInfo() {
 
         {/* Religion */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Religion</Text>
+          <Text style={styles.fieldLabel}>{t("profile.religion")}</Text>
           <Dropdown
             style={[styles.dropdown, !basicInfo.religion && styles.errorBorder]}
             placeholderStyle={styles.placeholderStyle}
@@ -306,7 +308,7 @@ export default function BasicInfo() {
             maxHeight={300}
             labelField="label"
             valueField="value"
-            placeholder="Select religion"
+            placeholder={t("profile.selectReligion")}
             value={basicInfo.religion}
             onChange={(item) => {
               updateField("religion", item.value);
@@ -319,7 +321,7 @@ export default function BasicInfo() {
 
         {/* Zodiac Sign */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Zodiac Sign</Text>
+          <Text style={styles.fieldLabel}>{t("profile.zodiacSign")}</Text>
           <Dropdown
             style={[
               styles.dropdown,
@@ -332,7 +334,7 @@ export default function BasicInfo() {
             maxHeight={300}
             labelField="label"
             valueField="value"
-            placeholder="Select zodiac sign"
+            placeholder={t("profile.selectZodiacSign")}
             value={basicInfo.zodiacSign}
             onChange={(item) => {
               updateField("zodiacSign", item.value);
@@ -350,7 +352,7 @@ export default function BasicInfo() {
       {/* Save Button */}
       <View style={styles.saveContainer}>
         <CustomButton
-          title={isLoading ? "Saving..." : "Save Changes"}
+          title={isLoading ? t("profile.saving") : t("profile.saveChanges")}
           onPress={handleSave}
           isDisabled={isLoading}
           isLoading={isLoading}

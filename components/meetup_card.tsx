@@ -1,12 +1,13 @@
 import { color, font } from "@/utils/constants";
+import { formatCardDate } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import {
-  ActivityIndicator,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 interface MeetupCardProps {
@@ -215,7 +216,7 @@ export default function MeetupCard({
       <View style={styles.detailsContainer}>
         <View style={styles.detailRow}>
           <Ionicons name="calendar-outline" size={16} color={color.gray55} />
-          <Text style={styles.detailText}>{request.timestamp}</Text>
+          <Text style={styles.detailText}>{formatCardDate(request.date)}</Text>
         </View>
         <View style={styles.detailRow}>
           <Ionicons name="time-outline" size={16} color={color.gray55} />
@@ -242,6 +243,15 @@ export default function MeetupCard({
             ]}
           >
             {request.responseMessage}
+          </Text>
+        </View>
+      )}
+
+      {/* Confirmation Message for Accepted Incoming Requests */}
+      {type === "incoming" && request.status === "accepted" && (
+        <View style={[styles.responseContainer]}>
+          <Text style={[styles.responseMessage, styles.responseMessageSuccess]}>
+            Your request was accepted!
           </Text>
         </View>
       )}

@@ -3,8 +3,10 @@ import { color } from "@/utils/constants";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
+import { I18nextProvider } from "react-i18next";
 import { ActivityIndicator, StatusBar, View } from "react-native";
 import { ToastProvider } from "../components/toast_provider";
+import i18n from "../utils/i18n";
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -32,14 +34,16 @@ console.log("NEV")
   }
 
   return (
-    <AppProvider>
-      <ToastProvider>
-        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-        <Stack
-          screenOptions={{ headerShown: false, animation: "default" }}
-          initialRouteName="index"
-        />
-      </ToastProvider>
-    </AppProvider>
+    <I18nextProvider i18n={i18n}>
+      <AppProvider>
+        <ToastProvider>
+          <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+          <Stack
+            screenOptions={{ headerShown: false, animation: "default" }}
+            initialRouteName="index"
+          />
+        </ToastProvider>
+      </AppProvider>
+    </I18nextProvider>
   );
 }

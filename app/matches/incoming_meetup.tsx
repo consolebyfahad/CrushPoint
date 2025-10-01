@@ -6,7 +6,6 @@ import { color, font } from "@/utils/constants";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   ListRenderItem,
   Modal,
@@ -14,7 +13,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 interface IncomingMeetupProps {
@@ -65,15 +64,13 @@ export default function IncomingMeetup({
 
         const response = await apiCall(formData);
 
-        if (response?.status === "Success") {
-          Alert.alert("Success", "Meetup request accepted!");
+        if (response?.result === true) {
           onUpdateStatus?.(requestId, "accepted");
         } else {
-          Alert.alert("Error", response?.message || "Failed to accept request");
+          console.error("Failed to accept request:", response?.message);
         }
       } catch (error: any) {
         console.error("Error accepting request:", error);
-        Alert.alert("Error", "Failed to accept request. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -96,15 +93,13 @@ export default function IncomingMeetup({
 
         const response = await apiCall(formData);
 
-        if (response?.status === "Success") {
-          Alert.alert("Success", "Changes accepted!");
+        if (response?.result === true) {
           onUpdateStatus?.(requestId, "accepted");
         } else {
-          Alert.alert("Error", response?.message || "Failed to accept changes");
+          console.error("Failed to accept changes:", response?.message);
         }
       } catch (error: any) {
         console.error("Error accepting changes:", error);
-        Alert.alert("Error", "Failed to accept changes. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -122,7 +117,6 @@ export default function IncomingMeetup({
         }
       } catch (error) {
         console.error("Error opening suggest changes:", error);
-        Alert.alert("Error", "Failed to open changes dialog");
       }
     },
     [requests]
@@ -149,20 +143,15 @@ export default function IncomingMeetup({
 
         const response = await apiCall(formData);
 
-        if (response?.status === "Success") {
-          Alert.alert("Success", "Changes suggested successfully!");
+        if (response?.result === true) {
           onUpdateStatus?.(selectedRequest?.id, "change");
           setShowSuggestChanges(false);
           setSelectedRequest(null);
         } else {
-          Alert.alert(
-            "Error",
-            response?.message || "Failed to suggest changes"
-          );
+          console.error("Failed to suggest changes:", response?.message);
         }
       } catch (error: any) {
         console.error("Error submitting suggested changes:", error);
-        Alert.alert("Error", "Failed to suggest changes. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -172,49 +161,28 @@ export default function IncomingMeetup({
 
   const handleDecline = useCallback(
     async (requestId: string) => {
-      Alert.alert(
-        "Decline Meetup Request",
-        "Are you sure you want to decline this meetup request?",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Decline",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                setIsLoading(true);
+      try {
+        setIsLoading(true);
 
-                const formData = new FormData();
-                formData.append("type", "update_data");
-                formData.append("id", requestId);
-                formData.append("table_name", "meetup_requests");
-                formData.append("status", "declined");
-                formData.append("user_id", user?.user_id || "");
+        const formData = new FormData();
+        formData.append("type", "update_data");
+        formData.append("id", requestId);
+        formData.append("table_name", "meetup_requests");
+        formData.append("status", "declined");
+        formData.append("user_id", user?.user_id || "");
 
-                const response = await apiCall(formData);
+        const response = await apiCall(formData);
 
-                if (response?.status === "Success") {
-                  Alert.alert("Success", "Meetup request declined");
-                  onRemoveRequest?.(requestId);
-                } else {
-                  Alert.alert(
-                    "Error",
-                    response?.message || "Failed to decline request"
-                  );
-                }
-              } catch (error: any) {
-                console.error("Error declining request:", error);
-                Alert.alert(
-                  "Error",
-                  "Failed to decline request. Please try again."
-                );
-              } finally {
-                setIsLoading(false);
-              }
-            },
-          },
-        ]
-      );
+        if (response?.result === true) {
+          onRemoveRequest?.(requestId);
+        } else {
+          console.error("Failed to decline request:", response?.message);
+        }
+      } catch (error: any) {
+        console.error("Error declining request:", error);
+      } finally {
+        setIsLoading(false);
+      }
     },
     [user?.user_id, onRemoveRequest]
   );

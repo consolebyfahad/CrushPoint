@@ -1,12 +1,13 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -17,6 +18,7 @@ export default function LookingFor({
   filterData,
   setFilterData,
 }: any) {
+  const { t } = useTranslation();
   // Changed to array to support multiple selections
   const [selectedOptions, setSelectedOptions] = useState<string[]>(
     Array.isArray(filterData.lookingFor) ? filterData.lookingFor : []
@@ -25,25 +27,25 @@ export default function LookingFor({
   const lookingForOptions = [
     {
       id: "serious",
-      title: "Serious Relationship",
+      title: t("lookingFor.serious"),
       emoji: "🩵",
       color: "#3B82F6",
     },
     {
       id: "casual",
-      title: "Casual Dating",
+      title: t("lookingFor.casual"),
       emoji: "😊",
       color: "#F59E0B",
     },
     {
       id: "friendship",
-      title: "Friendship",
+      title: t("lookingFor.friendship"),
       emoji: "🤝",
       color: "#10B981",
     },
     {
       id: "open",
-      title: "Open To Possibilities",
+      title: t("lookingFor.open"),
       emoji: "🔥",
       color: "#EF4444",
     },
@@ -82,7 +84,7 @@ export default function LookingFor({
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.title}>Looking for</Text>
+        <Text style={styles.title}>{t("lookingFor.lookingFor")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={color.black} />
         </TouchableOpacity>
@@ -145,7 +147,7 @@ export default function LookingFor({
               selectedOptions.length === 0 && styles.saveButtonTextDisabled,
             ]}
           >
-            Save
+{t("save")}
           </Text>
         </TouchableOpacity>
       </View>

@@ -1,6 +1,6 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
-import { formatTimeAgo, formatTimeForDisplay } from "@/utils/helper";
+import { filterOutPastDates, formatTimeAgo, formatTimeForDisplay, sortRequestsByDate } from "@/utils/helper";
 import { useEffect, useState } from "react";
 
 interface RequestUser {
@@ -176,7 +176,7 @@ const useGetRequests = () => {
                   request.time
                 )
               ),
-              date: String(request.date || request.meetup_date || "TBD"),
+              date: String(request.meetup_date || request.date || "TBD"),
               time: String(
                 formatTimeForDisplay(
                   request.time || request.meetup_time || "TBD"
@@ -207,10 +207,17 @@ const useGetRequests = () => {
           }
         });
 
-        setIncomingRequests(incomingList);
-        setOutgoingRequests(outgoingList);
+        // Filter out past dates and sort by date
+        const filteredIncomingList = filterOutPastDates(incomingList);
+        const filteredOutgoingList = filterOutPastDates(outgoingList);
+        
+        const sortedIncomingList = sortRequestsByDate(filteredIncomingList);
+        const sortedOutgoingList = sortRequestsByDate(filteredOutgoingList);
 
-        if (incomingList.length === 0 && outgoingList.length === 0) {
+        setIncomingRequests(sortedIncomingList);
+        setOutgoingRequests(sortedOutgoingList);
+
+        if (sortedIncomingList.length === 0 && sortedOutgoingList.length === 0) {
           setError("No meetup requests found yet.");
         }
       } else {

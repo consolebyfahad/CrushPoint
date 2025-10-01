@@ -1,15 +1,16 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -21,39 +22,40 @@ export default function ReportUser({
   onSubmit,
   userName = "User",
 }: any) {
+  const { t } = useTranslation();
   const [selectedReason, setSelectedReason] = useState("");
   const [additionalDetails, setAdditionalDetails] = useState("");
 
   const reportReasons = [
     {
       id: "fake_profile",
-      title: "Fake Profile",
-      description: "This profile appears to be fake photos or info.",
+      title: t("report.fakeProfile"),
+      description: t("report.fakeProfileDesc"),
     },
     {
       id: "inappropriate_photos",
-      title: "Inappropriate Photos",
-      description: "Profile contains inappropriate or explicit content",
+      title: t("report.inappropriatePhotos"),
+      description: t("report.inappropriatePhotosDesc"),
     },
     {
       id: "harassment",
-      title: "Harassment or Threats",
-      description: "This person is sending threatening or harassing.",
+      title: t("report.harassment"),
+      description: t("report.harassmentDesc"),
     },
     {
       id: "spam",
-      title: "Spam or Scams",
-      description: "Profile is promoting products, services, or scam.",
+      title: t("report.spam"),
+      description: t("report.spamDesc"),
     },
     {
       id: "underage",
-      title: "Underage User",
-      description: "This person appears to be under 18 years old",
+      title: t("report.underage"),
+      description: t("report.underageDesc"),
     },
     {
       id: "other",
-      title: "Other",
-      description: "Other concerns not listed above",
+      title: t("report.other"),
+      description: t("report.otherDesc"),
     },
   ];
 
@@ -114,7 +116,7 @@ export default function ReportUser({
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={color.black} />
             </TouchableOpacity>
-            <Text style={styles.title}>Report User</Text>
+            <Text style={styles.title}>{t("report.reportUser")}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={color.black} />
             </TouchableOpacity>
@@ -126,7 +128,7 @@ export default function ReportUser({
           >
             {/* Question */}
             <Text style={styles.questionText}>
-              {" What's wrong with this profile?"}
+              {t("report.whatsWrong")}
             </Text>
 
             {/* Report Reasons */}
@@ -164,13 +166,13 @@ export default function ReportUser({
             {/* Additional Details */}
             <View style={styles.additionalDetailsSection}>
               <Text style={styles.additionalDetailsLabel}>
-                Additional Details
+                {t("report.additionalDetails")}
               </Text>
               <TextInput
                 style={styles.additionalDetailsInput}
                 value={additionalDetails}
                 onChangeText={setAdditionalDetails}
-                placeholder="Please provide more information..."
+                placeholder={t("report.placeholder")}
                 placeholderTextColor={color.gray14}
                 multiline
                 numberOfLines={4}
@@ -196,7 +198,7 @@ export default function ReportUser({
                 color={color.white}
                 style={styles.submitIcon}
               />
-              <Text style={styles.submitButtonText}>Submit Report</Text>
+              <Text style={styles.submitButtonText}>{t("report.submitReport")}</Text>
             </TouchableOpacity>
           </View>
         </View>

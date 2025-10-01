@@ -1,13 +1,14 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -18,6 +19,7 @@ export default function ZodiacSign({
   filterData,
   setFilterData,
 }: any) {
+  const { t } = useTranslation();
   const [selectedZodiacs, setSelectedZodiacs] = useState<string[]>(
     Array.isArray(filterData.zodiacSign) ? filterData.zodiacSign : []
   );
@@ -70,7 +72,7 @@ export default function ZodiacSign({
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.title}>Zodiac Sign</Text>
+        <Text style={styles.title}>{t("filters.zodiacSign")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={color.black} />
         </TouchableOpacity>
@@ -126,7 +128,7 @@ export default function ZodiacSign({
               selectedZodiacs.length === 0 && styles.saveButtonTextDisabled,
             ]}
           >
-            Save
+{t("save")}
           </Text>
         </TouchableOpacity>
       </View>

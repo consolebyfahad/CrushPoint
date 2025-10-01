@@ -5,17 +5,19 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { logout } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
@@ -27,13 +29,13 @@ export default function Settings() {
   };
 
   const handleLogOut = async () => {
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
+    Alert.alert(t("auth.logout"), t("auth.logoutConfirm"), [
       {
-        text: "Cancel",
+        text: t("cancel"),
         style: "cancel",
       },
       {
-        text: "Log Out",
+        text: t("auth.logout"),
         style: "destructive",
         onPress: async () => {
           const success = await logout();
@@ -78,11 +80,15 @@ export default function Settings() {
     });
   };
 
+  const handleLanguageSettings = () => {
+    router.push("/profile/language");
+  };
+
   // Settings sections data
   const visibilitySettings = [
     {
       id: "private_spot",
-      title: "Edit Private Spot",
+      title: t("profile.editPrivateSpot"),
       icon: "location-outline",
       hasChevron: true,
       onPress: handleEditPrivateSpot,
@@ -92,28 +98,35 @@ export default function Settings() {
   const accountSettings = [
     {
       id: "account_settings",
-      title: "Account Settings",
+      title: t("settings.account"),
       icon: "person-outline",
       hasChevron: true,
       onPress: handleAccountSettings,
     },
     {
       id: "notifications",
-      title: "Notifications",
+      title: t("settings.notifications"),
       icon: "notifications-outline",
       hasChevron: true,
       onPress: handleNotificationSettings,
     },
     {
+      id: "language",
+      title: t("settings.language"),
+      icon: "language-outline",
+      hasChevron: true,
+      onPress: handleLanguageSettings,
+    },
+    {
       id: "verification",
-      title: "Verification Status",
+      title: t("profile.verificationStatus"),
       icon: "shield-checkmark-outline",
       hasChevron: true,
       onPress: handleVerificationStatus,
     },
     {
       id: "blocked_users",
-      title: "Blocked Users",
+      title: t("settings.blockedUsers"),
       icon: "ban-outline",
       hasChevron: true,
       onPress: () => {
@@ -125,24 +138,24 @@ export default function Settings() {
   const connectSettings = [
     {
       id: "invite_friend",
-      title: "Invite a friend",
-      subtitle: "Last updated: 2023-12-01",
+      title: t("settings.inviteFriend"),
+      subtitle: t("settings.lastUpdated"),
       icon: "gift-outline",
       hasChevron: true,
       onPress: () => console.log("Invite a friend"),
     },
     {
       id: "review",
-      title: "Give us a review",
-      subtitle: "Rate us on app store",
+      title: t("settings.giveReview"),
+      subtitle: t("settings.rateOnStore"),
       icon: "star-outline",
       hasExternal: true,
       onPress: () => console.log("Give us a review"),
     },
     {
       id: "community",
-      title: "Community Guidelines",
-      subtitle: "Last updated: 2023-12-01",
+      title: t("settings.communityGuidelines"),
+      subtitle: t("settings.lastUpdated"),
       icon: "people-outline",
       hasChevron: true,
       onPress: () => router.push("/profile/community_guidelines"),
@@ -152,21 +165,21 @@ export default function Settings() {
   const otherSettings = [
     {
       id: "terms",
-      title: "Terms of Service",
+      title: t("settings.terms"),
       icon: "document-text-outline",
       hasChevron: true,
       onPress: () => router.push("/profile/terms_of_service"),
     },
     {
       id: "privacy",
-      title: "Privacy Policy",
+      title: t("settings.privacyPolicy"),
       icon: "shield-outline",
       hasChevron: true,
       onPress: () => router.push("/profile/privacy_policy"),
     },
     {
       id: "support",
-      title: "Contact Support",
+      title: t("settings.contactSupport"),
       icon: "help-circle-outline",
       hasChevron: true,
       onPress: () => {
@@ -232,19 +245,19 @@ export default function Settings() {
         >
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.title}>{t("settings.settings")}</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Visibility Section */}
-        {renderSection("Visibility", visibilitySettings)}
+        {renderSection(t("settings.visibility"), visibilitySettings)}
 
         {/* Account Section */}
-        {renderSection("Account", accountSettings)}
+        {renderSection(t("settings.account"), accountSettings)}
 
         {/* Connect Section */}
-        {renderSection("Connect", connectSettings)}
+        {renderSection(t("settings.connect"), connectSettings)}
         {renderSection(undefined, otherSettings)}
 
         {/* Bottom Spacing */}
@@ -254,7 +267,7 @@ export default function Settings() {
       {/* Log Out Button */}
       <View style={styles.logoutContainer}>
         <CustomButton
-          title="Log Out"
+          title={t("auth.logout")}
           style={{ backgroundColor: color.gray94 }}
           fontstyle={{ color: color.black }}
           onPress={handleLogOut}

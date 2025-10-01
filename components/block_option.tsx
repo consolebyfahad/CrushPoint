@@ -1,6 +1,7 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function BlockConfirmation({
@@ -10,6 +11,7 @@ export default function BlockConfirmation({
   onBack,
   userName = "User",
 }: any) {
+  const { t } = useTranslation();
   const handleConfirm = () => {
     if (onConfirm) {
       onConfirm();
@@ -45,7 +47,7 @@ export default function BlockConfirmation({
             <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={color.black} />
             </TouchableOpacity>
-            <Text style={styles.title}>Block {userName}?</Text>
+            <Text style={styles.title}>{t("block.blockUser", { userName })}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={color.black} />
             </TouchableOpacity>
@@ -59,10 +61,9 @@ export default function BlockConfirmation({
             </View>
 
             {/* Confirmation Text */}
-            <Text style={styles.confirmationTitle}>Are you sure?</Text>
+            <Text style={styles.confirmationTitle}>{t("block.areYouSure")}</Text>
             <Text style={styles.confirmationText}>
-              {userName} will no longer be able to See your profile, Send you
-              reactions, Match with you
+              {t("block.blockDescription", { userName })}
             </Text>
           </View>
 
@@ -73,7 +74,7 @@ export default function BlockConfirmation({
               onPress={handleCancel}
               activeOpacity={0.8}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t("cancel")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -81,7 +82,7 @@ export default function BlockConfirmation({
               onPress={handleConfirm}
               activeOpacity={0.8}
             >
-              <Text style={styles.confirmButtonText}>Confirm</Text>
+              <Text style={styles.confirmButtonText}>{t("confirm")}</Text>
             </TouchableOpacity>
           </View>
         </View>

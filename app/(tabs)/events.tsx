@@ -6,18 +6,20 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EventsTab() {
+  const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const { loading, events, error, refetch, toggleAttendance } = useGetEvents();
 
@@ -58,12 +60,12 @@ export default function EventsTab() {
         <Ionicons name="calendar-outline" size={64} color={color.gray14} />
       </View>
       <Text style={styles.emptyTitle}>
-        {searchText ? "No events found" : "No events available"}
+        {searchText ? t("events.noEvents") : t("events.noEvents")}
       </Text>
       <Text style={styles.emptyText}>
         {searchText
-          ? "Try adjusting your search terms"
-          : "Check back later for new events"}
+          ? t("common.tryAgain")
+          : t("events.noEventsDesc")}
       </Text>
     </View>
   );
@@ -95,11 +97,11 @@ export default function EventsTab() {
   if (loading && events.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <EventsTabsHeader title="Upcoming Events" events={[]} />
+        <EventsTabsHeader title={t("events.events")} events={[]} />
         <CustomSearchBar
           searchText={searchText}
           onChangeText={setSearchText}
-          placeholder="Search events"
+          placeholder={t("common.search")}
         />
         {renderLoadingState()}
       </SafeAreaView>
@@ -110,11 +112,11 @@ export default function EventsTab() {
   if (error && events.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <EventsTabsHeader title="Upcoming Events" events={[]} />
+        <EventsTabsHeader title={t("events.events")} events={[]} />
         <CustomSearchBar
           searchText={searchText}
           onChangeText={setSearchText}
-          placeholder="Search events"
+          placeholder={t("common.search")}
         />
         {renderErrorState()}
       </SafeAreaView>
@@ -124,13 +126,13 @@ export default function EventsTab() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <EventsTabsHeader title="Upcoming Events" events={events} />
+      <EventsTabsHeader title={t("events.events")} events={events} />
 
       {/* Search Bar */}
       <CustomSearchBar
         searchText={searchText}
         onChangeText={setSearchText}
-        placeholder="Search events"
+        placeholder={t("common.search")}
       />
 
       {/* Events List */}

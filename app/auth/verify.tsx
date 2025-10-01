@@ -6,6 +6,7 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     ActivityIndicator,
     Animated,
@@ -17,6 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Verify() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { user, loginUser } = useAppContext();
   const { showToast } = useToast();
@@ -207,9 +209,9 @@ export default function Verify() {
       ) : (
         <View style={styles.content}>
           <View style={styles.titleSection}>
-            <Text style={styles.title}>Verify your {contactType}</Text>
+            <Text style={styles.title}>{t("auth.verifyYour", { contactType })}</Text>
             <Text style={styles.subtitle}>
-              Enter the 6-digit code we sent to {contactInfo}
+              {t("auth.enterCodeSent", { contactInfo })}
             </Text>
           </View>
 
@@ -247,7 +249,7 @@ export default function Verify() {
           {/* Resend Code Button */}
           <CustomButton
             title={
-              canResend ? "Resend Code" : `Resend code in ${resendCountdown}s`
+              canResend ? t("auth.resendCode") : t("auth.resendCodeIn", { count: resendCountdown })
             }
             onPress={handleResendCode}
             isDisabled={!canResend || isVerifying}
