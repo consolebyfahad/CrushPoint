@@ -1,15 +1,9 @@
+import Header from "@/components/header";
 import { color, font } from "@/utils/constants";
 import { saveLanguagePreference } from "@/utils/i18n";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Language {
@@ -63,19 +57,11 @@ const LanguageSettings: React.FC = () => {
         <Text style={styles.flag}>{language.flag}</Text>
         <View style={styles.languageText}>
           <Text
-            style={[
-              styles.languageName,
-              isSelected && styles.selectedText,
-            ]}
+            style={[styles.languageName, isSelected && styles.selectedText]}
           >
             {language.name}
           </Text>
-          <Text
-            style={[
-              styles.nativeName,
-              isSelected && styles.selectedText,
-            ]}
-          >
+          <Text style={[styles.nativeName, isSelected && styles.selectedText]}>
             {language.nativeName}
           </Text>
         </View>
@@ -90,21 +76,10 @@ const LanguageSettings: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={color.secondary} />
-        </TouchableOpacity>
-        <Text style={styles.title}>{t("language.selectLanguage")}</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <Header divider title={t("language.selectLanguage")} />
 
       <View style={styles.content}>
-        <Text style={styles.subtitle}>
-          {t("language.chooseLanguage")}
-        </Text>
+        <Text style={styles.subtitle}>{t("language.chooseLanguage")}</Text>
         <View style={styles.languageList}>
           {languages.map((language: Language) => (
             <LanguageOption
@@ -115,9 +90,7 @@ const LanguageSettings: React.FC = () => {
             />
           ))}
         </View>
-        <Text style={styles.note}>
-          {t("language.languageNote")}
-        </Text>
+        <Text style={styles.note}>{t("language.languageNote")}</Text>
       </View>
     </SafeAreaView>
   );
@@ -127,33 +100,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: color.gray100,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: color.gray600,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 18,
-    fontFamily: font.bold,
-    color: color.black,
-    flex: 1,
-    textAlign: "center",
-  },
-  placeholder: {
-    width: 40,
   },
   content: {
     flex: 1,
