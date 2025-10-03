@@ -70,7 +70,6 @@ export default function Map({
     };
 
     const locationForMap = getLocationForMap();
-    console.log("Location for map:", locationForMap);
 
     if (locationForMap) {
       const newRegion = {
@@ -93,8 +92,6 @@ export default function Map({
       const userLocation = getUserCoordinates(selectedUser);
 
       if (userLocation) {
-        console.log("Animating to selected user location:", userLocation);
-
         // Create region for selected user with appropriate zoom level
         const selectedUserRegion = {
           latitude: userLocation.latitude,
@@ -112,8 +109,6 @@ export default function Map({
   // NEW: Handle showing current user location
   const handleShowMyLocation = () => {
     if (currentLocation && mapRef.current) {
-      console.log("Animating to current user location:", currentLocation);
-
       const currentUserRegion = {
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
@@ -147,6 +142,17 @@ export default function Map({
     if (user?.loc?.lat && user?.loc?.lng) {
       const lat = parseFloat(user.loc.lat.toString());
       const lng = parseFloat(user.loc.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+
+    // Fallback to direct lat/lng properties (for users without loc object)
+    if (user?.lat && user?.lng) {
+      const lat = parseFloat(user.lat.toString());
+      const lng = parseFloat(user.lng.toString());
 
       // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {

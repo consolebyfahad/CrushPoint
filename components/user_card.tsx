@@ -29,17 +29,57 @@ export default function UserCard({
   const { userData: currentUser } = useAppContext();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
-  // Calculate distance between current user and target user
-  const distance = calculateDistance(
-    {
-      lat: currentUser?.lat || 0,
-      lng: currentUser?.lng || 0,
-    },
-    {
-      lat: user?.actualLocation?.lat || 0,
-      lng: user?.actualLocation?.lng || 0,
+  // Helper function to get user coordinates from multiple possible sources
+  const getUserCoordinates = (user: any) => {
+    // Try actualLocation first (preferred)
+    if (user?.actualLocation?.lat && user?.actualLocation?.lng) {
+      const lat = parseFloat(user.actualLocation.lat.toString());
+      const lng = parseFloat(user.actualLocation.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { lat, lng };
+      }
     }
-  );
+
+    // Fallback to loc object
+    if (user?.loc?.lat && user?.loc?.lng) {
+      const lat = parseFloat(user.loc.lat.toString());
+      const lng = parseFloat(user.loc.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { lat, lng };
+      }
+    }
+
+    // Fallback to direct lat/lng properties (for users without loc object)
+    if (user?.lat && user?.lng) {
+      const lat = parseFloat(user.lat.toString());
+      const lng = parseFloat(user.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { lat, lng };
+      }
+    }
+
+    return null;
+  };
+
+  // Get target user coordinates
+  const targetUserCoords = getUserCoordinates(user);
+
+  // Calculate distance between current user and target user
+  const distance = targetUserCoords
+    ? calculateDistance(
+        {
+          lat: parseFloat(currentUser?.lat?.toString() || "0"),
+          lng: parseFloat(currentUser?.lng?.toString() || "0"),
+        },
+        targetUserCoords
+      )
+    : "N/A";
 
   // Get profile image source - handle both URI and local assets
   const getProfileImageSource = () => {
@@ -63,25 +103,7 @@ export default function UserCard({
 
   // ENHANCED: Better location validation and error handling
   const hasValidLocation = () => {
-    // Check if user has valid location in actualLocation
-    const hasActualLocation =
-      user?.actualLocation?.lat &&
-      user?.actualLocation?.lng &&
-      parseFloat(user.actualLocation.lat.toString()) !== 0 &&
-      parseFloat(user.actualLocation.lng.toString()) !== 0 &&
-      !isNaN(parseFloat(user.actualLocation.lat.toString())) &&
-      !isNaN(parseFloat(user.actualLocation.lng.toString()));
-
-    // Check if user has valid location in loc object
-    const hasLocLocation =
-      user?.loc?.lat &&
-      user?.loc?.lng &&
-      parseFloat(user.loc.lat.toString()) !== 0 &&
-      parseFloat(user.loc.lng.toString()) !== 0 &&
-      !isNaN(parseFloat(user.loc.lat.toString())) &&
-      !isNaN(parseFloat(user.loc.lng.toString()));
-
-    return hasActualLocation || hasLocLocation;
+    return targetUserCoords !== null;
   };
 
   // UPDATED: Enhanced show on map function
@@ -101,14 +123,6 @@ export default function UserCard({
 
       // Simulate a brief loading state for better UX
       await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Log the action for debugging
-      console.log("Showing user on map:", {
-        userId: user.id,
-        name: user.name,
-        actualLocation: user.actualLocation,
-        loc: user.loc,
-      });
 
       // Trigger the map navigation
       onShowUserOnMap(user);

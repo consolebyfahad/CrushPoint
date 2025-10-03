@@ -3,13 +3,13 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -70,7 +70,6 @@ export default function Nationality({
       ...filterData,
       nationality: selectedNationalities,
     });
-    console.log("Selected nationalities:", selectedNationalities);
     onClose();
   };
 
@@ -165,7 +164,7 @@ export default function Nationality({
                 styles.saveButtonTextDisabled,
             ]}
           >
-{t("save")}
+            {t("save")}
           </Text>
         </TouchableOpacity>
       </View>

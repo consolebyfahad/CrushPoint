@@ -31,14 +31,21 @@ export default function Filters({
 }: any) {
   const { t } = useTranslation();
   const { userData } = useAppContext();
-  console.log("userData", userData.gender_interest);
   const [selectedGender, setSelectedGender] = useState(() => {
-    return formatGenderInterest(userData?.gender_interest || "") || filterData.gender || "Men";
+    return (
+      formatGenderInterest(userData?.gender_interest || "") ||
+      filterData.gender ||
+      "Men"
+    );
   });
   const [ageFrom, setAgeFrom] = useState(filterData.ageFrom || "18");
   const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");
   const [distance, setDistance] = useState(filterData.distance || 10);
-  const genderOptions = [t("filters.men"), t("filters.women"), t("filters.both")];
+  const genderOptions = [
+    t("filters.men"),
+    t("filters.women"),
+    t("filters.both"),
+  ];
 
   // Helper function to format multiple selection display
   const formatMultipleSelectionDisplay = (selection: any) => {
@@ -129,7 +136,6 @@ export default function Filters({
     //   refetch();
     // }, 100);
 
-    console.log("Applying filters:", updatedFilterData);
     onClose();
   };
 

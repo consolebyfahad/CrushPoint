@@ -12,9 +12,9 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { requestUserLocation } from "@/utils/location";
 import {
-    getFCMToken,
-    requestFCMPermission,
-    setupNotificationListeners,
+  getFCMToken,
+  requestFCMPermission,
+  setupNotificationListeners,
 } from "@/utils/notification";
 import { BellIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,12 +27,12 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Modal,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -99,7 +99,6 @@ export default function Index() {
             setShowLocationModal(false);
 
             const location = await requestUserLocation();
-            console.log("Fresh location obtained:", location);
 
             if (location && isActive) {
               setCurrentLocation(location);
@@ -135,14 +134,12 @@ export default function Index() {
       formData.append("lng", location.longitude.toString());
 
       const response = await apiCall(formData);
-      console.log("Location update response:", response);
 
       if (response.result || response.success) {
         updateUserData({
           lat: location.latitude,
           lng: location.longitude,
         });
-        console.log("✅ Location updated successfully");
       }
     } catch (error) {
       console.error("❌ Failed to update location in database:", error);
@@ -153,16 +150,11 @@ export default function Index() {
   useEffect(() => {
     requestNotificationPermissions();
     const handleNotificationPress = async (data: any) => {
-      console.log("🔔 Notification Pressed:", data);
       if (data?.date_id) {
         try {
-          console.log(
-            "🔥 New match notification received, fetching match data..."
-          );
           const matchData = await fetchMatchData(data.date_id);
 
           if (matchData) {
-            console.log("matchData", matchData);
             router.push({
               pathname: "/profile/match",
               params: {
@@ -187,7 +179,7 @@ export default function Index() {
     if (params.viewType) {
       setViewType(params.viewType as string);
     }
-    
+
     if (params.selectedUserId && params.selectedUserLocation) {
       try {
         const locationData = JSON.parse(params.selectedUserLocation as string);
@@ -196,16 +188,14 @@ export default function Index() {
           name: params.selectedUserName,
           ...locationData,
         };
-        
-        console.log("Setting selected user from profile navigation:", selectedUserData);
-        
+
         // Switch to map view first
         setViewType("Map");
-        
+
         // Small delay to ensure map tab is active before setting selected user
         setTimeout(() => {
           setSelectedUser(selectedUserData);
-          
+
           // Auto-clear selection after 10 seconds for better UX
           setTimeout(() => {
             setSelectedUser(null);
@@ -268,14 +258,10 @@ export default function Index() {
 
   const requestNotificationPermissions = async () => {
     try {
-      console.log("🔔 Requesting notification permissions...");
       const permissionGranted = await requestFCMPermission();
 
       if (permissionGranted) {
-        console.log("✅ Notification permission granted");
         await registerFCMToken();
-      } else {
-        console.log("❌ Notification permission denied");
       }
     } catch (error) {
       console.error("Error requesting notification permissions:", error);
@@ -296,7 +282,6 @@ export default function Index() {
       formData.append("deviceModel", deviceInfo.model);
 
       const response = await apiCall(formData);
-      console.log("✅ FCM token registered:", response.result);
     } catch (error) {
       console.error("❌ FCM registration failed:", error);
     }
@@ -304,7 +289,6 @@ export default function Index() {
 
   const handleAllowLocation = async () => {
     const location = await requestUserLocation();
-    console.log("location", location);
 
     if (location) {
       setCurrentLocation(location);
@@ -318,7 +302,6 @@ export default function Index() {
         formData.append("lng", location.longitude.toString());
 
         const response = await apiCall(formData);
-        console.log("Initial location save response:", response);
 
         if (response.result || response.success) {
           updateUserData({
@@ -397,8 +380,6 @@ export default function Index() {
 
   // UPDATED: Enhanced function to show user on map
   const handleShowUserOnMap = (selectedUser: any) => {
-    console.log("Show user on map:", selectedUser);
-
     // Switch to map view first
     setViewType("Map");
 

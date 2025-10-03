@@ -18,7 +18,6 @@ export default function RootLayout() {
   });
 
   const [isReady, setIsReady] = useState(false);
-console.log("NEV")
   useEffect(() => {
     if (fontsLoaded || fontError) {
       setIsReady(true);

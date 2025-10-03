@@ -5,22 +5,22 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import {
-    nationalityOptions,
-    religionOptions,
-    zodiacOptions
+  nationalityOptions,
+  religionOptions,
+  zodiacOptions,
 } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,7 +30,6 @@ export default function BasicInfo() {
   const { user, userData, updateUserData } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
-  console.log("params", params);
 
   // Initialize state properly from params
   const [basicInfo, setBasicInfo] = useState({
@@ -90,12 +89,10 @@ export default function BasicInfo() {
       const cleanNationality = Array.isArray(basicInfo.nationality)
         ? basicInfo.nationality.filter((n) => n && n !== "Not Specified")
         : [];
-      console.log("cleanNationality before sending:", cleanNationality);
       formData.append("nationality", JSON.stringify(cleanNationality));
 
       formData.append("religion", basicInfo.religion);
       formData.append("zodiac", basicInfo.zodiacSign);
-      console.log(formData);
       const response = await apiCall(formData);
 
       if (response.result) {
@@ -225,8 +222,12 @@ export default function BasicInfo() {
 
         {/* Relationship Goals - Custom Multi Select */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>{t("profile.relationshipGoals")}</Text>
-          <Text style={styles.fieldSubLabel}>{t("profile.selectOneOrMoreGoals")}</Text>
+          <Text style={styles.fieldLabel}>
+            {t("profile.relationshipGoals")}
+          </Text>
+          <Text style={styles.fieldSubLabel}>
+            {t("profile.selectOneOrMoreGoals")}
+          </Text>
           <View
             style={[
               styles.relationshipGoalsContainer,
@@ -257,7 +258,9 @@ export default function BasicInfo() {
         {/* Nationality - Multi Select */}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.nationality")}</Text>
-          <Text style={styles.fieldSubLabel}>{t("profile.selectUpTo3Nationalities")}</Text>
+          <Text style={styles.fieldSubLabel}>
+            {t("profile.selectUpTo3Nationalities")}
+          </Text>
           <MultiSelect
             style={[
               styles.dropdown,

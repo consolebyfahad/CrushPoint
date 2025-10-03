@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -56,7 +56,6 @@ export default function ZodiacSign({
       ...filterData,
       zodiacSign: selectedZodiacs,
     });
-    console.log("Selected zodiac signs:", selectedZodiacs);
     onClose();
   };
 
@@ -128,7 +127,7 @@ export default function ZodiacSign({
               selectedZodiacs.length === 0 && styles.saveButtonTextDisabled,
             ]}
           >
-{t("save")}
+            {t("save")}
           </Text>
         </TouchableOpacity>
       </View>

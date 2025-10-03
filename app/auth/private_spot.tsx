@@ -32,7 +32,6 @@ export default function PrivateSpot() {
   const { updateUserData, userData, user } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
-  console.log("params", params);
 
   // Determine mode - check for spot data to determine if editing
   const isEdit = params?.fromEdit === "true";
@@ -193,13 +192,22 @@ export default function PrivateSpot() {
     });
   };
 
-  const handleSaveAndContinue = () => {
-    updateUserData({
-      radius: selectedRadius === "100m" ? 100 : 200,
-      lat: mapRegion.latitude,
-      lng: mapRegion.longitude,
-    });
-    router.push("/auth/add_photos");
+  const handleSaveAndContinue = async () => {
+    // Get user's real current location and save to userData
+    try {
+      const realLocation = await requestUserLocation();
+      if (realLocation) {
+        updateUserData({
+          lat: realLocation.latitude,
+          lng: realLocation.longitude,
+        });
+        router.push("/auth/add_photos");
+      } else {
+        showToast("Unable to get your location. Please try again.", "error");
+      }
+    } catch (error) {
+      showToast("Unable to get your location. Please try again.", "error");
+    }
   };
 
   const handleSaveChanges = async () => {
@@ -252,28 +260,17 @@ export default function PrivateSpot() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        // Update context with new location data
-        updateUserData({
-          radius: selectedRadius === "100m" ? 100 : 200,
-          lat: mapRegion.latitude,
-          lng: mapRegion.longitude,
-        });
-
-        showToast(
-          existingSpotData?.id
-            ? "Private spot updated successfully!"
-            : "Private spot added successfully!",
-          "success"
-        );
-
         setTimeout(() => {
-          router.back(); // Go back to private spots list
+          if (isEdit) {
+            router.back();
+          } else {
+            handleSaveAndContinue();
+          }
         }, 500);
       } else {
         throw new Error(response.message || "Failed to save private spot");
       }
     } catch (error) {
-      console.error("Error saving private spot:", error);
       showToast(
         existingSpotData?.id
           ? "Failed to update private spot. Please try again."
@@ -328,11 +325,11 @@ export default function PrivateSpot() {
   };
 
   const handleButtonPress = () => {
-    if (existingSpotData?.id || isEdit) {
-      handleSaveChanges();
-    } else {
-      handleSaveAndContinue();
-    }
+    // if (existingSpotData?.id || isEdit) {
+    handleSaveChanges();
+    // } else {
+    //   handleSaveAndContinue();
+    // }
   };
 
   if (isLoadingLocation && !isEdit && !existingSpotData) {

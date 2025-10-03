@@ -3,10 +3,12 @@ import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 
 const FACE_API_CONFIG = {
-  API_KEY: "p-kmeDYiAJfe2K3vOoShCPQ4LNmAbVvB",
-  API_SECRET: "1MRi6hRagROVPEG9r7wYyu9bLJBZEMgl",
-  BASE_URL: "https://api-us.faceplusplus.com/facepp/v3",
-  CONFIDENCE_THRESHOLD: 75,
+  API_KEY: "wUMEkbH38iXACQKJsN8wZOAHTvtHMZgX",
+  API_SECRET: "OOHILkIIpuLWKV8qZAurWirLquB0k8gG",
+  BASE_URL: "https://api-us.faceplusplus.com/facepp/v3", // US Region (current)
+  // BASE_URL: "https://api-ap.faceplusplus.com/facepp/v3", // Asia-Pacific Region
+  // BASE_URL: "https://api-cn.faceplusplus.com/facepp/v3", // China Region
+  CONFIDENCE_THRESHOLD: 80, // Increased threshold for better accuracy
 };
 
 interface SimpleVerificationResult {
@@ -19,7 +21,6 @@ class SimpleFaceVerification {
   // Resize image to meet Face++ requirements (max 1MB, 800px width)
   private async resizeImage(imageUri: string): Promise<string> {
     try {
-      console.log("📦 Resizing image:", imageUri);
 
       const manipulatorResult = await ImageManipulator.manipulateAsync(
         imageUri,
@@ -36,7 +37,6 @@ class SimpleFaceVerification {
         throw new Error("Resized image file not found or size unknown");
       }
       const fileSizeInMB = fileInfo.size / (1024 * 1024);
-      console.log(`✅ Resized image size: ${fileSizeInMB.toFixed(2)}MB`);
 
       return manipulatorResult.uri;
     } catch (error: any) {
@@ -55,7 +55,6 @@ class SimpleFaceVerification {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      console.log(`📏 Base64 length: ${base64.length} characters`);
 
       if (base64.length > 10485760) {
         // 10MB limit
@@ -76,7 +75,6 @@ class SimpleFaceVerification {
         return url; // Already local
       }
 
-      console.log("📥 Downloading image:", url);
       const filename = `temp_${Date.now()}.jpg`;
       const localUri = `${FileSystem.documentDirectory}${filename}`;
 
@@ -107,12 +105,20 @@ class SimpleFaceVerification {
       formData.append("api_secret", FACE_API_CONFIG.API_SECRET);
       formData.append("image_base64", base64Image);
 
+
       const response = await fetch(`${FACE_API_CONFIG.BASE_URL}/detect`, {
         method: "POST",
         body: formData,
       });
 
-      const result = await response.json();
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
+
+      const result = JSON.parse(responseText);
 
       if (result.error_message) {
         throw new Error(result.error_message);
@@ -129,11 +135,15 @@ class SimpleFaceVerification {
     }
   }
 
-  // Compare two face tokens
+  // Compare two face tokens with retry logic for concurrency limits
   private async compareFaceTokens(
     token1: string,
-    token2: string
+    token2: string,
+    retryCount: number = 0
   ): Promise<number> {
+    const maxRetries = 3;
+    const retryDelay = 2000; // 2 seconds
+
     try {
       const formData = new FormData();
       formData.append("api_key", FACE_API_CONFIG.API_KEY);
@@ -146,7 +156,21 @@ class SimpleFaceVerification {
         body: formData,
       });
 
-      const result = await response.json();
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        const errorData = JSON.parse(responseText);
+        
+        // Handle concurrency limit with retry
+        if (errorData.error_message === "CONCURRENCY_LIMIT_EXCEEDED" && retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          return this.compareFaceTokens(token1, token2, retryCount + 1);
+        }
+        
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
+      }
+
+      const result = JSON.parse(responseText);
 
       if (result.error_message) {
         throw new Error(result.error_message);
@@ -165,36 +189,39 @@ class SimpleFaceVerification {
     referenceImageUri: string
   ): Promise<SimpleVerificationResult> {
     try {
-      console.log("🔍 Starting simple face verification...");
-      console.log("📸 Captured image:", capturedImageUri);
-      console.log("🖼️ Reference image:", referenceImageUri);
+
+      // Validate input parameters
+      if (!capturedImageUri || !referenceImageUri) {
+        throw new Error("Both captured and reference images are required");
+      }
 
       // Get face tokens for both images
-      console.log("🔍 Detecting face in captured image...");
       const capturedToken = await this.getFaceToken(capturedImageUri);
 
-      console.log("🔍 Detecting face in reference image...");
       const referenceToken = await this.getFaceToken(referenceImageUri);
 
       // Compare faces
-      console.log("⚖️ Comparing faces...");
       const confidence = await this.compareFaceTokens(
         capturedToken,
         referenceToken
       );
 
+      // Validate confidence score
+      if (typeof confidence !== 'number' || confidence < 0 || confidence > 100) {
+        throw new Error("Invalid confidence score received from Face++ API");
+      }
+
       const verified = confidence >= FACE_API_CONFIG.CONFIDENCE_THRESHOLD;
 
       let message = "";
       if (verified) {
-        message = `✅ Face verified with ${confidence.toFixed(1)}% confidence`;
+        message = `✅ Identity verification completed! Confidence: ${confidence.toFixed(1)}%`;
       } else {
         message = `❌ Face verification failed. Confidence: ${confidence.toFixed(
           1
-        )}%`;
+        )}% (Required: ${FACE_API_CONFIG.CONFIDENCE_THRESHOLD}%). Please try again with better lighting and ensure your face is clearly visible.`;
       }
 
-      console.log("🎯 Verification result:", { verified, confidence, message });
 
       return {
         verified,
@@ -208,17 +235,21 @@ class SimpleFaceVerification {
 
       if (error.message.includes("No face detected")) {
         userMessage =
-          "No face detected. Please ensure your face is clearly visible.";
+          "No face detected. Please ensure your face is clearly visible and centered in the frame.";
       } else if (error.message.includes("INVALID_IMAGE_SIZE")) {
-        userMessage = "Image size issue. Please try taking a new photo.";
+        userMessage = "Image size issue. Please try taking a new photo with better quality.";
       } else if (error.message.includes("CONCURRENCY_LIMIT_EXCEEDED")) {
-        userMessage = "Service is busy. Please try again in a moment.";
+        userMessage = "Service is busy due to free tier limits. Please wait a moment and try again, or consider upgrading to a paid plan for better performance.";
+      } else if (error.message.includes("INVALID_API_KEY") || error.message.includes("AUTHENTICATION_FAILED")) {
+        userMessage = "Service configuration error. Please contact support.";
       } else if (
         error.message.includes("network") ||
         error.message.includes("timeout")
       ) {
         userMessage =
           "Network error. Please check your connection and try again.";
+      } else if (error.message.includes("RATE_LIMIT_EXCEEDED")) {
+        userMessage = "Too many requests. Please wait a moment before trying again.";
       }
 
       return {

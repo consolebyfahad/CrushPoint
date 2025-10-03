@@ -251,8 +251,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const updateUserData = (data: Partial<UserData>) => {
     setUserData((prev) => {
       const updatedData = { ...prev, ...data };
-      console.log("📝 Updating user data:", data);
-      console.log("📝 New user data state:", updatedData);
       return updatedData;
     });
   };
@@ -290,7 +288,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loginUser = async (userData: User): Promise<void> => {
     try {
-      console.log("🔐 Logging in user:", userData);
       setUser(userData);
       setIsLoggedIn(true);
 
@@ -298,9 +295,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // If user is existing, we'll fetch their profile data separately
       if (!userData.new) {
         // For existing users, we might want to fetch their profile data
-        console.log(
-          "👤 Existing user - profile data will be fetched separately"
-        );
       }
     } catch (error) {
       console.error("❌ Login error:", error);
@@ -312,7 +306,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     profileData: Partial<UserData>
   ): Promise<void> => {
     try {
-      console.log("👤 Updating user profile:", profileData);
       updateUserData(profileData);
     } catch (error) {
       console.error("❌ Profile update error:", error);
@@ -328,7 +321,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       clearUserImages();
 
       await AsyncStorage.removeItem(STORAGE_KEY);
-      console.log("✅ User logged out successfully");
       return true;
     } catch (error) {
       console.error("❌ Logout error:", error);

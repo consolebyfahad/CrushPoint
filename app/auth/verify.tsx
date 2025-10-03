@@ -8,12 +8,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    ActivityIndicator,
-    Animated,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Animated,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -107,23 +107,6 @@ export default function Verify() {
     setIsVerifying(true);
 
     try {
-      // Development mode: Accept hardcoded PIN 123456 for testing
-      const isDevelopmentMode = __DEV__;
-      const isHardcodedPIN = fullCode === "123456";
-
-      if (isDevelopmentMode && isHardcodedPIN) {
-        console.log("🔧 Development mode: Using hardcoded PIN 123456");
-        await loginUser(user);
-        setCode(["", "", "", "", "", ""]);
-
-        if (user?.new) {
-          router.push("/auth/gender");
-        } else {
-          router.push("/(tabs)");
-        }
-        return;
-      }
-
       const formData = new FormData();
       formData.append("type", "verify_otp");
       formData.append("user_id", user?.user_id);
@@ -172,7 +155,6 @@ export default function Verify() {
       const response = await apiCall(formData);
 
       if (response.success) {
-
         // Reset countdown and state
         setResendCountdown(59);
         setCanResend(false);
@@ -209,7 +191,9 @@ export default function Verify() {
       ) : (
         <View style={styles.content}>
           <View style={styles.titleSection}>
-            <Text style={styles.title}>{t("auth.verifyYour", { contactType })}</Text>
+            <Text style={styles.title}>
+              {t("auth.verifyYour", { contactType })}
+            </Text>
             <Text style={styles.subtitle}>
               {t("auth.enterCodeSent", { contactInfo })}
             </Text>
@@ -249,7 +233,9 @@ export default function Verify() {
           {/* Resend Code Button */}
           <CustomButton
             title={
-              canResend ? t("auth.resendCode") : t("auth.resendCodeIn", { count: resendCountdown })
+              canResend
+                ? t("auth.resendCode")
+                : t("auth.resendCodeIn", { count: resendCountdown })
             }
             onPress={handleResendCode}
             isDisabled={!canResend || isVerifying}

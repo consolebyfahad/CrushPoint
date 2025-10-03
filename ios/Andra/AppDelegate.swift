@@ -38,9 +38,9 @@ FirebaseApp.configure()
       launchOptions: launchOptions)
 #endif
 
-// @generated begin react-native-maps-init - expo prebuild (DO NOT MODIFY) sync-1c2fadb4767b672b8f22a87aab42c0a1b3146523
+// @generated begin react-native-maps-init - expo prebuild (DO NOT MODIFY) sync-73fe78fee17f3742662c763545a647d146038a24
 #if canImport(GoogleMaps)
-GMSServices.provideAPIKey("AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y")
+GMSServices.provideAPIKey("AIzaSyBpRUeweq7eCIDHavnHsheE66bHJd5nGX8")
 #endif
 // @generated end react-native-maps-init
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

@@ -71,12 +71,11 @@
     "startScan": "Start Scan",
     "noReferenceImage": "No reference image available for comparison.",
     "verificationError": "Verification Error",
-    "verificationFailed": "Failed to verify face. Please try again.",
+    "verificationSuccessful": "Verification Successful!",
     "tryAgain": "Try Again",
     "skip": "Skip",
     "verifyYour": "Verify your {{contactType}}",
     "enterCodeSent": "Enter the 6-digit code we sent to {{contactInfo}}",
-    "resendCode": "Resend Code",
     "resendCodeIn": "Resend code in {{count}}s"
   },
 

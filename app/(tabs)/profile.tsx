@@ -2,7 +2,12 @@ import CustomButton from "@/components/custom_button";
 import { useAppContext } from "@/context/app_context";
 import useGetProfile from "@/hooks/useGetProfile";
 import { color, font } from "@/utils/constants";
-import { formatGenderInterest, formatNationality, formatReligion, formatZodiac } from "@/utils/helper";
+import {
+  formatGenderInterest,
+  formatNationality,
+  formatReligion,
+  formatZodiac,
+} from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
@@ -27,7 +32,6 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 export default function ProfileTab() {
   const { t } = useTranslation();
   const { userData, user } = useAppContext();
-  console.log("userData", user);
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -43,7 +47,6 @@ export default function ProfileTab() {
 
       // Only refresh if we have user data and we're not currently loading
       if (user?.user_id && !loading && isActive) {
-        console.log("ProfileTab focused - refreshing profile data");
         setIsRefreshing(true);
 
         // Small delay to ensure smooth navigation
@@ -257,7 +260,9 @@ export default function ProfileTab() {
               size={14}
               color={color.primary}
             />
-            <Text style={styles.editPrivateSpot}>{t("profile.editPrivateSpot")}</Text>
+            <Text style={styles.editPrivateSpot}>
+              {t("profile.editPrivateSpot")}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -319,11 +324,15 @@ export default function ProfileTab() {
           <View style={styles.infoContainer}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>{t("profile.interestedIn")}</Text>
-              <Text style={styles.infoValue}>{formatGenderInterest(userData.gender_interest)}</Text>
+              <Text style={styles.infoValue}>
+                {formatGenderInterest(userData.gender_interest)}
+              </Text>
             </View>
 
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{t("profile.relationshipGoals")}</Text>
+              <Text style={styles.infoLabel}>
+                {t("profile.relationshipGoals")}
+              </Text>
               <View style={styles.infoRow}>
                 <Text style={styles.infoValue}>
                   {userData.parsedLookingFor?.[0] ?? ""}
@@ -342,27 +351,34 @@ export default function ProfileTab() {
             </View> */}
 
             {/* Nationality - only show if specified */}
-            {userData.parsedNationality && userData.parsedNationality.length > 0 && userData.parsedNationality[0] && userData.parsedNationality[0].trim() !== "" && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{t("profile.nationality")}</Text>
+            {userData.parsedNationality &&
+              userData.parsedNationality.length > 0 &&
+              userData.parsedNationality[0] &&
+              userData.parsedNationality[0].trim() !== "" && (
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoValue}>
-                    {formatNationality(userData.parsedNationality[0])}
+                  <Text style={styles.infoLabel}>
+                    {t("profile.nationality")}
                   </Text>
-                  {userData.parsedNationality.length > 1 && (
-                    <Text style={styles.additionalGoals}>
-                      , +{userData.parsedNationality.length - 1}
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoValue}>
+                      {formatNationality(userData.parsedNationality[0])}
                     </Text>
-                  )}
+                    {userData.parsedNationality.length > 1 && (
+                      <Text style={styles.additionalGoals}>
+                        , +{userData.parsedNationality.length - 1}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
-            )}
+              )}
 
             {/* Religion - only show if specified */}
             {userData.religion && userData.religion.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.religion")}</Text>
-                <Text style={styles.infoValue}>{formatReligion(userData.religion)}</Text>
+                <Text style={styles.infoValue}>
+                  {formatReligion(userData.religion)}
+                </Text>
               </View>
             )}
 
@@ -370,7 +386,9 @@ export default function ProfileTab() {
             {userData.zodiac && userData.zodiac.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.zodiac")}</Text>
-                <Text style={styles.infoValue}>{formatZodiac(userData.zodiac)}</Text>
+                <Text style={styles.infoValue}>
+                  {formatZodiac(userData.zodiac)}
+                </Text>
               </View>
             )}
           </View>

@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -51,7 +51,6 @@ export default function Religion({
       ...filterData,
       religion: selectedReligions,
     });
-    console.log("Selected religions:", selectedReligions);
     onClose();
   };
 
@@ -128,7 +127,7 @@ export default function Religion({
               selectedReligions.length === 0 && styles.saveButtonTextDisabled,
             ]}
           >
-{t("save")}
+            {t("save")}
           </Text>
         </TouchableOpacity>
       </View>

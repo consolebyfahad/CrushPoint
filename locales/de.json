@@ -71,12 +71,11 @@
     "startScan": "Scan starten",
     "noReferenceImage": "Kein Referenzbild für den Vergleich verfügbar.",
     "verificationError": "Verifizierungsfehler",
-    "verificationFailed": "Gesichtsverifizierung fehlgeschlagen. Bitte versuche es erneut.",
+    "verificationSuccessful": "Verifizierung erfolgreich!",
     "tryAgain": "Erneut versuchen",
     "skip": "Überspringen",
     "verifyYour": "Verifiziere dein {{contactType}}",
     "enterCodeSent": "Gib den 6-stelligen Code ein, den wir an {{contactInfo}} gesendet haben",
-    "resendCode": "Code erneut senden",
     "resendCodeIn": "Code in {{count}}s erneut senden"
   },
 

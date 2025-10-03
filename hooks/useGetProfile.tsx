@@ -64,13 +64,12 @@ export default function useGetProfile() {
         }
 
         const age = calculateAge(userData.dob);
-        
+
         // Debug interests data
-        console.log("userData.interests", userData.interests);
-        
+
         let parsedInterests: string[] = [];
         let originalInterestIds: string[] = [];
-        
+
         if (userData.interests) {
           try {
             parsedInterests = parseInterestsWithNames(userData.interests);
@@ -82,11 +81,10 @@ export default function useGetProfile() {
           }
         }
         // Debug looking_for data
-        console.log("userData.looking_for", userData.looking_for);
-        
+
         let parsedLookingFor: string[] = [];
         let originalLookingForIds: string[] = [];
-        
+
         if (userData.looking_for) {
           try {
             parsedLookingFor = parseLookingForWithLabels(userData.looking_for);
@@ -97,7 +95,6 @@ export default function useGetProfile() {
             originalLookingForIds = [];
           }
         }
-        console.log("userData.nationality", userData.nationality);
 
         // Handle nationality parsing more carefully
         let parsedNationality: string[] = [];
@@ -105,7 +102,10 @@ export default function useGetProfile() {
 
         if (userData.nationality) {
           // Check if it's a JSON string first
-          if (userData.nationality.startsWith('[') && userData.nationality.endsWith(']')) {
+          if (
+            userData.nationality.startsWith("[") &&
+            userData.nationality.endsWith("]")
+          ) {
             try {
               // Try to parse as JSON
               const parsed = parseJsonString(userData.nationality);

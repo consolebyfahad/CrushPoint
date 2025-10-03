@@ -4,7 +4,7 @@ import {
   calculateAge,
   parseInterestsWithNames,
   parseLookingForWithLabels,
-  parseUserImages
+  parseUserImages,
 } from "@/utils/helper";
 import { useEffect, useState } from "react";
 
@@ -78,6 +78,9 @@ interface TransformedUser {
   };
   dob: string;
   loc: LocationData | null;
+  // Add direct lat/lng properties for map display
+  lat: string;
+  lng: string;
 }
 
 interface ApiResponse {
@@ -104,8 +107,6 @@ export default function useGetUsers(filters: UserFilters = {}) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const filtersString = JSON.stringify(filters);
-  console.log("filters", filters);
-  console.log("filtersString", filtersString);
   const fetchUsers = async (): Promise<void> => {
     if (!user?.user_id) {
       setError("User ID not available");
@@ -148,7 +149,6 @@ export default function useGetUsers(filters: UserFilters = {}) {
       if (filters.zodiacSign) {
         formData.append("zodiac", filters.zodiacSign);
       }
-      console.log("formData filter", formData);
       const response: ApiResponse = await apiCall(formData);
 
       if (response.result && response.data && Array.isArray(response.data)) {
@@ -224,6 +224,9 @@ export default function useGetUsers(filters: UserFilters = {}) {
         userData.radius
       ),
       loc: userData.loc,
+      // Add direct lat/lng properties for map display
+      lat: userData.lat,
+      lng: userData.lng,
     };
   };
 

@@ -12,16 +12,14 @@
       "bundleIdentifier": "com.dating.CrushPoint",
       "googleServicesFile": "./GoogleService-Info.plist",
       "config": {
-        "googleMapsApiKey": "AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y"
+        "googleMapsApiKey": "AIzaSyBpRUeweq7eCIDHavnHsheE66bHJd5nGX8"
       },
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera for scanning and face detection.",
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload profile pictures and verify your identity.",
         "NSPhotoLibraryAddUsageDescription": "This app needs permission to save photos to your photo library.",
         "NSFaceIDUsageDescription": "This app uses Face ID for secure login.",
-        "UIBackgroundModes": [
-          "remote-notification"
-        ]
+        "UIBackgroundModes": ["remote-notification"]
       },
       "entitlements": {
         "aps-environment": "production"
@@ -35,7 +33,7 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyAQiilQ_i4LRPFyMhfLB5ZT3UGMTIxqL0Y"
+          "apiKey": "AIzaSyBpRUeweq7eCIDHavnHsheE66bHJd5nGX8"
         }
       },
       "permissions": [

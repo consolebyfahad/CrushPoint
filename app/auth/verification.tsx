@@ -40,39 +40,6 @@ export default function FaceVerification() {
   // Centralized state check
   const isProcessing = verificationState !== "idle";
 
-  // Handle verification result separately from UI
-  const handleVerificationResult = useCallback(
-    async (isVerified: boolean, message: string, photoUri: string) => {
-      const title = isVerified
-        ? "✅ Verification Successful!"
-        : "✅ Verification Successful!";
-
-      return new Promise<void>((resolve) => {
-        Alert.alert(title, message, [
-          {
-            text: "Try Again",
-            onPress: () => resolve(),
-          },
-          {
-            text: isVerified ? "Continue" : "Continue",
-            style: "default",
-            onPress: () => {
-              // Don't do async work here - just resolve and handle outside
-              if (isVerified) {
-                processVerifiedPhoto(photoUri);
-              } else {
-                processVerifiedPhoto(photoUri);
-                // skipVerificationAndSubmit();
-              }
-              resolve();
-            },
-          },
-        ]);
-      });
-    },
-    []
-  );
-
   // Process verified photo upload
   const processVerifiedPhoto = useCallback(async (photoUri: string) => {
     try {
@@ -94,12 +61,33 @@ export default function FaceVerification() {
     }
   }, []);
 
-  // Skip verification and submit
-  const skipVerificationAndSubmit = useCallback(() => {
-    setTimeout(() => {
-      submitAllData(null);
-    }, 100);
-  }, []);
+  // Handle verification result separately from UI
+  const handleVerificationResult = useCallback(
+    async (isVerified: boolean, message: string, photoUri: string) => {
+      const title = isVerified
+        ? `${t("auth.verificationSuccessful")}`
+        : `${t("auth.verificationFailed")}`;
+
+      return new Promise<void>((resolve) => {
+        Alert.alert(title, message, [
+          {
+            text: isVerified ? t("continue") : t("auth.tryAgain"),
+            style: isVerified ? "default" : "destructive",
+            onPress: () => {
+              // Only process photo if verification is successful
+              if (isVerified) {
+                processVerifiedPhoto(photoUri);
+              }
+              resolve();
+            },
+          },
+        ]);
+      });
+    },
+    [t, processVerifiedPhoto]
+  );
+
+  // Remove skip verification function - verification is now mandatory
 
   // Simplified face comparison
   const compareFaces = async (
@@ -177,17 +165,8 @@ export default function FaceVerification() {
 
       let verificationResult;
 
-      if (Platform.OS === "ios") {
-        // Skip actual verification on iOS to avoid crashes
-        verificationResult = await compareFaces(photo.uri, defaultImage);
-        // verificationResult = {
-        //   verified: true,
-        //   confidence: 100,
-        //   message: "✅ Identity verification completed!",
-        // };
-      } else {
-        verificationResult = await compareFaces(photo.uri, defaultImage);
-      }
+      // Perform actual verification on all platforms
+      verificationResult = await compareFaces(photo.uri, defaultImage);
 
       // Reset state before showing alert
       setVerificationState("idle");
@@ -214,11 +193,6 @@ export default function FaceVerification() {
             {
               text: t("auth.tryAgain"),
               onPress: () => {},
-            },
-            {
-              text: t("auth.skip"),
-              style: "destructive",
-              onPress: () => skipVerificationAndSubmit(),
             },
           ]
         );
@@ -310,7 +284,8 @@ export default function FaceVerification() {
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{t("auth.verifyIdentity")}</Text>
         <Text style={styles.instructionText}>
-          <Octicons name="info" size={14} color={color.gray55} /> {t("auth.faceVerificationInstruction")}
+          <Octicons name="info" size={14} color={color.gray55} />{" "}
+          {t("auth.faceVerificationInstruction")}
         </Text>
       </View>
 
