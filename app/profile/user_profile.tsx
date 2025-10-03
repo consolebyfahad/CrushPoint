@@ -5,7 +5,12 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
-import { capitalizeFirstLetter, formatNationality, formatReligion, formatZodiac } from "@/utils/helper";
+import {
+  capitalizeFirstLetter,
+  formatNationality,
+  formatReligion,
+  formatZodiac,
+} from "@/utils/helper";
 import { FloatingBubbleAnimation } from "@/utils/matchAnimation";
 import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,15 +19,15 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import PagerView from "react-native-pager-view";
 
@@ -57,10 +62,50 @@ export default function UserProfile() {
       }
       return params;
     } catch (error) {
-      console.error("Error parsing user data:", error);
       return params;
     }
   }, [params, currentUser]);
+
+  // Helper function to get user coordinates from multiple possible sources (same as user_card.tsx)
+  const getUserCoordinates = (user: any) => {
+    // Try actualLocation first (preferred)
+    if (user?.actualLocation?.lat && user?.actualLocation?.lng) {
+      const lat = parseFloat(user.actualLocation.lat.toString());
+      const lng = parseFloat(user.actualLocation.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { lat, lng };
+      }
+    }
+
+    // Fallback to loc object
+    if (user?.loc?.lat && user?.loc?.lng) {
+      const lat = parseFloat(user.loc.lat.toString());
+      const lng = parseFloat(user.loc.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { lat, lng };
+      }
+    }
+
+    // Fallback to direct lat/lng properties (for users without loc object)
+    if (user?.lat && user?.lng) {
+      const lat = parseFloat(user.lat.toString());
+      const lng = parseFloat(user.lng.toString());
+
+      // Validate coordinates
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+        return { lat, lng };
+      }
+    }
+
+    return null;
+  };
+
+  // Get target user coordinates
+  const targetUserCoords = getUserCoordinates(userData);
 
   const userInfo = useMemo(() => {
     if (!userData || typeof userData !== "object") {
@@ -102,16 +147,15 @@ export default function UserProfile() {
     };
 
     // Calculate real distance between current user and profile user
-    const realDistance = calculateDistance(
-      {
-        lat: currentUser?.lat || 0,
-        lng: currentUser?.lng || 0,
-      },
-      {
-        lat: userData?.actualLocation?.lat || 0,
-        lng: userData?.actualLocation?.lng || 0,
-      }
-    );
+    const realDistance = targetUserCoords
+      ? calculateDistance(
+          {
+            lat: parseFloat(currentUser?.lat?.toString() || "0"),
+            lng: parseFloat(currentUser?.lng?.toString() || "0"),
+          },
+          targetUserCoords
+        )
+      : "N/A";
 
     return {
       id: userData.id || "unknown",
@@ -127,10 +171,7 @@ export default function UserProfile() {
       zodiac: userData.zodiac || "",
       about: userData.about || "This is me",
       email: userData.email || "",
-      gender:
-        userData.gender === "female"
-          ? "Female"
-          : userData.gender || "",
+      gender: userData.gender === "female" ? "Female" : userData.gender || "",
       country: userData.country || "",
       state: userData.state || "",
       city: userData.city || "",
@@ -197,7 +238,6 @@ export default function UserProfile() {
       formData.append("user_id", user?.user_id || "");
       formData.append("emoji", action);
 
-      console.log("formData", formData);
       const response = await apiCall(formData);
 
       if (response.result) {
@@ -211,10 +251,8 @@ export default function UserProfile() {
         setShowAnimation(true);
       }
     } catch (error) {
-      console.error("Animation error:", error);
+      // Animation error handled silently
     }
-
-    console.log("Emoji action:", action, "for user:", userInfo.name);
   };
 
   const handleAnimationComplete = () => {
@@ -244,7 +282,6 @@ export default function UserProfile() {
   };
 
   const handleConfirmBlock = async () => {
-    console.log("Block user:", userInfo.name);
     // Handle block logic here
     try {
       const formData = new FormData();
@@ -252,7 +289,6 @@ export default function UserProfile() {
       formData.append("table_name", "blocked_users");
       formData.append("block_id", userInfo.id);
       formData.append("user_id", user?.user_id || "");
-      console.log("formData", formData);
       const response = await apiCall(formData);
       if (response.result) {
         setShowBlockConfirmation(false);
@@ -267,7 +303,6 @@ export default function UserProfile() {
   };
 
   const handleSubmitReport = async (reportData: any) => {
-    console.log("Report submitted:", reportData);
     try {
       const formData = new FormData();
       formData.append("type", "add_data");
@@ -291,27 +326,7 @@ export default function UserProfile() {
 
   // Location validation function (same as user card)
   const hasValidLocation = () => {
-    const user = userInfo as any; // Type assertion for location properties
-    
-    // Check if user has valid location in actualLocation
-    const hasActualLocation =
-      user?.actualLocation?.lat &&
-      user?.actualLocation?.lng &&
-      parseFloat(user.actualLocation.lat.toString()) !== 0 &&
-      parseFloat(user.actualLocation.lng.toString()) !== 0 &&
-      !isNaN(parseFloat(user.actualLocation.lat.toString())) &&
-      !isNaN(parseFloat(user.actualLocation.lng.toString()));
-
-    // Check if user has valid location in loc object
-    const hasLocLocation =
-      user?.loc?.lat &&
-      user?.loc?.lng &&
-      parseFloat(user.loc.lat.toString()) !== 0 &&
-      parseFloat(user.loc.lng.toString()) !== 0 &&
-      !isNaN(parseFloat(user.loc.lat.toString())) &&
-      !isNaN(parseFloat(user.loc.lng.toString()));
-
-    return hasActualLocation || hasLocLocation;
+    return targetUserCoords !== null;
   };
 
   // Handle show user location on map (same logic as user card)
@@ -330,13 +345,8 @@ export default function UserProfile() {
         return;
       }
 
-      const user = userInfo as any; // Type assertion for location properties
-      
-      console.log("Showing user on map:", {
-        name: userInfo.name,
-        actualLocation: user.actualLocation,
-        loc: user.loc,
-      });
+      // Simulate a brief loading state for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Navigate to home tab with map view and user data (same as list view)
       router.push({
@@ -346,15 +356,16 @@ export default function UserProfile() {
           selectedUserId: userInfo.id,
           selectedUserName: userInfo.name,
           selectedUserLocation: JSON.stringify({
-            actualLocation: user.actualLocation,
-            loc: user.loc,
+            actualLocation: userData.actualLocation,
+            loc: userData.loc,
+            lat: userData.lat,
+            lng: userData.lng,
           }),
         },
       });
 
       setIsLoadingLocation(false);
     } catch (error) {
-      console.error("Error in handleShowOnMap:", error);
       setIsLoadingLocation(false);
       Alert.alert(
         "Error",
@@ -539,15 +550,17 @@ export default function UserProfile() {
           {/* Other Information */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Basic Information</Text>
-            
+
             {/* Height - only show if specified */}
             {userInfo.height && userInfo.height.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Height</Text>
-                <Text style={styles.infoValue}>{capitalizeFirstLetter(userInfo.height)}</Text>
+                <Text style={styles.infoValue}>
+                  {capitalizeFirstLetter(userInfo.height)}
+                </Text>
               </View>
             )}
-            
+
             {/* Nationality - only show if specified */}
             {userInfo.nationality && userInfo.nationality.length > 0 && (
               <View style={styles.infoRow}>
@@ -565,28 +578,34 @@ export default function UserProfile() {
                 </View>
               </View>
             )}
-            
+
             {/* Religion - only show if specified */}
             {userInfo.religion && userInfo.religion.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Religion</Text>
-                <Text style={styles.infoValue}>{formatReligion(userInfo.religion)}</Text>
+                <Text style={styles.infoValue}>
+                  {formatReligion(userInfo.religion)}
+                </Text>
               </View>
             )}
-            
+
             {/* Zodiac - only show if specified */}
             {userInfo.zodiac && userInfo.zodiac.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Zodiac</Text>
-                <Text style={styles.infoValue}>{formatZodiac(userInfo.zodiac)}</Text>
+                <Text style={styles.infoValue}>
+                  {formatZodiac(userInfo.zodiac)}
+                </Text>
               </View>
             )}
-            
+
             {/* Gender - only show if specified */}
             {userInfo.gender && userInfo.gender.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Gender</Text>
-                <Text style={styles.infoValue}>{capitalizeFirstLetter(userInfo.gender)}</Text>
+                <Text style={styles.infoValue}>
+                  {capitalizeFirstLetter(userInfo.gender)}
+                </Text>
               </View>
             )}
           </View>
