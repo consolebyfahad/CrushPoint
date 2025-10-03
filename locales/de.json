@@ -301,5 +301,100 @@
     "casual": "Lockeres Dating",
     "friendship": "Freundschaft",
     "open": "Offen für Möglichkeiten"
+  },
+
+  "about": {
+    "about": "Über",
+    "name": "Name",
+    "dateOfBirth": "Geburtsdatum",
+    "ageValidation": "Sie müssen mindestens 18 Jahre alt sein, um diese App zu nutzen",
+    "invalidAge": "Bitte geben Sie ein gültiges Alter ein",
+    "continue": "Weiter"
+  },
+
+  "interests": {
+    "interests": "Interessen",
+    "searchInterests": "Interessen suchen...",
+    "selectAtLeast": "Wählen Sie mindestens {{count}} Interessen aus",
+    "continue": "Weiter"
+  },
+
+  "communityGuidelines": {
+    "communityGuidelines": "Community-Richtlinien",
+    "beRespectful": "Seien Sie respektvoll",
+    "beRespectfulDesc": "Behandeln Sie alle mit Freundlichkeit und Respekt. Wir sind alle hier, um bedeutungsvolle Verbindungen zu knüpfen, also seien Sie bitte höflich in Ihren Interaktionen.",
+    "authenticProfiles": "Authentische Profile",
+    "authenticProfilesDesc": "Verwenden Sie echte Fotos von sich und genaue Informationen. Catfishing oder irreführende Profile sind nicht erlaubt und führen zur Kontosperrung.",
+    "safeInteractions": "Sichere Interaktionen",
+    "safeInteractionsDesc": "Treffen Sie sich an öffentlichen Orten für Ihre ersten Dates. Priorisieren Sie immer Ihre Sicherheit und vertrauen Sie Ihrem Instinkt, wenn Sie jemanden Neues treffen.",
+    "noHarassment": "Keine Belästigung",
+    "noHarassmentDesc": "Belästigung, Mobbing oder jede Form von Missbrauch wird nicht toleriert. Dazu gehören unerwünschte Nachrichten, unangemessene Kommentare oder hartnäckiger Kontakt, nachdem jemand Desinteresse geäußert hat.",
+    "respectPrivacy": "Respektieren Sie die Privatsphäre",
+    "respectPrivacyDesc": "Teilen Sie keine persönlichen Informationen über andere ohne deren Zustimmung. Respektieren Sie Grenzen und Privatsphäre-Einstellungen.",
+    "noSpam": "Kein Spam oder Betrug",
+    "noSpamDesc": "Verwenden Sie CrushPoint nicht für kommerzielle Zwecke, Spam oder betrügerische Aktivitäten. Dazu gehört die Bewerbung anderer Dienstleistungen, der Verkauf von Produkten oder die Bitte um Geld.",
+    "ageVerification": "Altersverifikation",
+    "ageVerificationDesc": "Sie müssen mindestens 18 Jahre alt sein, um CrushPoint zu nutzen. Die Angabe falscher Altersinformationen führt zur sofortigen Kontokündigung.",
+    "reportInappropriate": "Melden Sie unangemessenes Verhalten",
+    "reportInappropriateDesc": "Wenn Sie jemanden treffen, der diese Richtlinien verletzt, melden Sie ihn bitte sofort. Wir nehmen alle Meldungen ernst und werden umgehend ermitteln."
+  },
+
+  "contactSupport": {
+    "contactSupport": "Support kontaktieren",
+    "name": "Name",
+    "email": "E-Mail",
+    "subject": "Betreff",
+    "message": "Nachricht",
+    "accountIssue": "Kontoproblem",
+    "bugReport": "Fehlerbericht",
+    "featureRequest": "Feature-Anfrage",
+    "safetyConcern": "Sicherheitsbedenken",
+    "billingQuestion": "Abrechnungsfrage",
+    "other": "Andere",
+    "submit": "Absenden",
+    "submitting": "Wird gesendet...",
+    "messageSent": "Nachricht erfolgreich gesendet!",
+    "messageFailed": "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+  },
+
+  "privateSpots": {
+    "privateSpots": "Private Orte",
+    "addPrivateSpot": "Privaten Ort hinzufügen",
+    "noPrivateSpots": "Keine privaten Orte",
+    "noPrivateSpotsDesc": "Sie haben noch keine privaten Orte hinzugefügt. Fügen Sie einen hinzu, um Ihre Sichtbarkeit an bestimmten Standorten zu kontrollieren.",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "confirmDelete": "Sind Sie sicher, dass Sie diesen privaten Ort löschen möchten?",
+    "deleted": "Privater Ort erfolgreich gelöscht",
+    "deleteFailed": "Privaten Ort konnte nicht gelöscht werden"
+  },
+
+  "verification": {
+    "verificationStatus": "Verifikationsstatus",
+    "verified": "Verifiziert",
+    "pending": "Ausstehend",
+    "failed": "Fehlgeschlagen",
+    "notVerified": "Nicht verifiziert",
+    "verifyNow": "Jetzt verifizieren",
+    "verificationPending": "Ihre Verifikation wird überprüft. Dies dauert normalerweise 24-48 Stunden.",
+    "verificationFailed": "Ihre Verifikation ist fehlgeschlagen. Bitte versuchen Sie es erneut mit einem klaren Foto Ihres Gesichts."
+  },
+
+  "match": {
+    "itsAMatch": "Es ist ein Match!",
+    "youAnd": "Sie und {{name}} haben sich gegenseitig gemocht!",
+    "startChatting": "Chatten beginnen",
+    "keepSwiping": "Weiter swipen"
+  },
+
+  "privacy": {
+    "privacyPolicy": "Datenschutzrichtlinie",
+    "lastUpdated": "Zuletzt aktualisiert: {{date}}",
+    "informationWeCollect": "Informationen, die wir sammeln",
+    "howWeUseInfo": "Wie wir Ihre Informationen verwenden",
+    "informationSharing": "Informationsaustausch",
+    "dataSecurity": "Datensicherheit",
+    "yourRights": "Ihre Rechte",
+    "contactUs": "Kontaktieren Sie uns"
   }
 }

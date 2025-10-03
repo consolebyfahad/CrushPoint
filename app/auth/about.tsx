@@ -6,6 +6,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Keyboard,
@@ -23,6 +24,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const About = () => {
+  const { t } = useTranslation();
   const { updateUserData } = useAppContext();
   const [name, setName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
@@ -75,7 +77,7 @@ const About = () => {
       // Check if user is 18 or older
       const age = calculateAge(currentDate);
       if (age < 18) {
-        setAgeError("You must be 18 or older to use this app");
+        setAgeError(t("about.ageValidation"));
         setDateOfBirth("");
       } else {
         setAgeError("");
@@ -109,7 +111,7 @@ const About = () => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.content}>
           <View style={styles.titleSection}>
-            <Text style={styles.title}>Tell us about you</Text>
+            <Text style={styles.title}>{t("about.about")}</Text>
             <Text style={styles.disclaimerText}>
               <Octicons name="info" size={14} color={color.gray55} />{" "}
               {"We don't display your age publicly without your consent"}
@@ -117,13 +119,13 @@ const About = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Your Name</Text>
+            <Text style={styles.label}>{t("about.name")}</Text>
             <TextInput
               style={[
                 styles.input,
                 Platform.OS === "ios" && { paddingVertical: 14 },
               ]}
-              placeholder="Enter your name"
+              placeholder={t("about.name")}
               placeholderTextColor="#999"
               value={name}
               onChangeText={setName}
@@ -131,7 +133,7 @@ const About = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Date of Birth</Text>
+            <Text style={styles.label}>{t("about.dateOfBirth")}</Text>
             <TouchableOpacity
               onPress={handleDatePress}
               style={[styles.dateInput, ageError && styles.dateInputError]}
@@ -186,11 +188,13 @@ const About = () => {
               {/* Header */}
               <View style={styles.datePickerHeader}>
                 <TouchableOpacity onPress={handleDateCancel}>
-                  <Text style={styles.cancelButton}>Cancel</Text>
+                  <Text style={styles.cancelButton}>{t("cancel")}</Text>
                 </TouchableOpacity>
-                <Text style={styles.datePickerTitle}>Select Date</Text>
+                <Text style={styles.datePickerTitle}>
+                  {t("about.dateOfBirth")}
+                </Text>
                 <TouchableOpacity onPress={handleDateConfirm}>
-                  <Text style={styles.confirmButton}>Done</Text>
+                  <Text style={styles.confirmButton}>{t("done")}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -214,7 +218,7 @@ const About = () => {
       {/* Continue Button */}
       <View style={styles.buttonContainer}>
         <CustomButton
-          title="Continue"
+          title={t("about.continue")}
           onPress={handleContinue}
           isDisabled={!name.trim() || !dateOfBirth.trim() || !!ageError}
         />

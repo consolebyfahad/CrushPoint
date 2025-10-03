@@ -10,6 +10,7 @@ import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -31,6 +32,7 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interests() {
+  const { t } = useTranslation();
   const { interests, loading, error, refetch } = useGetInterests();
   const { updateUserData, user, userData } = useAppContext();
   const { showToast } = useToast();
@@ -52,8 +54,10 @@ export default function Interests() {
         // Use the already parsed interest IDs from the profile
         const interestIds = userData.originalInterestIds;
         console.log("Loading existing interests:", interestIds);
-        
-        const finalInterests = Array.isArray(interestIds) ? interestIds : [interestIds];
+
+        const finalInterests = Array.isArray(interestIds)
+          ? interestIds
+          : [interestIds];
         console.log("Setting selected interests:", finalInterests);
         setSelectedInterests(finalInterests);
       } catch (error) {
@@ -112,7 +116,6 @@ export default function Interests() {
         showToast("Failed to update interests", "error");
       }
     } catch (error) {
-      console.error("Update error:", error);
       showToast("Failed to update interests. Please try again.", "error");
     } finally {
       setIsLoading(false);
@@ -153,7 +156,7 @@ export default function Interests() {
             onRefresh={handleRefresh}
             colors={[color.primary]}
             tintColor={color.primary}
-            title="Pull to refresh interests"
+            title={t("common.retry")}
             titleColor={color.gray55}
           />
         }
@@ -163,15 +166,15 @@ export default function Interests() {
           <View style={styles.titleSection}>
             <Text style={styles.title}>
               {params.isEdit
-                ? "Edit your interests"
-                : "What are your interests?"}
+                ? t("interests.interests")
+                : t("interests.interests")}
             </Text>
             <View style={styles.subtitleContainer}>
               <Text style={styles.subtitle}>
                 <Octicons name="info" size={14} color={color.gray55} />
                 {params.isEdit
                   ? " Update your interests to get better matches"
-                  : " Select at least 3 interests to help us find better matches for you"}
+                  : t("interests.selectAtLeast", { count: 3 })}
               </Text>
             </View>
           </View>
@@ -187,7 +190,7 @@ export default function Interests() {
             </View>
             <TextInput
               style={styles.searchInput}
-              placeholder="Search interests..."
+              placeholder={t("interests.searchInterests")}
               placeholderTextColor={color.gray55}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -196,19 +199,21 @@ export default function Interests() {
           {error && interests.length === 0 ? (
             <View style={styles.errorContainer}>
               <Octicons name="alert" size={48} color={color.gray55} />
-              <Text style={styles.errorTitle}>Unable to load interests</Text>
+              <Text style={styles.errorTitle}>{t("common.error")}</Text>
               <Text style={styles.errorMessage}>{error}</Text>
               <TouchableOpacity
                 style={styles.retryButton}
                 onPress={handleRetry}
               >
-                <Text style={styles.retryButtonText}>Try Again</Text>
+                <Text style={styles.retryButtonText}>
+                  {t("common.tryAgain")}
+                </Text>
               </TouchableOpacity>
             </View>
           ) : loading && interests.length === 0 ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={color.primary} />
-              <Text style={styles.loadingText}>Loading interests...</Text>
+              <Text style={styles.loadingText}>{t("common.loading")}</Text>
             </View>
           ) : (
             <AnimatedInterestGrid
@@ -231,7 +236,7 @@ export default function Interests() {
             Selected: {selectedInterests.length} (minimum {minSelections})
           </Animated.Text>
           <CustomButton
-            title="Continue"
+            title={t("interests.continue")}
             onPress={handleContinue}
             isDisabled={isButtonDisabled}
           />
@@ -243,7 +248,7 @@ export default function Interests() {
             {selectedInterests.length !== 1 ? "s" : ""}
           </Text>
           <CustomButton
-            title={isLoading ? "Saving..." : "Save Changes"}
+            title={isLoading ? t("common.loading") : t("common.save")}
             onPress={handleSaveChanges}
             isDisabled={isButtonDisabled || isLoading}
             isLoading={isLoading}

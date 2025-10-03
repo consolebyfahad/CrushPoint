@@ -301,5 +301,100 @@
     "casual": "Casual Dating",
     "friendship": "Friendship",
     "open": "Open To Possibilities"
+  },
+
+  "about": {
+    "about": "About",
+    "name": "Name",
+    "dateOfBirth": "Date of Birth",
+    "ageValidation": "You must be at least 18 years old to use this app",
+    "invalidAge": "Please enter a valid age",
+    "continue": "Continue"
+  },
+
+  "interests": {
+    "interests": "Interests",
+    "searchInterests": "Search interests...",
+    "selectAtLeast": "Select at least {{count}} interests",
+    "continue": "Continue"
+  },
+
+  "communityGuidelines": {
+    "communityGuidelines": "Community Guidelines",
+    "beRespectful": "Be Respectful",
+    "beRespectfulDesc": "Treat everyone with kindness and respect. We're all here to make meaningful connections, so please be courteous in your interactions.",
+    "authenticProfiles": "Authentic Profiles",
+    "authenticProfilesDesc": "Use real photos of yourself and accurate information. Catfishing or misleading profiles are not allowed and will result in account suspension.",
+    "safeInteractions": "Safe Interactions",
+    "safeInteractionsDesc": "Meet in public places for your first few dates. Always prioritize your safety and trust your instincts when meeting someone new.",
+    "noHarassment": "No Harassment",
+    "noHarassmentDesc": "Harassment, bullying, or any form of abuse will not be tolerated. This includes unwanted messages, inappropriate comments, or persistent contact after someone has expressed disinterest.",
+    "respectPrivacy": "Respect Privacy",
+    "respectPrivacyDesc": "Don't share personal information about others without their consent. Respect boundaries and privacy settings.",
+    "noSpam": "No Spam or Scams",
+    "noSpamDesc": "Don't use CrushPoint for commercial purposes, spam, or fraudulent activities. This includes promoting other services, selling products, or soliciting money.",
+    "ageVerification": "Age Verification",
+    "ageVerificationDesc": "You must be at least 18 years old to use CrushPoint. Providing false age information will result in immediate account termination.",
+    "reportInappropriate": "Report Inappropriate Behavior",
+    "reportInappropriateDesc": "If you encounter someone who violates these guidelines, please report them immediately. We take all reports seriously and will investigate promptly."
+  },
+
+  "contactSupport": {
+    "contactSupport": "Contact Support",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "accountIssue": "Account Issue",
+    "bugReport": "Bug Report",
+    "featureRequest": "Feature Request",
+    "safetyConcern": "Safety Concern",
+    "billingQuestion": "Billing Question",
+    "other": "Other",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "messageSent": "Message sent successfully!",
+    "messageFailed": "Failed to send message. Please try again."
+  },
+
+  "privateSpots": {
+    "privateSpots": "Private Spots",
+    "addPrivateSpot": "Add Private Spot",
+    "noPrivateSpots": "No Private Spots",
+    "noPrivateSpotsDesc": "You haven't added any private spots yet. Add one to control your visibility in specific locations.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this private spot?",
+    "deleted": "Private spot deleted successfully",
+    "deleteFailed": "Failed to delete private spot"
+  },
+
+  "verification": {
+    "verificationStatus": "Verification Status",
+    "verified": "Verified",
+    "pending": "Pending",
+    "failed": "Failed",
+    "notVerified": "Not Verified",
+    "verifyNow": "Verify Now",
+    "verificationPending": "Your verification is being reviewed. This usually takes 24-48 hours.",
+    "verificationFailed": "Your verification failed. Please try again with a clear photo of your face."
+  },
+
+  "match": {
+    "itsAMatch": "It's a Match!",
+    "youAnd": "You and {{name}} liked each other!",
+    "startChatting": "Start Chatting",
+    "keepSwiping": "Keep Swiping"
+  },
+
+  "privacy": {
+    "privacyPolicy": "Privacy Policy",
+    "lastUpdated": "Last updated: {{date}}",
+    "informationWeCollect": "Information We Collect",
+    "howWeUseInfo": "How We Use Your Information",
+    "informationSharing": "Information Sharing",
+    "dataSecurity": "Data Security",
+    "yourRights": "Your Rights",
+    "contactUs": "Contact Us"
   }
 }

@@ -456,7 +456,7 @@ export default function UserProfile() {
             )}
           </View>
 
-          {/* Floating Bubble Animation */}
+          {/* Center Emoji Animation */}
           {showAnimation && (
             <FloatingBubbleAnimation
               visible={showAnimation}
