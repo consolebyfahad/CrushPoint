@@ -2,24 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CLIENT_ID</key>
-	<string>247710361352-4783hk46dnrgqqj6rtqel6nl8q5i3rhp.apps.googleusercontent.com</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.247710361352-4783hk46dnrgqqj6rtqel6nl8q5i3rhp</string>
-	<key>ANDROID_CLIENT_ID</key>
-	<string>247710361352-240e88kdcusknhq8fi0c4hajrek5vj99.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAWPrQPcJomaa1ZiArad6jspUarsRFs9Ug</string>
+	<string>AIzaSyA3Y-nrW_8xph_UOm8WXAeidPC1NcMcZqM</string>
 	<key>GCM_SENDER_ID</key>
-	<string>247710361352</string>
+	<string>323137189211</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.dating.CrushPoint</string>
+	<string>com.dating.Andra</string>
 	<key>PROJECT_ID</key>
-	<string>crush-point</string>
+	<string>andradating</string>
 	<key>STORAGE_BUCKET</key>
-	<string>crush-point.firebasestorage.app</string>
+	<string>andradating.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:247710361352:ios:1261666952b51f970daebd</string>
+	<string>1:323137189211:ios:6a0506498eef412909567e</string>
 </dict>
 </plist>

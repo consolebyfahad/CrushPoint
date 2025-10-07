@@ -31,8 +31,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="crushpoint"/>
-        <data android:scheme="exp+crushpoint"/>
+        <data android:scheme="andra"/>
+        <data android:scheme="exp+andra"/>
       </intent-filter>
     </activity>
     <uses-library android:name="org.apache.http.legacy" android:required="false"/>

@@ -1,4 +1,4 @@
-package com.dating.CrushPoint
+package com.dating.Andra
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

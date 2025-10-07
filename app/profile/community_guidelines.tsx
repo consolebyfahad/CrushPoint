@@ -3,11 +3,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,43 +19,53 @@ export default function CommunityGuidelines() {
   const guidelines = [
     {
       title: "Be Respectful",
-      content: "Treat everyone with kindness and respect. We're all here to make meaningful connections, so please be courteous in your interactions.",
+      content:
+        "Treat everyone with kindness and respect. We're all here to make meaningful connections, so please be courteous in your interactions.",
     },
     {
       title: "Authentic Profiles",
-      content: "Use real photos of yourself and accurate information. Catfishing or misleading profiles are not allowed and will result in account suspension.",
+      content:
+        "Use real photos of yourself and accurate information. Catfishing or misleading profiles are not allowed and will result in account suspension.",
     },
     {
       title: "Safe Interactions",
-      content: "Meet in public places for your first few dates. Always prioritize your safety and trust your instincts when meeting someone new.",
+      content:
+        "Meet in public places for your first few dates. Always prioritize your safety and trust your instincts when meeting someone new.",
     },
     {
       title: "No Harassment",
-      content: "Harassment, bullying, or any form of abuse will not be tolerated. This includes unwanted messages, inappropriate comments, or persistent contact after someone has expressed disinterest.",
+      content:
+        "Harassment, bullying, or any form of abuse will not be tolerated. This includes unwanted messages, inappropriate comments, or persistent contact after someone has expressed disinterest.",
     },
     {
       title: "Respect Privacy",
-      content: "Don't share personal information about others without their consent. Respect boundaries and privacy settings.",
+      content:
+        "Don't share personal information about others without their consent. Respect boundaries and privacy settings.",
     },
     {
       title: "No Spam or Scams",
-      content: "Don't use CrushPoint for commercial purposes, spam, or fraudulent activities. This includes promoting other services, selling products, or soliciting money.",
+      content:
+        "Don't use Andra for commercial purposes, spam, or fraudulent activities. This includes promoting other services, selling products, or soliciting money.",
     },
     {
       title: "Age Verification",
-      content: "You must be at least 18 years old to use CrushPoint. Providing false age information will result in immediate account termination.",
+      content:
+        "You must be at least 18 years old to use Andra. Providing false age information will result in immediate account termination.",
     },
     {
       title: "Report Inappropriate Behavior",
-      content: "If you encounter someone who violates these guidelines, please report them immediately. We take all reports seriously and will investigate promptly.",
+      content:
+        "If you encounter someone who violates these guidelines, please report them immediately. We take all reports seriously and will investigate promptly.",
     },
     {
       title: "Content Guidelines",
-      content: "Keep your photos and messages appropriate. Explicit content, violence, or offensive material is prohibited and will result in content removal and potential account suspension.",
+      content:
+        "Keep your photos and messages appropriate. Explicit content, violence, or offensive material is prohibited and will result in content removal and potential account suspension.",
     },
     {
       title: "Location Respect",
-      content: "Respect others' private spots and location preferences. Don't share someone's location without permission or show up uninvited to their private spaces.",
+      content:
+        "Respect others' private spots and location preferences. Don't share someone's location without permission or show up uninvited to their private spaces.",
     },
   ];
 
@@ -95,8 +105,8 @@ export default function CommunityGuidelines() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -104,18 +114,21 @@ export default function CommunityGuidelines() {
         <View style={styles.introSection}>
           <View style={styles.introHeader}>
             <Ionicons name="heart" size={32} color={color.primary} />
-            <Text style={styles.introTitle}>Welcome to CrushPoint</Text>
+            <Text style={styles.introTitle}>Welcome to Andra</Text>
           </View>
           <Text style={styles.introText}>
-            CrushPoint is designed to help you make meaningful connections with people nearby. 
-            To ensure a safe and enjoyable experience for everyone, we've established these community guidelines.
+            Andra is designed to help you make meaningful connections with
+            people nearby. To ensure a safe and enjoyable experience for
+            everyone, we've established these community guidelines.
           </Text>
         </View>
 
         {/* Guidelines */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Community Guidelines</Text>
-          {guidelines.map((guideline, index) => renderGuidelineItem(guideline, index))}
+          {guidelines.map((guideline, index) =>
+            renderGuidelineItem(guideline, index)
+          )}
         </View>
 
         {/* Safety Tips */}
@@ -125,7 +138,11 @@ export default function CommunityGuidelines() {
             {safetyTips.map((tip, index) => (
               <View key={index} style={styles.safetyTipItem}>
                 <View style={styles.safetyTipBullet}>
-                  <Ionicons name="shield-checkmark" size={16} color={color.primary} />
+                  <Ionicons
+                    name="shield-checkmark"
+                    size={16}
+                    color={color.primary}
+                  />
                 </View>
                 <Text style={styles.safetyTipText}>{tip}</Text>
               </View>
@@ -140,8 +157,8 @@ export default function CommunityGuidelines() {
             <Text style={styles.contactTitle}>Need Help?</Text>
           </View>
           <Text style={styles.contactText}>
-            If you have any questions about these guidelines or need to report a violation, 
-            please contact our support team through the app settings.
+            If you have any questions about these guidelines or need to report a
+            violation, please contact our support team through the app settings.
           </Text>
         </View>
 

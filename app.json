@@ -1,15 +1,15 @@
 {
   "expo": {
     "name": "Andra",
-    "slug": "CrushPoint",
+    "slug": "andra",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "crushpoint",
+    "scheme": "andra",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dating.CrushPoint",
+      "bundleIdentifier": "com.dating.Andra",
       "googleServicesFile": "./GoogleService-Info.plist",
       "config": {
         "googleMapsApiKey": "AIzaSyBpRUeweq7eCIDHavnHsheE66bHJd5nGX8"
@@ -45,7 +45,7 @@
         "android.permission.RECORD_AUDIO"
       ],
       "edgeToEdgeEnabled": true,
-      "package": "com.dating.CrushPoint",
+      "package": "com.dating.Andra",
       "googleServicesFile": "./google-services.json"
     },
     "web": {

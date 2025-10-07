@@ -99,8 +99,6 @@ interface UserFilters {
   zodiacSign?: string;
 }
 
-const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
-
 export default function useGetUsers(filters: UserFilters = {}) {
   const { user } = useAppContext();
   const [users, setUsers] = useState<TransformedUser[]>([]);

@@ -1,4 +1,4 @@
-package com.dating.CrushPoint
+package com.dating.Andra
 
 import android.app.Application
 import android.content.res.Configuration

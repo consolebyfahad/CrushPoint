@@ -29,20 +29,14 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>crushpoint</string>
-          <string>com.dating.CrushPoint</string>
+          <string>andra</string>
+          <string>com.dating.Andra</string>
         </array>
       </dict>
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.googleusercontent.apps.247710361352-4783hk46dnrgqqj6rtqel6nl8q5i3rhp</string>
-        </array>
-      </dict>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>exp+crushpoint</string>
+          <string>exp+andra</string>
         </array>
       </dict>
     </array>
