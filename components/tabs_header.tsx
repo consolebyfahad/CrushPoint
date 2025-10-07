@@ -2,14 +2,19 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function EventsTabsHeader({ title, events }: any) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.header}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.eventCount}>{events.length} Events</Text>
+        <Text style={styles.eventCount}>
+          {events.length} {t("events.eventsCount")}
+        </Text>
       </View>
     </View>
   );
@@ -17,6 +22,7 @@ export default function EventsTabsHeader({ title, events }: any) {
 
 // TabsHeader for Notifications
 export function NotificationsTabsHeader({ title, notifications, close }: any) {
+  const { t } = useTranslation();
   const unreadCount = notifications.filter(
     (notif: any) => !notif.isRead
   ).length;
@@ -35,8 +41,8 @@ export function NotificationsTabsHeader({ title, notifications, close }: any) {
         ) : (
           <Text style={styles.eventCount}>
             {unreadCount > 0
-              ? `${unreadCount} Unread`
-              : `${notifications.length} Total`}
+              ? `${unreadCount} ${t("notifications.unread")}`
+              : `${notifications.length} ${t("notifications.total")}`}
           </Text>
         )}
       </View>
@@ -52,13 +58,17 @@ export function MatchesTabsHeader({
   matchesCount,
   totalRequestsCount,
 }: any) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.header}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.eventCount}>
           {activeTab === "matches" ? matchesCount : totalRequestsCount}{" "}
-          {matches}
+          {activeTab === "matches"
+            ? t("matches.matches")
+            : t("meetups.requests")}
         </Text>
       </View>
     </View>

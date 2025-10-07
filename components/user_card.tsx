@@ -4,6 +4,7 @@ import { calculateDistance } from "@/utils/distanceCalculator";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -26,6 +27,7 @@ export default function UserCard({
   onViewProfile,
   onShowUserOnMap, // UPDATED: Updated prop name
 }: UserCardProps) {
+  const { t } = useTranslation();
   const { userData: currentUser } = useAppContext();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
@@ -97,7 +99,7 @@ export default function UserCard({
       onViewProfile(user);
     } catch (error) {
       console.error("Error in onViewProfile:", error);
-      Alert.alert("Error", "Unable to view profile. Please try again.");
+      Alert.alert(t("common.error"), t("common.unableToViewProfile"));
     }
   };
 
@@ -112,9 +114,9 @@ export default function UserCard({
       // Validate location before proceeding
       if (!hasValidLocation()) {
         Alert.alert(
-          "Location Unavailable",
-          "This user's location is not available on the map.",
-          [{ text: "OK", style: "default" }]
+          t("common.locationUnavailable"),
+          t("common.locationNotAvailable"),
+          [{ text: t("common.ok"), style: "default" }]
         );
         return;
       }
@@ -131,11 +133,9 @@ export default function UserCard({
     } catch (error) {
       console.error("Error in handleShowOnMap:", error);
       setIsLoadingLocation(false);
-      Alert.alert(
-        "Error",
-        "Unable to show location on map. Please try again.",
-        [{ text: "OK", style: "default" }]
-      );
+      Alert.alert(t("common.error"), t("common.unableToShowLocation"), [
+        { text: t("common.ok"), style: "default" },
+      ]);
     }
   };
 
@@ -165,7 +165,7 @@ export default function UserCard({
         {user?.isOnline && (
           <View style={styles.onlineStatus}>
             <View style={styles.onlineDot} />
-            <Text style={styles.onlineText}>Online</Text>
+            <Text style={styles.onlineText}>{t("matches.online")}</Text>
           </View>
         )}
 
@@ -173,7 +173,7 @@ export default function UserCard({
         {user?.images && user.images.length > 1 && (
           <View style={styles.imageOverlay}>
             <Text style={styles.imageCount}>
-              +{user.images.length - 1} more
+              +{user.images.length - 1} {t("common.more")}
             </Text>
           </View>
         )}
@@ -183,7 +183,8 @@ export default function UserCard({
       <View style={styles.userInfo}>
         <View style={styles.nameRow}>
           <Text style={styles.userName} numberOfLines={1}>
-            {user?.name || "Unknown"}, {user?.age || "N/A"}
+            {user?.name || t("common.unknown")},{" "}
+            {user?.age || t("common.notAvailable")}
           </Text>
           <View style={styles.distanceContainer}>
             <SimpleLineIcons
@@ -198,7 +199,7 @@ export default function UserCard({
         {/* Looking For Section */}
         {user?.lookingFor && user.lookingFor.length > 0 && (
           <View style={styles.lookingForSection}>
-            <Text style={styles.sectionLabel}>Looking for:</Text>
+            <Text style={styles.sectionLabel}>{t("common.lookingFor")}</Text>
             <View style={styles.lookingForContainer}>
               {formatLookingFor(user.lookingFor).map(
                 (lookingFor: string, index: number) => (
@@ -224,7 +225,7 @@ export default function UserCard({
         {/* Interests Section */}
         {user?.interests && user.interests.length > 0 && (
           <View style={styles.interestsSection}>
-            <Text style={styles.sectionLabel}>Interests:</Text>
+            <Text style={styles.sectionLabel}>{t("common.interests")}</Text>
             <View style={styles.interestsContainer}>
               {formatInterests(user.interests).map(
                 (interest: string, index: number) => (
@@ -252,7 +253,7 @@ export default function UserCard({
           (!user?.lookingFor || user.lookingFor.length === 0) && (
             <View style={styles.noInfoContainer}>
               <Text style={styles.noInfoText}>
-                No interests or preferences shared yet
+                {t("common.noInterestsShared")}
               </Text>
             </View>
           )}
@@ -260,7 +261,7 @@ export default function UserCard({
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <CustomButton
-            title="View Profile"
+            title={t("common.viewProfile")}
             style={styles.viewProfileButton}
             fontstyle={styles.viewProfileButtonText}
             onPress={handleViewProfile}

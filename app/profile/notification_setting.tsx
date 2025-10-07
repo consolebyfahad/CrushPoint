@@ -5,6 +5,7 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   ScrollView,
@@ -16,6 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationSettings({ navigation }: any) {
+  const { t } = useTranslation();
   const { user, userData, updateUserData } = useAppContext();
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -75,7 +77,7 @@ export default function NotificationSettings({ navigation }: any) {
 
   const handleSaveChanges = async () => {
     if (!user?.user_id) {
-      Alert.alert("Error", "User session expired. Please login again.");
+      Alert.alert(t("common.error"), t("common.userSessionExpired"));
       return;
     }
 
@@ -123,15 +125,12 @@ export default function NotificationSettings({ navigation }: any) {
         }
       } else {
         throw new Error(
-          response.message || "Failed to update notification settings"
+          response.message || t("common.failedToUpdateNotifications")
         );
       }
     } catch (error) {
       console.error("Update error:", error);
-      Alert.alert(
-        "Error",
-        "Failed to update notification settings. Please try again."
-      );
+      Alert.alert(t("common.error"), t("common.failedToUpdateNotifications"));
     } finally {
       setIsLoading(false);
     }
@@ -140,68 +139,68 @@ export default function NotificationSettings({ navigation }: any) {
   const notificationOptions = [
     {
       key: "newMatches",
-      title: "New Matches",
-      description: "When you get a new match",
+      title: t("common.newMatches"),
+      description: t("common.newMatchesDesc"),
       enabled: notificationSettings.newMatches,
     },
     {
       key: "newMeetup",
-      title: "Meetup Requests",
-      description: "When you get a new meetup request",
+      title: t("common.meetupRequests"),
+      description: t("common.meetupRequestsDesc"),
       enabled: notificationSettings.newMeetup,
     },
     {
       key: "meetupRespondReceived",
-      title: "Meetup Respond Received",
-      description: "When someone responds to your meetup request",
+      title: t("common.meetupRespondReceived"),
+      description: t("common.meetupRespondReceivedDesc"),
       enabled: notificationSettings.meetupRespondReceived,
     },
     {
       key: "emojiReceived",
-      title: "Emoji Received",
-      description: "When someone sends you an emoji",
+      title: t("common.emojiReceived"),
+      description: t("common.emojiReceivedDesc"),
       enabled: notificationSettings.emojiReceived,
     },
     {
       key: "nearbyMatches",
-      title: "Nearby Matches",
-      description: "When your matches are nearby",
+      title: t("common.nearbyMatches"),
+      description: t("common.nearbyMatchesDesc"),
       enabled: notificationSettings.nearbyMatches,
     },
     {
       key: "nearbyUsers",
-      title: "Nearby Users",
-      description: "When new users are in your area",
+      title: t("common.nearbyUsers"),
+      description: t("common.nearbyUsersDesc"),
       enabled: notificationSettings.nearbyUsers,
     },
     {
       key: "profileVisits",
-      title: "Profile Visits",
-      description: "When someone views your profile",
+      title: t("common.profileVisits"),
+      description: t("common.profileVisitsDesc"),
       enabled: notificationSettings.profileVisits,
     },
     {
       key: "newEventPosted",
-      title: "New Event Posted",
-      description: "When a new event is posted in your area",
+      title: t("common.newEventPosted"),
+      description: t("common.newEventPostedDesc"),
       enabled: notificationSettings.newEventPosted,
     },
     {
       key: "eventInvitationAccepted",
-      title: "Event Invitation Accepted",
-      description: "When someone accepts event invitation",
+      title: t("common.eventInvitationAccepted"),
+      description: t("common.eventInvitationAcceptedDesc"),
       enabled: notificationSettings.eventInvitationAccepted,
     },
     {
       key: "eventReminder",
-      title: "Event Reminder",
-      description: "Reminders for upcoming events",
+      title: t("common.eventReminder"),
+      description: t("common.eventReminderDesc"),
       enabled: notificationSettings.eventReminder,
     },
     {
       key: "offersPromotions",
-      title: "Offers & Promotions",
-      description: "Special offers and promotions",
+      title: t("common.offersPromotions"),
+      description: t("common.offersPromotionsDesc"),
       enabled: notificationSettings.offersPromotions,
     },
   ];
@@ -218,8 +217,8 @@ export default function NotificationSettings({ navigation }: any) {
         onValueChange={() => toggleNotification(item.key)}
         trackColor={{ false: "#DFDFDF", true: color.primary }}
         thumbColor={item.enabled ? "#FFFFFF" : "#FFFFFF"}
-        ios_backgroundColor="#DFDFDF"
-        style={[styles.switch, isLoading && { opacity: 0.6 }]}
+        // ios_backgroundColor="#DFDFDF"
+        // style={[styles.switch]}
         disabled={isLoading}
       />
     </View>

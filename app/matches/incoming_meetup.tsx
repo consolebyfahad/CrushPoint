@@ -4,6 +4,7 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -13,7 +14,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 interface IncomingMeetupProps {
@@ -33,6 +34,7 @@ export default function IncomingMeetup({
   onRefresh,
   isRefreshing = false,
 }: IncomingMeetupProps) {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const [showSuggestChanges, setShowSuggestChanges] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
@@ -207,9 +209,9 @@ export default function IncomingMeetup({
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyEmoji}>📥</Text>
-      <Text style={styles.emptyTitle}>No incoming requests</Text>
+      <Text style={styles.emptyTitle}>{t("meetups.noIncomingRequests")}</Text>
       <Text style={styles.emptyText}>
-        When someone wants to meet you, their requests will appear here.
+        {t("meetups.noIncomingRequestsDesc")}
       </Text>
     </View>
   );
@@ -217,10 +219,8 @@ export default function IncomingMeetup({
   const renderSearchEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyEmoji}>🔍</Text>
-      <Text style={styles.emptyTitle}>No results found</Text>
-      <Text style={styles.emptyText}>
-        Try searching with different keywords.
-      </Text>
+      <Text style={styles.emptyTitle}>{t("meetups.noResultsFound")}</Text>
+      <Text style={styles.emptyText}>{t("meetups.tryDifferentKeywords")}</Text>
     </View>
   );
 
@@ -293,7 +293,7 @@ export default function IncomingMeetup({
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={color.primary} />
-            <Text style={styles.loadingText}>Processing...</Text>
+            <Text style={styles.loadingText}>{t("meetups.processing")}</Text>
           </View>
         </View>
       )}

@@ -2,6 +2,7 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Platform,
   StyleSheet,
@@ -21,10 +22,11 @@ type CustomSearchBarProps = {
 export default function CustomSearchBar({
   searchText,
   onChangeText,
-  placeholder = "Search",
+  placeholder,
   containerStyle,
   inputContainerStyle,
 }: CustomSearchBarProps) {
+  const { t } = useTranslation();
   return (
     <View
       style={[
@@ -43,7 +45,7 @@ export default function CustomSearchBar({
         style={styles.searchInput}
         value={searchText}
         onChangeText={onChangeText}
-        placeholder={placeholder}
+        placeholder={placeholder || t("common.search")}
         placeholderTextColor={color.gray55}
       />
       {searchText.length > 0 && (

@@ -25,18 +25,23 @@ export default function ZodiacSign({
   );
 
   const zodiacSigns = [
-    { id: "aries", name: "Aries", icon: "♈", symbol: "🐏" },
-    { id: "gemini", name: "Gemini", icon: "♊", symbol: "👯" },
-    { id: "leo", name: "Leo", icon: "♌", symbol: "🦁" },
-    { id: "libra", name: "Libra", icon: "♎", symbol: "⚖️" },
-    { id: "sagittarius", name: "Sagittarius", icon: "♐", symbol: "🏹" },
-    { id: "aquarius", name: "Aquarius", icon: "♒", symbol: "🏺" },
-    { id: "taurus", name: "Taurus", icon: "♉", symbol: "🐂" },
-    { id: "cancer", name: "Cancer", icon: "♋", symbol: "🦀" },
-    { id: "virgo", name: "Virgo", icon: "♍", symbol: "👩" },
-    { id: "scorpio", name: "Scorpio", icon: "♏", symbol: "🦂" },
-    { id: "capricorn", name: "Capricorn", icon: "♑", symbol: "🐐" },
-    { id: "pisces", name: "Pisces", icon: "♓", symbol: "🐟" },
+    { id: "aries", name: t("zodiac.aries"), icon: "♈", symbol: "🐏" },
+    { id: "gemini", name: t("zodiac.gemini"), icon: "♊", symbol: "👯" },
+    { id: "leo", name: t("zodiac.leo"), icon: "♌", symbol: "🦁" },
+    { id: "libra", name: t("zodiac.libra"), icon: "♎", symbol: "⚖️" },
+    {
+      id: "sagittarius",
+      name: t("zodiac.sagittarius"),
+      icon: "♐",
+      symbol: "🏹",
+    },
+    { id: "aquarius", name: t("zodiac.aquarius"), icon: "♒", symbol: "🏺" },
+    { id: "taurus", name: t("zodiac.taurus"), icon: "♉", symbol: "🐂" },
+    { id: "cancer", name: t("zodiac.cancer"), icon: "♋", symbol: "🦀" },
+    { id: "virgo", name: t("zodiac.virgo"), icon: "♍", symbol: "👩" },
+    { id: "scorpio", name: t("zodiac.scorpio"), icon: "♏", symbol: "🦂" },
+    { id: "capricorn", name: t("zodiac.capricorn"), icon: "♑", symbol: "🐐" },
+    { id: "pisces", name: t("zodiac.pisces"), icon: "♓", symbol: "🐟" },
   ];
 
   const handleZodiacSelect = (zodiac: string) => {

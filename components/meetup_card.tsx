@@ -1,13 +1,14 @@
 import { color, font } from "@/utils/constants";
 import { formatCardDate } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import {
-    ActivityIndicator,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface MeetupCardProps {
@@ -48,6 +49,7 @@ export default function MeetupCard({
   onEdit,
   isLoading = false,
 }: MeetupCardProps) {
+  const { t } = useTranslation();
   const getStatusIcon = () => {
     switch (request.status) {
       case "accepted":
@@ -72,15 +74,15 @@ export default function MeetupCard({
 
     switch (request.status) {
       case "pending":
-        return renderBadge(styles.pendingBadge, "Pending");
+        return renderBadge(styles.pendingBadge, t("meetups.pending"));
       case "change":
-        return renderBadge(styles.changeBadge, "Changes Requested");
+        return renderBadge(styles.changeBadge, t("meetups.changesRequested"));
       case "accepted":
-        return renderBadge(styles.acceptedBadge, "Accepted");
+        return renderBadge(styles.acceptedBadge, t("meetups.accepted"));
       case "declined":
-        return renderBadge(styles.declinedBadge, "Declined");
+        return renderBadge(styles.declinedBadge, t("meetups.declined"));
       case "cancelled":
-        return renderBadge(styles.cancelledBadge, "Cancelled");
+        return renderBadge(styles.cancelledBadge, t("meetups.cancelled"));
       default:
         return null;
     }
@@ -105,7 +107,9 @@ export default function MeetupCard({
             disabled={isLoading}
           >
             <Ionicons name="checkmark" size={16} color={color.white} />
-            <Text style={styles.acceptButtonText}>Accept Changes</Text>
+            <Text style={styles.acceptButtonText}>
+              {t("meetups.acceptChanges")}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.changeButton, isLoading && styles.disabledButton]}
@@ -113,7 +117,7 @@ export default function MeetupCard({
             disabled={isLoading}
           >
             <Ionicons name="refresh-outline" size={16} color={color.primary} />
-            <Text style={styles.changeButtonText}>Suggest</Text>
+            <Text style={styles.changeButtonText}>{t("meetups.suggest")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.declineButton, isLoading && styles.disabledButton]}
@@ -134,7 +138,7 @@ export default function MeetupCard({
           disabled={isLoading}
         >
           <Ionicons name="checkmark" size={16} color={color.white} />
-          <Text style={styles.acceptButtonText}>Accept</Text>
+          <Text style={styles.acceptButtonText}>{t("meetups.accept")}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.changeButton, isLoading && styles.disabledButton]}
@@ -142,7 +146,7 @@ export default function MeetupCard({
           disabled={isLoading}
         >
           <Ionicons name="refresh-outline" size={16} color={color.primary} />
-          <Text style={styles.changeButtonText}>Suggest</Text>
+          <Text style={styles.changeButtonText}>{t("meetups.suggest")}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.declineButton, isLoading && styles.disabledButton]}
@@ -170,7 +174,7 @@ export default function MeetupCard({
             disabled={isLoading}
           >
             <Ionicons name="pencil-outline" size={16} color={color.primary} />
-            <Text style={styles.editButtonText}>Edit</Text>
+            <Text style={styles.editButtonText}>{t("meetups.edit")}</Text>
           </TouchableOpacity>
         )}
         {onCancel && (
@@ -180,7 +184,7 @@ export default function MeetupCard({
             disabled={isLoading}
           >
             <Ionicons name="close-outline" size={16} color="#FF3B30" />
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <Text style={styles.cancelButtonText}>{t("meetups.cancel")}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -203,8 +207,8 @@ export default function MeetupCard({
           <View style={styles.titleRow}>
             <Text style={styles.userName}>
               {type === "incoming"
-                ? `${request.user.name} wants to meet`
-                : `Request to ${request.user.name}`}
+                ? t("meetups.wantsToMeet", { name: request.user.name })
+                : t("meetups.requestTo", { name: request.user.name })}
             </Text>
           </View>
           <Text style={styles.timestamp}>{request.timestamp}</Text>
@@ -251,7 +255,7 @@ export default function MeetupCard({
       {type === "incoming" && request.status === "accepted" && (
         <View style={[styles.responseContainer]}>
           <Text style={[styles.responseMessage, styles.responseMessageSuccess]}>
-            Your request was accepted!
+            {t("meetups.yourRequestAccepted")}
           </Text>
         </View>
       )}

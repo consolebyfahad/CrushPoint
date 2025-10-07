@@ -25,7 +25,7 @@ export default function ProfileOptions({
     if (onBlock) {
       onBlock();
     } else {
-      console.log("Block user");
+      console.log(t("common.blockUser"));
     }
   };
 
@@ -33,7 +33,7 @@ export default function ProfileOptions({
     if (onReport) {
       onReport();
     } else {
-      console.log("Report user");
+      console.log(t("common.reportUser"));
     }
   };
 
@@ -41,13 +41,13 @@ export default function ProfileOptions({
     if (onRemoveMatch) {
       onRemoveMatch();
     } else {
-      console.log("Remove match");
+      console.log(t("common.removeMatch"));
     }
   };
   console.log("userdata", userData);
   // Default user data if not provided
   const defaultUser = {
-    name: "User",
+    name: t("common.defaultUser"),
     age: 25,
     image:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
@@ -112,7 +112,9 @@ export default function ProfileOptions({
                   >
                     <Ionicons name="close" size={20} color="#6B7280" />
                   </View>
-                  <Text style={styles.optionText}>{t("profile.removeMatch")}</Text>
+                  <Text style={styles.optionText}>
+                    {t("profile.removeMatch")}
+                  </Text>
                 </View>
               </TouchableOpacity>
             )}

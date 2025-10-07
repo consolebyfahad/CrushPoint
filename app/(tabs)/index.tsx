@@ -54,7 +54,7 @@ export default function Index() {
 
   // Filter data state
   const [filterData, setFilterData] = useState<UserFilters>({
-    gender: "Male",
+    gender: t("common.male"),
     ageFrom: "18",
     ageTo: "35",
     distance: 10,
@@ -65,7 +65,7 @@ export default function Index() {
   });
 
   const { users, loading, error, refetch } = useGetUsers(filterData);
-  const [viewType, setViewType] = useState("Map");
+  const [viewType, setViewType] = useState(t("common.mapView"));
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
   // Modal states
@@ -190,7 +190,7 @@ export default function Index() {
         };
 
         // Switch to map view first
-        setViewType("Map");
+        setViewType(t("common.mapView"));
 
         // Small delay to ensure map tab is active before setting selected user
         setTimeout(() => {
@@ -224,9 +224,9 @@ export default function Index() {
               "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
           },
           matchedUser: {
-            name: response.data?.name || "Unknown",
+            name: response.data?.name || t("common.unknown"),
             age: response.data?.age || 0,
-            distance: response.data?.distance || "Unknown",
+            distance: response.data?.distance || t("common.unknown"),
             image:
               response.data?.profile_image ||
               "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
@@ -381,7 +381,7 @@ export default function Index() {
   // UPDATED: Enhanced function to show user on map
   const handleShowUserOnMap = (selectedUser: any) => {
     // Switch to map view first
-    setViewType("Map");
+    setViewType(t("common.mapView"));
 
     // Small delay to ensure map tab is active before setting selected user
     setTimeout(() => {
@@ -417,7 +417,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       {/* Main Content */}
-      {viewType === "List View" ? (
+      {viewType === t("common.listView") ? (
         <ListView
           onViewProfile={handleViewProfile}
           onShowUserOnMap={handleShowUserOnMap}
@@ -463,46 +463,48 @@ export default function Index() {
             <TouchableOpacity
               style={[
                 styles.toggleButton,
-                viewType === "Map" && styles.activeToggle,
+                viewType === t("common.mapView") && styles.activeToggle,
               ]}
-              onPress={() => setViewType("Map")}
+              onPress={() => setViewType(t("common.mapView"))}
               activeOpacity={0.8}
             >
               <Feather name="map" size={18} color="black" />
               <Text
                 style={[
                   styles.toggleText,
-                  viewType === "Map"
+                  viewType === t("common.mapView")
                     ? styles.activeToggleText
                     : styles.inactiveToggleText,
                 ]}
               >
-                Map
+                {t("common.mapView")}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.toggleButton,
-                viewType === "List View" && styles.activeToggle,
+                viewType === t("common.listView") && styles.activeToggle,
               ]}
-              onPress={() => setViewType("List View")}
+              onPress={() => setViewType(t("common.listView"))}
               activeOpacity={0.8}
             >
               <Ionicons
                 name="list"
                 size={18}
-                color={viewType === "List View" ? color.black : color.gray14}
+                color={
+                  viewType === t("common.listView") ? color.black : color.gray14
+                }
               />
               <Text
                 style={[
                   styles.toggleText,
-                  viewType === "List View"
+                  viewType === t("common.listView")
                     ? styles.activeToggleText
                     : styles.inactiveToggleText,
                 ]}
               >
-                List View
+                {t("common.listView")}
               </Text>
             </TouchableOpacity>
           </View>

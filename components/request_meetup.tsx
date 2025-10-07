@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -38,6 +39,7 @@ export default function RequestMeetup({
   onSubmit,
   matchData,
 }: RequestMeetupProps) {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(new Date());
@@ -79,12 +81,12 @@ export default function RequestMeetup({
 
   const handleSubmit = async () => {
     if (!location.trim()) {
-      Alert.alert("Error", "Please enter a location for the meetup.");
+      Alert.alert(t("common.error"), t("meetups.pleaseEnterLocation"));
       return;
     }
 
     if (!user?.user_id) {
-      Alert.alert("Error", "User session expired. Please login again.");
+      Alert.alert(t("common.error"), t("meetups.userSessionExpired"));
       return;
     }
     const formattedDate = selectedDate.toISOString().split("T")[0];
@@ -117,33 +119,34 @@ export default function RequestMeetup({
       const response = await apiCall(formData);
 
       if (response.result) {
-        Alert.alert("Success", `Meetup request sent to ${matchData.name}!`, [
-          {
-            text: "OK",
-            onPress: () => {
-              onSubmit({
-                matchId: matchData.id,
-                date: formattedDate,
-                time: formattedTime,
-                location: location.trim(),
-                message: message.trim(),
-              });
-              onClose();
+        Alert.alert(
+          t("common.success"),
+          t("meetups.meetupRequestSent", { name: matchData.name }),
+          [
+            {
+              text: t("common.ok"),
+              onPress: () => {
+                onSubmit({
+                  matchId: matchData.id,
+                  date: formattedDate,
+                  time: formattedTime,
+                  location: location.trim(),
+                  message: message.trim(),
+                });
+                onClose();
+              },
             },
-          },
-        ]);
+          ]
+        );
       } else {
         Alert.alert(
-          "Error",
-          response.message || "Failed to send meetup request. Please try again."
+          t("common.error"),
+          response.message || t("meetups.failedToSendRequest")
         );
       }
     } catch (error) {
       console.error("❌ Meetup request error:", error);
-      Alert.alert(
-        "Error",
-        "Failed to send meetup request. Please check your connection and try again."
-      );
+      Alert.alert(t("common.error"), t("meetups.networkError"));
     } finally {
       setIsLoading(false);
     }
@@ -162,7 +165,7 @@ export default function RequestMeetup({
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Request Meetup</Text>
+        <Text style={styles.title}>{t("meetups.requestMeetup")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={color.black} />
         </TouchableOpacity>
@@ -181,7 +184,7 @@ export default function RequestMeetup({
             )}
             <View style={styles.userDetails}>
               <Text style={styles.requestText}>
-                Send meetup request to {matchData.name}
+                {t("meetups.sendMeetupRequest", { name: matchData.name })}
               </Text>
               <View style={styles.userMeta}>
                 <SimpleLineIcons
@@ -194,7 +197,9 @@ export default function RequestMeetup({
                 </Text>
                 <View style={styles.separator} />
                 <Text style={styles.metaText}>
-                  Matched {matchData.matchedTime || "2 hours ago"}
+                  {t("meetups.matched", {
+                    time: matchData.matchedTime || "2 hours ago",
+                  })}
                 </Text>
               </View>
             </View>
@@ -204,7 +209,7 @@ export default function RequestMeetup({
         {/* Date Field */}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
-            Date <Text style={styles.required}>*</Text>
+            {t("meetups.date")} <Text style={styles.required}>*</Text>
           </Text>
           <TouchableOpacity
             style={styles.dateTimeInput}
@@ -218,7 +223,7 @@ export default function RequestMeetup({
         {/* Time Field */}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
-            Time <Text style={styles.required}>*</Text>
+            {t("meetups.time")} <Text style={styles.required}>*</Text>
           </Text>
           <TouchableOpacity
             style={styles.dateTimeInput}
@@ -232,25 +237,27 @@ export default function RequestMeetup({
         {/* Location Field */}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
-            Location <Text style={styles.required}>*</Text>
+            {t("meetups.location")} <Text style={styles.required}>*</Text>
           </Text>
           <TextInput
             style={styles.textInput}
             value={location}
             onChangeText={setLocation}
-            placeholder="Enter meetup location"
+            placeholder={t("meetups.enterMeetupLocation")}
             placeholderTextColor={color.gray55}
           />
         </View>
 
         {/* Message Field */}
         <View style={styles.section}>
-          <Text style={styles.inputLabel}>Message (Optional)</Text>
+          <Text style={styles.inputLabel}>
+            {t("meetups.message")} ({t("common.optional")})
+          </Text>
           <TextInput
             style={[styles.textInput, styles.messageInput]}
             value={message}
             onChangeText={setMessage}
-            placeholder="Add a message..."
+            placeholder={t("meetups.addMessageOptional")}
             placeholderTextColor={color.gray55}
             multiline
             numberOfLines={4}
@@ -273,7 +280,9 @@ export default function RequestMeetup({
           {isLoading ? (
             <ActivityIndicator size="small" color={color.white} />
           ) : (
-            <Text style={styles.submitButtonText}>Send Request</Text>
+            <Text style={styles.submitButtonText}>
+              {t("meetups.sendRequest")}
+            </Text>
           )}
         </TouchableOpacity>
       </View>

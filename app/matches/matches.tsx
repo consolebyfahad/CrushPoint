@@ -10,6 +10,7 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { router } from "expo-router";
 import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -28,6 +29,7 @@ interface Match {
 }
 
 export default function Matches() {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const [searchText, setSearchText] = useState("");
   const [showProfileOptions, setShowProfileOptions] = useState(false);
@@ -223,25 +225,25 @@ export default function Matches() {
     () => (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyEmoji}>💕</Text>
-        <Text style={styles.emptyTitle}>No matches yet</Text>
-        <Text style={styles.emptyText}>
-          Start swiping to find your perfect match!
-        </Text>
+        <Text style={styles.emptyTitle}>{t("matches.noMatchesYet")}</Text>
+        <Text style={styles.emptyText}>{t("matches.startSwiping")}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-          <Text style={styles.retryButtonText}>Refresh</Text>
+          <Text style={styles.retryButtonText}>{t("matches.refresh")}</Text>
         </TouchableOpacity>
       </View>
     ),
-    [refetch]
+    [refetch, t]
   );
 
   const renderErrorState = useCallback(
     () => (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyEmoji}>😔</Text>
-        <Text style={styles.emptyTitle}>Error loading matches</Text>
+        <Text style={styles.emptyTitle}>
+          {t("matches.errorLoadingMatches")}
+        </Text>
         <Text style={styles.emptyText}>
-          {error || "Something went wrong. Pull to refresh."}
+          {error || t("matches.somethingWentWrong")}
         </Text>
         <TouchableOpacity
           style={[styles.retryButton, loading && styles.retryButtonDisabled]}
@@ -251,22 +253,22 @@ export default function Matches() {
           {loading ? (
             <ActivityIndicator size="small" color={color.white} />
           ) : (
-            <Text style={styles.retryButtonText}>Try Again</Text>
+            <Text style={styles.retryButtonText}>{t("common.tryAgain")}</Text>
           )}
         </TouchableOpacity>
       </View>
     ),
-    [error, loading, refetch]
+    [error, loading, refetch, t]
   );
 
   const renderLoadingState = useCallback(
     () => (
       <View style={styles.emptyContainer}>
         <ActivityIndicator size="large" color={color.primary} />
-        <Text style={styles.loadingText}>Loading your matches...</Text>
+        <Text style={styles.loadingText}>{t("matches.loadingMatches")}</Text>
       </View>
     ),
-    []
+    [t]
   );
 
   // Handle different states
@@ -281,7 +283,7 @@ export default function Matches() {
         <CustomSearchBar
           searchText={searchText}
           onChangeText={setSearchText}
-          placeholder="Search matches"
+          placeholder={t("matches.searchMatches")}
         />
       )}
 

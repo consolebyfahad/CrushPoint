@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Image,
@@ -22,6 +23,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function EventDetails({ route }: any) {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const [event, setEvent] = useState<any>(null);
   const [isAttending, setIsAttending] = useState(false);
@@ -48,7 +50,7 @@ export default function EventDetails({ route }: any) {
   if (!event) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading event...</Text>
+        <Text style={styles.loadingText}>{t("events.loadingEvent")}</Text>
       </View>
     );
   }
@@ -84,7 +86,7 @@ export default function EventDetails({ route }: any) {
 
   const handleRSVP = async () => {
     if (!user?.user_id) {
-      showToast("User session expired. Please login again.", "error");
+      showToast(t("events.userSessionExpired"), "error");
       return;
     }
 
@@ -102,10 +104,10 @@ export default function EventDetails({ route }: any) {
       if (response.result) {
         setIsAttending(!isAttending);
       } else {
-        showToast(response.message || "Failed to RSVP", "error");
+        showToast(response.message || t("events.failedToRSVP"), "error");
       }
     } catch (error) {
-      showToast("Something went wrong. Please try again.", "error");
+      showToast(t("events.somethingWentWrongTryAgain"), "error");
     } finally {
       setIsRSVPing(false);
     }
@@ -193,7 +195,9 @@ export default function EventDetails({ route }: any) {
             <View style={styles.infoContent}>
               <Text style={styles.infoText}>{event.location}</Text>
               <TouchableOpacity onPress={handleGetDirections}>
-                <Text style={styles.directionsText}>Get directions</Text>
+                <Text style={styles.directionsText}>
+                  {t("events.getDirections")}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -207,7 +211,9 @@ export default function EventDetails({ route }: any) {
               style={styles.organizerImage}
             />
             <View style={styles.organizerInfo}>
-              <Text style={styles.organizerLabel}>Organized by</Text>
+              <Text style={styles.organizerLabel}>
+                {t("events.organizedBy")}
+              </Text>
               <View style={styles.organizerNameRow}>
                 <Text style={styles.organizerName}>{event.organizer.name}</Text>
                 {event.organizer.verified && (
@@ -225,18 +231,18 @@ export default function EventDetails({ route }: any) {
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About this event</Text>
+          <Text style={styles.sectionTitle}>{t("events.aboutThisEvent")}</Text>
           <Text style={styles.description}>{event.description}</Text>
         </View>
 
         {/* Who's Going Section */}
         <View style={styles.section}>
           <View style={styles.attendeesHeader}>
-            <Text style={styles.sectionTitle}>{"Who's going"}</Text>
+            <Text style={styles.sectionTitle}>{t("events.whosGoing")}</Text>
             <View style={styles.attendeesCount}>
               <Feather name="users" size={16} color={color.gray55} />
               <Text style={styles.attendeesCountText}>
-                {event.totalAttendees} attending
+                {event.totalAttendees} {t("events.attending")}
               </Text>
             </View>
           </View>
@@ -256,7 +262,7 @@ export default function EventDetails({ route }: any) {
             </View>
 
             <TouchableOpacity onPress={handleViewAllAttendees}>
-              <Text style={styles.viewAllText}>View all</Text>
+              <Text style={styles.viewAllText}>{t("events.viewAll")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -264,14 +270,14 @@ export default function EventDetails({ route }: any) {
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <CustomButton
-            title="Add to Calendar"
+            title={t("events.addToCalendar")}
             variant="secondary"
             style={{ width: "48%" }}
             icon={<AddCalender />}
             onPress={handleAddToCalendar}
           />
           <CustomButton
-            title="Invite Matches"
+            title={t("events.inviteMatches")}
             variant="secondary"
             style={{ width: "48%" }}
             icon={<Users />}
@@ -287,7 +293,11 @@ export default function EventDetails({ route }: any) {
       <View style={styles.rsvpContainer}>
         <CustomButton
           title={
-            isRSVPing ? "Processing..." : isAttending ? "Going" : "RSVP Now"
+            isRSVPing
+              ? t("events.processing")
+              : isAttending
+              ? t("events.going")
+              : t("events.rsvpNow")
           }
           icon={<Calender />}
           onPress={handleRSVP}

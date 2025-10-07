@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   Modal,
@@ -27,6 +28,7 @@ export default function MatchCard({
   onViewProfile,
   onOptions,
 }: MatchCardProps) {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const [showRequestMeetup, setShowRequestMeetup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -162,7 +164,7 @@ export default function MatchCard({
             <View style={styles.matchHeader}>
               <View style={styles.nameRow}>
                 <Text style={styles.userName} numberOfLines={1}>
-                  {match?.name || "Unknown"}, {match?.age || "N/A"}
+                  {match?.name || t("matches.unknown")}, {match?.age || "N/A"}
                 </Text>
                 {match?.isVerified && (
                   <Feather
@@ -185,7 +187,7 @@ export default function MatchCard({
                 </Text>
                 <View style={styles.separator} />
                 <Text style={styles.timeAgo}>
-                  {match?.timeAgo || "Recently"}
+                  {match?.timeAgo || t("matches.recently")}
                 </Text>
               </View>
             </View>
@@ -206,7 +208,7 @@ export default function MatchCard({
           {/* Action Buttons */}
           <View style={styles.actionContainer}>
             <CustomButton
-              title="Request Meetup"
+              title={t("meetups.requestMeetup")}
               style={[
                 styles.requestMeetupButton,
                 isSubmitting && styles.disabledButton,
@@ -253,7 +255,7 @@ export default function MatchCard({
             onSubmit={handleSubmitMeetupRequest}
             matchData={{
               id: match?.match_id,
-              name: match?.name || "Unknown",
+              name: match?.name || t("matches.unknown"),
               image: match?.image || (match?.images && match.images[0]),
               distance: match?.distance || "2.5 km",
               matchedTime: match?.matchedTime || "2 hours ago",

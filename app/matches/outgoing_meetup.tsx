@@ -3,6 +3,7 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -10,7 +11,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 
 interface OutgoingMeetupProps {
@@ -30,6 +31,7 @@ export default function OutgoingMeetup({
   onRefresh,
   isRefreshing = false,
 }: OutgoingMeetupProps) {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -101,9 +103,9 @@ export default function OutgoingMeetup({
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyEmoji}>📤</Text>
-      <Text style={styles.emptyTitle}>No outgoing requests</Text>
+      <Text style={styles.emptyTitle}>{t("meetups.noOutgoingRequests")}</Text>
       <Text style={styles.emptyText}>
-        Meetup requests you send to others will appear here.
+        {t("meetups.noOutgoingRequestsDesc")}
       </Text>
     </View>
   );
@@ -111,10 +113,8 @@ export default function OutgoingMeetup({
   const renderSearchEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyEmoji}>🔍</Text>
-      <Text style={styles.emptyTitle}>No results found</Text>
-      <Text style={styles.emptyText}>
-        Try searching with different keywords.
-      </Text>
+      <Text style={styles.emptyTitle}>{t("meetups.noResultsFound")}</Text>
+      <Text style={styles.emptyText}>{t("meetups.tryDifferentKeywords")}</Text>
     </View>
   );
 
@@ -154,7 +154,7 @@ export default function OutgoingMeetup({
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={color.primary} />
-            <Text style={styles.loadingText}>Processing...</Text>
+            <Text style={styles.loadingText}>{t("meetups.processing")}</Text>
           </View>
         </View>
       )}

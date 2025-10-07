@@ -3,6 +3,7 @@ import CustomSearchBar from "@/components/custom_search";
 import useGetRequests from "@/hooks/useGetRequests";
 import { color, font } from "@/utils/constants";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -16,6 +17,7 @@ import IncomingMeetup from "./incoming_meetup";
 import OutgoingMeetup from "./outgoing_meetup";
 
 export default function Requests() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("incoming");
   const [searchText, setSearchText] = useState("");
 
@@ -70,14 +72,14 @@ export default function Requests() {
         <CustomSearchBar
           searchText={searchText}
           onChangeText={setSearchText}
-          placeholder="Search requests..."
+          placeholder={t("meetups.searchRequests")}
         />
       </View>
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
         <CustomButton
-          title={`Incoming`}
+          title={t("meetups.incoming")}
           count={incomingCount}
           style={[styles.tab, activeTab === "incoming" && styles.activeTab]}
           fontstyle={[
@@ -87,7 +89,7 @@ export default function Requests() {
           onPress={() => setActiveTab("incoming")}
         />
         <CustomButton
-          title={`Outgoing`}
+          title={t("meetups.outgoing")}
           count={outgoingCount}
           style={[styles.tab, activeTab === "outgoing" && styles.activeTab]}
           fontstyle={[
@@ -103,13 +105,13 @@ export default function Requests() {
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
-            <Text style={styles.retryButtonText}>Try Again</Text>
+            <Text style={styles.retryButtonText}>{t("common.tryAgain")}</Text>
           </TouchableOpacity>
         </View>
       ) : loading && totalRequests === 0 ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={color.primary} />
-          <Text style={styles.loadingText}>Loading requests...</Text>
+          <Text style={styles.loadingText}>{t("meetups.loadingRequests")}</Text>
         </View>
       ) : (
         <View style={styles.tabContent}>
@@ -149,7 +151,7 @@ export default function Requests() {
             filteredOutgoingRequests.length === 0)) && (
           <View style={styles.noResultsContainer}>
             <Text style={styles.noResultsText}>
-              No requests found matching "{searchText}"
+              {t("meetups.noRequestsFound", { searchText })}
             </Text>
           </View>
         )}

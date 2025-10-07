@@ -152,8 +152,8 @@ export default function ProfileTab() {
   if (error || !userData) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{"Failed to load profile."}</Text>
-        <CustomButton title="Retry" onPress={refetch} />
+        <Text style={styles.errorText}>{t("matches.failedToLoadProfile")}</Text>
+        <CustomButton title={t("common.retry")} onPress={refetch} />
       </View>
     );
   }
@@ -169,7 +169,7 @@ export default function ProfileTab() {
             onRefresh={handleManualRefresh}
             colors={[color.primary]}
             tintColor={color.primary}
-            title="Pull to refresh"
+            title={t("common.pullToRefresh")}
             titleColor={color.gray55}
           />
         }

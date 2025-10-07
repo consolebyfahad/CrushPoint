@@ -53,7 +53,7 @@ export default function FaceVerification() {
       }, 100);
     } catch (error) {
       console.error("Upload error:", error);
-      showToast("Failed to upload selfie", "error");
+      showToast(t("common.failedToUploadSelfie"), "error");
       // Continue with submission without selfie
       setTimeout(() => {
         submitAllData(null);
@@ -96,7 +96,7 @@ export default function FaceVerification() {
   ) => {
     try {
       if (!referenceImageUri) {
-        throw new Error("No reference image available");
+        throw new Error(t("common.noReferenceImage"));
       }
 
       const result = await compareSimpleFaces(
@@ -113,7 +113,7 @@ export default function FaceVerification() {
   // Fixed image upload for iOS
   const uploadImageToServer = async (imageUri: string): Promise<string> => {
     if (!user?.user_id) {
-      throw new Error("User ID not found. Please login again.");
+      throw new Error(t("common.userIdNotFound"));
     }
 
     try {
@@ -135,7 +135,7 @@ export default function FaceVerification() {
       if (response.result && response.file_name) {
         return response.file_name;
       } else {
-        throw new Error(response.message || "Upload failed");
+        throw new Error(response.message || t("common.uploadFailed"));
       }
     } catch (error) {
       console.error("Image upload error:", error);
@@ -183,7 +183,7 @@ export default function FaceVerification() {
       console.error("Camera/Verification error:", error);
       setVerificationState("idle");
 
-      showToast("Error in face verification", "error");
+      showToast(t("common.errorInFaceVerification"), "error");
 
       setTimeout(() => {
         Alert.alert(
@@ -203,7 +203,7 @@ export default function FaceVerification() {
   // Improved data submission with better error handling
   const submitAllData = async (selfieFileName?: string | null) => {
     if (!user?.user_id) {
-      showToast("User session expired. Please login again.", "error");
+      showToast(t("common.userSessionExpired"), "error");
       return;
     }
 
@@ -249,7 +249,7 @@ export default function FaceVerification() {
           router.push("/(tabs)");
         }, 100);
       } else {
-        throw new Error(response.message || "Failed to create profile");
+        throw new Error(response.message || t("common.failedToCreateProfile"));
       }
     } catch (error: any) {
       console.error("Submission error:", error);

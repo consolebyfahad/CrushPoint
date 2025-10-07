@@ -1,6 +1,7 @@
 import { color, font } from "@/utils/constants";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, StyleSheet, Text, View } from "react-native";
 import CustomButton from "./custom_button";
 
@@ -13,6 +14,7 @@ export default function AccessLocation({
   visible,
   onAllow,
 }: AccessLocationProps) {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -41,7 +43,7 @@ export default function AccessLocation({
           </Text>
 
           {/* Allow Button */}
-          <CustomButton title="Allow" onPress={onAllow} />
+          <CustomButton title={t("common.allow")} onPress={onAllow} />
         </View>
       </View>
     </Modal>

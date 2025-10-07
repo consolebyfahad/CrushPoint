@@ -3,14 +3,14 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -20,7 +20,7 @@ export default function ReportUser({
   onClose,
   onBack,
   onSubmit,
-  userName = "User",
+  userName,
 }: any) {
   const { t } = useTranslation();
   const [selectedReason, setSelectedReason] = useState("");
@@ -66,7 +66,7 @@ export default function ReportUser({
   const handleSubmitReport = () => {
     if (!selectedReason) {
       // Show error or alert
-      console.log("Please select a reason");
+      console.log(t("common.pleaseSelectReason"));
       return;
     }
 
@@ -79,7 +79,7 @@ export default function ReportUser({
     if (onSubmit) {
       onSubmit(reportData);
     } else {
-      console.log("Report submitted:", reportData);
+      console.log(t("common.reportSubmitted"), reportData);
     }
 
     // Reset form and close
@@ -116,7 +116,11 @@ export default function ReportUser({
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={color.black} />
             </TouchableOpacity>
-            <Text style={styles.title}>{t("report.reportUser")}</Text>
+            <Text style={styles.title}>
+              {t("report.reportUser", {
+                userName: userName || t("common.defaultUser"),
+              })}
+            </Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={color.black} />
             </TouchableOpacity>
@@ -127,9 +131,7 @@ export default function ReportUser({
             showsVerticalScrollIndicator={false}
           >
             {/* Question */}
-            <Text style={styles.questionText}>
-              {t("report.whatsWrong")}
-            </Text>
+            <Text style={styles.questionText}>{t("report.whatsWrong")}</Text>
 
             {/* Report Reasons */}
             <View style={styles.reasonsContainer}>
@@ -198,7 +200,9 @@ export default function ReportUser({
                 color={color.white}
                 style={styles.submitIcon}
               />
-              <Text style={styles.submitButtonText}>{t("report.submitReport")}</Text>
+              <Text style={styles.submitButtonText}>
+                {t("report.submitReport")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

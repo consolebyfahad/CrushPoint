@@ -8,13 +8,13 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    ActivityIndicator,
-    FlatList,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -63,9 +63,7 @@ export default function EventsTab() {
         {searchText ? t("events.noEvents") : t("events.noEvents")}
       </Text>
       <Text style={styles.emptyText}>
-        {searchText
-          ? t("common.tryAgain")
-          : t("events.noEventsDesc")}
+        {searchText ? t("common.tryAgain") : t("events.noEventsDesc")}
       </Text>
     </View>
   );
@@ -80,78 +78,55 @@ export default function EventsTab() {
       <View style={styles.emptyIconContainer}>
         <Ionicons name="alert-circle-outline" size={64} color={color.error} />
       </View>
-      <Text style={styles.emptyTitle}>Something went wrong</Text>
+      <Text style={styles.emptyTitle}>{t("events.somethingWentWrong")}</Text>
       <Text style={styles.emptyText}>{error}</Text>
-      <Text style={styles.retryText}>Pull down to retry</Text>
+      <Text style={styles.retryText}>{t("events.pullDownToRetry")}</Text>
     </ScrollView>
   );
 
   const renderLoadingState = () => (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={color.primary} />
-      <Text style={styles.loadingText}>Loading events...</Text>
+      <Text style={styles.loadingText}>{t("events.loadingEvents")}</Text>
     </View>
   );
 
-  // Show loading state on initial load
-  if (loading && events.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <EventsTabsHeader title={t("events.events")} events={[]} />
-        <CustomSearchBar
-          searchText={searchText}
-          onChangeText={setSearchText}
-          placeholder={t("common.search")}
-        />
-        {renderLoadingState()}
-      </SafeAreaView>
-    );
-  }
-
-  // Show error state if there's an error and no events
-  if (error && events.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <EventsTabsHeader title={t("events.events")} events={[]} />
-        <CustomSearchBar
-          searchText={searchText}
-          onChangeText={setSearchText}
-          placeholder={t("common.search")}
-        />
-        {renderErrorState()}
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {/* Header - Always shown */}
       <EventsTabsHeader title={t("events.events")} events={events} />
 
-      {/* Search Bar */}
+      {/* Search Bar - Always shown */}
       <CustomSearchBar
         searchText={searchText}
         onChangeText={setSearchText}
         placeholder={t("common.search")}
       />
 
-      {/* Events List */}
-      <FlatList
-        data={filteredEvents}
-        renderItem={renderEventCard}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={renderEmptyState}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={handleRefresh}
-            colors={[color.primary]}
-            tintColor={color.primary}
-          />
-        }
-      />
+      {/* Conditional Content */}
+      {error && events.length === 0 ? (
+        renderErrorState()
+      ) : loading && events.length === 0 ? (
+        renderLoadingState()
+      ) : (
+        /* Events List */
+        <FlatList
+          data={filteredEvents}
+          renderItem={renderEventCard}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={renderEmptyState}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={handleRefresh}
+              colors={[color.primary]}
+              tintColor={color.primary}
+            />
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }

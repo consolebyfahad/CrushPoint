@@ -9,7 +9,7 @@ export default function BlockConfirmation({
   onClose,
   onConfirm,
   onBack,
-  userName = "User",
+  userName,
 }: any) {
   const { t } = useTranslation();
   const handleConfirm = () => {
@@ -47,7 +47,11 @@ export default function BlockConfirmation({
             <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={color.black} />
             </TouchableOpacity>
-            <Text style={styles.title}>{t("block.blockUser", { userName })}</Text>
+            <Text style={styles.title}>
+              {t("block.blockUser", {
+                userName: userName || t("common.defaultUser"),
+              })}
+            </Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={color.black} />
             </TouchableOpacity>
@@ -61,7 +65,9 @@ export default function BlockConfirmation({
             </View>
 
             {/* Confirmation Text */}
-            <Text style={styles.confirmationTitle}>{t("block.areYouSure")}</Text>
+            <Text style={styles.confirmationTitle}>
+              {t("block.areYouSure")}
+            </Text>
             <Text style={styles.confirmationText}>
               {t("block.blockDescription", { userName })}
             </Text>

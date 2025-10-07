@@ -1,9 +1,12 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function EventCard({ event, onPress, onToggleAttending }: any) {
+  const { t } = useTranslation();
+
   const handlePress = () => {
     if (onPress) {
       onPress(event);
@@ -51,7 +54,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
         {/* Going Badge - Only show if user is attending */}
         {event.isAttending && (
           <View style={styles.goingBadge}>
-            <Text style={styles.goingText}>Going</Text>
+            <Text style={styles.goingText}>{t("events.going")}</Text>
           </View>
         )}
       </View>
@@ -88,7 +91,8 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           <View style={styles.attendeesInfo}>
             <Ionicons name="people-outline" size={14} color={color.gray69} />
             <Text style={styles.attendeesText}>
-              {event.totalAttendees || event.attendees || 0} attending
+              {event.totalAttendees || event.attendees || 0}{" "}
+              {t("events.attending")}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={color.gray69} />
