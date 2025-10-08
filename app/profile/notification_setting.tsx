@@ -227,7 +227,7 @@ export default function NotificationSettings({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <Header title={"Notifications"} divider={true} />
+      <Header title={t("common.notifications")} divider={true} />
 
       {/* Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -240,7 +240,7 @@ export default function NotificationSettings({ navigation }: any) {
       {/* Save Button */}
       <View style={styles.buttonContainer}>
         <CustomButton
-          title={isLoading ? "Saving..." : "Save Changes"}
+          title={isLoading ? t("common.saving") : t("common.saveChanges")}
           onPress={handleSaveChanges}
           isDisabled={!isChanged || isLoading}
           isLoading={isLoading}

@@ -361,7 +361,25 @@
     "eventReminder": "Event-Erinnerung",
     "eventReminderDesc": "Erinnerungen für bevorstehende Events",
     "offersPromotions": "Angebote & Aktionen",
-    "offersPromotionsDesc": "Spezielle Angebote und Aktionen"
+    "offersPromotionsDesc": "Spezielle Angebote und Aktionen",
+    "searchLocation": "Standort suchen...",
+    "noResultsFound": "Keine Ergebnisse gefunden",
+    "searching": "Suche...",
+    "selectLocation": "Standort auswählen",
+    "locationNotFound": "Standort nicht gefunden",
+    "editPrivateSpot": "Privaten Bereich bearbeiten",
+    "editYourPrivateSpot": "Deinen privaten Bereich bearbeiten",
+    "setYourPrivateSpot": "Deinen privaten Bereich festlegen",
+    "updatePrivateSpotDesc": "Standort und Radius dieses privaten Bereichs aktualisieren",
+    "updatePrivateAreaDesc": "Bereich aktualisieren, in dem du für andere nicht sichtbar sein möchtest",
+    "setPrivateAreaDesc": "Ziehe die Karte, um einen Bereich zu wählen, in dem du für andere nicht sichtbar sein möchtest, \nDu kannst bis zu 3 private Bereiche in den Profileinstellungen hinzufügen.",
+    "choosePrivateAreaDesc": "Wähle einen Bereich auf der Karte, in dem du für andere nicht sichtbar sein möchtest",
+    "updating": "Aktualisieren...",
+    "updateSpot": "Bereich aktualisieren",
+    "continue": "Weiter",
+    "gettingLocation": "Deinen Standort ermitteln...",
+    "privacyRadius": "Datenschutz-Radius",
+    "enableLocationAccess": "Standortzugriff aktivieren"
   },
 
   "filters": {

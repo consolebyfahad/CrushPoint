@@ -361,7 +361,25 @@
     "eventReminder": "Event Reminder",
     "eventReminderDesc": "Reminders for upcoming events",
     "offersPromotions": "Offers & Promotions",
-    "offersPromotionsDesc": "Special offers and promotions"
+    "offersPromotionsDesc": "Special offers and promotions",
+    "searchLocation": "Search location...",
+    "noResultsFound": "No results found",
+    "searching": "Searching...",
+    "selectLocation": "Select a location",
+    "locationNotFound": "Location not found",
+    "editPrivateSpot": "Edit Private Spot",
+    "editYourPrivateSpot": "Edit Your Private Spot",
+    "setYourPrivateSpot": "Set Your Private Spot",
+    "updatePrivateSpotDesc": "Update this private spot location and radius",
+    "updatePrivateAreaDesc": "Update the area where you don't want to be visible to others",
+    "setPrivateAreaDesc": "Drag the map to choose an area where you don't want to be visible to others, \nYou can add up to 3 Private Spots in profile setting.",
+    "choosePrivateAreaDesc": "Choose an area on the map where you don't want to be visible to others",
+    "updating": "Updating...",
+    "updateSpot": "Update Spot",
+    "continue": "Continue",
+    "gettingLocation": "Getting your location...",
+    "privacyRadius": "Privacy Radius",
+    "enableLocationAccess": "Enable Location Access"
   },
 
   "filters": {

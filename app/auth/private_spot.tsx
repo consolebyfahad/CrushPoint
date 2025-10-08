@@ -4,17 +4,26 @@ import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
-import { requestUserLocation } from "@/utils/location";
+import {
+  getCurrentLocationSuggestion,
+  getPopularLocations,
+  requestUserLocation,
+  searchLocations,
+} from "@/utils/location";
 import { MarkerIcon } from "@/utils/SvgIcons";
+import { Ionicons } from "@expo/vector-icons";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -29,6 +38,7 @@ type PrivateSpotData = {
 };
 
 export default function PrivateSpot() {
+  const { t } = useTranslation();
   const { updateUserData, userData, user } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
@@ -83,6 +93,21 @@ export default function PrivateSpot() {
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Search functionality state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (existingSpotData) {
@@ -192,6 +217,81 @@ export default function PrivateSpot() {
     });
   };
 
+  // Search functionality
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await searchLocations(query);
+      setSearchResults(results);
+      setShowSearchResults(true);
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchResults([]);
+      setShowSearchResults(false);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Show initial suggestions when search field is focused
+  const handleSearchFocus = async () => {
+    if (searchQuery.trim().length === 0) {
+      // Show popular locations and current location
+      const popularLocations = getPopularLocations();
+      const currentLocation = await getCurrentLocationSuggestion();
+
+      const suggestions = currentLocation
+        ? [currentLocation, ...popularLocations.slice(0, 4)]
+        : popularLocations.slice(0, 5);
+
+      setSearchResults(suggestions);
+      setShowSearchResults(true);
+    }
+  };
+
+  const handleLocationSelect = (location: any) => {
+    const newRegion: Region = {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+    setMapRegion(newRegion);
+    setSearchQuery(location.name || location.address);
+    setShowSearchResults(false);
+    setSearchResults([]);
+  };
+
+  // Debounce timer reference
+  const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  const handleSearchInputChange = (text: string) => {
+    setSearchQuery(text);
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (text.trim().length >= 2) {
+      // Debounce search - only search after user stops typing for 500ms
+      searchTimeoutRef.current = setTimeout(() => {
+        handleSearch(text);
+      }, 500);
+    } else if (text.trim().length === 0) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  };
+
   const handleSaveAndContinue = async () => {
     // Get user's real current location and save to userData
     try {
@@ -212,7 +312,7 @@ export default function PrivateSpot() {
 
   const handleSaveChanges = async () => {
     if (!user?.user_id) {
-      Alert.alert("Error", "User session expired. Please login again.");
+      Alert.alert(t("common.error"), t("common.userSessionExpired"));
       return;
     }
 
@@ -268,13 +368,13 @@ export default function PrivateSpot() {
           }
         }, 500);
       } else {
-        throw new Error(response.message || "Failed to save private spot");
+        throw new Error(response.message || t("common.failedToCreateProfile"));
       }
     } catch (error) {
       showToast(
         existingSpotData?.id
-          ? "Failed to update private spot. Please try again."
-          : "Failed to add private spot. Please try again.",
+          ? t("common.failedToUpdateNotifications")
+          : t("common.failedToCreateProfile"),
         "error"
       );
     } finally {
@@ -288,39 +388,39 @@ export default function PrivateSpot() {
 
   const getTitle = () => {
     if (existingSpotData?.id) {
-      return "Edit Private Spot";
+      return t("common.editPrivateSpot");
     } else if (isEdit) {
-      return "Edit Your Private Spot";
+      return t("common.editYourPrivateSpot");
     } else {
-      return "Set Your Private Spot";
+      return t("common.setYourPrivateSpot");
     }
   };
 
   const getSubtitle = () => {
     if (existingSpotData?.id) {
-      return "Update this private spot location and radius";
+      return t("common.updatePrivateSpotDesc");
     } else if (isEdit) {
-      return "Update the area where you don't want to be visible to others";
+      return t("common.updatePrivateAreaDesc");
     } else if (locationPermissionGranted) {
-      return "Drag the map to choose an area where you don't want to be visible to others, \nYou can add up to 3 Private Spots in profile setting.";
+      return t("common.setPrivateAreaDesc");
     } else {
-      return "Choose an area on the map where you don't want to be visible to others";
+      return t("common.choosePrivateAreaDesc");
     }
   };
 
   const getButtonTitle = () => {
     if (isSaving) {
       return existingSpotData?.id
-        ? "Updating..."
+        ? t("common.updating")
         : isEdit
-        ? "Saving..."
-        : "Saving...";
+        ? t("common.saving")
+        : t("common.saving");
     } else if (existingSpotData?.id) {
-      return "Update Spot";
+      return t("common.updateSpot");
     } else if (isEdit) {
-      return "Save Changes";
+      return t("common.saveChanges");
     } else {
-      return "Continue";
+      return t("common.continue");
     }
   };
 
@@ -338,7 +438,7 @@ export default function PrivateSpot() {
         <Header />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={color.primary} />
-          <Text style={styles.loadingText}>Getting your location...</Text>
+          <Text style={styles.loadingText}>{t("common.gettingLocation")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -356,6 +456,96 @@ export default function PrivateSpot() {
               {getSubtitle()}
             </Text>
           </View>
+        </View>
+
+        {/* Search Field */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons
+              name="search"
+              size={20}
+              color={color.gray55}
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder={t("common.searchLocation")}
+              placeholderTextColor={color.gray55}
+              value={searchQuery}
+              onChangeText={handleSearchInputChange}
+              onFocus={handleSearchFocus}
+            />
+            {isSearching && (
+              <ActivityIndicator
+                size="small"
+                color={color.primary}
+                style={styles.searchLoading}
+              />
+            )}
+          </View>
+
+          {/* Search Results */}
+          {showSearchResults && searchResults.length > 0 && (
+            <View style={styles.searchResultsContainer}>
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item, index) =>
+                  `${item.latitude}-${item.longitude}-${index}`
+                }
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.searchResultItem}
+                    onPress={() => handleLocationSelect(item)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons
+                      name={
+                        item.type === "recent"
+                          ? "time-outline"
+                          : item.type === "popular"
+                          ? "star-outline"
+                          : "location-outline"
+                      }
+                      size={20}
+                      color={
+                        item.type === "recent"
+                          ? color.primary
+                          : item.type === "popular"
+                          ? "#FFA500"
+                          : color.gray55
+                      }
+                    />
+                    <View style={styles.searchResultText}>
+                      <Text style={styles.searchResultTitle} numberOfLines={1}>
+                        {item.name || item.address}
+                      </Text>
+                      {item.address && item.name && (
+                        <Text
+                          style={styles.searchResultSubtitle}
+                          numberOfLines={1}
+                        >
+                          {item.address}
+                        </Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                )}
+                style={styles.searchResultsList}
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
+          )}
+
+          {showSearchResults &&
+            searchResults.length === 0 &&
+            searchQuery.trim() &&
+            !isSearching && (
+              <View style={styles.noResultsContainer}>
+                <Text style={styles.noResultsText}>
+                  {t("common.noResultsFound")}
+                </Text>
+              </View>
+            )}
         </View>
 
         {/* Map Container */}
@@ -399,7 +589,7 @@ export default function PrivateSpot() {
         </View>
 
         <View style={styles.radiusSection}>
-          <Text style={styles.radiusTitle}>Privacy Radius</Text>
+          <Text style={styles.radiusTitle}>{t("common.privacyRadius")}</Text>
           <View style={styles.radiusButtons}>
             <TouchableOpacity
               style={[
@@ -454,7 +644,9 @@ export default function PrivateSpot() {
               onPress={getUserLocation}
               activeOpacity={0.8}
             >
-              <Text style={styles.retryButtonText}>Enable Location Access</Text>
+              <Text style={styles.retryButtonText}>
+                {t("common.enableLocationAccess")}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -605,5 +797,106 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderColor: color.gray87,
+  },
+  // Search styles
+  searchContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    position: "relative",
+    zIndex: 1000,
+  },
+  searchInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: color.gray95,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: color.gray87,
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.black,
+  },
+  searchLoading: {
+    marginLeft: 8,
+  },
+  searchResultsContainer: {
+    position: "absolute",
+    top: "100%",
+    left: 16,
+    right: 16,
+    backgroundColor: color.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: color.gray87,
+    maxHeight: 200,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    zIndex: 1001,
+  },
+  searchResultsList: {
+    maxHeight: 200,
+  },
+  searchResultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray95,
+  },
+  searchResultText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  searchResultTitle: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.black,
+    marginBottom: 2,
+  },
+  searchResultSubtitle: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray55,
+  },
+  noResultsContainer: {
+    position: "absolute",
+    top: "100%",
+    left: 16,
+    right: 16,
+    backgroundColor: color.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: color.gray87,
+    padding: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    zIndex: 1001,
+  },
+  noResultsText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.gray55,
   },
 });
