@@ -9,6 +9,7 @@ import {
 } from "@react-native-google-signin/google-signin";
 import * as AppleAuthentication from "expo-apple-authentication";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 
 interface SocialAuthProps {
@@ -29,9 +30,9 @@ interface UserData {
 // Configure Google Sign-In once
 GoogleSignin.configure({
   webClientId:
-    "247710361352-tpf24aqbsl6cldmat3m6377hh27mv8mo.apps.googleusercontent.com",
+    "323137189211-bsva08l18ig45dvalqhcbs08mqrgsi4j.apps.googleusercontent.com",
   iosClientId:
-    "247710361352-4783hk46dnrgqqj6rtqel6nl8q5i3rhp.apps.googleusercontent.com",
+    "323137189211-bsva08l18ig45dvalqhcbs08mqrgsi4j.apps.googleusercontent.com",
   offlineAccess: true,
   forceCodeForRefreshToken: true,
 });
@@ -41,6 +42,7 @@ export default function SocialAuth({
   onAuthError,
   isDisabled = false,
 }: SocialAuthProps) {
+  const { t } = useTranslation();
   const [appleLoading, setAppleLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -100,12 +102,12 @@ export default function SocialAuth({
           console.log("Google Sign-In completed successfully");
           onAuthSuccess(userData, "google");
         } else {
-          onAuthError(apiResponse.message || "Google Sign-In failed");
+          onAuthError(apiResponse.message || t("auth.googleSignInFailed"));
           console.error("Google Sign-In API Error:", apiResponse.message);
         }
       } else {
         console.log("Google Sign-In was cancelled or failed");
-        onAuthError("Google sign in was cancelled");
+        onAuthError(t("auth.googleSignInCancelled"));
       }
     } catch (error) {
       console.error("Google Sign-In Error:", error);
@@ -113,29 +115,27 @@ export default function SocialAuth({
       if (isErrorWithCode(error)) {
         switch (error.code) {
           case statusCodes.SIGN_IN_CANCELLED:
-            onAuthError("Google sign in was cancelled");
+            onAuthError(t("auth.googleSignInCancelled"));
             break;
           case statusCodes.IN_PROGRESS:
-            onAuthError("Sign in already in progress");
+            onAuthError(t("auth.googleSignInInProgress"));
             break;
           case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            onAuthError("Google Play Services not available");
+            onAuthError(t("auth.googlePlayServicesNotAvailable"));
             break;
           case "DEVELOPER_ERROR":
-            onAuthError(
-              "Configuration error. Please check Google Sign-In setup."
-            );
+            onAuthError(t("auth.googleSignInConfigError"));
             console.error(
               "DEVELOPER_ERROR - Check configuration files and client IDs"
             );
             break;
           default:
             onAuthError(
-              `Google sign in failed: ${error.message || error.code}`
+              `${t("auth.googleSignInFailed")}: ${error.message || error.code}`
             );
         }
       } else {
-        onAuthError("Something went wrong with Google Sign-In");
+        onAuthError(t("auth.googleSignInError"));
       }
     } finally {
       setGoogleLoading(false);
@@ -148,7 +148,7 @@ export default function SocialAuth({
     try {
       const isAvailable = await AppleAuthentication.isAvailableAsync();
       if (!isAvailable) {
-        onAuthError("Apple Sign-In is not available on this device");
+        onAuthError(t("auth.appleSignInNotAvailable"));
         return;
       }
 
@@ -160,7 +160,7 @@ export default function SocialAuth({
       });
 
       if (!credential.identityToken) {
-        onAuthError("Apple Sign-In failed: No identity token received");
+        onAuthError(t("auth.appleSignInNoToken"));
         return;
       }
       const name = credential.fullName
@@ -189,20 +189,20 @@ export default function SocialAuth({
 
         onAuthSuccess(userInfo, "apple");
       } else {
-        onAuthError(apiResponse.message || "Apple Sign-In failed");
+        onAuthError(apiResponse.message || t("auth.appleSignInFailed"));
         console.error("Apple Sign-In API Error:", apiResponse.message);
       }
     } catch (error: any) {
       console.error("Apple Sign-In Error:", error);
 
       if (error.code === "ERR_CANCELED") {
-        onAuthError("Apple Sign-In was canceled");
+        onAuthError(t("auth.appleSignInCancelled"));
       } else if (error.code === "ERR_INVALID_RESPONSE") {
-        onAuthError("Apple Sign-In failed: Invalid response");
+        onAuthError(t("auth.appleSignInInvalidResponse"));
       } else if (error.code === "ERR_NOT_AVAILABLE") {
-        onAuthError("Apple Sign-In is not available");
+        onAuthError(t("auth.appleSignInNotAvailableDevice"));
       } else {
-        onAuthError("Apple Sign-In failed. Please try again.");
+        onAuthError(t("auth.appleSignInTryAgain"));
       }
     } finally {
       setAppleLoading(false);
@@ -212,7 +212,7 @@ export default function SocialAuth({
   return (
     <View style={styles.container}>
       <CustomButton
-        title="Continue with Apple"
+        title={t("auth.continueWithApple")}
         onPress={handleAppleSignIn}
         icon={<AppleIcon />}
         variant="secondary"
@@ -221,7 +221,7 @@ export default function SocialAuth({
       />
 
       <CustomButton
-        title="Continue with Google"
+        title={t("auth.continueWithGoogle")}
         onPress={handleGoogleSignIn}
         icon={<GoogleIcon />}
         variant="secondary"

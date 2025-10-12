@@ -6,19 +6,21 @@ import { color, font } from "@/utils/constants";
 import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LookingFor() {
+  const { t } = useTranslation();
   const { updateUserData } = useAppContext();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const options = [
-    { id: "serious", label: "🩵 Serious relationship" },
-    { id: "casual", label: "😘 Casual dating" },
-    { id: "friendship", label: "🤝 Friendship" },
-    { id: "open", label: "🔥 Open to possibilities" },
-    { id: "prefer-not", label: "🤫 Prefer not to say" },
+    { id: "serious", label: `🩵 ${t("lookingFor.seriousRelationship")}` },
+    { id: "casual", label: `😘 ${t("lookingFor.casualDating")}` },
+    { id: "friendship", label: `🤝 ${t("lookingFor.friendship")}` },
+    { id: "open", label: `🔥 ${t("lookingFor.openToPossibilities")}` },
+    { id: "prefer-not", label: `🤫 ${t("lookingFor.preferNotToSay")}` },
   ];
 
   const handleSelectionChange = (newSelection: string[]) => {
@@ -44,11 +46,13 @@ export default function LookingFor() {
       <Header />
       <View style={styles.content}>
         <View style={styles.titleSection}>
-          <Text style={styles.title}>What are you looking for?</Text>
+          <Text style={styles.title}>
+            {t("lookingFor.whatAreYouLookingFor")}
+          </Text>
           <View style={styles.subtitleContainer}>
             <Text style={styles.subtitle}>
-              <Octicons name="info" size={14} color={color.gray55} /> Select all
-              that apply to help others understand your intentions
+              <Octicons name="info" size={14} color={color.gray55} />{" "}
+              {t("lookingFor.selectAllThatApply")}
             </Text>
           </View>
         </View>
@@ -66,7 +70,7 @@ export default function LookingFor() {
 
       <View style={styles.buttonContainer}>
         <CustomButton
-          title="Continue"
+          title={t("continue")}
           onPress={handleContinue}
           isDisabled={selectedOptions.length === 0}
         />

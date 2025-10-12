@@ -110,6 +110,7 @@ export default function RequestMeetup({
       formData.append("table_name", "meetup_requests");
       formData.append("date_id", matchData.id);
       formData.append("date", formattedDate);
+      formData.append("new_date", formattedDate);
       formData.append("time", formattedTime);
       formData.append("location", location.trim());
       formData.append("message", message.trim());
@@ -120,7 +121,7 @@ export default function RequestMeetup({
 
       if (response.result) {
         Alert.alert(
-          t("common.success"),
+          t("success"),
           t("meetups.meetupRequestSent", { name: matchData.name }),
           [
             {

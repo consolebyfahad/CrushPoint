@@ -9,12 +9,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -113,7 +113,7 @@ export default function Login() {
             onPress={() => setActiveTab("phone")}
           >
             <PhoneIcon />
-            <Text style={styles.tabText}>Phone</Text>
+            <Text style={styles.tabText}>{t("auth.phone")}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -124,14 +124,16 @@ export default function Login() {
             onPress={() => setActiveTab("email")}
           >
             <EmailIcon />
-            <Text style={styles.tabText}>Email</Text>
+            <Text style={styles.tabText}>{t("auth.email")}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Input Section */}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>
-            {activeTab === "phone" ? t("auth.phoneNumber") : t("auth.emailAddress")}
+            {activeTab === "phone"
+              ? t("auth.phoneNumber")
+              : t("auth.emailAddress")}
           </Text>
 
           <View style={styles.inputContainer}>

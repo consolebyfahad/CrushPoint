@@ -6,6 +6,7 @@ import { FemaleIcon, MaleIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Animated,
   StyleSheet,
@@ -16,6 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Gender() {
+  const { t } = useTranslation();
   const { updateUserData } = useAppContext();
 
   const [selectedGender, setSelectedGender] = useState("male");
@@ -115,10 +117,10 @@ export default function Gender() {
       <Header />
       <View style={styles.content}>
         <View style={styles.titleSection}>
-          <Text style={styles.title}>{"What's your gender?"}</Text>
+          <Text style={styles.title}>{t("common.whatsYourGender")}</Text>
           <Text style={styles.subtitle}>
-            <Octicons name="info" size={14} color={color.gray55} /> This helps
-            us create a better experience for you
+            <Octicons name="info" size={14} color={color.gray55} />{" "}
+            {t("common.genderHelpText")}
           </Text>
         </View>
 
@@ -148,7 +150,7 @@ export default function Gender() {
                     : styles.unselectedText,
                 ]}
               >
-                Male
+                {t("common.male")}
               </Text>
             </Animated.View>
           </TouchableOpacity>
@@ -178,7 +180,7 @@ export default function Gender() {
                     : styles.unselectedText,
                 ]}
               >
-                Female
+                {t("common.female")}
               </Text>
             </Animated.View>
           </TouchableOpacity>
@@ -186,7 +188,7 @@ export default function Gender() {
       </View>
 
       <View style={styles.buttonContainer}>
-        <CustomButton title="Continue" onPress={handleContinue} />
+        <CustomButton title={t("continue")} onPress={handleContinue} />
       </View>
     </SafeAreaView>
   );

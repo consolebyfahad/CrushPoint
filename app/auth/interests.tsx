@@ -88,12 +88,15 @@ export default function Interests() {
 
   const handleSaveChanges = async () => {
     if (!user?.user_id) {
-      Alert.alert("Error", "User session expired. Please login again.");
+      Alert.alert(t("common.error"), t("interests.errorSessionExpired"));
       return;
     }
 
     if (selectedInterests.length === 0) {
-      Alert.alert("Validation Error", "Please select at least one interest.");
+      Alert.alert(
+        t("interests.validationError"),
+        t("interests.selectAtLeastOne")
+      );
       return;
     }
     console.log("selectedInterests", selectedInterests);
@@ -113,10 +116,10 @@ export default function Interests() {
           router.back();
         }, 1000);
       } else {
-        showToast("Failed to update interests", "error");
+        showToast(t("interests.updateFailed"), "error");
       }
     } catch (error) {
-      showToast("Failed to update interests. Please try again.", "error");
+      showToast(t("interests.updateFailedRetry"), "error");
     } finally {
       setIsLoading(false);
     }
@@ -171,9 +174,9 @@ export default function Interests() {
             </Text>
             <View style={styles.subtitleContainer}>
               <Text style={styles.subtitle}>
-                <Octicons name="info" size={14} color={color.gray55} />
+                <Octicons name="info" size={14} color={color.gray55} />{" "}
                 {params.isEdit
-                  ? " Update your interests to get better matches"
+                  ? t("interests.updateInterestsSubtitle")
                   : t("interests.selectAtLeast", { count: 3 })}
               </Text>
             </View>
@@ -233,7 +236,10 @@ export default function Interests() {
       {!params.isEdit ? (
         <View style={styles.bottomSection}>
           <Animated.Text style={[styles.selectedCount, animatedCounterStyle]}>
-            Selected: {selectedInterests.length} (minimum {minSelections})
+            {t("interests.selectedCount", {
+              count: selectedInterests.length,
+              min: minSelections,
+            })}
           </Animated.Text>
           <CustomButton
             title={t("interests.continue")}
@@ -244,8 +250,13 @@ export default function Interests() {
       ) : (
         <View style={styles.buttonContainer}>
           <Text style={styles.selectedCountEdit}>
-            Selected: {selectedInterests.length} interest
-            {selectedInterests.length !== 1 ? "s" : ""}
+            {selectedInterests.length === 1
+              ? t("interests.selectedCountEdit", {
+                  count: selectedInterests.length,
+                })
+              : t("interests.selectedCountEditPlural", {
+                  count: selectedInterests.length,
+                })}
           </Text>
           <CustomButton
             title={isLoading ? t("common.loading") : t("common.save")}

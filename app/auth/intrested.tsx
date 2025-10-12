@@ -6,10 +6,12 @@ import { FemaleIcon, MaleIcon } from "@/utils/SvgIcons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Interested() {
+  const { t } = useTranslation();
   const { updateUserData, userData } = useAppContext();
   const [selectedInterest, setSelectedInterest] = useState(
     userData?.gender === "female"
@@ -33,12 +35,12 @@ export default function Interested() {
       <Header />
       <View style={styles.content}>
         <View style={styles.titleSection}>
-          <Text style={styles.title}>Who are you interested in?</Text>
+          <Text style={styles.title}>{t("common.whoAreYouInterestedIn")}</Text>
           <View style={styles.subtitleContainer}>
             {/* <InfoIcon /> */}
             <Text style={styles.subtitle}>
-              <Octicons name="info" size={14} color={color.gray55} /> This helps
-              us show you relevant profiles nearby
+              <Octicons name="info" size={14} color={color.gray55} />{" "}
+              {t("common.interestedHelpText")}
             </Text>
           </View>
         </View>
@@ -64,7 +66,7 @@ export default function Interested() {
                   : styles.unselectedText,
               ]}
             >
-              Men
+              {t("common.men")}
             </Text>
           </TouchableOpacity>
 
@@ -88,7 +90,7 @@ export default function Interested() {
                   : styles.unselectedText,
               ]}
             >
-              Women
+              {t("common.women")}
             </Text>
           </TouchableOpacity>
 
@@ -113,14 +115,14 @@ export default function Interested() {
                   : styles.unselectedText,
               ]}
             >
-              Both
+              {t("common.both")}
             </Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.buttonContainer}>
-        <CustomButton title="Continue" onPress={handleContinue} />
+        <CustomButton title={t("continue")} onPress={handleContinue} />
       </View>
     </SafeAreaView>
   );

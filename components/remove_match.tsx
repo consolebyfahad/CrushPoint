@@ -1,6 +1,7 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function RemoveMatch({
@@ -10,6 +11,8 @@ export default function RemoveMatch({
   onBack,
   userName = "User",
 }: any) {
+  const { t } = useTranslation();
+
   const handleConfirm = () => {
     if (onConfirm) {
       onConfirm();
@@ -42,7 +45,7 @@ export default function RemoveMatch({
         <View style={styles.modalContainer}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Remove Match</Text>
+            <Text style={styles.title}>{t("profile.removeMatch")}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={color.black} />
             </TouchableOpacity>
@@ -56,10 +59,11 @@ export default function RemoveMatch({
             </View>
 
             {/* Confirmation Text */}
-            <Text style={styles.confirmationTitle}>Are you sure?</Text>
+            <Text style={styles.confirmationTitle}>
+              {t("block.areYouSure")}
+            </Text>
             <Text style={styles.confirmationText}>
-              Are you sure you want to remove {userName} from your matches? This
-              action cannot be undone.
+              {t("common.removeMatchConfirmation", { userName })}
             </Text>
           </View>
 
@@ -70,7 +74,7 @@ export default function RemoveMatch({
               onPress={handleCancel}
               activeOpacity={0.8}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t("cancel")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -78,7 +82,9 @@ export default function RemoveMatch({
               onPress={handleConfirm}
               activeOpacity={0.8}
             >
-              <Text style={styles.removeButtonText}>Remove</Text>
+              <Text style={styles.removeButtonText}>
+                {t("profile.removeMatch")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -528,6 +528,73 @@ export const formatTimeAgo = (date: string, time: string) => {
   }
 };
 
+/**
+ * Parse created_at timestamp and add timezone offset (e.g., 3 hours)
+ * Format: "Oct 11, 2025 10:24 PM"
+ */
+export const parseCreatedAtWithOffset = (
+  createdAtStr: string,
+  hoursOffset: number = 3
+): Date => {
+  try {
+    const monthMap: { [key: string]: number } = {
+      Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+      Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+    };
+
+    // Parse "Oct 11, 2025 10:24 PM"
+    const parts = createdAtStr.split(" ");
+    const month = monthMap[parts[0]];
+    const day = parseInt(parts[1].replace(",", ""));
+    const year = parseInt(parts[2]);
+    const timeValue = parts[3];
+    const ampm = parts[4];
+
+    const [hours, minutes] = timeValue.split(":").map(Number);
+
+    // Convert to 24-hour format
+    let hour24 = hours;
+    if (ampm === "PM" && hours !== 12) {
+      hour24 += 12;
+    } else if (ampm === "AM" && hours === 12) {
+      hour24 = 0;
+    }
+
+    // Create date and add offset
+    const date = new Date(year, month, day, hour24, minutes);
+    date.setHours(date.getHours() + hoursOffset);
+
+    return date;
+  } catch (error) {
+    console.warn("Error parsing created_at:", error);
+    return new Date();
+  }
+};
+
+/**
+ * Calculate time ago from a Date object
+ */
+export const calculateTimeAgo = (date: Date): string => {
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInSeconds = Math.floor(diffInMs / 1000);
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  const diffInDays = Math.floor(diffInHours / 24);
+
+  if (diffInMinutes < 1) {
+    return "Just now";
+  } else if (diffInHours < 1) {
+    return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+  } else if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+  } else if (diffInDays === 1) {
+    return "1 day ago";
+  } else {
+    return `${diffInDays} days ago`;
+  }
+};
+
 // ==================== IMAGE PARSING UTILITIES ====================
 
 const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";

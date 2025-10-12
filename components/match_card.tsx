@@ -258,7 +258,7 @@ export default function MatchCard({
               name: match?.name || t("matches.unknown"),
               image: match?.image || (match?.images && match.images[0]),
               distance: match?.distance || "2.5 km",
-              matchedTime: match?.matchedTime || "2 hours ago",
+              matchedTime: match?.timeAgo || "2 hours ago",
             }}
           />
         </View>

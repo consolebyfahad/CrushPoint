@@ -1,8 +1,10 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
+import { calculateDistance } from "@/utils/distanceCalculator";
 import {
   calculateAge,
-  formatTimeAgo,
+  calculateTimeAgo,
+  parseCreatedAtWithOffset,
   parseInterestsWithNames,
   parseLookingForWithLabels,
 } from "@/utils/helper";
@@ -46,11 +48,11 @@ interface MatchUser {
 const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
 
 const useGetMatches = () => {
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
   const [matches, setMatches] = useState<MatchUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
+  console.log("userData", userData);
   // Parse images similar to useGetUsers
   const parseImages = (
     imagesStr: string,
@@ -139,7 +141,7 @@ const useGetMatches = () => {
       formData.append("user_id", user.user_id);
       console.log("formData", formData);
       const response = await apiCall(formData);
-
+      console.log(JSON.stringify(response));
       if (Array.isArray(response?.data)) {
         const formattedMatches = response.data
           .filter((match: any) => match.match_id !== "0" && match.match)
@@ -160,6 +162,24 @@ const useGetMatches = () => {
                   .map((lang: string) => lang.trim())
               : [];
 
+            // Calculate time ago with 3-hour offset from created_at
+            const createdAtDate = parseCreatedAtWithOffset(match.created_at, 3);
+            const timeAgo = calculateTimeAgo(createdAtDate);
+
+            // Calculate distance between user's location and match's location
+            const userLocation = {
+              lat: userData?.lat || 0,
+              lng: userData?.lng || 0,
+            };
+            const matchLocation = {
+              lat: parseFloat(matchUser.lat) || 0,
+              lng: parseFloat(matchUser.lng) || 0,
+            };
+            const calculatedDistance = calculateDistance(
+              userLocation,
+              matchLocation
+            );
+
             return {
               // Match-specific data
               id: match.id,
@@ -167,8 +187,8 @@ const useGetMatches = () => {
               user_id: match.user_id,
               emoji: match.emoji,
               status: match.status,
-              timeAgo: formatTimeAgo(match.date, match.time),
-              distance: match.distance ? `${match.distance} km` : "2.5 km",
+              timeAgo: timeAgo,
+              distance: calculatedDistance,
 
               // User profile data
               name: matchUser.name || `User ${match.match_id}`,

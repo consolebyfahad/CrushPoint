@@ -38,6 +38,15 @@ export const requestFCMPermission = async (): Promise<boolean> => {
 
 export const getFCMToken = async (): Promise<string | null> => {
   try {
+    // iOS requires explicit device registration for remote notifications
+    if (Platform.OS === "ios") {
+      const isRegistered = messaging().isDeviceRegisteredForRemoteMessages;
+      if (!isRegistered) {
+        await messaging().registerDeviceForRemoteMessages();
+        console.log("📱 iOS device registered for remote messages");
+      }
+    }
+    
     const token = await messaging().getToken();
     console.log("🔑 FCM Token:", token);
     return token;

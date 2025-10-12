@@ -19,6 +19,7 @@ export interface NotificationSetting {
 }
 
 export interface UserData {
+  id: string;
   gender: string;
   gender_interest: string;
   interests: any[];
@@ -154,6 +155,7 @@ const defaultNotificationSettings: NotificationSetting[] = [
 ];
 
 const defaultUserData: UserData = {
+  id: "",
   gender: "",
   gender_interest: "",
   interests: [],

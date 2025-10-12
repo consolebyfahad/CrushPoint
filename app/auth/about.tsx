@@ -114,7 +114,7 @@ const About = () => {
             <Text style={styles.title}>{t("about.about")}</Text>
             <Text style={styles.disclaimerText}>
               <Octicons name="info" size={14} color={color.gray55} />{" "}
-              {"We don't display your age publicly without your consent"}
+              {t("about.agePrivacyNote")}
             </Text>
           </View>
 

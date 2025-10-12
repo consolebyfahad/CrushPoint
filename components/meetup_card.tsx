@@ -19,7 +19,7 @@ interface MeetupCardProps {
       name: string;
       image: string;
     };
-    status: "pending" | "change" | "accepted" | "declined" | "cancelled";
+    status: "pending" | "change" | "accept" | "declined" | "cancelled";
     timestamp: string;
     date: string;
     time: string;
@@ -52,7 +52,7 @@ export default function MeetupCard({
   const { t } = useTranslation();
   const getStatusIcon = () => {
     switch (request.status) {
-      case "accepted":
+      case "accept":
         return <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />;
       case "declined":
         return <Ionicons name="close-circle" size={20} color="#FF3B30" />;
@@ -66,7 +66,9 @@ export default function MeetupCard({
   };
   const getStatusBadge = () => {
     const renderBadge = (style: any, label: any) => (
-      <View style={style}>
+      <View
+        style={[style, { flexDirection: "row", alignItems: "center", gap: 4 }]}
+      >
         {getStatusIcon()}
         <Text style={style}>{label}</Text>
       </View>
@@ -77,8 +79,8 @@ export default function MeetupCard({
         return renderBadge(styles.pendingBadge, t("meetups.pending"));
       case "change":
         return renderBadge(styles.changeBadge, t("meetups.changesRequested"));
-      case "accepted":
-        return renderBadge(styles.acceptedBadge, t("meetups.accepted"));
+      case "accept":
+        return renderBadge(styles.acceptedBadge, t("meetups.accept"));
       case "declined":
         return renderBadge(styles.declinedBadge, t("meetups.declined"));
       case "cancelled":
@@ -91,7 +93,7 @@ export default function MeetupCard({
   const renderIncomingButtons = () => {
     // Don't show buttons if request is already processed or loading
     if (
-      request.status === "accepted" ||
+      request.status === "accept" ||
       request.status === "declined" ||
       isLoading
     ) {
@@ -236,12 +238,12 @@ export default function MeetupCard({
       {/* Message */}
 
       {/* Response Message for Outgoing */}
-      {type === "outgoing" && request.responseMessage && (
+      {/* {type === "outgoing" && request.responseMessage && (
         <View style={[styles.responseContainer]}>
           <Text
             style={[
               styles.responseMessage,
-              request.status === "accepted" && styles.responseMessageSuccess,
+              request.status === "accept" && styles.responseMessageSuccess,
               request.status === "declined" && styles.responseMessageError,
               request.status === "change" && styles.responseMessageInfo,
             ]}
@@ -249,16 +251,16 @@ export default function MeetupCard({
             {request.responseMessage}
           </Text>
         </View>
-      )}
+      )} */}
 
-      {/* Confirmation Message for Accepted Incoming Requests */}
-      {type === "incoming" && request.status === "accepted" && (
+      {/* Confirmation Message for accept Incoming Requests */}
+      {/* {type === "incoming" && request.status === "accept" && (
         <View style={[styles.responseContainer]}>
           <Text style={[styles.responseMessage, styles.responseMessageSuccess]}>
             {t("meetups.yourRequestAccepted")}
           </Text>
         </View>
-      )}
+      )} */}
 
       {/* Action Buttons */}
       {type === "incoming" && renderIncomingButtons()}

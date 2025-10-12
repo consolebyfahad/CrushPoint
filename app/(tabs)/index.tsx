@@ -261,6 +261,10 @@ export default function Index() {
       const permissionGranted = await requestFCMPermission();
 
       if (permissionGranted) {
+        // Small delay for iOS to complete APNS registration
+        if (Platform.OS === "ios") {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
         await registerFCMToken();
       }
     } catch (error) {

@@ -165,7 +165,7 @@ export default function UserCard({
         {user?.isOnline && (
           <View style={styles.onlineStatus}>
             <View style={styles.onlineDot} />
-            <Text style={styles.onlineText}>{t("matches.online")}</Text>
+            <Text style={styles.onlineText}>{t("common.online")}</Text>
           </View>
         )}
 

@@ -9,6 +9,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -33,6 +34,7 @@ type UploadedPhoto = {
 };
 
 export default function AddPhotos() {
+  const { t } = useTranslation();
   const { user, addUserImage, removeUserImage } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
@@ -88,11 +90,9 @@ export default function AddPhotos() {
   const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
-        "Permission needed",
-        "Please grant camera roll permissions to upload photos.",
-        [{ text: "OK" }]
-      );
+      Alert.alert(t("profile.permissionNeeded"), t("profile.grantPermission"), [
+        { text: t("common.ok") },
+      ]);
       return false;
     }
     return true;
@@ -100,7 +100,7 @@ export default function AddPhotos() {
 
   const uploadImageToServer = async (imageUri: string, photoId: string) => {
     if (!user?.user_id) {
-      Alert.alert("Error", "User ID not found. Please login again.");
+      Alert.alert(t("common.error"), t("profile.userIdNotFound"));
       return null;
     }
 
@@ -148,14 +148,14 @@ export default function AddPhotos() {
       }
     } catch (error) {
       setSelectedPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
-      showToast("Failed to upload image. Please try again.");
+      showToast(t("profile.failedToUpload"));
       return null;
     }
   };
 
   const pickImage = async () => {
     if (selectedPhotos.length >= maxPhotos) {
-      showToast("Maximum photos reached", "warning");
+      showToast(t("profile.maximumPhotosReached"), "warning");
       return;
     }
 
@@ -191,7 +191,7 @@ export default function AddPhotos() {
         });
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to pick images. Please try again.");
+      Alert.alert(t("common.error"), t("profile.failedToPickImages"));
       console.error("Image picker error:", error);
     }
   };
@@ -215,8 +215,8 @@ export default function AddPhotos() {
 
     if (uploadedPhotos.length < minPhotos) {
       Alert.alert(
-        "Not enough photos",
-        `Please upload at least ${minPhotos} photos to continue.`
+        t("profile.notEnoughPhotos"),
+        t("profile.uploadAtLeastContinue", { count: minPhotos })
       );
       return;
     }
@@ -230,14 +230,14 @@ export default function AddPhotos() {
 
     if (uploadedPhotos.length < minPhotos) {
       Alert.alert(
-        "Not enough photos",
-        `Please upload at least ${minPhotos} photos to save.`
+        t("profile.notEnoughPhotos"),
+        t("profile.uploadAtLeastSave", { count: minPhotos })
       );
       return;
     }
 
     if (!user?.user_id) {
-      Alert.alert("Error", "User ID not found. Please login again.");
+      Alert.alert(t("common.error"), t("profile.userIdNotFound"));
       return;
     }
 
@@ -262,18 +262,18 @@ export default function AddPhotos() {
         });
         imageFileNames.forEach((fileName) => addUserImage(fileName));
 
-        Alert.alert("Success", "Photos updated successfully!", [
+        Alert.alert(t("common.success"), t("profile.photosUpdatedSuccess"), [
           {
-            text: "OK",
+            text: t("common.ok"),
             onPress: () => router.back(),
           },
         ]);
       } else {
-        throw new Error(response.message || "Failed to update photos");
+        throw new Error(response.message || t("profile.failedToUpdatePhotos"));
       }
     } catch (error) {
       console.error("Save error:", error);
-      Alert.alert("Error", "Failed to save photos. Please try again.");
+      Alert.alert(t("common.error"), t("profile.failedToSavePhotos"));
     } finally {
       setIsLoading(false);
     }
@@ -347,13 +347,12 @@ export default function AddPhotos() {
         <View style={styles.content}>
           <View style={styles.titleSection}>
             <Text style={styles.title}>
-              {isEditMode ? "Edit your photos" : "Add your best photos"}
+              {isEditMode ? t("profile.editPhotos") : t("profile.addPhotos")}
             </Text>
             <View style={styles.subtitleContainer}>
               <Text style={styles.subtitle}>
-                <Octicons name="info" size={14} color={color.gray55} /> Photos
-                should be clear and show your face. Add at least 2 photos to
-                continue.
+                <Octicons name="info" size={14} color={color.gray55} />{" "}
+                {t("profile.photosSubtitle")}
               </Text>
             </View>
           </View>
@@ -367,9 +366,11 @@ export default function AddPhotos() {
             <View style={styles.uploadContent}>
               <Feather name="camera" size={32} color={color.gray900} />
               <Text style={styles.uploadText}>
-                Drag & drop photos here, or click to select
+                {t("profile.dragDropPhotos")}
               </Text>
-              <Text style={styles.fileSizeText}>Maximum file size: 5MB</Text>
+              <Text style={styles.fileSizeText}>
+                {t("profile.maxFileSize")}
+              </Text>
             </View>
           </TouchableOpacity>
 
@@ -389,9 +390,13 @@ export default function AddPhotos() {
 
           {/* Photo Count */}
           <Text style={styles.photoCount}>
-            {uploadedCount} of {maxPhotos} photos uploaded
-            {uploadingCount > 0 && ` (${uploadingCount} uploading)`}
-            (minimum {minPhotos})
+            {t("profile.photosUploaded", {
+              count: uploadedCount,
+              max: maxPhotos,
+            })}
+            {uploadingCount > 0 &&
+              ` ${t("profile.uploading", { count: uploadingCount })}`}{" "}
+            {t("profile.minimumPhotos", { min: minPhotos })}
           </Text>
         </View>
       </ScrollView>
@@ -399,7 +404,13 @@ export default function AddPhotos() {
       {/* Action Button */}
       <View style={styles.buttonContainer}>
         <CustomButton
-          title={isLoading ? "Saving..." : isEditMode ? "Save" : "Continue"}
+          title={
+            isLoading
+              ? t("common.saving")
+              : isEditMode
+              ? t("common.save")
+              : t("continue")
+          }
           onPress={isEditMode ? handleSave : handleContinue}
           isDisabled={isButtonDisabled || isLoading}
           isLoading={isLoading}

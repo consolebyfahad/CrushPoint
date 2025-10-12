@@ -4,6 +4,14 @@ import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import {
+  calculateAge,
+  convertNationalityValuesToLabels,
+  parseInterestsWithNames,
+  parseJsonString,
+  parseLookingForWithLabels,
+  parseNationalityWithLabels,
+} from "@/utils/helper";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,7 +28,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Verify() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
-  const { user, loginUser } = useAppContext();
+  const { user, loginUser, updateUserData } = useAppContext();
   const { showToast } = useToast();
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [resendCountdown, setResendCountdown] = useState(59);
@@ -28,6 +36,9 @@ export default function Verify() {
   const contactType = params.type || "phone";
   const contactInfo = params.contact || "+155 (500) 000-00";
   const [isVerifying, setIsVerifying] = useState(false);
+
+  const defaultPhoto =
+    "https://img.freepik.com/vecteurs-libre/homme-affaires-caractere-avatar-isole_24877-60111.jpg?semt=ais_hybrid&w=740";
 
   const inputRefs = useRef<(TextInput | null)[]>([]);
   const animatedValues = useRef(code.map(() => new Animated.Value(1))).current;
@@ -97,6 +108,148 @@ export default function Verify() {
     }
   };
 
+  const fetchUserProfile = async () => {
+    if (!user?.user_id) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("type", "get_data");
+      formData.append("table_name", "users");
+      formData.append("id", user.user_id);
+
+      const response = await apiCall(formData);
+      console.log("response", response);
+      if (response.data && response.data.length > 0) {
+        const userData = response.data[0];
+        let photos: string[] = [];
+
+        // Parse images
+        if (userData.images) {
+          try {
+            const cleanedImagesString = userData.images
+              .replace(/\\\\/g, "\\")
+              .replace(/\\\"/g, '"');
+            const imageFilenames = JSON.parse(cleanedImagesString);
+            const baseImageUrl = userData.image_url || "";
+
+            if (Array.isArray(imageFilenames) && imageFilenames.length > 0) {
+              photos = imageFilenames.map((filename: string) => {
+                const cleanFilename = filename.replace(/\\/g, "");
+                return `${baseImageUrl}${cleanFilename}`;
+              });
+            } else {
+              photos = [defaultPhoto];
+            }
+          } catch (error) {
+            console.error("Error parsing images:", error);
+            photos = [defaultPhoto];
+          }
+        } else {
+          photos = [defaultPhoto];
+        }
+
+        const age = calculateAge(userData.dob);
+
+        // Parse interests
+        let parsedInterests: string[] = [];
+        let originalInterestIds: string[] = [];
+        if (userData.interests) {
+          try {
+            parsedInterests = parseInterestsWithNames(userData.interests);
+            originalInterestIds = parseJsonString(userData.interests);
+          } catch (error) {
+            console.warn("Error parsing interests:", error);
+          }
+        }
+
+        // Parse looking_for
+        let parsedLookingFor: string[] = [];
+        let originalLookingForIds: string[] = [];
+        if (userData.looking_for) {
+          try {
+            parsedLookingFor = parseLookingForWithLabels(userData.looking_for);
+            originalLookingForIds = parseJsonString(userData.looking_for);
+          } catch (error) {
+            console.warn("Error parsing looking_for:", error);
+          }
+        }
+
+        // Parse nationality
+        let parsedNationality: string[] = [];
+        let originalNationalityValues: string[] = [];
+        if (userData.nationality) {
+          if (
+            userData.nationality.startsWith("[") &&
+            userData.nationality.endsWith("]")
+          ) {
+            try {
+              const parsed = parseJsonString(userData.nationality);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                originalNationalityValues = parsed;
+                parsedNationality = parseNationalityWithLabels(
+                  userData.nationality
+                );
+              }
+            } catch (error) {
+              console.warn("Error parsing nationality:", error);
+            }
+          } else if (
+            userData.nationality !== "Not Specified" &&
+            userData.nationality.trim() !== ""
+          ) {
+            originalNationalityValues = [userData.nationality];
+            parsedNationality = convertNationalityValuesToLabels([
+              userData.nationality,
+            ]);
+          }
+        }
+
+        // Update context with fetched profile data
+        const contextUserData = {
+          ...userData,
+          images: userData.images ? [userData.images] : [],
+          looking_for: userData.looking_for
+            ? parseJsonString(userData.looking_for)
+            : [],
+          radius: parseInt(userData.radius) || 100,
+          lat: parseFloat(userData.lat) || 0,
+          lng: parseFloat(userData.lng) || 0,
+          age,
+          photos,
+          parsedInterests,
+          parsedLookingFor,
+          originalLookingForIds,
+          originalInterestIds,
+          parsedNationality,
+          originalNationalityValues,
+          email: userData.email || "",
+          gender: userData.gender || "",
+          gender_interest: userData.gender_interest || "",
+          country: userData.country || "",
+          state: userData.state || "",
+          city: userData.city || "",
+          languages: userData.languages || "",
+          height: userData.height !== "0" ? userData.height : "",
+          nationality: userData.nationality || "",
+          religion: userData.religion || "",
+          zodiac: userData.zodiac || "",
+          about: userData.about || "",
+          phone: userData.phone || "",
+          name: userData.name || "",
+          dob: userData.dob || "",
+          interests: userData.interests
+            ? parseJsonString(userData.interests)
+            : [],
+        };
+
+        updateUserData(contextUserData);
+        console.log("✅ User profile fetched and updated in context");
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
+
   const handleVerifyCode = async (fullCode: string) => {
     if (!user?.user_id) {
       showToast("User session expired. Please login again.", "error");
@@ -116,9 +269,13 @@ export default function Verify() {
       if (response.result) {
         await loginUser(user);
         setCode(["", "", "", "", "", ""]);
+
         if (user?.new) {
+          // New user - go to profile setup
           router.push("/auth/gender");
         } else {
+          // Existing user - fetch their profile data first
+          await fetchUserProfile();
           router.push("/(tabs)");
         }
       } else {

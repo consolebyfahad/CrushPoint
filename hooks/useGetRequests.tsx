@@ -1,6 +1,11 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
-import { filterOutPastDates, formatTimeAgo, formatTimeForDisplay, sortRequestsByDate } from "@/utils/helper";
+import {
+  filterOutPastDates,
+  formatTimeAgo,
+  formatTimeForDisplay,
+  sortRequestsByDate,
+} from "@/utils/helper";
 import { useEffect, useState } from "react";
 
 interface RequestUser {
@@ -127,7 +132,7 @@ const useGetRequests = () => {
       formData.append("user_id", user.user_id);
 
       const response = await apiCall(formData);
-
+      console.log("requests response", JSON.stringify(response));
       if (response?.data && Array.isArray(response.data)) {
         const incomingList: MeetupRequest[] = [];
         const outgoingList: MeetupRequest[] = [];
@@ -135,7 +140,6 @@ const useGetRequests = () => {
         response.data.forEach((request: any) => {
           try {
             // Determine if it's incoming or outgoing based on the current user's ID
-            console.log(userData?.date_id, request.id);
             const isIncoming = request.date_id === userData?.id;
 
             // Get the other user's information
@@ -176,7 +180,7 @@ const useGetRequests = () => {
                   request.time
                 )
               ),
-              date: String(request.meetup_date || request.date || "TBD"),
+              date: String(request.new_date || request.meetup_date || "TBD"),
               time: String(
                 formatTimeForDisplay(
                   request.time || request.meetup_time || "TBD"
@@ -210,14 +214,17 @@ const useGetRequests = () => {
         // Filter out past dates and sort by date
         const filteredIncomingList = filterOutPastDates(incomingList);
         const filteredOutgoingList = filterOutPastDates(outgoingList);
-        
+
         const sortedIncomingList = sortRequestsByDate(filteredIncomingList);
         const sortedOutgoingList = sortRequestsByDate(filteredOutgoingList);
 
         setIncomingRequests(sortedIncomingList);
         setOutgoingRequests(sortedOutgoingList);
 
-        if (sortedIncomingList.length === 0 && sortedOutgoingList.length === 0) {
+        if (
+          sortedIncomingList.length === 0 &&
+          sortedOutgoingList.length === 0
+        ) {
           setError("No meetup requests found yet.");
         }
       } else {

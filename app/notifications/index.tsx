@@ -6,6 +6,7 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -30,6 +31,7 @@ interface Notification {
 }
 
 export default function Notifications({ navigation }: any) {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,25 +73,33 @@ export default function Notifications({ navigation }: any) {
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     if (diffInSeconds < 60) {
-      return "just now";
+      return t("notifications.justNow");
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+      return minutes === 1
+        ? t("notifications.minuteAgo", { count: minutes })
+        : t("notifications.minutesAgo", { count: minutes });
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+      return hours === 1
+        ? t("notifications.hourAgo", { count: hours })
+        : t("notifications.hoursAgo", { count: hours });
     } else if (diffInSeconds < 2592000) {
       const days = Math.floor(diffInSeconds / 86400);
-      return `${days} day${days > 1 ? "s" : ""} ago`;
+      return days === 1
+        ? t("notifications.dayAgo", { count: days })
+        : t("notifications.daysAgo", { count: days });
     } else {
       const months = Math.floor(diffInSeconds / 2592000);
-      return `${months} month${months > 1 ? "s" : ""} ago`;
+      return months === 1
+        ? t("notifications.monthAgo", { count: months })
+        : t("notifications.monthsAgo", { count: months });
     }
   };
 
   const fetchNotifications = async () => {
     if (!user?.user_id) {
-      setError("User session expired. Please login again.");
+      setError(t("notifications.userSessionExpired"));
       setIsLoading(false);
       return;
     }
@@ -112,7 +122,7 @@ export default function Notifications({ navigation }: any) {
             message: notif.notification,
             timeAgo: notif.created_at
               ? formatTimeAgo(notif.created_at)
-              : "recently",
+              : t("notifications.recently"),
             isRead: notif.is_read || false,
             created_at: notif.created_at,
             user_name: notif.user_name || notif.from_user,
@@ -129,7 +139,7 @@ export default function Notifications({ navigation }: any) {
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      setError("Failed to load notifications. Please try again.");
+      setError(t("notifications.failedToLoad"));
       setNotifications([]);
     } finally {
       setIsLoading(false);
@@ -141,24 +151,24 @@ export default function Notifications({ navigation }: any) {
     switch (type.toLowerCase()) {
       case "reaction":
       case "emoji":
-        return "New Reaction";
+        return t("notifications.newReaction");
       case "match":
-        return "New Match!";
+        return t("notifications.newMatch");
       case "profile_view":
       case "view":
-        return "Profile View";
+        return t("notifications.profileView");
       case "event":
-        return "Event Notification";
+        return t("notifications.eventNotification");
       case "message":
-        return "New Message";
+        return t("notifications.newMessage");
       case "like":
-        return "Someone Liked You";
+        return t("notifications.someoneLikedYou");
       case "nearby":
-        return "Nearby User";
+        return t("notifications.nearbyUser");
       case "super_like":
-        return "Super Like!";
+        return t("notifications.superLike");
       default:
-        return "Notification";
+        return t("notifications.notification");
     }
   };
 
@@ -242,10 +252,9 @@ export default function Notifications({ navigation }: any) {
         <Text style={styles.emptyEmoji}>🔔</Text>
         <Text style={styles.emptyEmojiSub}>💤</Text>
       </View>
-      <Text style={styles.emptyTitle}>All quiet here!</Text>
+      <Text style={styles.emptyTitle}>{t("notifications.allQuietHere")}</Text>
       <Text style={styles.emptyText}>
-        No notifications to show right now.{"\n"}
-        We'll let you know when something exciting happens! ✨
+        {t("notifications.noNotificationsText")}
       </Text>
 
       <TouchableOpacity
@@ -254,7 +263,9 @@ export default function Notifications({ navigation }: any) {
         activeOpacity={0.8}
       >
         <Ionicons name="refresh" size={16} color={color.white} />
-        <Text style={styles.refreshButtonText}>Check Again</Text>
+        <Text style={styles.refreshButtonText}>
+          {t("notifications.checkAgain")}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -264,7 +275,9 @@ export default function Notifications({ navigation }: any) {
       <View style={styles.emptyIconContainer}>
         <Text style={styles.emptyEmoji}>😕</Text>
       </View>
-      <Text style={styles.emptyTitle}>Oops! Something went wrong</Text>
+      <Text style={styles.emptyTitle}>
+        {t("notifications.oopsSomethingWentWrong")}
+      </Text>
       <Text style={styles.emptyText}>{error}</Text>
 
       <TouchableOpacity
@@ -273,7 +286,7 @@ export default function Notifications({ navigation }: any) {
         activeOpacity={0.8}
       >
         <Ionicons name="refresh" size={16} color={color.white} />
-        <Text style={styles.refreshButtonText}>Try Again</Text>
+        <Text style={styles.refreshButtonText}>{t("common.tryAgain")}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -281,7 +294,9 @@ export default function Notifications({ navigation }: any) {
   const renderLoadingState = () => (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={color.primary} />
-      <Text style={styles.loadingText}>Loading notifications...</Text>
+      <Text style={styles.loadingText}>
+        {t("notifications.loadingNotifications")}
+      </Text>
     </View>
   );
 
@@ -289,7 +304,7 @@ export default function Notifications({ navigation }: any) {
     return (
       <SafeAreaView style={styles.container}>
         <NotificationsTabsHeader
-          title="Notifications"
+          title={t("notifications.notifications")}
           notifications={[]}
           close={handleClose}
         />
@@ -301,7 +316,7 @@ export default function Notifications({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <NotificationsTabsHeader
-        title="Notifications"
+        title={t("notifications.notifications")}
         notifications={notifications}
         close={handleClose}
       />
@@ -320,7 +335,7 @@ export default function Notifications({ navigation }: any) {
             onRefresh={handleRefresh}
             colors={[color.primary]}
             tintColor={color.primary}
-            title="Pull to refresh"
+            title={t("notifications.pullToRefresh")}
             titleColor={color.gray55}
           />
         }

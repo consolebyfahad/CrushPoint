@@ -117,7 +117,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
     try {
       const formData = new FormData();
       formData.append("type", "get_map_users");
-      formData.append("id", user.user_id);
+      formData.append("user_id", user.user_id);
 
       if (filters.gender && filters.gender !== "Both") {
         formData.append("gender", filters.gender);
@@ -147,6 +147,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
       if (filters.zodiacSign) {
         formData.append("zodiac", filters.zodiacSign);
       }
+      console.log("formData", formData);
       const response: ApiResponse = await apiCall(formData);
 
       if (response.result && response.data && Array.isArray(response.data)) {

@@ -84,7 +84,7 @@ export default function OutgoingMeetup({
       console.error("Error editing request:", error);
     }
   }, []);
-
+  console.log("filteredRequests", JSON.stringify(filteredRequests));
   const renderMeetupCard: ListRenderItem<any> = useCallback(
     ({ item }) => (
       <MeetupCard
