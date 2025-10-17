@@ -63,9 +63,7 @@ export default function IncomingMeetup({
         formData.append("table_name", "meetup_requests");
         formData.append("status", "accept");
         // formData.append("user_id", user?.user_id || "");
-        console.log("formData", formData);
         const response = await apiCall(formData);
-        console.log("response", response);
         if (response?.result === true) {
           onUpdateStatus?.(requestId, "accepted");
         } else {
@@ -92,7 +90,6 @@ export default function IncomingMeetup({
         formData.append("status", "accept");
         // formData.append("user_id", user?.user_id || "");
         // formData.append("accept_changes", "1");
-        console.log("formData", formData);
         const response = await apiCall(formData);
 
         if (response?.result === true) {

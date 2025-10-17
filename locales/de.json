@@ -1,5 +1,6 @@
 {
   "welcome": "Willkommen!",
+  "welcomeTerms": "Mit der Registrierung stimmst du unseren Nutzungsbedingungen und der Datenschutzrichtlinie zu",
   "getStarted": "Loslegen",
   "continue": "Weiter",
   "skip": "Überspringen",
@@ -19,14 +20,14 @@
   "info": "Info",
 
   "onboarding": {
-    "title1": "Finde dein perfektes Match",
-    "subtitle1": "Entdecke tolle Menschen in deiner Nähe und starte bedeutungsvolle Gespräche",
-    "title2": "Verbinden & Chatten",
-    "subtitle2": "Chatte mit deinen Matches und baue echte Verbindungen auf",
-    "title3": "Persönlich treffen",
-    "subtitle3": "Plane Treffen und bringe deine Verbindungen auf die nächste Stufe",
-    "title4": "Sicher bleiben",
-    "subtitle4": "Deine Sicherheit ist unsere Priorität mit verifizierten Profilen und sicherem Messaging"
+    "title1": "In Deiner Nähe",
+    "subtitle1": "Finde echte Profile in deiner Nähe auf der Map oder in der Listenansicht.",
+    "title2": "Trifft Euch Persönlich",
+    "subtitle2": "Finde deinen Partner mit gemeinsamen Interessen und Absichten. Vergiss Swipen nach links und rechts.",
+    "title3": "Sende Reaktionen",
+    "subtitle3": "Keine Chats erforderlich. Sende deinem Crush ein lustiges Emoji, um die Aufmerksamkeit zu erregen.",
+    "title4": "Entdecke Events",
+    "subtitle4": "Finden deinen Partner oder Partnerin bei interessanten Veranstaltungen."
   },
 
   "language": {
@@ -41,46 +42,47 @@
     "login": "Anmelden",
     "signup": "Konto erstellen",
     "logout": "Abmelden",
-    "phoneNumber": "Telefonnummer",
-    "enterPhone": "Gib deine Telefonnummer ein",
-    "verificationCode": "Bestätigungscode",
-    "enterCode": "Gib den Bestätigungscode ein, der an dein Telefon gesendet wurde",
-    "resendCode": "Code erneut senden",
-    "verify": "Bestätigen",
-    "invalidPhone": "Bitte gib eine gültige Telefonnummer ein",
-    "invalidCode": "Bitte gib einen gültigen Bestätigungscode ein",
-    "verificationFailed": "Bestätigung fehlgeschlagen. Bitte versuche es erneut.",
-    "loginSuccess": "Anmeldung erfolgreich!",
     "logoutConfirm": "Bist du sicher, dass du dich abmelden möchtest?",
-    "logoutSuccess": "Erfolgreich abgemeldet",
-    "chooseSignupMethod": "Wähle deine bevorzugte Anmeldemethode",
+    "phoneNumber": "Telefonnummer",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "apple": "Apple",
+    "google": "Google",
+    "emailAddress": "E-Mail-Adresse",
+    "enterPhone": "Gib deine Telefonnummer ein",
+    "enterEmail": "E-Mail-Adresse eingeben",
+    "phoneVerification": "Wir senden dir einen Bestätigungscode",
+    "emailVerification": "Wir senden dir einen Bestätigungscode",
     "continueWithPhone": "Mit Telefon fortfahren",
     "continueWithEmail": "Mit E-Mail fortfahren",
-    "continueWithApple": "Mit Apple fortfahren",
-    "continueWithGoogle": "Mit Google fortfahren",
     "alreadyHaveAccount": "Hast du bereits ein Konto?",
-    "enterEmail": "Gib deine E-Mail ein",
-    "phoneVerification": "Wir senden dir einen Code zur Verifizierung deiner Nummer",
-    "emailVerification": "Wir senden dir einen Code zur Verifizierung deiner E-Mail",
-    "emailAddress": "E-Mail-Adresse",
-    "phone": "Telefon",
-    "email": "E-Mail",
-    "verifyIdentity": "Deine Identität verifizieren",
-    "faceVerificationInstruction": "Positioniere dein Gesicht im Rahmen und sorge für gute Beleuchtung",
-    "capturing": "Aufnahme...",
-    "processing": "Verarbeitung...",
-    "uploading": "Hochladen...",
-    "submitting": "Übermittlung...",
-    "creatingProfile": "Profil erstellen...",
-    "startScan": "Scan starten",
-    "noReferenceImage": "Kein Referenzbild für den Vergleich verfügbar.",
-    "verificationError": "Verifizierungsfehler",
-    "verificationSuccessful": "Verifizierung erfolgreich!",
-    "tryAgain": "Erneut versuchen",
-    "skip": "Überspringen",
-    "verifyYour": "Verifiziere dein {{contactType}}",
-    "enterCodeSent": "Gib den 6-stelligen Code ein, den wir an {{contactInfo}} gesendet haben",
+    "chooseSignupMethod": "Wähle, wie du dich registrieren möchtest",
+    "verificationCode": "Bestätigungscode",
+    "enterCode": "Gib den Bestätigungscode ein, der an dein Telefon gesendet wurde",
+    "enterCodeSent": "Gib den 6-stelligen Code ein, der an {{contactInfo}} gesendet wurde",
+    "verifyYour": "Bestätige dein {{contactType}}",
+    "resendCode": "Code erneut senden",
     "resendCodeIn": "Code in {{count}}s erneut senden",
+    "verify": "Bestätigen",
+    "invalidPhone": "Bitte gib eine gültige Telefonnummer ein",
+    "verifyIdentity": "Bestätige deine Identität",
+    "faceVerificationInstruction": "Mache ein Selfie, um deine Identität zu bestätigen und dein Profil zu vervollständigen",
+    "startScan": "Gesichtsscan starten",
+    "capturing": "Erfasse...",
+    "processing": "Verarbeite...",
+    "uploading": "Lade hoch...",
+    "submitting": "Übermittle...",
+    "creatingProfile": "Erstelle Profil...",
+    "verificationSuccessful": "Bestätigung erfolgreich!",
+    "verificationFailed": "Bestätigung fehlgeschlagen",
+    "verificationError": "Bestätigungsfehler",
+    "tryAgain": "Erneut versuchen",
+    "noReferenceImage": "Kein Referenzbild verfügbar",
+    "invalidCode": "Bitte gib einen gültigen Bestätigungscode ein",
+    "loginSuccess": "Anmeldung erfolgreich!",
+    "logoutSuccess": "Erfolgreich abgemeldet",
+    "failedToResendCode": "Code konnte nicht erneut gesendet werden. Bitte versuche es erneut.",
+    "logoutError": "Fehler beim Abmelden. Bitte versuche es erneut.",
     "googleSignInCancelled": "Google-Anmeldung wurde abgebrochen",
     "googleSignInInProgress": "Anmeldung läuft bereits",
     "googlePlayServicesNotAvailable": "Google Play-Dienste nicht verfügbar",
@@ -93,14 +95,43 @@
     "appleSignInCancelled": "Apple-Anmeldung wurde abgebrochen",
     "appleSignInInvalidResponse": "Apple-Anmeldung fehlgeschlagen: Ungültige Antwort",
     "appleSignInNotAvailableDevice": "Apple-Anmeldung ist nicht verfügbar",
-    "appleSignInTryAgain": "Apple-Anmeldung fehlgeschlagen. Bitte versuche es erneut."
+    "appleSignInTryAgain": "Apple-Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+    "continueWithApple": "Mit Apple fortfahren",
+    "continueWithGoogle": "Mit Google fortfahren",
+    "uploadFailed": "Upload fehlgeschlagen",
+    "somethingWentWrong": "Etwas ist schief gelaufen. Bitte versuche es erneut."
+  },
+
+  "faceVerification": {
+    "success": "Identitätsverifikation abgeschlossen! Vertrauen:",
+    "failed": "Gesichtserkennung fehlgeschlagen. Vertrauen:",
+    "required": "Erforderlich",
+    "tryAgain": "Bitte versuche es erneut mit besserer Beleuchtung und stelle sicher, dass dein Gesicht deutlich sichtbar ist.",
+    "genericError": "Verifikation fehlgeschlagen. Bitte versuche es erneut.",
+    "noFaceDetected": "Kein Gesicht erkannt. Bitte stelle sicher, dass dein Gesicht deutlich sichtbar und zentriert im Bild ist.",
+    "invalidImageSize": "Bildgrößenproblem. Bitte versuche ein neues Foto mit besserer Qualität zu machen.",
+    "concurrencyLimit": "Service ist aufgrund der kostenlosen Stufe beschäftigt. Bitte warte einen Moment und versuche es erneut, oder erwäge ein Upgrade auf einen bezahlten Plan für bessere Leistung.",
+    "configError": "Service-Konfigurationsfehler. Bitte kontaktiere den Support.",
+    "networkError": "Netzwerkfehler. Bitte überprüfe deine Verbindung und versuche es erneut.",
+    "rateLimit": "Zu viele Anfragen. Bitte warte einen Moment, bevor du es erneut versuchst.",
+    "resizedImageNotFound": "Reduzierte Bilddatei nicht gefunden oder Größe unbekannt",
+    "failedToResizeImage": "Bild konnte nicht reduziert werden",
+    "imageTooLarge": "Bild auch nach Komprimierung zu groß",
+    "failedToProcessImage": "Bild konnte nicht verarbeitet werden",
+    "failedToDownloadImage": "Bild konnte nicht heruntergeladen werden",
+    "noFaceDetectedInImage": "Kein Gesicht im Bild erkannt",
+    "faceDetectionError": "Gesichtserkennungsfehler",
+    "faceComparisonError": "Gesichtsvergleichsfehler",
+    "bothImagesRequired": "Sowohl das aufgenommene als auch das Referenzbild sind erforderlich",
+    "invalidConfidenceScore": "Ungültiger Vertrauenswert von der Face++ API erhalten",
+    "verificationFailed": "Verifikation fehlgeschlagen"
   },
 
   "profile": {
     "profile": "Profil",
     "editProfile": "Profil bearbeiten",
     "viewProfile": "Profil anzeigen",
-    "basicInfo": "Grundinformationen",
+    "basicInfo": "Profil",
     "photos": "Fotos",
     "interests": "Interessen",
     "lookingFor": "Suche nach",
@@ -127,6 +158,7 @@
     "failedToSavePhotos": "Fotos konnten nicht gespeichert werden. Bitte versuche es erneut.",
     "age": "Alter",
     "height": "Größe",
+    "gender": "Geschlecht",
     "location": "Standort",
     "occupation": "Beruf",
     "education": "Bildung",
@@ -142,6 +174,7 @@
     "selectOneOrMoreGoals": "Ein oder mehrere Ziele auswählen",
     "selectUpTo3Nationalities": "Bis zu 3 Nationalitäten auswählen",
     "selectNationalities": "Nationalitäten auswählen",
+    "searchNationalities": "Nationalitäten suchen",
     "selectReligion": "Religion auswählen",
     "selectZodiacSign": "Sternzeichen auswählen",
     "saving": "Speichern...",
@@ -153,7 +186,20 @@
     "matched": "Gematched",
     "removeMatch": "Match entfernen",
     "block": "Blockieren",
-    "report": "Melden"
+    "report": "Melden",
+    "failedToUpdateBasicInfo": "Grundlegende Informationen konnten nicht aktualisiert werden",
+    "failedToUpdateBasicInfoRetry": "Grundlegende Informationen konnten nicht aktualisiert werden. Bitte versuche es erneut.",
+    "accountSettings": "Kontoeinstellungen",
+    "fullName": "Vollständiger Name",
+    "enterFullName": "Gib deinen vollständigen Namen ein",
+    "changeableOnceIn6Months": "Nur einmal in 6 Monaten änderbar",
+    "dateOfBirth": "Geburtsdatum",
+    "dateFormat": "mm/dd/jjjj",
+    "phoneNumber": "Telefonnummer",
+    "enterPhoneNumber": "Gib deine Telefonnummer ein",
+    "email": "E-Mail",
+    "enterEmail": "Gib deine E-Mail ein",
+    "deleteAccountConfirmation": "Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
   },
 
   "matches": {
@@ -278,7 +324,24 @@
     "failedToRSVP": "Zusage fehlgeschlagen",
     "userSessionExpired": "Benutzersitzung abgelaufen. Bitte melde dich erneut an.",
     "somethingWentWrongTryAgain": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
-    "eventLeft": "Du hast die Veranstaltung verlassen"
+    "eventLeft": "Du hast die Veranstaltung verlassen",
+    "defaultTitle": "Unbenannte Veranstaltung",
+    "defaultCategory": "Allgemein",
+    "defaultLocation": "Ort steht noch fest",
+    "defaultDescription": "Keine Beschreibung verfügbar",
+    "defaultOrganizer": "Veranstalter",
+    "noEventsFound": "Keine Veranstaltungen gefunden. Schau später nach neuen Veranstaltungen!",
+    "failedToLoadEvents": "Veranstaltungen konnten nicht geladen werden",
+    "networkError": "Netzwerkfehler aufgetreten. Bitte überprüfe deine Verbindung.",
+    "userNotLoggedIn": "Benutzer nicht angemeldet",
+    "failedToUpdateAttendance": "Teilnahme konnte nicht aktualisiert werden"
+  },
+
+  "users": {
+    "userIdNotAvailable": "Benutzer-ID nicht verfügbar",
+    "noUsersFoundInArea": "Keine Benutzer in deinem Gebiet gefunden",
+    "noUsersFoundOrServerError": "Keine Benutzer gefunden oder Serverfehler aufgetreten",
+    "networkError": "Netzwerkfehler aufgetreten. Bitte überprüfe deine Verbindung."
   },
 
   "settings": {
@@ -345,6 +408,8 @@
   },
 
   "common": {
+    "Female": "Weiblich",
+    "save": "Speichern",
     "search": "Suchen",
     "filter": "Filter",
     "sort": "Sortieren",
@@ -367,6 +432,7 @@
     "both": "Beide",
     "online": "Online",
     "offline": "Offline",
+    "outgoing": "Ausgehend",
     "lastSeen": "Zuletzt gesehen",
     "now": "jetzt",
     "minutesAgo": "vor {{count}} Minuten",
@@ -513,13 +579,13 @@
   },
 
   "about": {
-    "about": "Über",
+    "about": "Über Dich",
     "name": "Name",
     "dateOfBirth": "Geburtsdatum",
     "ageValidation": "Sie müssen mindestens 18 Jahre alt sein, um diese App zu nutzen",
     "invalidAge": "Bitte geben Sie ein gültiges Alter ein",
     "continue": "Weiter",
-    "agePrivacyNote": "Wir zeigen dein Alter nicht öffentlich ohne deine Zustimmung"
+    "agePrivacyNote": "Dein Name und Alter werden auf deinem Profil öffentlich angezeigt."
   },
 
   "interests": {
@@ -542,44 +608,6 @@
     "updateFailedRetry": "Interessen konnten nicht aktualisiert werden. Bitte versuche es erneut."
   },
 
-  "communityGuidelines": {
-    "communityGuidelines": "Community-Richtlinien",
-    "beRespectful": "Seien Sie respektvoll",
-    "beRespectfulDesc": "Behandeln Sie alle mit Freundlichkeit und Respekt. Wir sind alle hier, um bedeutungsvolle Verbindungen zu knüpfen, also seien Sie bitte höflich in Ihren Interaktionen.",
-    "authenticProfiles": "Authentische Profile",
-    "authenticProfilesDesc": "Verwenden Sie echte Fotos von sich und genaue Informationen. Catfishing oder irreführende Profile sind nicht erlaubt und führen zur Kontosperrung.",
-    "safeInteractions": "Sichere Interaktionen",
-    "safeInteractionsDesc": "Treffen Sie sich an öffentlichen Orten für Ihre ersten Dates. Priorisieren Sie immer Ihre Sicherheit und vertrauen Sie Ihrem Instinkt, wenn Sie jemanden Neues treffen.",
-    "noHarassment": "Keine Belästigung",
-    "noHarassmentDesc": "Belästigung, Mobbing oder jede Form von Missbrauch wird nicht toleriert. Dazu gehören unerwünschte Nachrichten, unangemessene Kommentare oder hartnäckiger Kontakt, nachdem jemand Desinteresse geäußert hat.",
-    "respectPrivacy": "Respektieren Sie die Privatsphäre",
-    "respectPrivacyDesc": "Teilen Sie keine persönlichen Informationen über andere ohne deren Zustimmung. Respektieren Sie Grenzen und Privatsphäre-Einstellungen.",
-    "noSpam": "Kein Spam oder Betrug",
-    "noSpamDesc": "Verwenden Sie Andra nicht für kommerzielle Zwecke, Spam oder betrügerische Aktivitäten. Dazu gehört die Bewerbung anderer Dienstleistungen, der Verkauf von Produkten oder die Bitte um Geld.",
-    "ageVerification": "Altersverifikation",
-    "ageVerificationDesc": "Sie müssen mindestens 18 Jahre alt sein, um Andra zu nutzen. Die Angabe falscher Altersinformationen führt zur sofortigen Kontokündigung.",
-    "reportInappropriate": "Melden Sie unangemessenes Verhalten",
-    "reportInappropriateDesc": "Wenn Sie jemanden treffen, der diese Richtlinien verletzt, melden Sie ihn bitte sofort. Wir nehmen alle Meldungen ernst und werden umgehend ermitteln."
-  },
-
-  "contactSupport": {
-    "contactSupport": "Support kontaktieren",
-    "name": "Name",
-    "email": "E-Mail",
-    "subject": "Betreff",
-    "message": "Nachricht",
-    "accountIssue": "Kontoproblem",
-    "bugReport": "Fehlerbericht",
-    "featureRequest": "Feature-Anfrage",
-    "safetyConcern": "Sicherheitsbedenken",
-    "billingQuestion": "Abrechnungsfrage",
-    "other": "Andere",
-    "submit": "Absenden",
-    "submitting": "Wird gesendet...",
-    "messageSent": "Nachricht erfolgreich gesendet!",
-    "messageFailed": "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
-  },
-
   "privateSpots": {
     "privateSpots": "Private Orte",
     "addPrivateSpot": "Privaten Ort hinzufügen",
@@ -600,25 +628,51 @@
     "notVerified": "Nicht verifiziert",
     "verifyNow": "Jetzt verifizieren",
     "verificationPending": "Ihre Verifikation wird überprüft. Dies dauert normalerweise 24-48 Stunden.",
-    "verificationFailed": "Ihre Verifikation ist fehlgeschlagen. Bitte versuchen Sie es erneut mit einem klaren Foto Ihres Gesichts."
-  },
-
-  "match": {
-    "itsAMatch": "Es ist ein Match!",
-    "youAnd": "Sie und {{name}} haben sich gegenseitig gemocht!",
-    "startChatting": "Chatten beginnen",
-    "keepSwiping": "Weiter swipen"
-  },
-
-  "privacy": {
-    "privacyPolicy": "Datenschutzrichtlinie",
-    "lastUpdated": "Zuletzt aktualisiert: {{date}}",
-    "informationWeCollect": "Informationen, die wir sammeln",
-    "howWeUseInfo": "Wie wir Ihre Informationen verwenden",
-    "informationSharing": "Informationsaustausch",
-    "dataSecurity": "Datensicherheit",
-    "yourRights": "Ihre Rechte",
-    "contactUs": "Kontaktieren Sie uns"
+    "verificationFailed": "Ihre Verifikation ist fehlgeschlagen. Bitte versuchen Sie es erneut mit einem klaren Foto Ihres Gesichts.",
+    "status": {
+      "title": "Verifizierungsstatus",
+      "successful": {
+        "title": "Verifizierung erfolgreich",
+        "description": "Dein Konto ist verifiziert"
+      },
+      "pending": {
+        "title": "Verifizierung ausstehend",
+        "description": "Wir prüfen deine Einreichung"
+      },
+      "failed": {
+        "title": "Verifizierung fehlgeschlagen",
+        "description": "Bitte versuche die Verifizierung erneut"
+      }
+    },
+    "whyVerify": {
+      "title": "Warum verifizieren?",
+      "message": "Verifizierung hilft:\n\n• Vertrauen in der Community aufbauen\n• Fake-Profile reduzieren\n• Dein Match-Potenzial steigern\n• Ein sichereres Dating-Erlebnis gewährleisten",
+      "gotIt": "Verstanden"
+    },
+    "issues": {
+      "title": "Häufige Verifizierungsprobleme:",
+      "poorLighting": {
+        "title": "Schlechte Beleuchtung",
+        "description": "Stelle sicher, dass dein Gesicht gut beleuchtet und deutlich sichtbar ist"
+      },
+      "faceNotCentered": {
+        "title": "Gesicht nicht zentriert",
+        "description": "Positioniere dein Gesicht innerhalb des Führungsrahmens"
+      },
+      "multipleFaces": {
+        "title": "Mehrere Gesichter erkannt",
+        "description": "Stelle sicher, dass du alleine im Bild bist"
+      }
+    },
+    "success": {
+      "title": "Herzlichen Glückwunsch!",
+      "description": "Dein verifiziertes Abzeichen wird nun in deinem Profil angezeigt und hilft dir, Vertrauen mit potenziellen Matches aufzubauen."
+    },
+    "review": {
+      "title": "Überprüfung läuft",
+      "description": "Unser Team überprüft deine Verifizierungseinreichung. Dies dauert normalerweise 24-48 Stunden. Wir benachrichtigen dich, sobald es abgeschlossen ist."
+    },
+    "tryAgain": "Erneut versuchen"
   },
 
   "zodiac": {
@@ -634,5 +688,630 @@
     "capricorn": "Steinbock",
     "aquarius": "Wassermann",
     "pisces": "Fische"
+  },
+
+  "nationalities": {
+    "afghan": "Afghanisch",
+    "albanian": "Albanisch",
+    "algerian": "Algerisch",
+    "american": "Amerikanisch",
+    "andorran": "Andorranisch",
+    "angolan": "Angolanisch",
+    "antiguan": "Antiguanisch",
+    "argentine": "Argentinisch",
+    "armenian": "Armenisch",
+    "australian": "Australisch",
+    "austrian": "Österreichisch",
+    "azerbaijani": "Aserbaidschanisch",
+    "bahamian": "Bahamaisch",
+    "bahraini": "Bahrainisch",
+    "bangladeshi": "Bangladeschisch",
+    "barbadian": "Barbadisch",
+    "belarusian": "Belarussisch",
+    "belgian": "Belgisch",
+    "belizean": "Belizisch",
+    "beninese": "Beninisch",
+    "bhutanese": "Bhutanisch",
+    "bolivian": "Bolivianisch",
+    "bosnian": "Bosnisch",
+    "botswanan": "Botswanisch",
+    "brazilian": "Brasilianisch",
+    "british": "Britisch",
+    "bruneian": "Bruneiisch",
+    "bulgarian": "Bulgarisch",
+    "burkinabe": "Burkinisch",
+    "burmese": "Myanmarisch",
+    "burundian": "Burundisch",
+    "cambodian": "Kambodschanisch",
+    "cameroonian": "Kamerunisch",
+    "canadian": "Kanadisch",
+    "cape_verdean": "Kap-verdisch",
+    "central_african": "Zentralafrikanisch",
+    "chadian": "Tschadisch",
+    "chilean": "Chilenisch",
+    "chinese": "Chinesisch",
+    "colombian": "Kolumbianisch",
+    "comoran": "Komorisch",
+    "congolese": "Kongolesisch",
+    "costa_rican": "Costa-ricanisch",
+    "croatian": "Kroatisch",
+    "cuban": "Kubanisch",
+    "cypriot": "Zypriotisch",
+    "czech": "Tschechisch",
+    "danish": "Dänisch",
+    "djiboutian": "Dschibutisch",
+    "dominican": "Dominikanisch",
+    "dutch": "Niederländisch",
+    "ecuadorian": "Ecuadorianisch",
+    "egyptian": "Ägyptisch",
+    "emirati": "Emiratisch",
+    "equatorial_guinean": "Äquatorialguineisch",
+    "eritrean": "Eritreisch",
+    "estonian": "Estnisch",
+    "ethiopian": "Äthiopisch",
+    "fijian": "Fidschianisch",
+    "filipino": "Philippinisch",
+    "finnish": "Finnisch",
+    "french": "Französisch",
+    "gabonese": "Gabunisch",
+    "gambian": "Gambisch",
+    "georgian": "Georgisch",
+    "german": "Deutsch",
+    "ghanaian": "Ghanaisch",
+    "greek": "Griechisch",
+    "grenadian": "Grenadisch",
+    "guatemalan": "Guatemaltekisch",
+    "guinean": "Guineisch",
+    "guyanese": "Guyanisch",
+    "haitian": "Haitianisch",
+    "honduran": "Honduranisch",
+    "hungarian": "Ungarisch",
+    "icelandic": "Isländisch",
+    "indian": "Indisch",
+    "indonesian": "Indonesisch",
+    "iranian": "Iranisch",
+    "iraqi": "Irakisch",
+    "irish": "Irisch",
+    "israeli": "Israelisch",
+    "italian": "Italienisch",
+    "ivorian": "Ivorisch",
+    "jamaican": "Jamaikanisch",
+    "japanese": "Japanisch",
+    "jordanian": "Jordanisch",
+    "kazakhstani": "Kasachisch",
+    "kenyan": "Kenianisch",
+    "kiribati": "Kiribatisch",
+    "korean": "Koreanisch",
+    "kuwaiti": "Kuwaitisch",
+    "kyrgyzstani": "Kirgisisch",
+    "laotian": "Laotisch",
+    "latvian": "Lettisch",
+    "lebanese": "Libanesisch",
+    "liberian": "Liberianisch",
+    "libyan": "Libysch",
+    "liechtenstein": "Liechtensteinisch",
+    "lithuanian": "Litauisch",
+    "luxembourgish": "Luxemburgisch",
+    "macedonian": "Mazedonisch",
+    "malagasy": "Madagassisch",
+    "malawian": "Malawisch",
+    "malaysian": "Malaysisch",
+    "maldivian": "Maledivisch",
+    "malian": "Malisch",
+    "maltese": "Maltesisch",
+    "marshallese": "Marschallisch",
+    "mauritanian": "Mauretanisch",
+    "mauritian": "Mauritisch",
+    "mexican": "Mexikanisch",
+    "micronesian": "Mikronesisch",
+    "moldovan": "Moldauisch",
+    "monacan": "Monakisch",
+    "mongolian": "Mongolisch",
+    "montenegrin": "Montenegrinisch",
+    "moroccan": "Marokkanisch",
+    "mozambican": "Mosambikanisch",
+    "namibian": "Namibisch",
+    "nauruan": "Nauruisch",
+    "nepalese": "Nepalesisch",
+    "new_zealand": "Neuseeländisch",
+    "nicaraguan": "Nicaraguanisch",
+    "nigerian": "Nigerianisch",
+    "nigerien": "Nigerisch",
+    "north_korean": "Nordkoreanisch",
+    "norwegian": "Norwegisch",
+    "omani": "Omanisch",
+    "pakistani": "Pakistanisch",
+    "palauan": "Palauisch",
+    "palestinian": "Palästinensisch",
+    "panamanian": "Panamaisch",
+    "papua_new_guinean": "Papua-neuguineisch",
+    "paraguayan": "Paraguayisch",
+    "peruvian": "Peruanisch",
+    "polish": "Polnisch",
+    "portuguese": "Portugiesisch",
+    "qatari": "Katarisch",
+    "romanian": "Rumänisch",
+    "russian": "Russisch",
+    "rwandan": "Ruandisch",
+    "saint_kitts": "St. Kitts",
+    "saint_lucian": "St. Lucia",
+    "saint_vincentian": "St. Vincent",
+    "samoan": "Samoanisch",
+    "san_marinese": "San-marinesisch",
+    "sao_tomean": "São-toméisch",
+    "saudi_arabian": "Saudi-arabisch",
+    "senegalese": "Senegalesisch",
+    "serbian": "Serbisch",
+    "seychellois": "Seychellisch",
+    "sierra_leonean": "Sierra-leonisch",
+    "singaporean": "Singapurisch",
+    "slovak": "Slowakisch",
+    "slovenian": "Slowenisch",
+    "solomon_islander": "Salomonisch",
+    "somali": "Somalisch",
+    "south_african": "Südafrikanisch",
+    "south_korean": "Südkoreanisch",
+    "south_sudanese": "Südsudanesisch",
+    "spanish": "Spanisch",
+    "sri_lankan": "Sri-lankisch",
+    "sudanese": "Sudanesisch",
+    "surinamese": "Surinamisch",
+    "swazi": "Swasisch",
+    "swedish": "Schwedisch",
+    "swiss": "Schweizerisch",
+    "syrian": "Syrisch",
+    "taiwanese": "Taiwanisch",
+    "tajikistani": "Tadschikisch",
+    "tanzanian": "Tansanisch",
+    "thai": "Thailändisch",
+    "timorese": "Timoresisch",
+    "togolese": "Togolesisch",
+    "tongan": "Tongaisch",
+    "trinidadian": "Trinidadisch",
+    "tunisian": "Tunesisch",
+    "turkish": "Türkisch",
+    "turkmenistani": "Turkmenisch",
+    "tuvaluan": "Tuvaluisch",
+    "ugandan": "Ugandisch",
+    "ukrainian": "Ukrainisch",
+    "uruguayan": "Uruguayisch",
+    "uzbekistani": "Usbekisch",
+    "vanuatuan": "Vanuatuisch",
+    "vatican": "Vatikanisch",
+    "venezuelan": "Venezolanisch",
+    "vietnamese": "Vietnamesisch",
+    "yemeni": "Jemenitisch",
+    "zambian": "Sambisch",
+    "zimbabwean": "Simbabweisch"
+  },
+
+  "religions": {
+    "christianity": "Christentum",
+    "islam": "Islam",
+    "hinduism": "Hinduismus",
+    "buddhism": "Buddhismus",
+    "judaism": "Judentum",
+    "others": "Andere",
+    "any": "Beliebig"
+  },
+
+  "contactSupport": {
+    "title": "Support kontaktieren",
+    "subtitle": "Wir sind hier, um zu helfen",
+    "description": "Unser Support-Team wird sich so schnell wie möglich bei dir melden.",
+    "nameLabel": "Name *",
+    "emailLabel": "E-Mail *",
+    "subjectLabel": "Betreff *",
+    "messageLabel": "Nachricht *",
+    "namePlaceholder": "Gib deinen Namen ein",
+    "emailPlaceholder": "Gib deine E-Mail ein",
+    "messagePlaceholder": "Wie können wir dir helfen?",
+    "characterCount": "{{count}}/500",
+    "sending": "Wird gesendet...",
+    "sendMessage": "Nachricht senden",
+    "subjects": {
+      "accountIssue": "Kontoproblem",
+      "bugReport": "Fehlerbericht",
+      "featureRequest": "Feature-Anfrage",
+      "safetyConcern": "Sicherheitsbedenken",
+      "billingQuestion": "Abrechnungsfrage",
+      "other": "Andere"
+    },
+    "validation": {
+      "nameRequired": "Name ist erforderlich",
+      "emailRequired": "E-Mail ist erforderlich",
+      "validEmail": "Bitte gib eine gültige E-Mail ein",
+      "subjectRequired": "Betreff ist erforderlich",
+      "messageRequired": "Nachricht ist erforderlich",
+      "sessionExpired": "Benutzersitzung abgelaufen. Bitte melde dich erneut an.",
+      "sendFailed": "Nachricht konnte nicht gesendet werden",
+      "somethingWrong": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+    }
+  },
+
+  "match": {
+    "title": "Es ist ein Match",
+    "subtitle": "Es ist ein Match",
+    "description": "Vergiss das Chatten, geh und rede mit",
+    "viewProfile": "{{name}}'s Profil ansehen",
+    "keepExploring": "Weiter erkunden"
+  },
+
+  "communityGuidelines": {
+    "title": "Community-Richtlinien",
+    "welcomeTitle": "Willkommen bei Andra",
+    "welcomeDescription": "Andra ist darauf ausgelegt, dir dabei zu helfen, bedeutsame Verbindungen mit Menschen in deiner Nähe zu knüpfen. Um ein sicheres und angenehmes Erlebnis für alle zu gewährleisten, haben wir diese Community-Richtlinien festgelegt.",
+    "safetyTips": "Sicherheitstipps",
+    "needHelp": "Brauchst du Hilfe?",
+    "helpDescription": "Wenn du Fragen zu diesen Richtlinien hast oder eine Verletzung melden möchtest, wende dich bitte über die App-Einstellungen an unser Support-Team.",
+    "guidelines": {
+      "respectful": {
+        "title": "Sei respektvoll",
+        "description": "Behandle alle mit Freundlichkeit und Respekt. Wir sind alle hier, um bedeutsame Verbindungen zu knüpfen, also sei bitte höflich in deinen Interaktionen."
+      },
+      "authentic": {
+        "title": "Authentische Profile",
+        "description": "Verwende echte Fotos von dir und genaue Informationen. Catfishing oder irreführende Profile sind nicht erlaubt und führen zur Kontosperrung."
+      },
+      "safety": {
+        "title": "Bleib sicher",
+        "description": "Triff dich immer an öffentlichen Orten für erste Dates und lass jemanden wissen, wohin du gehst. Vertraue deinem Instinkt und melde verdächtiges Verhalten."
+      },
+      "appropriate": {
+        "title": "Halte es angemessen",
+        "description": "Teile Inhalte, die respektvoll und für alle Zielgruppen geeignet sind. Belästigung, Hassrede und explizite Inhalte sind streng verboten."
+      },
+      "privacy": {
+        "title": "Respektiere die Privatsphäre",
+        "description": "Teile keine persönlichen Informationen, Fotos oder Gespräche ohne Erlaubnis. Respektiere die Grenzen und das Einverständnis anderer."
+      },
+      "reporting": {
+        "title": "Melde Bedenken",
+        "description": "Wenn du etwas siehst, das gegen unsere Richtlinien verstößt, melde es bitte sofort. Wir nehmen alle Meldungen ernst und werden angemessene Maßnahmen ergreifen."
+      }
+    },
+    "safetyTipsList": [
+      "Triff dich immer an öffentlichen Orten für erste Dates",
+      "Erzähle einem Freund oder Familienmitglied von deinen Plänen",
+      "Nutze nach Möglichkeit dein eigenes Transportmittel",
+      "Vertraue deinem Instinkt - wenn sich etwas falsch anfühlt, ist es wahrscheinlich so",
+      "Teile nicht zu schnell persönliche Informationen",
+      "Sei vorsichtig mit dem Alkoholkonsum",
+      "Habe einen Ausstiegsplan",
+      "Melde verdächtiges oder unangemessenes Verhalten"
+    ]
+  },
+
+  "basicInfo": {
+    "interestedIn": {
+      "men": "Männer",
+      "women": "Frauen",
+      "both": "Beide"
+    },
+    "relationshipGoals": {
+      "serious": "Ernste Beziehung",
+      "casual": "Lockeres Dating",
+      "friendship": "Freundschaft",
+      "open": "Offen für Möglichkeiten",
+      "preferNot": "Möchte ich nicht sagen"
+    },
+    "heightUnit": "cm",
+    "validation": {
+      "sessionExpired": "Benutzersitzung abgelaufen. Bitte melde dich erneut an.",
+      "relationshipGoalRequired": "Bitte wähle mindestens ein Beziehungsziel aus."
+    }
+  },
+
+  "api": {
+    "errors": {
+      "somethingWentWrong": "Etwas ist schiefgelaufen",
+      "requestTimeout": "Anfrage-Timeout. Bitte überprüfe deine Verbindung und versuche es erneut.",
+      "networkError": "Netzwerkfehler. Bitte überprüfe deine Internetverbindung."
+    }
+  },
+
+  "helper": {
+    "genderInterest": {
+      "all": "Alle",
+      "women": "Frauen",
+      "men": "Männer"
+    },
+    "time": {
+      "justNow": "Gerade eben",
+      "minutesAgo": "{{count}} Minute her",
+      "minutesAgo_plural": "{{count}} Minuten her",
+      "hoursAgo": "{{count}} Stunde her",
+      "hoursAgo_plural": "{{count}} Stunden her",
+      "dayAgo": "1 Tag her",
+      "daysAgo": "{{count}} Tage her",
+      "recently": "Kürzlich"
+    },
+    "location": {
+      "notSpecified": "Standort nicht angegeben"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "height": {
+      "unit": "cm"
+    },
+    "unknown": {
+      "interest": "Unbekanntes Interesse ({{id}})",
+      "option": "Unbekannte Option ({{id}})"
+    }
+  },
+
+  "blockedUsers": {
+    "title": "Blockierte Benutzer",
+    "loading": "Blockierte Benutzer werden geladen...",
+    "blockedDate": "Blockiert {{date}}",
+    "empty": {
+      "title": "Keine blockierten Benutzer",
+      "description": "Benutzer, die du blockierst, werden hier angezeigt. Du kannst sie jederzeit entsperren."
+    },
+    "unblock": {
+      "title": "Benutzer entsperren",
+      "message": "Bist du sicher, dass du {{name}} entsperren möchtest? Sie werden dein Profil wieder sehen und mit dir interagieren können.",
+      "button": "Entsperren",
+      "success": {
+        "title": "Benutzer entsperrt",
+        "message": "{{name}} wurde erfolgreich entsperrt."
+      }
+    }
+  },
+
+  "terms": {
+    "title": "Nutzungsbedingungen",
+    "lastUpdated": "Zuletzt aktualisiert: November 2025",
+    "intro": "Diese Nutzungsbedingungen regeln Ihre Nutzung der Andra-Mobile-App. Bitte lesen Sie diese Bedingungen sorgfältig durch, bevor Sie unseren Service nutzen.",
+    "notice": {
+      "title": "Wichtiger Hinweis",
+      "content": "Durch die weitere Nutzung von Andra bestätigen Sie, dass Sie diese Nutzungsbedingungen gelesen, verstanden und sich damit einverstanden erklärt haben. Wenn Sie mit einem Teil dieser Bedingungen nicht einverstanden sind, stellen Sie bitte die Nutzung der App ein."
+    },
+    "contact": {
+      "title": "Fragen?",
+      "content": "Wenn Sie Fragen zu diesen Nutzungsbedingungen haben, kontaktieren Sie bitte unser Support-Team über die App-Einstellungen oder wenden Sie sich direkt an uns."
+    },
+    "sections": {
+      "acceptance": {
+        "title": "1. Annahme der Bedingungen",
+        "content": "Durch das Herunterladen, Zugreifen oder Verwenden der Andra-Mobile-App ('App') stimmen Sie zu, an diese Nutzungsbedingungen ('Bedingungen') gebunden zu sein. Wenn Sie diesen Bedingungen nicht zustimmen, verwenden Sie bitte nicht unsere App."
+      },
+      "description": {
+        "title": "2. Beschreibung des Services",
+        "content": "Andra ist eine standortbasierte Social-Networking-App, die Verbindungen zwischen Nutzern basierend auf Nähe, Interessen und Präferenzen erleichtert. Die App umfasst Funktionen wie Benutzerprofile, Matching, Nachrichten, Event-Entdeckung und standortbasierte Services."
+      },
+      "eligibility": {
+        "title": "3. Benutzerberechtigung",
+        "content": "Sie müssen mindestens 18 Jahre alt sein, um Andra zu nutzen. Durch die Nutzung der App bestätigen und garantieren Sie, dass Sie mindestens 18 Jahre alt sind und die rechtliche Befugnis haben, diese Bedingungen einzugehen."
+      },
+      "accounts": {
+        "title": "4. Benutzerkonten und Registrierung",
+        "content": "Um bestimmte Funktionen der App zu nutzen, müssen Sie ein Konto erstellen. Sie sind verantwortlich für die Vertraulichkeit Ihrer Kontoinformationen und für alle Aktivitäten, die unter Ihrem Konto stattfinden."
+      },
+      "conduct": {
+        "title": "5. Benutzerverhalten und verbotene Aktivitäten",
+        "content": "Sie stimmen zu, sich nicht an folgenden verbotenen Aktivitäten zu beteiligen: Belästigung, Missbrauch oder bedrohliches Verhalten gegenüber anderen Nutzern; Veröffentlichung falscher, irreführender oder betrügerischer Informationen."
+      },
+      "privacy": {
+        "title": "6. Datenschutz und Datenschutz",
+        "content": "Ihre Privatsphäre ist uns wichtig. Unsere Sammlung und Verwendung persönlicher Informationen wird durch unsere Datenschutzrichtlinie geregelt, die durch Bezugnahme in diese Bedingungen eingebunden ist."
+      },
+      "location": {
+        "title": "7. Standortdienste",
+        "content": "Andra verwendet Standortdienste, um nähebasierte Funktionen bereitzustellen. Durch die Aktivierung der Standortdienste stimmen Sie der Sammlung und Verwendung Ihrer Standortdaten zu."
+      },
+      "intellectual": {
+        "title": "8. Inhalte und geistiges Eigentum",
+        "content": "Sie behalten das Eigentum an Inhalten, die Sie in der App veröffentlichen, gewähren uns jedoch eine Lizenz zur Verwendung, Anzeige und Verteilung solcher Inhalte im Zusammenhang mit der App."
+      },
+      "prohibitedContent": {
+        "title": "9. Verbotene Inhalte",
+        "content": "Sie dürfen keine Inhalte veröffentlichen, die illegal, schädlich, bedrohlich, missbräuchlich, diffamierend, vulgär, obszön oder anderweitig anstößig sind."
+      },
+      "safety": {
+        "title": "10. Sicherheit und Schutz",
+        "content": "Obwohl wir uns bemühen, eine sichere Umgebung zu bieten, nutzen Sie die App auf eigene Gefahr. Wir sind nicht verantwortlich für das Verhalten anderer Nutzer."
+      },
+      "thirdParty": {
+        "title": "11. Drittanbieter-Services",
+        "content": "Die App kann in Drittanbieter-Services integriert werden, einschließlich Social-Media-Plattformen und Zahlungsabwicklern."
+      },
+      "disclaimers": {
+        "title": "12. Haftungsausschlüsse und Haftungsbeschränkungen",
+        "content": "DIE APP WIRD 'WIE BESEHEN' OHNE GEWÄHRLEISTUNGEN JEDER ART BEREITGESTELLT. IM MAXIMAL ZULÄSSIGEN RAHMEN DES GESETZES SCHLIESSEN WIR ALLE GEWÄHRLEISTUNGEN AUS."
+      },
+      "termination": {
+        "title": "13. Kündigung",
+        "content": "Wir können Ihr Konto jederzeit wegen Verstößen gegen diese Bedingungen oder aus anderen Gründen nach unserem Ermessen kündigen oder sperren."
+      },
+      "modifications": {
+        "title": "14. Änderungen der Bedingungen",
+        "content": "Wir behalten uns das Recht vor, diese Bedingungen jederzeit zu ändern. Wir werden Nutzer über wesentliche Änderungen über die App oder per E-Mail informieren."
+      },
+      "governing": {
+        "title": "15. Anwendbares Recht und Streitbeilegung",
+        "content": "Diese Bedingungen unterliegen den Gesetzen der Gerichtsbarkeit, in der Andra eingetragen ist."
+      },
+      "contact": {
+        "title": "16. Kontaktinformationen",
+        "content": "Wenn Sie Fragen zu diesen Bedingungen haben, kontaktieren Sie uns bitte über die Support-Funktion der App oder an unserer angegebenen Kontaktadresse."
+      }
+    }
+  },
+
+  "privacy": {
+    "title": "Datenschutzrichtlinie",
+    "lastUpdated": "Zuletzt aktualisiert: November 2025",
+    "intro": {
+      "title": "Ihre Privatsphäre ist wichtig",
+      "content": "Wir verpflichten uns, Ihre Privatsphäre zu schützen und transparent darüber zu sein, wie wir Ihre Informationen in Andra sammeln, verwenden und teilen."
+    },
+    "dataCollect": {
+      "title": "Welche Informationen wir sammeln"
+    },
+    "protection": {
+      "title": "Wie wir Ihre Privatsphäre schützen"
+    },
+    "principles": {
+      "title": "Unsere Datenschutzprinzipien",
+      "noSell": "Wir verkaufen niemals Ihre persönlichen Daten",
+      "control": "Sie kontrollieren, wer Ihre Informationen sieht",
+      "delete": "Sie können Ihre Daten jederzeit löschen",
+      "security": "Wir verwenden branchenübliche Sicherheit"
+    },
+    "contact": {
+      "title": "Fragen zum Datenschutz?",
+      "content": "Wenn Sie Fragen zu dieser Datenschutzrichtlinie haben oder Ihre Datenschutzrechte ausüben möchten, kontaktieren Sie uns über die App-Einstellungen oder wenden Sie sich an unser Support-Team."
+    },
+    "sections": {
+      "collect": {
+        "title": "Informationen, die wir sammeln",
+        "content": "Wir sammeln Informationen, die Sie direkt bereitstellen (Profildetails, Fotos, Interessen), automatisch (Standort, Geräteinformationen, App-Nutzung) und von Drittanbietern."
+      },
+      "use": {
+        "title": "Wie wir Ihre Informationen verwenden",
+        "content": "Ihre Informationen helfen uns, relevante Matches zu zeigen, unsere Services zu verbessern, wichtige Updates zu senden, Sicherheit zu gewährleisten und Kundensupport zu bieten."
+      },
+      "location": {
+        "title": "Standortdaten",
+        "content": "Wir verwenden Ihren Standort, um nahegelegene Benutzer und Events zu zeigen. Sie können die Standortfreigabe in Ihren Geräteeinstellungen kontrollieren."
+      },
+      "photos": {
+        "title": "Foto- und Profilinformationen",
+        "content": "Ihre Fotos und Profildetails werden verwendet, um Ihr Profil zu erstellen und Sie potenziellen Matches zu zeigen."
+      },
+      "sharing": {
+        "title": "Datenaustausch",
+        "content": "Wir teilen Ihre Informationen nur mit anderen Nutzern, wie es von unseren App-Funktionen beabsichtigt ist (Anzeigen von Profilen für Matches)."
+      },
+      "security": {
+        "title": "Datensicherheit",
+        "content": "Wir verwenden branchenübliche Verschlüsselung, um Ihre Daten zu schützen. Alle Informationen werden auf sicheren Servern mit eingeschränktem Zugang gespeichert."
+      },
+      "rights": {
+        "title": "Ihre Rechte",
+        "content": "Sie können jederzeit auf Ihr Konto zugreifen, es aktualisieren oder löschen. Sie können sich von bestimmten Datensammlungen abmelden und kontrollieren, wer Ihr Profil sieht."
+      },
+      "retention": {
+        "title": "Datenaufbewahrung",
+        "content": "Wir behalten Ihre Daten nur so lange, wie es zur Bereitstellung unserer Services erforderlich ist. Wenn Sie Ihr Konto löschen, entfernen wir Ihre persönlichen Informationen innerhalb von 30 Tagen."
+      },
+      "children": {
+        "title": "Datenschutz von Kindern",
+        "content": "Andra ist nicht für Benutzer unter 18 Jahren bestimmt. Wir sammeln nicht wissentlich Informationen von Minderjährigen."
+      },
+      "changes": {
+        "title": "Änderungen an dieser Richtlinie",
+        "content": "Wir können diese Datenschutzrichtlinie gelegentlich aktualisieren. Wir werden Sie über wesentliche Änderungen über die App oder E-Mail informieren."
+      }
+    },
+    "dataTypes": {
+      "profile": {
+        "type": "Profilinformationen",
+        "examples": "Name, Alter, Fotos, Interessen, Präferenzen"
+      },
+      "location": {
+        "type": "Standortdaten",
+        "examples": "GPS-Koordinaten, nahegelegene Orte, Standortverlauf"
+      },
+      "usage": {
+        "type": "Nutzungsinformationen",
+        "examples": "App-Interaktionen, Matches, Nachrichten, besuchte Events"
+      },
+      "device": {
+        "type": "Geräteinformationen",
+        "examples": "Gerätetyp, Betriebssystem, App-Version"
+      },
+      "contact": {
+        "type": "Kontaktinformationen",
+        "examples": "E-Mail, Telefonnummer (nur zur Verifizierung)"
+      }
+    }
+  },
+
+  "errors": {
+    "noUsersAvailable": "Hoppla! Keine Benutzer verfügbar",
+    "unableToLoadUsers": "Benutzer können nicht geladen werden. Bitte versuche es erneut.",
+    "tryAgain": "Erneut versuchen",
+    "findingUsers": "Suche Benutzer in deiner Nähe...",
+    "noUsersFound": "Keine Benutzer gefunden",
+    "adjustSearchRadius": "Versuche deinen Suchradius anzupassen oder schaue später nach neuen Benutzern in deiner Gegend.",
+    "refresh": "Aktualisieren",
+    "loading": "Lädt...",
+    "retry": "Wiederholen",
+    "loadingMap": "Karte wird geladen...",
+    "locationUnavailable": "Standort nicht verfügbar",
+    "unableToAccessLocation": "Dein Standort kann nicht abgerufen werden. Bitte aktiviere die Standortdienste und versuche es erneut.",
+    "loadingProfile": "Profil wird geladen...",
+    "unableToShowLocation": "Standort kann nicht auf der Karte angezeigt werden. Bitte versuche es erneut.",
+    "ok": "OK"
+  },
+
+  "validation": {
+    "validationError": "Validierungsfehler",
+    "enterFullName": "Bitte gib deinen vollständigen Namen ein.",
+    "selectDateOfBirth": "Bitte wähle dein Geburtsdatum aus.",
+    "enterPhoneNumber": "Bitte gib deine Telefonnummer ein.",
+    "enterValidPhoneNumber": "Bitte gib eine gültige Telefonnummer ein.",
+    "enterEmailAddress": "Bitte gib deine E-Mail-Adresse ein.",
+    "enterValidEmailAddress": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "userSessionExpired": "Benutzersitzung abgelaufen. Bitte melde dich erneut an.",
+    "failedToUpdateSettings": "Kontoeinstellungen konnten nicht aktualisiert werden. Bitte versuche es erneut.",
+    "saving": "Speichert...",
+    "saveChanges": "Änderungen speichern"
+  },
+
+  "suggestChanges": {
+    "error": "Fehler",
+    "enterNewLocation": "Bitte gib einen neuen Standort ein.",
+    "userSessionExpired": "Benutzersitzung abgelaufen. Bitte melde dich erneut an.",
+    "success": "Erfolg",
+    "changesSuggestedSuccessfully": "Änderungen erfolgreich vorgeschlagen!",
+    "ok": "OK",
+    "failedToSuggestChanges": "Änderungen konnten nicht vorgeschlagen werden. Bitte versuche es erneut.",
+    "failedToSuggestChangesNetwork": "Änderungen konnten nicht vorgeschlagen werden. Bitte überprüfe deine Verbindung und versuche es erneut."
+  },
+
+  "invite": {
+    "failedToSendInvites": "Einladungen konnten nicht gesendet werden",
+    "somethingWentWrong": "Etwas ist schief gelaufen. Bitte versuche es erneut."
+  },
+
+  "privateSpot": {
+    "unableToGetLocation": "Dein Standort kann nicht abgerufen werden. Bitte versuche es erneut.",
+    "loadingPrivateSpots": "Private Orte werden geladen...",
+    "deletePrivateSpot": "Privaten Ort löschen",
+    "failedToLoadPrivateSpots": "Private Orte konnten nicht geladen werden",
+    "failedToDeletePrivateSpot": "Privaten Ort konnte nicht gelöscht werden",
+    "title": "Privater Ort",
+    "validation": {
+      "locationError": "Standort konnte nicht ermittelt werden. Bitte versuche es erneut."
+    }
+  },
+
+  "account": {
+    "deleteAccount": "Konto löschen",
+    "deleteMyAccount": "Mein Konto löschen",
+    "failedToUpdateSettings": "Kontoeinstellungen konnten nicht aktualisiert werden"
+  },
+
+  "hooks": {
+    "invalidUserData": "Ungültige Benutzerdaten: erforderliche Felder fehlen",
+    "failedToTransformUser": "Benutzer konnte nicht transformiert werden",
+    "userIdNotAvailable": "Benutzer-ID nicht verfügbar",
+    "noUserDataFound": "Keine Benutzerdaten gefunden",
+    "failedToFetchUserData": "Benutzerdaten konnten nicht abgerufen werden",
+    "noMeetupRequestsFound": "Noch keine Meetup-Anfragen gefunden.",
+    "networkErrorCheckConnection": "Netzwerkfehler aufgetreten. Bitte überprüfe deine Verbindung.",
+    "noMatchesFound": "Noch keine Matches gefunden. Weiter swipen!",
+    "failedToLoadMatches": "Matches konnten nicht geladen werden",
+    "userSessionExpired": "Benutzersitzung abgelaufen. Bitte melde dich erneut an.",
+    "failedToLoadBlockedUsers": "Blockierte Benutzer konnten nicht geladen werden",
+    "failedToUnblockUser": "Benutzer konnte nicht entblockiert werden",
+    "userNotAuthenticated": "Benutzer nicht authentifiziert",
+    "invalidResponseFormat": "Ungültiges Antwortformat",
+    "failedToFetchInterests": "Interessen konnten nicht abgerufen werden"
   }
 }

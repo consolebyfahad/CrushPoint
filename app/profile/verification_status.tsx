@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   ScrollView,
@@ -16,6 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function VerificationStatus() {
+  const { t } = useTranslation();
   const [verificationState, setVerificationState] = useState({
     status: "faild", // "failed", "pending", "verified"
     lastAttempt: new Date(),
@@ -28,9 +30,9 @@ export default function VerificationStatus() {
 
   const handleWhyVerify = () => {
     Alert.alert(
-      "Why Verify?",
-      "Verification helps:\n\n• Build trust in the community\n• Reduce fake profiles\n• Increase your match potential\n• Ensure a safer dating experience",
-      [{ text: "Got it" }]
+      t("verification.whyVerify.title"),
+      t("verification.whyVerify.message"),
+      [{ text: t("verification.whyVerify.gotIt") }]
     );
   };
 
@@ -38,8 +40,8 @@ export default function VerificationStatus() {
     switch (verificationState.status) {
       case "verified":
         return {
-          title: "Verification Successful",
-          description: "Your account is verified",
+          title: t("verification.status.successful.title"),
+          description: t("verification.status.successful.description"),
           iconName: "checkmark-circle",
           iconColor: "#10B981",
           backgroundColor: color.primary100,
@@ -47,8 +49,8 @@ export default function VerificationStatus() {
         };
       case "pending":
         return {
-          title: "Verification Pending",
-          description: "We're reviewing your submission",
+          title: t("verification.status.pending.title"),
+          description: t("verification.status.pending.description"),
           iconName: "time",
           iconColor: "#F59E0B",
           backgroundColor: color.primary100,
@@ -57,8 +59,8 @@ export default function VerificationStatus() {
       case "failed":
       default:
         return {
-          title: "Verification Failed",
-          description: "Please try verifying again",
+          title: t("verification.status.failed.title"),
+          description: t("verification.status.failed.description"),
           iconName: "warning-outline",
           iconColor: "#EF4444",
           backgroundColor: color.primary100,
@@ -71,23 +73,23 @@ export default function VerificationStatus() {
 
   const verificationIssues = [
     {
-      title: "Poor lighting",
-      description: "Ensure your face is well-lit and clearly visible",
+      title: t("verification.issues.poorLighting.title"),
+      description: t("verification.issues.poorLighting.description"),
     },
     {
-      title: "Face not centered",
-      description: "Position your face within the guide frame",
+      title: t("verification.issues.faceNotCentered.title"),
+      description: t("verification.issues.faceNotCentered.description"),
     },
     {
-      title: "Multiple faces detected",
-      description: "Make sure you're alone in the frame",
+      title: t("verification.issues.multipleFaces.title"),
+      description: t("verification.issues.multipleFaces.description"),
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <Header title={"Verification Status"} divider={true} />
+      <Header title={t("verification.status.title")} divider={true} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Status Card */}
@@ -114,7 +116,9 @@ export default function VerificationStatus() {
           onPress={handleWhyVerify}
           activeOpacity={0.7}
         >
-          <Text style={styles.whyVerifyTitle}>Why verify?</Text>
+          <Text style={styles.whyVerifyTitle}>
+            {t("verification.whyVerify.title")}
+          </Text>
           <Ionicons
             name="information-circle-outline"
             size={20}
@@ -125,7 +129,9 @@ export default function VerificationStatus() {
         {/* Common Issues Section - Only show if verification failed */}
         {verificationState.status === "failed" && (
           <View style={styles.issuesSection}>
-            <Text style={styles.issuesTitle}>Common verification issues:</Text>
+            <Text style={styles.issuesTitle}>
+              {t("verification.issues.title")}
+            </Text>
 
             {verificationIssues.map((issue, index) => (
               <View key={index} style={styles.issueItem}>
@@ -139,10 +145,11 @@ export default function VerificationStatus() {
         {/* Success Message - Only show if verified */}
         {verificationState.status === "verified" && (
           <View style={styles.successSection}>
-            <Text style={styles.successTitle}>Congratulations!</Text>
+            <Text style={styles.successTitle}>
+              {t("verification.success.title")}
+            </Text>
             <Text style={styles.successDescription}>
-              Your verified badge will now appear on your profile, helping you
-              build trust with potential matches.
+              {t("verification.success.description")}
             </Text>
           </View>
         )}
@@ -150,11 +157,11 @@ export default function VerificationStatus() {
         {/* Pending Message - Only show if pending */}
         {verificationState.status === "pending" && (
           <View style={styles.pendingSection}>
-            <Text style={styles.pendingTitle}>Review in Progress</Text>
+            <Text style={styles.pendingTitle}>
+              {t("verification.review.title")}
+            </Text>
             <Text style={styles.pendingDescription}>
-              {
-                "Our team is reviewing your verification submission. This usually takes 24-48 hours. We'll notify you once it's complete."
-              }
+              {t("verification.review.description")}
             </Text>
           </View>
         )}
@@ -167,7 +174,7 @@ export default function VerificationStatus() {
       {statusInfo.showTryAgain && (
         <View style={styles.tryAgainContainer}>
           <CustomButton
-            title="Try Again"
+            title={t("verification.tryAgain")}
             onPress={handleTryAgain}
             icon={<Feather name="camera" size={18} color="white" />}
           />

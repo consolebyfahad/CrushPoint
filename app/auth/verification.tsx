@@ -253,10 +253,7 @@ export default function FaceVerification() {
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      showToast(
-        error.message || "Something went wrong. Please try again.",
-        "error"
-      );
+      showToast(error.message || t("auth.somethingWentWrong"), "error");
     } finally {
       setVerificationState("idle");
     }

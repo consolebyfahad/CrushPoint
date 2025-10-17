@@ -1,5 +1,6 @@
 {
   "welcome": "Welcome!",
+  "welcomeTerms": "By signing up, you agree to our Terms and Privacy Policy",
   "getStarted": "Get Started",
   "continue": "Continue",
   "skip": "Skip",
@@ -19,14 +20,14 @@
   "info": "Info",
 
   "onboarding": {
-    "title1": "Find Your Perfect Match",
-    "subtitle1": "Discover amazing people nearby and start meaningful conversations",
-    "title2": "Connect & Chat",
-    "subtitle2": "Chat with your matches and build real connections",
-    "title3": "Meet in Person",
-    "subtitle3": "Plan meetups and take your connections to the next level",
-    "title4": "Stay Safe",
-    "subtitle4": "Your safety is our priority with verified profiles and secure messaging"
+    "title1": "Discover People Nearby",
+    "subtitle1": "Find real profiles around you on the map or in list view.",
+    "title2": "Meet in Person",
+    "subtitle2": "Explore real people based on shared interests and intentions. Forget swiping left and right. ",
+    "title3": "Express Yourself Authentically",
+    "subtitle3": "No chats needed. Send your crush a fun emoji to get their attention. ",
+    "title4": "Discover Events",
+    "subtitle4": "Find your significant other at interesting events."
   },
 
   "language": {
@@ -41,46 +42,48 @@
     "login": "Login",
     "signup": "Create Your Account",
     "logout": "Logout",
-    "phoneNumber": "Phone Number",
-    "enterPhone": "Enter your phone number",
-    "verificationCode": "Verification Code",
-    "enterCode": "Enter the verification code sent to your phone",
-    "resendCode": "Resend Code",
-    "verify": "Verify",
-    "invalidPhone": "Please enter a valid phone number",
-    "invalidCode": "Please enter a valid verification code",
-    "verificationFailed": "Verification failed. Please try again.",
-    "loginSuccess": "Login successful!",
     "logoutConfirm": "Are you sure you want to logout?",
-    "logoutSuccess": "Logged out successfully",
-    "chooseSignupMethod": "Choose your preferred sign up method",
+    "phoneNumber": "Phone Number",
+    "email": "Email",
+    "emailAddress": "Email Address",
+    "enterPhone": "Enter your phone number",
+    "enterEmail": "Enter your email address",
+    "phoneVerification": "We'll send you a verification code",
+    "emailVerification": "We'll send you a verification code",
     "continueWithPhone": "Continue with Phone",
     "continueWithEmail": "Continue with Email",
-    "continueWithApple": "Continue with Apple",
-    "continueWithGoogle": "Continue with Google",
     "alreadyHaveAccount": "Already have an account?",
-    "enterEmail": "Enter your email",
-    "phoneVerification": "We'll send you a code to verify your number",
-    "emailVerification": "We'll send you a code to verify your email",
-    "emailAddress": "Email Address",
-    "phone": "Phone",
-    "email": "Email",
+    "chooseSignupMethod": "Choose how you'd like to sign up",
+    "verificationCode": "Verification Code",
+    "enterCode": "Enter the verification code sent to your phone",
+    "enterCodeSent": "Enter the 6-digit code sent to {{contactInfo}}",
+    "verifyYour": "Verify your {{contactType}}",
+    "resendCode": "Resend Code",
+    "resendCodeIn": "Resend code in {{count}}s",
+    "verify": "Verify",
+    "invalidPhone": "Please enter a valid phone number",
     "verifyIdentity": "Verify Your Identity",
-    "faceVerificationInstruction": "Position your face in the frame and ensure good lighting",
+    "faceVerificationInstruction": "Take a selfie to verify your identity and complete your profile",
+    "startScan": "Start Face Scan",
     "capturing": "Capturing...",
     "processing": "Processing...",
     "uploading": "Uploading...",
     "submitting": "Submitting...",
     "creatingProfile": "Creating Profile...",
-    "startScan": "Start Scan",
-    "noReferenceImage": "No reference image available for comparison.",
-    "verificationError": "Verification Error",
     "verificationSuccessful": "Verification Successful!",
+    "verificationFailed": "Verification Failed",
+    "verificationError": "Verification Error",
     "tryAgain": "Try Again",
+    "noReferenceImage": "No reference image available",
+    "invalidCode": "Please enter a valid verification code",
+    "loginSuccess": "Login successful!",
+    "logoutSuccess": "Logged out successfully",
+    "failedToResendCode": "Failed to resend code. Please try again.",
+    "logoutError": "Error logging out. Please try again.",
+    "continueWithApple": "Continue with Apple",
+    "continueWithGoogle": "Continue with Google",
+    "phone": "Phone",
     "skip": "Skip",
-    "verifyYour": "Verify your {{contactType}}",
-    "enterCodeSent": "Enter the 6-digit code we sent to {{contactInfo}}",
-    "resendCodeIn": "Resend code in {{count}}s",
     "googleSignInCancelled": "Google sign in was cancelled",
     "googleSignInInProgress": "Sign in already in progress",
     "googlePlayServicesNotAvailable": "Google Play Services not available",
@@ -93,7 +96,34 @@
     "appleSignInCancelled": "Apple Sign-In was canceled",
     "appleSignInInvalidResponse": "Apple Sign-In failed: Invalid response",
     "appleSignInNotAvailableDevice": "Apple Sign-In is not available",
-    "appleSignInTryAgain": "Apple Sign-In failed. Please try again."
+    "appleSignInTryAgain": "Apple Sign-In failed. Please try again.",
+    "uploadFailed": "Upload failed",
+    "somethingWentWrong": "Something went wrong. Please try again."
+  },
+
+  "faceVerification": {
+    "success": "Identity verification completed! Confidence:",
+    "failed": "Face verification failed. Confidence:",
+    "required": "Required",
+    "tryAgain": "Please try again with better lighting and ensure your face is clearly visible.",
+    "genericError": "Verification failed. Please try again.",
+    "noFaceDetected": "No face detected. Please ensure your face is clearly visible and centered in the frame.",
+    "invalidImageSize": "Image size issue. Please try taking a new photo with better quality.",
+    "concurrencyLimit": "Service is busy due to free tier limits. Please wait a moment and try again, or consider upgrading to a paid plan for better performance.",
+    "configError": "Service configuration error. Please contact support.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "rateLimit": "Too many requests. Please wait a moment before trying again.",
+    "resizedImageNotFound": "Resized image file not found or size unknown",
+    "failedToResizeImage": "Failed to resize image",
+    "imageTooLarge": "Image too large even after compression",
+    "failedToProcessImage": "Failed to process image",
+    "failedToDownloadImage": "Failed to download image",
+    "noFaceDetectedInImage": "No face detected in the image",
+    "faceDetectionError": "Face detection error",
+    "faceComparisonError": "Face comparison error",
+    "bothImagesRequired": "Both captured and reference images are required",
+    "invalidConfidenceScore": "Invalid confidence score received from Face++ API",
+    "verificationFailed": "Verification failed"
   },
 
   "profile": {
@@ -127,6 +157,7 @@
     "failedToSavePhotos": "Failed to save photos. Please try again.",
     "age": "Age",
     "height": "Height",
+    "gender": "Gender",
     "location": "Location",
     "occupation": "Occupation",
     "education": "Education",
@@ -142,6 +173,7 @@
     "selectOneOrMoreGoals": "Select one or more goals",
     "selectUpTo3Nationalities": "Select up to 3 nationalities",
     "selectNationalities": "Select nationalities",
+    "searchNationalities": "Search nationalities",
     "selectReligion": "Select religion",
     "selectZodiacSign": "Select zodiac sign",
     "saving": "Saving...",
@@ -153,7 +185,20 @@
     "matched": "Matched",
     "removeMatch": "Remove Match",
     "block": "Block",
-    "report": "Report"
+    "report": "Report",
+    "failedToUpdateBasicInfo": "Failed to update basic information",
+    "failedToUpdateBasicInfoRetry": "Failed to update basic information. Please try again.",
+    "accountSettings": "Account Settings",
+    "fullName": "Full Name",
+    "enterFullName": "Enter your full name",
+    "changeableOnceIn6Months": "Changeable only once in 6 months",
+    "dateOfBirth": "Date of Birth",
+    "dateFormat": "mm/dd/yyyy",
+    "phoneNumber": "Phone Number",
+    "enterPhoneNumber": "Enter your phone number",
+    "email": "Email",
+    "enterEmail": "Enter your email",
+    "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone."
   },
 
   "matches": {
@@ -278,7 +323,24 @@
     "failedToRSVP": "Failed to RSVP",
     "userSessionExpired": "User session expired. Please login again.",
     "somethingWentWrongTryAgain": "Something went wrong. Please try again.",
-    "eventLeft": "You left the event"
+    "eventLeft": "You left the event",
+    "defaultTitle": "Untitled Event",
+    "defaultCategory": "General",
+    "defaultLocation": "Location TBD",
+    "defaultDescription": "No description available",
+    "defaultOrganizer": "Event Organizer",
+    "noEventsFound": "No events found. Check back later for upcoming events!",
+    "failedToLoadEvents": "Failed to load events",
+    "networkError": "Network error occurred. Please check your connection.",
+    "userNotLoggedIn": "User not logged in",
+    "failedToUpdateAttendance": "Failed to update attendance"
+  },
+
+  "users": {
+    "userIdNotAvailable": "User ID not available",
+    "noUsersFoundInArea": "No users found in your area",
+    "noUsersFoundOrServerError": "No users found or server error occurred",
+    "networkError": "Network error occurred. Please check your connection."
   },
 
   "settings": {
@@ -367,6 +429,7 @@
     "both": "Both",
     "online": "Online",
     "offline": "Offline",
+    "outgoing": "Outgoing",
     "lastSeen": "Last seen",
     "now": "now",
     "minutesAgo": "{{count}} minutes ago",
@@ -542,44 +605,6 @@
     "updateFailedRetry": "Failed to update interests. Please try again."
   },
 
-  "communityGuidelines": {
-    "communityGuidelines": "Community Guidelines",
-    "beRespectful": "Be Respectful",
-    "beRespectfulDesc": "Treat everyone with kindness and respect. We're all here to make meaningful connections, so please be courteous in your interactions.",
-    "authenticProfiles": "Authentic Profiles",
-    "authenticProfilesDesc": "Use real photos of yourself and accurate information. Catfishing or misleading profiles are not allowed and will result in account suspension.",
-    "safeInteractions": "Safe Interactions",
-    "safeInteractionsDesc": "Meet in public places for your first few dates. Always prioritize your safety and trust your instincts when meeting someone new.",
-    "noHarassment": "No Harassment",
-    "noHarassmentDesc": "Harassment, bullying, or any form of abuse will not be tolerated. This includes unwanted messages, inappropriate comments, or persistent contact after someone has expressed disinterest.",
-    "respectPrivacy": "Respect Privacy",
-    "respectPrivacyDesc": "Don't share personal information about others without their consent. Respect boundaries and privacy settings.",
-    "noSpam": "No Spam or Scams",
-    "noSpamDesc": "Don't use Andra for commercial purposes, spam, or fraudulent activities. This includes promoting other services, selling products, or soliciting money.",
-    "ageVerification": "Age Verification",
-    "ageVerificationDesc": "You must be at least 18 years old to use Andra. Providing false age information will result in immediate account termination.",
-    "reportInappropriate": "Report Inappropriate Behavior",
-    "reportInappropriateDesc": "If you encounter someone who violates these guidelines, please report them immediately. We take all reports seriously and will investigate promptly."
-  },
-
-  "contactSupport": {
-    "contactSupport": "Contact Support",
-    "name": "Name",
-    "email": "Email",
-    "subject": "Subject",
-    "message": "Message",
-    "accountIssue": "Account Issue",
-    "bugReport": "Bug Report",
-    "featureRequest": "Feature Request",
-    "safetyConcern": "Safety Concern",
-    "billingQuestion": "Billing Question",
-    "other": "Other",
-    "submit": "Submit",
-    "submitting": "Submitting...",
-    "messageSent": "Message sent successfully!",
-    "messageFailed": "Failed to send message. Please try again."
-  },
-
   "privateSpots": {
     "privateSpots": "Private Spots",
     "addPrivateSpot": "Add Private Spot",
@@ -590,35 +615,6 @@
     "confirmDelete": "Are you sure you want to delete this private spot?",
     "deleted": "Private spot deleted successfully",
     "deleteFailed": "Failed to delete private spot"
-  },
-
-  "verification": {
-    "verificationStatus": "Verification Status",
-    "verified": "Verified",
-    "pending": "Pending",
-    "failed": "Failed",
-    "notVerified": "Not Verified",
-    "verifyNow": "Verify Now",
-    "verificationPending": "Your verification is being reviewed. This usually takes 24-48 hours.",
-    "verificationFailed": "Your verification failed. Please try again with a clear photo of your face."
-  },
-
-  "match": {
-    "itsAMatch": "It's a Match!",
-    "youAnd": "You and {{name}} liked each other!",
-    "startChatting": "Start Chatting",
-    "keepSwiping": "Keep Swiping"
-  },
-
-  "privacy": {
-    "privacyPolicy": "Privacy Policy",
-    "lastUpdated": "Last updated: {{date}}",
-    "informationWeCollect": "Information We Collect",
-    "howWeUseInfo": "How We Use Your Information",
-    "informationSharing": "Information Sharing",
-    "dataSecurity": "Data Security",
-    "yourRights": "Your Rights",
-    "contactUs": "Contact Us"
   },
 
   "zodiac": {
@@ -634,5 +630,677 @@
     "capricorn": "Capricorn",
     "aquarius": "Aquarius",
     "pisces": "Pisces"
+  },
+
+  "nationalities": {
+    "afghan": "Afghan",
+    "albanian": "Albanian",
+    "algerian": "Algerian",
+    "american": "American",
+    "andorran": "Andorran",
+    "angolan": "Angolan",
+    "antiguan": "Antiguan",
+    "argentine": "Argentine",
+    "armenian": "Armenian",
+    "australian": "Australian",
+    "austrian": "Austrian",
+    "azerbaijani": "Azerbaijani",
+    "bahamian": "Bahamian",
+    "bahraini": "Bahraini",
+    "bangladeshi": "Bangladeshi",
+    "barbadian": "Barbadian",
+    "belarusian": "Belarusian",
+    "belgian": "Belgian",
+    "belizean": "Belizean",
+    "beninese": "Beninese",
+    "bhutanese": "Bhutanese",
+    "bolivian": "Bolivian",
+    "bosnian": "Bosnian",
+    "botswanan": "Botswanan",
+    "brazilian": "Brazilian",
+    "british": "British",
+    "bruneian": "Bruneian",
+    "bulgarian": "Bulgarian",
+    "burkinabe": "Burkinabe",
+    "burmese": "Burmese",
+    "burundian": "Burundian",
+    "cambodian": "Cambodian",
+    "cameroonian": "Cameroonian",
+    "canadian": "Canadian",
+    "cape_verdean": "Cape Verdean",
+    "central_african": "Central African",
+    "chadian": "Chadian",
+    "chilean": "Chilean",
+    "chinese": "Chinese",
+    "colombian": "Colombian",
+    "comoran": "Comoran",
+    "congolese": "Congolese",
+    "costa_rican": "Costa Rican",
+    "croatian": "Croatian",
+    "cuban": "Cuban",
+    "cypriot": "Cypriot",
+    "czech": "Czech",
+    "danish": "Danish",
+    "djiboutian": "Djiboutian",
+    "dominican": "Dominican",
+    "dutch": "Dutch",
+    "ecuadorian": "Ecuadorian",
+    "egyptian": "Egyptian",
+    "emirati": "Emirati",
+    "equatorial_guinean": "Equatorial Guinean",
+    "eritrean": "Eritrean",
+    "estonian": "Estonian",
+    "ethiopian": "Ethiopian",
+    "fijian": "Fijian",
+    "filipino": "Filipino",
+    "finnish": "Finnish",
+    "french": "French",
+    "gabonese": "Gabonese",
+    "gambian": "Gambian",
+    "georgian": "Georgian",
+    "german": "German",
+    "ghanaian": "Ghanaian",
+    "greek": "Greek",
+    "grenadian": "Grenadian",
+    "guatemalan": "Guatemalan",
+    "guinean": "Guinean",
+    "guyanese": "Guyanese",
+    "haitian": "Haitian",
+    "honduran": "Honduran",
+    "hungarian": "Hungarian",
+    "icelandic": "Icelandic",
+    "indian": "Indian",
+    "indonesian": "Indonesian",
+    "iranian": "Iranian",
+    "iraqi": "Iraqi",
+    "irish": "Irish",
+    "israeli": "Israeli",
+    "italian": "Italian",
+    "ivorian": "Ivorian",
+    "jamaican": "Jamaican",
+    "japanese": "Japanese",
+    "jordanian": "Jordanian",
+    "kazakhstani": "Kazakhstani",
+    "kenyan": "Kenyan",
+    "kiribati": "Kiribati",
+    "korean": "Korean",
+    "kuwaiti": "Kuwaiti",
+    "kyrgyzstani": "Kyrgyzstani",
+    "laotian": "Laotian",
+    "latvian": "Latvian",
+    "lebanese": "Lebanese",
+    "liberian": "Liberian",
+    "libyan": "Libyan",
+    "liechtenstein": "Liechtenstein",
+    "lithuanian": "Lithuanian",
+    "luxembourgish": "Luxembourgish",
+    "macedonian": "Macedonian",
+    "malagasy": "Malagasy",
+    "malawian": "Malawian",
+    "malaysian": "Malaysian",
+    "maldivian": "Maldivian",
+    "malian": "Malian",
+    "maltese": "Maltese",
+    "marshallese": "Marshallese",
+    "mauritanian": "Mauritanian",
+    "mauritian": "Mauritian",
+    "mexican": "Mexican",
+    "micronesian": "Micronesian",
+    "moldovan": "Moldovan",
+    "monacan": "Monacan",
+    "mongolian": "Mongolian",
+    "montenegrin": "Montenegrin",
+    "moroccan": "Moroccan",
+    "mozambican": "Mozambican",
+    "namibian": "Namibian",
+    "nauruan": "Nauruan",
+    "nepalese": "Nepalese",
+    "new_zealand": "New Zealand",
+    "nicaraguan": "Nicaraguan",
+    "nigerian": "Nigerian",
+    "nigerien": "Nigerien",
+    "north_korean": "North Korean",
+    "norwegian": "Norwegian",
+    "omani": "Omani",
+    "pakistani": "Pakistani",
+    "palauan": "Palauan",
+    "palestinian": "Palestinian",
+    "panamanian": "Panamanian",
+    "papua_new_guinean": "Papua New Guinean",
+    "paraguayan": "Paraguayan",
+    "peruvian": "Peruvian",
+    "polish": "Polish",
+    "portuguese": "Portuguese",
+    "qatari": "Qatari",
+    "romanian": "Romanian",
+    "russian": "Russian",
+    "rwandan": "Rwandan",
+    "saint_kitts": "Saint Kitts",
+    "saint_lucian": "Saint Lucian",
+    "saint_vincentian": "Saint Vincentian",
+    "samoan": "Samoan",
+    "san_marinese": "San Marinese",
+    "sao_tomean": "São Toméan",
+    "saudi_arabian": "Saudi Arabian",
+    "senegalese": "Senegalese",
+    "serbian": "Serbian",
+    "seychellois": "Seychellois",
+    "sierra_leonean": "Sierra Leonean",
+    "singaporean": "Singaporean",
+    "slovak": "Slovak",
+    "slovenian": "Slovenian",
+    "solomon_islander": "Solomon Islander",
+    "somali": "Somali",
+    "south_african": "South African",
+    "south_korean": "South Korean",
+    "south_sudanese": "South Sudanese",
+    "spanish": "Spanish",
+    "sri_lankan": "Sri Lankan",
+    "sudanese": "Sudanese",
+    "surinamese": "Surinamese",
+    "swazi": "Swazi",
+    "swedish": "Swedish",
+    "swiss": "Swiss",
+    "syrian": "Syrian",
+    "taiwanese": "Taiwanese",
+    "tajikistani": "Tajikistani",
+    "tanzanian": "Tanzanian",
+    "thai": "Thai",
+    "timorese": "Timorese",
+    "togolese": "Togolese",
+    "tongan": "Tongan",
+    "trinidadian": "Trinidadian",
+    "tunisian": "Tunisian",
+    "turkish": "Turkish",
+    "turkmenistani": "Turkmenistani",
+    "tuvaluan": "Tuvaluan",
+    "ugandan": "Ugandan",
+    "ukrainian": "Ukrainian",
+    "uruguayan": "Uruguayan",
+    "uzbekistani": "Uzbekistani",
+    "vanuatuan": "Vanuatuan",
+    "vatican": "Vatican",
+    "venezuelan": "Venezuelan",
+    "vietnamese": "Vietnamese",
+    "yemeni": "Yemeni",
+    "zambian": "Zambian",
+    "zimbabwean": "Zimbabwean"
+  },
+
+  "religions": {
+    "christianity": "Christianity",
+    "islam": "Islam",
+    "hinduism": "Hinduism",
+    "buddhism": "Buddhism",
+    "judaism": "Judaism",
+    "others": "Others",
+    "any": "Any"
+  },
+
+  "contactSupport": {
+    "title": "Contact Support",
+    "subtitle": "We're here to help",
+    "description": "Our support team will get back to you as soon as possible.",
+    "nameLabel": "Name *",
+    "emailLabel": "Email *",
+    "subjectLabel": "Subject *",
+    "messageLabel": "Message *",
+    "namePlaceholder": "Enter your name",
+    "emailPlaceholder": "Enter your email",
+    "messagePlaceholder": "How can we help?",
+    "characterCount": "{{count}}/500",
+    "sending": "Sending...",
+    "sendMessage": "Send Message",
+    "subjects": {
+      "accountIssue": "Account Issue",
+      "bugReport": "Bug Report",
+      "featureRequest": "Feature Request",
+      "safetyConcern": "Safety Concern",
+      "billingQuestion": "Billing Question",
+      "other": "Other"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "validEmail": "Please enter a valid email",
+      "subjectRequired": "Subject is required",
+      "messageRequired": "Message is required",
+      "sessionExpired": "User session expired. Please login again.",
+      "sendFailed": "Failed to send message",
+      "somethingWrong": "Something went wrong. Please try again."
+    }
+  },
+
+  "match": {
+    "title": "It's a Match",
+    "subtitle": "It's a Match",
+    "description": "Forget chatting, go talk to",
+    "viewProfile": "View {{name}}'s Profile",
+    "keepExploring": "Keep Exploring"
+  },
+
+  "communityGuidelines": {
+    "title": "Community Guidelines",
+    "welcomeTitle": "Welcome to Andra",
+    "welcomeDescription": "Andra is designed to help you make meaningful connections with people nearby. To ensure a safe and enjoyable experience for everyone, we've established these community guidelines.",
+    "safetyTips": "Safety Tips",
+    "needHelp": "Need Help?",
+    "helpDescription": "If you have any questions about these guidelines or need to report a violation, please contact our support team through the app settings.",
+    "guidelines": {
+      "respectful": {
+        "title": "Be Respectful",
+        "description": "Treat everyone with kindness and respect. We're all here to make meaningful connections, so please be courteous in your interactions."
+      },
+      "authentic": {
+        "title": "Authentic Profiles",
+        "description": "Use real photos of yourself and accurate information. Catfishing or misleading profiles are not allowed and will result in account suspension."
+      },
+      "safety": {
+        "title": "Stay Safe",
+        "description": "Always meet in public places for first dates, and let someone know where you're going. Trust your instincts and report any suspicious behavior."
+      },
+      "appropriate": {
+        "title": "Keep It Appropriate",
+        "description": "Share content that's respectful and suitable for all audiences. Harassment, hate speech, and explicit content are strictly prohibited."
+      },
+      "privacy": {
+        "title": "Respect Privacy",
+        "description": "Don't share personal information, photos, or conversations without permission. Respect others' boundaries and consent."
+      },
+      "reporting": {
+        "title": "Report Concerns",
+        "description": "If you see something that violates our guidelines, please report it immediately. We take all reports seriously and will take appropriate action."
+      }
+    },
+    "safetyTipsList": [
+      "Always meet in public places for first dates",
+      "Tell a friend or family member about your plans",
+      "Use your own transportation when possible",
+      "Trust your instincts - if something feels wrong, it probably is",
+      "Don't share personal information too quickly",
+      "Be cautious with alcohol consumption",
+      "Have an exit strategy planned",
+      "Report any suspicious or inappropriate behavior"
+    ]
+  },
+
+  "basicInfo": {
+    "interestedIn": {
+      "men": "Men",
+      "women": "Women",
+      "both": "Both"
+    },
+    "relationshipGoals": {
+      "serious": "Serious relationship",
+      "casual": "Casual dating",
+      "friendship": "Friendship",
+      "open": "Open to possibilities",
+      "preferNot": "Prefer not to say"
+    },
+    "heightUnit": "cm",
+    "validation": {
+      "sessionExpired": "User session expired. Please login again.",
+      "relationshipGoalRequired": "Please select at least one relationship goal."
+    }
+  },
+
+  "api": {
+    "errors": {
+      "somethingWentWrong": "Something went wrong",
+      "requestTimeout": "Request timeout. Please check your connection and try again.",
+      "networkError": "Network error. Please check your internet connection."
+    }
+  },
+
+  "helper": {
+    "genderInterest": {
+      "all": "All",
+      "women": "Women",
+      "men": "Men"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}} minute ago",
+      "minutesAgo_plural": "{{count}} minutes ago",
+      "hoursAgo": "{{count}} hour ago",
+      "hoursAgo_plural": "{{count}} hours ago",
+      "dayAgo": "1 day ago",
+      "daysAgo": "{{count}} days ago",
+      "recently": "Recently"
+    },
+    "location": {
+      "notSpecified": "Location not specified"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "height": {
+      "unit": "cm"
+    },
+    "unknown": {
+      "interest": "Unknown Interest ({{id}})",
+      "option": "Unknown Option ({{id}})"
+    }
+  },
+
+  "verification": {
+    "status": {
+      "title": "Verification Status",
+      "successful": {
+        "title": "Verification Successful",
+        "description": "Your account is verified"
+      },
+      "pending": {
+        "title": "Verification Pending",
+        "description": "We're reviewing your submission"
+      },
+      "failed": {
+        "title": "Verification Failed",
+        "description": "Please try verifying again"
+      }
+    },
+    "whyVerify": {
+      "title": "Why Verify?",
+      "message": "Verification helps:\n\n• Build trust in the community\n• Reduce fake profiles\n• Increase your match potential\n• Ensure a safer dating experience",
+      "gotIt": "Got it"
+    },
+    "issues": {
+      "title": "Common verification issues:",
+      "poorLighting": {
+        "title": "Poor lighting",
+        "description": "Ensure your face is well-lit and clearly visible"
+      },
+      "faceNotCentered": {
+        "title": "Face not centered",
+        "description": "Position your face within the guide frame"
+      },
+      "multipleFaces": {
+        "title": "Multiple faces detected",
+        "description": "Make sure you're alone in the frame"
+      }
+    },
+    "success": {
+      "title": "Congratulations!",
+      "description": "Your verified badge will now appear on your profile, helping you build trust with potential matches."
+    },
+    "review": {
+      "title": "Review in Progress",
+      "description": "Our team is reviewing your verification submission. This usually takes 24-48 hours. We'll notify you once it's complete."
+    },
+    "tryAgain": "Try Again"
+  },
+
+  "blockedUsers": {
+    "title": "Blocked Users",
+    "loading": "Loading blocked users...",
+    "blockedDate": "Blocked {{date}}",
+    "empty": {
+      "title": "No blocked users",
+      "description": "Users you block will appear here. You can unblock them anytime."
+    },
+    "unblock": {
+      "title": "Unblock User",
+      "message": "Are you sure you want to unblock {{name}}? They will be able to see your profile and interact with you again.",
+      "button": "Unblock",
+      "success": {
+        "title": "User Unblocked",
+        "message": "{{name}} has been unblocked successfully."
+      }
+    }
+  },
+
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: November 2025",
+    "intro": "These Terms of Service govern your use of the Andra mobile application. Please read these terms carefully before using our service.",
+    "notice": {
+      "title": "Important Notice",
+      "content": "By continuing to use Andra, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree with any part of these terms, please discontinue use of the App."
+    },
+    "contact": {
+      "title": "Questions?",
+      "content": "If you have any questions about these Terms of Service, please contact our support team through the app settings or reach out to us directly."
+    },
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptance of Terms",
+        "content": "By downloading, accessing, or using the Andra mobile application ('App'), you agree to be bound by these Terms of Service ('Terms'). If you do not agree to these Terms, please do not use our App."
+      },
+      "description": {
+        "title": "2. Description of Service",
+        "content": "Andra is a location-based social networking application that facilitates connections between users based on proximity, interests, and preferences. The App includes features such as user profiles, matching, messaging, event discovery, and location-based services."
+      },
+      "eligibility": {
+        "title": "3. User Eligibility",
+        "content": "You must be at least 18 years old to use Andra. By using the App, you represent and warrant that you are at least 18 years of age and have the legal capacity to enter into these Terms."
+      },
+      "accounts": {
+        "title": "4. User Accounts and Registration",
+        "content": "To use certain features of the App, you must create an account. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account. You agree to provide accurate, current, and complete information during registration and to update such information to keep it accurate, current, and complete."
+      },
+      "conduct": {
+        "title": "5. User Conduct and Prohibited Activities",
+        "content": "You agree not to engage in any of the following prohibited activities: harassment, abuse, or threatening behavior towards other users; posting false, misleading, or fraudulent information; using the App for commercial purposes without authorization; sharing personal information of other users without consent; violating any applicable laws or regulations; or attempting to gain unauthorized access to the App or other users' accounts."
+      },
+      "privacy": {
+        "title": "6. Privacy and Data Protection",
+        "content": "Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy, which is incorporated into these Terms by reference. By using the App, you consent to the collection, use, and sharing of your information as described in our Privacy Policy."
+      },
+      "location": {
+        "title": "7. Location Services",
+        "content": "Andra uses location services to provide proximity-based features. By enabling location services, you consent to the collection and use of your location data. You can disable location services at any time through your device settings, though this may limit certain App functionality."
+      },
+      "intellectual": {
+        "title": "8. Content and Intellectual Property",
+        "content": "You retain ownership of content you post to the App, but grant us a license to use, display, and distribute such content in connection with the App. The App and its original content, features, and functionality are owned by Andra and are protected by international copyright, trademark, and other intellectual property laws."
+      },
+      "prohibitedContent": {
+        "title": "9. Prohibited Content",
+        "content": "You may not post content that is illegal, harmful, threatening, abusive, defamatory, vulgar, obscene, or otherwise objectionable. Content that violates others' intellectual property rights, contains viruses or malicious code, or is designed to disrupt the App's operation is prohibited."
+      },
+      "safety": {
+        "title": "10. Safety and Security",
+        "content": "While we strive to provide a safe environment, you use the App at your own risk. We are not responsible for the conduct of other users. Always exercise caution when meeting people in person and follow our safety guidelines. Report any suspicious or inappropriate behavior immediately."
+      },
+      "thirdParty": {
+        "title": "11. Third-Party Services",
+        "content": "The App may integrate with third-party services, including social media platforms and payment processors. Your use of such services is subject to their respective terms of service and privacy policies. We are not responsible for third-party services or their content."
+      },
+      "disclaimers": {
+        "title": "12. Disclaimers and Limitations of Liability",
+        "content": "THE APP IS PROVIDED 'AS IS' WITHOUT WARRANTIES OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES AND SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES ARISING FROM YOUR USE OF THE APP."
+      },
+      "termination": {
+        "title": "13. Termination",
+        "content": "We may terminate or suspend your account at any time for violations of these Terms or for any other reason at our discretion. You may terminate your account at any time through the App settings. Upon termination, your right to use the App will cease immediately."
+      },
+      "modifications": {
+        "title": "14. Modifications to Terms",
+        "content": "We reserve the right to modify these Terms at any time. We will notify users of material changes through the App or via email. Your continued use of the App after such modifications constitutes acceptance of the updated Terms."
+      },
+      "governing": {
+        "title": "15. Governing Law and Dispute Resolution",
+        "content": "These Terms are governed by the laws of the jurisdiction where Andra is incorporated. Any disputes arising from these Terms or your use of the App shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association."
+      },
+      "contact": {
+        "title": "16. Contact Information",
+        "content": "If you have any questions about these Terms, please contact us through the App's support feature or at our designated contact address. We will respond to your inquiries in a timely manner."
+      }
+    }
+  },
+
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: November 2025",
+    "intro": {
+      "title": "Your Privacy Matters",
+      "content": "We're committed to protecting your privacy and being transparent about how we collect, use, and share your information on Andra."
+    },
+    "dataCollect": {
+      "title": "What Information We Collect"
+    },
+    "protection": {
+      "title": "How We Protect Your Privacy"
+    },
+    "principles": {
+      "title": "Our Privacy Principles",
+      "noSell": "We never sell your personal data",
+      "control": "You control who sees your information",
+      "delete": "You can delete your data anytime",
+      "security": "We use industry-standard security"
+    },
+    "contact": {
+      "title": "Questions About Privacy?",
+      "content": "If you have any questions about this Privacy Policy or want to exercise your privacy rights, contact us through the app settings or reach out to our support team."
+    },
+    "sections": {
+      "collect": {
+        "title": "Information We Collect",
+        "content": "We collect information you provide directly (profile details, photos, interests), automatically (location, device info, app usage), and from third parties (social media when you sign in with Google/Apple)."
+      },
+      "use": {
+        "title": "How We Use Your Information",
+        "content": "Your information helps us show you relevant matches, improve our services, send important updates, ensure safety, and provide customer support. We never sell your personal data to third parties."
+      },
+      "location": {
+        "title": "Location Data",
+        "content": "We use your location to show nearby users and events. You can control location sharing in your device settings. Location data is encrypted and stored securely on our servers."
+      },
+      "photos": {
+        "title": "Photo and Profile Information",
+        "content": "Your photos and profile details are used to create your profile and show you to potential matches. You can edit or delete your information anytime in your profile settings."
+      },
+      "sharing": {
+        "title": "Data Sharing",
+        "content": "We only share your information with other users as intended by our app features (showing profiles to matches). We may share data with service providers who help us operate the app, but they're bound by strict confidentiality agreements."
+      },
+      "security": {
+        "title": "Data Security",
+        "content": "We use industry-standard encryption to protect your data. All information is stored on secure servers with restricted access. We regularly update our security measures to keep your data safe."
+      },
+      "rights": {
+        "title": "Your Rights",
+        "content": "You can access, update, or delete your account anytime. You can opt out of certain data collection, control who sees your profile, and request a copy of your data. Contact us for assistance."
+      },
+      "retention": {
+        "title": "Data Retention",
+        "content": "We keep your data only as long as needed to provide our services. When you delete your account, we remove your personal information within 30 days, though some data may be retained for legal compliance."
+      },
+      "children": {
+        "title": "Children's Privacy",
+        "content": "Andra is not intended for users under 18. We do not knowingly collect information from minors. If we discover a minor has provided us with information, we will delete it immediately."
+      },
+      "changes": {
+        "title": "Changes to This Policy",
+        "content": "We may update this Privacy Policy occasionally. We'll notify you of significant changes through the app or email. Continued use of the app after changes means you accept the updated policy."
+      }
+    },
+    "dataTypes": {
+      "profile": {
+        "type": "Profile Information",
+        "examples": "Name, age, photos, interests, preferences"
+      },
+      "location": {
+        "type": "Location Data",
+        "examples": "GPS coordinates, nearby places, location history"
+      },
+      "usage": {
+        "type": "Usage Information",
+        "examples": "App interactions, matches, messages, events attended"
+      },
+      "device": {
+        "type": "Device Information",
+        "examples": "Device type, operating system, app version"
+      },
+      "contact": {
+        "type": "Contact Information",
+        "examples": "Email, phone number (for verification only)"
+      }
+    }
+  },
+
+  "errors": {
+    "noUsersAvailable": "Oops! No User Available",
+    "unableToLoadUsers": "Unable to load users. Please try again.",
+    "tryAgain": "Try Again",
+    "findingUsers": "Finding users near you...",
+    "noUsersFound": "No users found",
+    "adjustSearchRadius": "Try adjusting your search radius or check back later for new users in your area.",
+    "refresh": "Refresh",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "loadingMap": "Loading map...",
+    "locationUnavailable": "Location Unavailable",
+    "unableToAccessLocation": "Unable to access your location. Please enable location services and try again.",
+    "loadingProfile": "Loading profile...",
+    "unableToShowLocation": "Unable to show location on map. Please try again.",
+    "ok": "OK"
+  },
+
+  "validation": {
+    "validationError": "Validation Error",
+    "enterFullName": "Please enter your full name.",
+    "selectDateOfBirth": "Please select your date of birth.",
+    "enterPhoneNumber": "Please enter your phone number.",
+    "enterValidPhoneNumber": "Please enter a valid phone number.",
+    "enterEmailAddress": "Please enter your email address.",
+    "enterValidEmailAddress": "Please enter a valid email address.",
+    "userSessionExpired": "User session expired. Please login again.",
+    "failedToUpdateSettings": "Failed to update account settings. Please try again.",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes"
+  },
+
+  "suggestChanges": {
+    "error": "Error",
+    "enterNewLocation": "Please enter a new location.",
+    "userSessionExpired": "User session expired. Please login again.",
+    "success": "Success",
+    "changesSuggestedSuccessfully": "Changes suggested successfully!",
+    "ok": "OK",
+    "failedToSuggestChanges": "Failed to suggest changes. Please try again.",
+    "failedToSuggestChangesNetwork": "Failed to suggest changes. Please check your connection and try again."
+  },
+
+  "invite": {
+    "failedToSendInvites": "Failed to send invites",
+    "somethingWentWrong": "Something went wrong. Please try again."
+  },
+
+  "privateSpot": {
+    "unableToGetLocation": "Unable to get your location. Please try again.",
+    "loadingPrivateSpots": "Loading private spots...",
+    "deletePrivateSpot": "Delete Private Spot",
+    "failedToLoadPrivateSpots": "Failed to load private spots",
+    "failedToDeletePrivateSpot": "Failed to delete private spot",
+    "title": "Private Spot",
+    "validation": {
+      "locationError": "Unable to get your location. Please try again."
+    }
+  },
+
+  "account": {
+    "deleteAccount": "Delete Account",
+    "deleteMyAccount": "Delete My Account",
+    "failedToUpdateSettings": "Failed to update account settings"
+  },
+
+  "hooks": {
+    "invalidUserData": "Invalid user data: missing required fields",
+    "failedToTransformUser": "Failed to transform user",
+    "userIdNotAvailable": "User ID not available",
+    "noUserDataFound": "No user data found",
+    "failedToFetchUserData": "Failed to fetch user data",
+    "noMeetupRequestsFound": "No meetup requests found yet.",
+    "networkErrorCheckConnection": "Network error occurred. Please check your connection.",
+    "noMatchesFound": "No matches found yet. Keep swiping!",
+    "failedToLoadMatches": "Failed to load matches",
+    "userSessionExpired": "User session expired. Please login again.",
+    "failedToLoadBlockedUsers": "Failed to load blocked users",
+    "failedToUnblockUser": "Failed to unblock user",
+    "userNotAuthenticated": "User not authenticated",
+    "invalidResponseFormat": "Invalid response format",
+    "failedToFetchInterests": "Failed to fetch interests"
   }
 }

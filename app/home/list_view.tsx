@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ListViewProps {
   onViewProfile: (user: any) => void;
-  onShowUserOnMap: (user: any) => void; // UPDATED: More descriptive prop name
+  onShowUserOnMap: (user: any) => void;
   users: any[];
   loading: boolean;
   error: string | null;
@@ -27,12 +27,14 @@ interface User {
   id: string;
   name: string;
   age: number;
+  match_status: string;
+  match_emoji: string;
   // Add other user properties as needed
 }
 
 export default function ListView({
   onViewProfile,
-  onShowUserOnMap, // UPDATED: Updated prop name
+  onShowUserOnMap,
   users,
   loading,
   error,
@@ -50,7 +52,7 @@ export default function ListView({
         onShowUserOnMap={onShowUserOnMap}
       />
     ),
-    [onViewProfile, onShowUserOnMap] // UPDATED: Updated dependency
+    [onViewProfile, onShowUserOnMap]
   );
 
   // Memoized key extractor
@@ -82,9 +84,9 @@ export default function ListView({
         color={color.gray55}
         style={styles.errorIcon}
       />
-      <Text style={styles.errorTitle}>Oops! No User Available</Text>
+      <Text style={styles.errorTitle}>{t("errors.noUsersAvailable")}</Text>
       <Text style={styles.errorMessage}>
-        {error || "Unable to load users. Please try again."}
+        {error || t("errors.unableToLoadUsers")}
       </Text>
       <TouchableOpacity
         style={[styles.retryButton, loading && styles.retryButtonDisabled]}
@@ -94,7 +96,7 @@ export default function ListView({
         {loading ? (
           <ActivityIndicator size="small" color={color.white} />
         ) : (
-          <Text style={styles.retryButtonText}>Try Again</Text>
+          <Text style={styles.retryButtonText}>{t("errors.tryAgain")}</Text>
         )}
       </TouchableOpacity>
     </View>
@@ -104,7 +106,7 @@ export default function ListView({
   const renderLoadingState = () => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={color.primary} />
-      <Text style={styles.loadingText}>Finding users near you...</Text>
+      <Text style={styles.loadingText}>{t("errors.findingUsers")}</Text>
     </View>
   );
 
@@ -112,13 +114,10 @@ export default function ListView({
   const renderEmptyState = () => (
     <View style={styles.centerContainer}>
       <Text style={styles.emptyEmoji}>🔍</Text>
-      <Text style={styles.emptyTitle}>No users found</Text>
-      <Text style={styles.emptyMessage}>
-        Try adjusting your search radius or check back later for new users in
-        your area.
-      </Text>
+      <Text style={styles.emptyTitle}>{t("errors.noUsersFound")}</Text>
+      <Text style={styles.emptyMessage}>{t("errors.adjustSearchRadius")}</Text>
       <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
-        <Text style={styles.retryButtonText}>Refresh</Text>
+        <Text style={styles.retryButtonText}>{t("errors.refresh")}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -139,7 +138,7 @@ export default function ListView({
             <Text
               style={[styles.retryLink, loading && styles.retryLinkDisabled]}
             >
-              {loading ? "Loading..." : "Retry"}
+              {loading ? t("errors.loading") : t("errors.retry")}
             </Text>
           </TouchableOpacity>
         </View>

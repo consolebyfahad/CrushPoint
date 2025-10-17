@@ -115,6 +115,8 @@ export default function UserProfile() {
         age: 0,
         distance: "-- km",
         isOnline: false,
+        match_status: "",
+        match_emoji: "",
         lookingFor: [],
         interests: [],
         height: "",
@@ -163,6 +165,8 @@ export default function UserProfile() {
       age: userData.age || 0,
       distance: realDistance,
       isOnline: userData.isOnline || true,
+      match_status: userData.match_status || "",
+      match_emoji: userData.match_emoji || "",
       lookingFor: userData.lookingFor || [],
       interests: userData.interests || [],
       height: userData.height || "",
@@ -225,6 +229,32 @@ export default function UserProfile() {
     { emoji: svgIcon.Tea, action: "message", color: "#8B5CF6" },
     { emoji: svgIcon.Hi, action: "friend", color: "#F97316" },
   ];
+
+  // Map emoji actions to SVG icons
+  const getMatchEmoji = (emoji: string) => {
+    const emojiMap: { [key: string]: any } = {
+      like: svgIcon.Like,
+      super_like: svgIcon.Fire,
+      smile: svgIcon.Blink,
+      message: svgIcon.Tea,
+      friend: svgIcon.Hi,
+    };
+
+    return emojiMap[emoji] || svgIcon.Hi;
+  };
+
+  // Get emoji color based on type
+  const getEmojiColor = (emoji: string) => {
+    const colorMap: { [key: string]: string } = {
+      like: "#3B82F6",
+      super_like: "#F59E0B",
+      smile: "#10B981",
+      message: "#8B5CF6",
+      friend: "#F97316",
+    };
+
+    return colorMap[emoji] || "#F97316"; // Default color
+  };
 
   const handleEmojiAction = async (action: any) => {
     if (isAnimating) return;
@@ -367,11 +397,9 @@ export default function UserProfile() {
       setIsLoadingLocation(false);
     } catch (error) {
       setIsLoadingLocation(false);
-      Alert.alert(
-        "Error",
-        "Unable to show location on map. Please try again.",
-        [{ text: "OK", style: "default" }]
-      );
+      Alert.alert(t("common.error"), t("errors.unableToShowLocation"), [
+        { text: t("errors.ok"), style: "default" },
+      ]);
     }
   };
 
@@ -449,12 +477,44 @@ export default function UserProfile() {
             </>
           )}
 
-          {/* Action Emojis */}
-          <View style={styles.actionEmojis}>
-            {actionEmojis.map((item, index) =>
-              renderEmojiButton({ item, index })
+          {/* Action Emojis - Hide if user has match status */}
+          {!(
+            userInfo.match_status === "match_sent" ||
+            userInfo.match_status === "matched"
+          ) && (
+            <View style={styles.actionEmojis}>
+              {actionEmojis.map((item, index) =>
+                renderEmojiButton({ item, index })
+              )}
+            </View>
+          )}
+
+          {/* Show match emoji if user has match status */}
+          {(userInfo.match_status === "match_sent" ||
+            userInfo.match_status === "matched") &&
+            userInfo.match_emoji && (
+              <View style={styles.matchEmojiContainer}>
+                <View
+                  style={[
+                    styles.matchEmojiBadge,
+                    {
+                      backgroundColor: `${getEmojiColor(
+                        userInfo.match_emoji
+                      )}20`,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.matchEmojiText,
+                      { color: getEmojiColor(userInfo.match_emoji) },
+                    ]}
+                  >
+                    {getMatchEmoji(userInfo.match_emoji)}
+                  </Text>
+                </View>
+              </View>
             )}
-          </View>
 
           {/* Center Emoji Animation */}
           {showAnimation && (
@@ -511,7 +571,7 @@ export default function UserProfile() {
 
           {/* Looking For */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Looking for</Text>
+            <Text style={styles.sectionTitle}>{t("profile.lookingFor")}</Text>
             <View style={styles.lookingForContainer}>
               {userInfo.lookingFor.map((item: any, index: number) => (
                 <View key={index} style={styles.lookingForTag}>
@@ -523,7 +583,7 @@ export default function UserProfile() {
 
           {/* Interests */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Interests</Text>
+            <Text style={styles.sectionTitle}>{t("profile.interests")}</Text>
             <View style={styles.interestsContainer}>
               {userInfo.interests.map((item: any, index: number) => (
                 <View key={index} style={styles.interestTag}>
@@ -536,7 +596,7 @@ export default function UserProfile() {
           {/* Languages */}
           {userInfo.languages.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Languages</Text>
+              <Text style={styles.sectionTitle}>{t("profile.languages")}</Text>
               <View style={styles.interestsContainer}>
                 {userInfo.languages.map((item: any, index: number) => (
                   <View key={index} style={styles.languageTag}>
@@ -549,12 +609,12 @@ export default function UserProfile() {
 
           {/* Other Information */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Basic Information</Text>
+            <Text style={styles.sectionTitle}>{t("profile.basicInfo")}</Text>
 
             {/* Height - only show if specified */}
             {userInfo.height && userInfo.height.trim() !== "" && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Height</Text>
+                <Text style={styles.infoLabel}>{t("profile.height")}</Text>
                 <Text style={styles.infoValue}>
                   {capitalizeFirstLetter(userInfo.height)}
                 </Text>
@@ -564,13 +624,14 @@ export default function UserProfile() {
             {/* Nationality - only show if specified */}
             {userInfo.nationality && userInfo.nationality.length > 0 && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Nationality</Text>
+                <Text style={styles.infoLabel}>{t("profile.nationality")}</Text>
                 <View style={styles.nationalityContainer}>
                   {userInfo.nationality.map(
                     (nationality: string, index: number) => (
                       <View key={index} style={styles.nationalityTag}>
                         <Text style={styles.nationalityText}>
-                          {formatNationality(nationality)}
+                          {t(`nationalities.${nationality.toLowerCase()}`) ||
+                            formatNationality(nationality)}
                         </Text>
                       </View>
                     )
@@ -582,9 +643,10 @@ export default function UserProfile() {
             {/* Religion - only show if specified */}
             {userInfo.religion && userInfo.religion.trim() !== "" && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Religion</Text>
+                <Text style={styles.infoLabel}>{t("profile.religion")}</Text>
                 <Text style={styles.infoValue}>
-                  {formatReligion(userInfo.religion)}
+                  {t(`religions.${userInfo.religion.toLowerCase()}`) ||
+                    formatReligion(userInfo.religion)}
                 </Text>
               </View>
             )}
@@ -592,9 +654,10 @@ export default function UserProfile() {
             {/* Zodiac - only show if specified */}
             {userInfo.zodiac && userInfo.zodiac.trim() !== "" && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Zodiac</Text>
+                <Text style={styles.infoLabel}>{t("profile.zodiac")}</Text>
                 <Text style={styles.infoValue}>
-                  {formatZodiac(userInfo.zodiac)}
+                  {t(`zodiac.${userInfo.zodiac.toLowerCase()}`) ||
+                    formatZodiac(userInfo.zodiac)}
                 </Text>
               </View>
             )}
@@ -602,9 +665,10 @@ export default function UserProfile() {
             {/* Gender - only show if specified */}
             {userInfo.gender && userInfo.gender.trim() !== "" && (
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Gender</Text>
+                <Text style={styles.infoLabel}>{t("profile.gender")}</Text>
                 <Text style={styles.infoValue}>
-                  {capitalizeFirstLetter(userInfo.gender)}
+                  {t(`common.${userInfo.gender}`) ||
+                    capitalizeFirstLetter(userInfo.gender)}
                 </Text>
               </View>
             )}
@@ -916,6 +980,13 @@ const styles = StyleSheet.create({
     color: color.black,
   },
   infoValue: {
+    backgroundColor: "#F0F9FF",
+
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#5FB3D4",
     fontSize: 16,
     fontFamily: font.medium,
     color: "#5FB3D4",
@@ -939,5 +1010,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: font.medium,
     color: "#5FB3D4",
+  },
+  matchEmojiContainer: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    zIndex: 5,
+  },
+  matchEmojiBadge: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  matchEmojiText: {
+    fontSize: 24,
+    fontWeight: "bold",
   },
 });

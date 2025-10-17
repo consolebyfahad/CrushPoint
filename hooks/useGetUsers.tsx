@@ -7,6 +7,7 @@ import {
   parseUserImages,
 } from "@/utils/helper";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface LocationData {
   id: string;
@@ -44,6 +45,8 @@ interface ApiUserData {
   social_token: string;
   notification_settings: string;
   timestamp: string;
+  match_staus: string;
+  match_emoji: string;
   loc: LocationData | null;
 }
 
@@ -77,6 +80,8 @@ interface TransformedUser {
     radius: number;
   };
   dob: string;
+  match_status: string;
+  match_emoji: string;
   loc: LocationData | null;
   // Add direct lat/lng properties for map display
   lat: string;
@@ -101,13 +106,14 @@ interface UserFilters {
 
 export default function useGetUsers(filters: UserFilters = {}) {
   const { user } = useAppContext();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<TransformedUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const filtersString = JSON.stringify(filters);
   const fetchUsers = async (): Promise<void> => {
     if (!user?.user_id) {
-      setError("User ID not available");
+      setError(t("users.userIdNotAvailable"));
       return;
     }
 
@@ -147,9 +153,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
       if (filters.zodiacSign) {
         formData.append("zodiac", filters.zodiacSign);
       }
-      console.log("formData", formData);
       const response: ApiResponse = await apiCall(formData);
-
       if (response.result && response.data && Array.isArray(response.data)) {
         const transformedUsers: TransformedUser[] = response.data
           .map((userData: ApiUserData) => {
@@ -157,7 +161,9 @@ export default function useGetUsers(filters: UserFilters = {}) {
               return transformUser(userData);
             } catch (transformError) {
               console.warn(
-                `Failed to transform user ${userData?.id || "unknown"}:`,
+                `${t("hooks.failedToTransformUser")} ${
+                  userData?.id || "unknown"
+                }:`,
                 transformError
               );
               return null;
@@ -171,14 +177,13 @@ export default function useGetUsers(filters: UserFilters = {}) {
         if (transformedUsers.length > 0) {
           setError(null);
         } else if (transformedUsers.length === 0) {
-          setError("No users found in your area");
+          setError(t("users.noUsersFoundInArea"));
         }
       } else {
-        setError("No users found or server error occurred");
+        setError(t("users.noUsersFoundOrServerError"));
       }
     } catch (err: any) {
-      const errorMessage =
-        err.message || "Network error occurred. Please check your connection.";
+      const errorMessage = err.message || t("users.networkError");
       setError(errorMessage);
       console.error("Fetch Users Error:", err);
     } finally {
@@ -189,7 +194,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
   // Safe transformation function with comprehensive error handling
   const transformUser = (userData: ApiUserData): TransformedUser => {
     if (!userData || !userData.id) {
-      throw new Error("Invalid user data: missing required fields");
+      throw new Error(t("hooks.invalidUserData"));
     }
 
     const gender = safeString(userData.gender);
@@ -208,6 +213,8 @@ export default function useGetUsers(filters: UserFilters = {}) {
       city: safeString(userData.city),
       phone: safeString(userData.phone),
       languages: safeString(userData.languages),
+      match_status: safeString(userData.match_staus),
+      match_emoji: safeString(userData.match_emoji),
       // Fixed: Use proper parsing functions for interests and looking_for
       interests: parseUserInterests(userData.interests),
       lookingFor: parseUserLookingFor(userData.looking_for),

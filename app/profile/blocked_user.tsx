@@ -3,6 +3,7 @@ import useGetBlockedUsers from "@/hooks/useGetBlockedUsers";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -16,28 +17,29 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BlockedUsers({ navigation }: any) {
+  const { t } = useTranslation();
   const { blockedUsers, loading, unblockUser } = useGetBlockedUsers();
   console.log("blockedUsers", blockedUsers);
   const handleUnblock = (user: any) => {
     Alert.alert(
-      "Unblock User",
-      `Are you sure you want to unblock ${user.name}? They will be able to see your profile and interact with you again.`,
+      t("blockedUsers.unblock.title"),
+      t("blockedUsers.unblock.message", { name: user.name }),
       [
         {
-          text: "Cancel",
+          text: t("common.cancel"),
           style: "cancel",
         },
         {
-          text: "Unblock",
+          text: t("blockedUsers.unblock.button"),
           style: "default",
           onPress: async () => {
             const success = await unblockUser(user.id, user.block_id);
 
             if (success) {
               Alert.alert(
-                "User Unblocked",
-                `${user.name} has been unblocked successfully.`,
-                [{ text: "OK" }]
+                t("blockedUsers.unblock.success.title"),
+                t("blockedUsers.unblock.success.message", { name: user.name }),
+                [{ text: t("common.ok") }]
               );
             }
           },
@@ -54,7 +56,9 @@ export default function BlockedUsers({ navigation }: any) {
           <Text style={styles.userName}>
             {item.name}, {item.age}
           </Text>
-          <Text style={styles.blockedDate}>Blocked {item.blockedDate}</Text>
+          <Text style={styles.blockedDate}>
+            {t("blockedUsers.blockedDate", { date: item.blockedDate })}
+          </Text>
         </View>
       </View>
 
@@ -63,7 +67,9 @@ export default function BlockedUsers({ navigation }: any) {
         onPress={() => handleUnblock(item)}
         activeOpacity={0.7}
       >
-        <Text style={styles.unblockText}>Unblock</Text>
+        <Text style={styles.unblockText}>
+          {t("blockedUsers.unblock.button")}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -73,9 +79,9 @@ export default function BlockedUsers({ navigation }: any) {
       <View style={styles.emptyIconContainer}>
         <Ionicons name="ban-outline" size={64} color={color.error} />
       </View>
-      <Text style={styles.emptyTitle}>No blocked users</Text>
+      <Text style={styles.emptyTitle}>{t("blockedUsers.empty.title")}</Text>
       <Text style={styles.emptyText}>
-        Users you block will appear here. You can unblock them anytime.
+        {t("blockedUsers.empty.description")}
       </Text>
     </View>
   );
@@ -83,13 +89,13 @@ export default function BlockedUsers({ navigation }: any) {
   const renderLoadingState = () => (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={color.primary} />
-      <Text style={styles.loadingText}>Loading blocked users...</Text>
+      <Text style={styles.loadingText}>{t("blockedUsers.loading")}</Text>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={"Blocked Users"} divider={true} />
+      <Header title={t("blockedUsers.title")} divider={true} />
 
       {/* Content */}
       {loading ? (

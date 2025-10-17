@@ -3,6 +3,7 @@ import { color, font } from "@/utils/constants";
 import { MarkerIcon } from "@/utils/SvgIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Image,
@@ -50,6 +51,7 @@ export default function Map({
   onUserDeselect,
   onShowMyLocation, // NEW: Prop for showing current user location
 }: MapViewProps) {
+  const { t } = useTranslation();
   const { userData } = useAppContext();
   const [mapRegion, setMapRegion] = useState<Region | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
@@ -184,7 +186,7 @@ export default function Map({
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={color.primary} />
-        <Text style={styles.loadingText}>Loading map...</Text>
+        <Text style={styles.loadingText}>{t("errors.loadingMap")}</Text>
       </View>
     );
   }
@@ -194,10 +196,9 @@ export default function Map({
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorEmoji}>📍</Text>
-        <Text style={styles.errorTitle}>Location Unavailable</Text>
+        <Text style={styles.errorTitle}>{t("errors.locationUnavailable")}</Text>
         <Text style={styles.errorMessage}>
-          Unable to access your location. Please enable location services and
-          try again.
+          {t("errors.unableToAccessLocation")}
         </Text>
       </View>
     );

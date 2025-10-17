@@ -4,11 +4,6 @@ import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
-import {
-  nationalityOptions,
-  religionOptions,
-  zodiacOptions,
-} from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
@@ -48,28 +43,85 @@ export default function BasicInfo() {
 
   // Options for dropdowns
   const interestedInOptions = [
-    { label: "Men", value: "male" },
-    { label: "Women", value: "female" },
-    { label: "Both", value: "other" },
+    { label: t("basicInfo.interestedIn.men"), value: "male" },
+    { label: t("basicInfo.interestedIn.women"), value: "female" },
+    { label: t("basicInfo.interestedIn.both"), value: "other" },
   ];
 
   const relationshipGoalOptions = [
-    { label: "🩵 Serious relationship", value: "serious" },
-    { label: "😘 Casual dating", value: "casual" },
-    { label: "🤝 Friendship", value: "friendship" },
-    { label: "🔥 Open to possibilities", value: "open" },
-    { label: "🤫 Prefer not to say", value: "prefer-not" },
+    {
+      label: `🩵 ${t("basicInfo.relationshipGoals.serious")}`,
+      value: "serious",
+    },
+    { label: `😘 ${t("basicInfo.relationshipGoals.casual")}`, value: "casual" },
+    {
+      label: `🤝 ${t("basicInfo.relationshipGoals.friendship")}`,
+      value: "friendship",
+    },
+    { label: `🔥 ${t("basicInfo.relationshipGoals.open")}`, value: "open" },
+    {
+      label: `🤫 ${t("basicInfo.relationshipGoals.preferNot")}`,
+      value: "prefer-not",
+    },
+  ];
+
+  // Nationality options
+  const nationalityOptions = [
+    { label: `🇺🇸 ${t("nationalities.american")}`, value: "american" },
+    { label: `🇨🇦 ${t("nationalities.canadian")}`, value: "canadian" },
+    { label: `🇬🇧 ${t("nationalities.british")}`, value: "british" },
+    { label: `🇦🇺 ${t("nationalities.australian")}`, value: "australian" },
+    { label: `🇩🇪 ${t("nationalities.german")}`, value: "german" },
+    { label: `🇫🇷 ${t("nationalities.french")}`, value: "french" },
+    { label: `🇮🇹 ${t("nationalities.italian")}`, value: "italian" },
+    { label: `🇪🇸 ${t("nationalities.spanish")}`, value: "spanish" },
+    { label: `🇯🇵 ${t("nationalities.japanese")}`, value: "japanese" },
+    { label: `🇨🇳 ${t("nationalities.chinese")}`, value: "chinese" },
+    { label: `🇮🇳 ${t("nationalities.indian")}`, value: "indian" },
+    { label: `🇧🇷 ${t("nationalities.brazilian")}`, value: "brazilian" },
+    { label: `🇲🇽 ${t("nationalities.mexican")}`, value: "mexican" },
+    { label: `🇷🇺 ${t("nationalities.russian")}`, value: "russian" },
+    { label: `🇰🇷 ${t("nationalities.korean")}`, value: "korean" },
+  ];
+
+  // Religion options
+  const religionOptions = [
+    { label: `✝️ ${t("religions.christianity")}`, value: "christianity" },
+    { label: `☪️ ${t("religions.islam")}`, value: "islam" },
+    { label: `✡️ ${t("religions.judaism")}`, value: "judaism" },
+    { label: `🕉️ ${t("religions.hinduism")}`, value: "hinduism" },
+    { label: `☸️ ${t("religions.buddhism")}`, value: "buddhism" },
+    { label: `🌍 ${t("religions.others")}`, value: "others" },
+  ];
+
+  // Zodiac options
+  const zodiacOptions = [
+    { label: `♈ ${t("zodiac.aries")}`, value: "aries" },
+    { label: `♉ ${t("zodiac.taurus")}`, value: "taurus" },
+    { label: `♊ ${t("zodiac.gemini")}`, value: "gemini" },
+    { label: `♋ ${t("zodiac.cancer")}`, value: "cancer" },
+    { label: `♌ ${t("zodiac.leo")}`, value: "leo" },
+    { label: `♍ ${t("zodiac.virgo")}`, value: "virgo" },
+    { label: `♎ ${t("zodiac.libra")}`, value: "libra" },
+    { label: `♏ ${t("zodiac.scorpio")}`, value: "scorpio" },
+    { label: `♐ ${t("zodiac.sagittarius")}`, value: "sagittarius" },
+    { label: `♑ ${t("zodiac.capricorn")}`, value: "capricorn" },
+    { label: `♒ ${t("zodiac.aquarius")}`, value: "aquarius" },
+    { label: `♓ ${t("zodiac.pisces")}`, value: "pisces" },
   ];
 
   const handleSave = async () => {
     if (!user?.user_id) {
-      Alert.alert("Error", "User session expired. Please login again.");
+      Alert.alert(t("common.error"), t("basicInfo.validation.sessionExpired"));
       return;
     }
 
     // Validation: require at least one relationship goal
     if (relationshipGoals.length === 0) {
-      Alert.alert("Error", "Please select at least one relationship goal.");
+      Alert.alert(
+        t("common.error"),
+        t("basicInfo.validation.relationshipGoalRequired")
+      );
       return;
     }
 
@@ -109,16 +161,13 @@ export default function BasicInfo() {
         router.back();
       } else {
         showToast(
-          response.message || "Failed to update basic information",
+          response.message || t("profile.failedToUpdateBasicInfo"),
           "error"
         );
       }
     } catch (error) {
       console.error("Update error:", error);
-      showToast(
-        "Failed to update basic information. Please try again.",
-        "error"
-      );
+      showToast(t("profile.failedToUpdateBasicInfoRetry"), "error");
     } finally {
       setIsLoading(false);
     }
@@ -251,7 +300,7 @@ export default function BasicInfo() {
               onChangeText={(value) => updateField("height", value)}
               keyboardType="numeric"
             />
-            <Text style={styles.heightUnit}>cm</Text>
+            <Text style={styles.heightUnit}>{t("basicInfo.heightUnit")}</Text>
           </View>
         </View>
 
@@ -264,7 +313,7 @@ export default function BasicInfo() {
           <MultiSelect
             style={[
               styles.dropdown,
-              basicInfo.nationality.length === 0 && styles.errorBorder,
+              // basicInfo.nationality.length === 0 && styles.errorBorder,
             ]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
@@ -286,6 +335,8 @@ export default function BasicInfo() {
             renderRightIcon={() => (
               <Ionicons name="chevron-down" size={20} color={color.gray55} />
             )}
+            search
+            searchPlaceholder={t("profile.searchNationalities")}
             selectedStyle={styles.selectedItem}
             renderSelectedItem={(item, unSelect) => (
               <TouchableOpacity
@@ -293,7 +344,7 @@ export default function BasicInfo() {
                 onPress={() => unSelect && unSelect(item)}
               >
                 <Text style={styles.selectedItemText}>{item.label}</Text>
-                <Ionicons name="close" size={16} color={color.gray55} />
+                <Ionicons name="close" size={16} color={color.white} />
               </TouchableOpacity>
             )}
           />
@@ -303,7 +354,10 @@ export default function BasicInfo() {
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.religion")}</Text>
           <Dropdown
-            style={[styles.dropdown, !basicInfo.religion && styles.errorBorder]}
+            style={[
+              styles.dropdown,
+              // !basicInfo.religion && styles.errorBorder
+            ]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
             iconStyle={styles.iconStyle}
@@ -328,7 +382,7 @@ export default function BasicInfo() {
           <Dropdown
             style={[
               styles.dropdown,
-              !basicInfo.zodiacSign && styles.errorBorder,
+              // !basicInfo.zodiacSign && styles.errorBorder,
             ]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
@@ -408,6 +462,7 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
   },
   selectedTextStyle: {
+    backgroundColor: color.primary,
     fontSize: 16,
     color: color.black,
     fontFamily: font.medium,
@@ -421,12 +476,14 @@ const styles = StyleSheet.create({
   selectedItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: color.primary || "#E3F2FD",
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    backgroundColor: color.primary || "#5FB3D4",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     marginTop: 4,
     marginRight: 4,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: color.primary || "#5FB3D4",
   },
   selectedItemText: {
     fontSize: 12,

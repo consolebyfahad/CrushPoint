@@ -33,7 +33,8 @@ export default function Verify() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [resendCountdown, setResendCountdown] = useState(59);
   const [canResend, setCanResend] = useState(false);
-  const contactType = params.type || "phone";
+  const rawContactType = params.type || "phone";
+  const contactType = t(`auth.${rawContactType}`);
   const contactInfo = params.contact || "+155 (500) 000-00";
   const [isVerifying, setIsVerifying] = useState(false);
 
@@ -118,7 +119,6 @@ export default function Verify() {
       formData.append("id", user.user_id);
 
       const response = await apiCall(formData);
-      console.log("response", response);
       if (response.data && response.data.length > 0) {
         const userData = response.data[0];
         let photos: string[] = [];
@@ -243,7 +243,6 @@ export default function Verify() {
         };
 
         updateUserData(contextUserData);
-        console.log("✅ User profile fetched and updated in context");
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -252,7 +251,7 @@ export default function Verify() {
 
   const handleVerifyCode = async (fullCode: string) => {
     if (!user?.user_id) {
-      showToast("User session expired. Please login again.", "error");
+      showToast(t("common.userSessionExpired"), "error");
       router.push("/welcome");
       return;
     }
@@ -279,7 +278,7 @@ export default function Verify() {
           router.push("/(tabs)");
         }
       } else {
-        showToast(response.message || "Invalid verification code", "error");
+        showToast(response.message || t("auth.invalidCode"), "error");
         console.error("Verification Error:", response.message);
         setCode(["", "", "", "", "", ""]);
         setTimeout(() => {
@@ -287,7 +286,7 @@ export default function Verify() {
         }, 100);
       }
     } catch (error) {
-      showToast("Something went wrong. Please try again.", "error");
+      showToast(t("api.errors.somethingWentWrong"), "error");
       console.error("Verification Error:", error);
 
       setCode(["", "", "", "", "", ""]);
@@ -330,10 +329,10 @@ export default function Verify() {
           });
         }, 1000);
       } else {
-        showToast(response.message || "Failed to resend code", "error");
+        showToast(response.message || t("auth.failedToResendCode"), "error");
       }
     } catch (error) {
-      showToast("Failed to resend code. Please try again.", "error");
+      showToast(t("auth.failedToResendCode"), "error");
       console.error("Resend Error:", error);
     }
   };

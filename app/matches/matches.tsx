@@ -48,8 +48,6 @@ export default function Matches() {
   );
 
   const handleViewProfile = useCallback((match: any) => {
-    console.log("View profile for:", match.name);
-
     const userProfileData = {
       id: match.match_id || match.id,
       name: match.name,
@@ -113,15 +111,15 @@ export default function Matches() {
   const handleRemoveMatch = useCallback(async () => {
     try {
       if (selectedMatch) {
-        console.log("selectedMatch", selectedMatch);
         // Call API to remove match
         const formData = new FormData();
         formData.append("type", "delete_data");
         formData.append("table_name", "matches");
-        formData.append("id", selectedMatch.match_id);
-        console.log("Remove match", JSON.stringify(formData));
+        formData.append("user_id", user?.user_id || "");
+        formData.append("match_id", selectedMatch.match_id);
+        console.log("formData", formData);
         const response = await apiCall(formData);
-
+        console.log("response", response);
         if (response.result) {
           // Remove from local state using the hook function
           removeMatch(selectedMatch.match_id);
@@ -146,8 +144,9 @@ export default function Matches() {
         blockFormData.append("user_id", user?.user_id || "");
         blockFormData.append("table_name", "blocked_users");
         blockFormData.append("block_id", selectedMatch.match_id);
-
+        console.log("blockFormData", blockFormData);
         const blockResponse = await apiCall(blockFormData);
+        console.log("blockResponse", blockResponse);
 
         if (blockResponse.result) {
           // Remove match from matches table
@@ -181,14 +180,14 @@ export default function Matches() {
           // Submit report to API
           const formData = new FormData();
           formData.append("type", "add_data");
-          formData.append("table_name", "reports");
+          formData.append("table_name", "Reported_users");
           formData.append("user_id", user?.user_id || "");
           formData.append("reported_user_id", selectedMatch.match_id);
           formData.append("reason", reportData.reason);
           formData.append("description", reportData.description || "");
-
+          console.log("formData", formData);
           const response = await apiCall(formData);
-
+          console.log("response", response);
           if (response.result) {
             // Optionally remove the match after reporting
             removeMatch(selectedMatch.match_id);

@@ -33,8 +33,6 @@ export default function MatchCard({
   const [showRequestMeetup, setShowRequestMeetup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  console.log("match", match);
-
   // Map emoji actions to SVG icons and get the appropriate emoji
   const getMatchEmoji = (emoji: any) => {
     const emojiMap: { [key: string]: any } = {
@@ -243,6 +241,7 @@ export default function MatchCard({
         transparent={true}
         animationType="slide"
         onRequestClose={() => setShowRequestMeetup(false)}
+        presentationStyle="overFullScreen"
       >
         <View style={styles.modalOverlay}>
           <TouchableOpacity

@@ -55,8 +55,6 @@ export default function AddPhotos() {
     return [];
   }, [photosParam]);
 
-  console.log("photos processed", photos);
-
   const [selectedPhotos, setSelectedPhotos] = useState<UploadedPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -144,7 +142,7 @@ export default function AddPhotos() {
 
         return response;
       } else {
-        throw new Error(response.message || "Upload failed");
+        throw new Error(response.message || t("auth.uploadFailed"));
       }
     } catch (error) {
       setSelectedPhotos((prev) => prev.filter((photo) => photo.id !== photoId));

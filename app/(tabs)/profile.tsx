@@ -36,10 +36,9 @@ export default function ProfileTab() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const pagerRef = useRef<PagerView>(null);
-
   const photos = userData.photos || [];
   const hasMultiplePhotos = photos.length > 1;
-
+  console.log("useruser", user);
   // NEW: Auto refresh when screen comes into focus (returning from edit screens)
   useFocusEffect(
     useCallback(() => {
@@ -143,7 +142,7 @@ export default function ProfileTab() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={color.primary} />
-        <Text style={styles.loadingText}>Loading profile...</Text>
+        <Text style={styles.loadingText}>{t("errors.loadingProfile")}</Text>
       </View>
     );
   }

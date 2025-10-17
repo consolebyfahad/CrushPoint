@@ -31,6 +31,8 @@ interface Notification {
 }
 
 export default function Notifications({ navigation }: any) {
+  console.log("🔔 Notifications component initialized");
+
   const { t } = useTranslation();
   const { user } = useAppContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -38,7 +40,16 @@ export default function Notifications({ navigation }: any) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  console.log("🔔 Notifications state:", {
+    notificationsCount: notifications.length,
+    isLoading,
+    isRefreshing,
+    error,
+    userId: user?.user_id,
+  });
+
   useEffect(() => {
+    console.log("🔔 useEffect triggered - fetching notifications");
     fetchNotifications();
   }, []);
 
@@ -98,11 +109,16 @@ export default function Notifications({ navigation }: any) {
   };
 
   const fetchNotifications = async () => {
+    console.log("🔔 fetchNotifications called");
+
     if (!user?.user_id) {
+      console.log("❌ No user ID available, setting error");
       setError(t("notifications.userSessionExpired"));
       setIsLoading(false);
       return;
     }
+
+    console.log("🔔 Fetching notifications for user:", user.user_id);
 
     try {
       const formData = new FormData();
@@ -110,38 +126,73 @@ export default function Notifications({ navigation }: any) {
       formData.append("table_name", "notifications");
       formData.append("user_id", user.user_id);
 
+      console.log("🔔 API request payload:", {
+        type: "get_data",
+        table_name: "notifications",
+        user_id: user.user_id,
+      });
+
       const response = await apiCall(formData);
+      console.log("🔔 API response received:", {
+        hasData: !!response.data,
+        dataType: Array.isArray(response.data) ? "array" : typeof response.data,
+        dataLength: Array.isArray(response.data) ? response.data.length : "N/A",
+        result: response.result,
+      });
 
       if (Array.isArray(response.data)) {
+        console.log("🔔 Processing notifications data:", response.data);
+
         // Process the notifications data
         const processedNotifications = response.data.map(
-          (notif: any, index: number) => ({
-            id: notif.id || `notif_${index}`,
-            type: notif.type || "general",
-            title: notif.title || getNotificationTitle(notif.type),
-            message: notif.notification,
-            timeAgo: notif.created_at
-              ? formatTimeAgo(notif.created_at)
-              : t("notifications.recently"),
-            isRead: notif.is_read || false,
-            created_at: notif.created_at,
-            user_name: notif.user_name || notif.from_user,
-            emoji: getNotificationEmoji(notif.type || "general"),
-          })
+          (notif: any, index: number) => {
+            const processed = {
+              id: notif.id || `notif_${index}`,
+              type: notif.type || "general",
+              title: notif.title || getNotificationTitle(notif.type),
+              message: notif.notification,
+              timeAgo: notif.created_at
+                ? formatTimeAgo(notif.created_at)
+                : t("notifications.recently"),
+              isRead: notif.is_read || false,
+              created_at: notif.created_at,
+              user_name: notif.user_name || notif.from_user,
+              emoji: getNotificationEmoji(notif.type || "general"),
+            };
+
+            console.log(`🔔 Processed notification ${index}:`, processed);
+            return processed;
+          }
         );
+
+        console.log("🔔 Setting processed notifications:", {
+          count: processedNotifications.length,
+          unreadCount: processedNotifications.filter((n) => !n.isRead).length,
+        });
 
         setNotifications(processedNotifications);
         setError(null);
       } else {
+        console.log(
+          "🔔 No notifications data or result is false, setting empty array"
+        );
         // No notifications or result is false
         setNotifications([]);
         setError(null);
       }
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      console.error("❌ Error fetching notifications:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        stack: error.stack,
+        userId: user?.user_id,
+      });
       setError(t("notifications.failedToLoad"));
       setNotifications([]);
     } finally {
+      console.log(
+        "🔔 fetchNotifications completed, setting loading states to false"
+      );
       setIsLoading(false);
       setIsRefreshing(false);
     }
@@ -177,23 +228,34 @@ export default function Notifications({ navigation }: any) {
   };
 
   const handleRefresh = async () => {
+    console.log("🔄 handleRefresh called");
     setIsRefreshing(true);
     await fetchNotifications();
   };
 
   const handleRetry = () => {
+    console.log("🔄 handleRetry called");
     setIsLoading(true);
     setError(null);
     fetchNotifications();
   };
 
   const handleNotificationPress = (notification: Notification) => {
+    console.log("👆 Notification pressed:", {
+      id: notification.id,
+      type: notification.type,
+      title: notification.title,
+      isRead: notification.isRead,
+    });
+
     // Mark as read locally
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((notif) =>
+    setNotifications((prevNotifications) => {
+      const updated = prevNotifications.map((notif) =>
         notif.id === notification.id ? { ...notif, isRead: true } : notif
-      )
-    );
+      );
+      console.log("📝 Notification marked as read locally");
+      return updated;
+    });
 
     // TODO: Call API to mark as read
     // markNotificationAsRead(notification.id);
@@ -202,37 +264,50 @@ export default function Notifications({ navigation }: any) {
     switch (notification.type.toLowerCase()) {
       case "reaction":
       case "emoji":
-        console.log("Navigate to reactions");
+        console.log("🔔 Navigate to reactions");
         // router.push("/reactions");
         break;
       case "match":
-        console.log("Navigate to matches");
+        console.log("💖 Navigate to matches");
         // router.push("/matches");
         break;
       case "profile_view":
       case "view":
-        console.log("Navigate to profile views");
+        console.log("👀 Navigate to profile views");
         // router.push("/profile-views");
         break;
       case "event":
-        console.log("Navigate to events");
+        console.log("🎉 Navigate to events");
         // router.push("/events");
         break;
       case "message":
-        console.log("Navigate to messages");
+        console.log("💬 Navigate to messages");
         // router.push("/messages");
         break;
       default:
-        console.log("General notification tap");
+        console.log("🔔 General notification tap");
         break;
     }
   };
 
   const handleDeleteNotification = (notification: Notification) => {
+    console.log("🗑️ Delete notification:", {
+      id: notification.id,
+      type: notification.type,
+      title: notification.title,
+    });
+
     // Remove locally
-    setNotifications((prevNotifications) =>
-      prevNotifications.filter((notif) => notif.id !== notification.id)
-    );
+    setNotifications((prevNotifications) => {
+      const filtered = prevNotifications.filter(
+        (notif) => notif.id !== notification.id
+      );
+      console.log(
+        "🗑️ Notification removed locally, new count:",
+        filtered.length
+      );
+      return filtered;
+    });
 
     // TODO: Call API to delete notification
     // deleteNotification(notification.id);

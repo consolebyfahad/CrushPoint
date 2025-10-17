@@ -11,12 +11,15 @@ import {
   Alert,
   Dimensions,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 
@@ -163,130 +166,151 @@ export default function RequestMeetup({
   const imageSource = getImageSource();
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>{t("meetups.requestMeetup")}</Text>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Ionicons name="close" size={24} color={color.black} />
-        </TouchableOpacity>
-      </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.modalContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t("meetups.requestMeetup")}</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color={color.black} />
+            </TouchableOpacity>
+          </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* User Info Card */}
-        <View style={styles.userCard}>
-          <View style={styles.userInfo}>
-            {imageSource ? (
-              <Image source={imageSource} style={styles.userImage} />
-            ) : (
-              <View style={[styles.userImage, styles.placeholderImage]}>
-                <Ionicons name="person" size={24} color={color.gray55} />
-              </View>
-            )}
-            <View style={styles.userDetails}>
-              <Text style={styles.requestText}>
-                {t("meetups.sendMeetupRequest", { name: matchData.name })}
-              </Text>
-              <View style={styles.userMeta}>
-                <SimpleLineIcons
-                  name="location-pin"
-                  size={12}
-                  color={color.gray55}
-                />
-                <Text style={styles.metaText}>
-                  {matchData.distance || "0.5 km"}
-                </Text>
-                <View style={styles.separator} />
-                <Text style={styles.metaText}>
-                  {t("meetups.matched", {
-                    time: matchData.matchedTime || "2 hours ago",
-                  })}
-                </Text>
+          <ScrollView
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.scrollContent}
+          >
+            {/* User Info Card */}
+            <View style={styles.userCard}>
+              <View style={styles.userInfo}>
+                {imageSource ? (
+                  <Image source={imageSource} style={styles.userImage} />
+                ) : (
+                  <View style={[styles.userImage, styles.placeholderImage]}>
+                    <Ionicons name="person" size={24} color={color.gray55} />
+                  </View>
+                )}
+                <View style={styles.userDetails}>
+                  <Text style={styles.requestText}>
+                    {t("meetups.sendMeetupRequest", { name: matchData.name })}
+                  </Text>
+                  <View style={styles.userMeta}>
+                    <SimpleLineIcons
+                      name="location-pin"
+                      size={12}
+                      color={color.gray55}
+                    />
+                    <Text style={styles.metaText}>
+                      {matchData.distance || "0.5 km"}
+                    </Text>
+                    <View style={styles.separator} />
+                    <Text style={styles.metaText}>
+                      {t("meetups.matched", {
+                        time: matchData.matchedTime || "2 hours ago",
+                      })}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </View>
+
+            {/* Date Field */}
+            <View style={styles.section}>
+              <Text style={styles.inputLabel}>
+                {t("meetups.date")} <Text style={styles.required}>*</Text>
+              </Text>
+              <TouchableOpacity
+                style={styles.dateTimeInput}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <Text style={styles.dateTimeText}>
+                  {formatDate(selectedDate)}
+                </Text>
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color={color.gray55}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Time Field */}
+            <View style={styles.section}>
+              <Text style={styles.inputLabel}>
+                {t("meetups.time")} <Text style={styles.required}>*</Text>
+              </Text>
+              <TouchableOpacity
+                style={styles.dateTimeInput}
+                onPress={() => setShowTimePicker(true)}
+              >
+                <Text style={styles.dateTimeText}>
+                  {formatTime(selectedTime)}
+                </Text>
+                <Ionicons name="time-outline" size={20} color={color.gray55} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Location Field */}
+            <View style={styles.section}>
+              <Text style={styles.inputLabel}>
+                {t("meetups.location")} <Text style={styles.required}>*</Text>
+              </Text>
+              <TextInput
+                style={styles.textInput}
+                value={location}
+                onChangeText={setLocation}
+                placeholder={t("meetups.enterMeetupLocation")}
+                placeholderTextColor={color.gray55}
+              />
+            </View>
+
+            {/* Message Field */}
+            <View style={styles.section}>
+              <Text style={styles.inputLabel}>
+                {t("meetups.message")} ({t("common.optional")})
+              </Text>
+              <TextInput
+                style={[styles.textInput, styles.messageInput]}
+                value={message}
+                onChangeText={setMessage}
+                placeholder={t("meetups.addMessageOptional")}
+                placeholderTextColor={color.gray55}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+            </View>
+          </ScrollView>
+
+          {/* Submit Button */}
+          <View style={styles.bottomButton}>
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                (!location.trim() || isLoading) && styles.submitButtonDisabled,
+              ]}
+              onPress={handleSubmit}
+              disabled={!location.trim() || isLoading}
+              activeOpacity={0.8}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color={color.white} />
+              ) : (
+                <Text style={styles.submitButtonText}>
+                  {t("meetups.sendRequest")}
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
-
-        {/* Date Field */}
-        <View style={styles.section}>
-          <Text style={styles.inputLabel}>
-            {t("meetups.date")} <Text style={styles.required}>*</Text>
-          </Text>
-          <TouchableOpacity
-            style={styles.dateTimeInput}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={styles.dateTimeText}>{formatDate(selectedDate)}</Text>
-            <Ionicons name="calendar-outline" size={20} color={color.gray55} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Time Field */}
-        <View style={styles.section}>
-          <Text style={styles.inputLabel}>
-            {t("meetups.time")} <Text style={styles.required}>*</Text>
-          </Text>
-          <TouchableOpacity
-            style={styles.dateTimeInput}
-            onPress={() => setShowTimePicker(true)}
-          >
-            <Text style={styles.dateTimeText}>{formatTime(selectedTime)}</Text>
-            <Ionicons name="time-outline" size={20} color={color.gray55} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Location Field */}
-        <View style={styles.section}>
-          <Text style={styles.inputLabel}>
-            {t("meetups.location")} <Text style={styles.required}>*</Text>
-          </Text>
-          <TextInput
-            style={styles.textInput}
-            value={location}
-            onChangeText={setLocation}
-            placeholder={t("meetups.enterMeetupLocation")}
-            placeholderTextColor={color.gray55}
-          />
-        </View>
-
-        {/* Message Field */}
-        <View style={styles.section}>
-          <Text style={styles.inputLabel}>
-            {t("meetups.message")} ({t("common.optional")})
-          </Text>
-          <TextInput
-            style={[styles.textInput, styles.messageInput]}
-            value={message}
-            onChangeText={setMessage}
-            placeholder={t("meetups.addMessageOptional")}
-            placeholderTextColor={color.gray55}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-        </View>
-      </ScrollView>
-
-      {/* Submit Button */}
-      <View style={styles.bottomButton}>
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            (!location.trim() || isLoading) && styles.submitButtonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={!location.trim() || isLoading}
-          activeOpacity={0.8}
-        >
-          {isLoading ? (
-            <ActivityIndicator size="small" color={color.white} />
-          ) : (
-            <Text style={styles.submitButtonText}>
-              {t("meetups.sendRequest")}
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
+      </TouchableWithoutFeedback>
 
       {/* Date Picker */}
       {showDatePicker && (
@@ -308,7 +332,7 @@ export default function RequestMeetup({
           onChange={handleTimeChange}
         />
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -318,6 +342,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     minHeight: SCREEN_HEIGHT * 0.8,
+    maxHeight: SCREEN_HEIGHT * 0.9,
+    flex: 1,
+  },
+  modalContent: {
+    flex: 1,
     paddingBottom: 24,
   },
   header: {
@@ -343,6 +372,10 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   userCard: {
     backgroundColor: color.gray94,

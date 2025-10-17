@@ -25,13 +25,33 @@ export default function Religion({
   );
 
   const religions = [
-    { id: "christianity", name: "Christianity", icon: "✝️", color: "#8B5CF6" },
-    { id: "islam", name: "Islam", icon: "☪️", color: "#8B5CF6" },
-    { id: "hinduism", name: "Hinduism", icon: "🕉️", color: "#8B5CF6" },
-    { id: "buddhism", name: "Buddhism", icon: "☸️", color: "#8B5CF6" },
-    { id: "judaism", name: "Judaism", icon: "✡️", color: "#8B5CF6" },
-    { id: "others", name: "Others", icon: "🌍", color: "#60A5FA" },
-    // { id: "any", name: "Any", icon: "🤲", color: "#A3A3A3" },
+    {
+      id: "christianity",
+      name: t("religions.christianity"),
+      icon: "✝️",
+      color: "#8B5CF6",
+    },
+    { id: "islam", name: t("religions.islam"), icon: "☪️", color: "#8B5CF6" },
+    {
+      id: "hinduism",
+      name: t("religions.hinduism"),
+      icon: "🕉️",
+      color: "#8B5CF6",
+    },
+    {
+      id: "buddhism",
+      name: t("religions.buddhism"),
+      icon: "☸️",
+      color: "#8B5CF6",
+    },
+    {
+      id: "judaism",
+      name: t("religions.judaism"),
+      icon: "✡️",
+      color: "#8B5CF6",
+    },
+    { id: "others", name: t("religions.others"), icon: "🌍", color: "#60A5FA" },
+    // { id: "any", name: t("religions.any"), icon: "🤲", color: "#A3A3A3" },
   ];
 
   const handleReligionSelect = (religion: string) => {

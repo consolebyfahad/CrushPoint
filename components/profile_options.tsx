@@ -44,7 +44,6 @@ export default function ProfileOptions({
       console.log(t("common.removeMatch"));
     }
   };
-  console.log("userdata", userData);
   // Default user data if not provided
   const defaultUser = {
     name: t("common.defaultUser"),

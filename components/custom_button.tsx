@@ -1,5 +1,6 @@
 import { color, font } from "@/utils/constants";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   GestureResponderEvent,
@@ -34,6 +35,7 @@ export default function CustomButton({
   fontstyle,
   count,
 }: CustomButtonProps) {
+  const { t } = useTranslation();
   const buttonDisabled =
     typeof isDisabled === "boolean" ? isDisabled || isLoading : isLoading;
   const [isPressed, setIsPressed] = useState(false);
@@ -104,7 +106,7 @@ export default function CustomButton({
             <Text
               style={[
                 styles.count,
-                title === "Outgoing" && styles.outgoingCount,
+                title === t("common.outgoing") && styles.outgoingCount,
               ]}
             >
               {count}

@@ -1,6 +1,7 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Interest {
   id: string;
@@ -19,6 +20,7 @@ interface UseGetInterestsReturn {
 }
 
 export default function useGetInterests(): UseGetInterestsReturn {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const [interests, setInterests] = useState<Interest[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export default function useGetInterests(): UseGetInterestsReturn {
 
   const fetchInterests = useCallback(async () => {
     if (!user) {
-      setError("User not authenticated");
+      setError(t("hooks.userNotAuthenticated"));
       return;
     }
 
@@ -44,11 +46,11 @@ export default function useGetInterests(): UseGetInterestsReturn {
       if (result.data && Array.isArray(result.data)) {
         setInterests(result.data);
       } else {
-        throw new Error("Invalid response format");
+        throw new Error(t("hooks.invalidResponseFormat"));
       }
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch interests";
+        err instanceof Error ? err.message : t("hooks.failedToFetchInterests");
       setError(errorMessage);
       console.error("Error fetching interests:", err);
     } finally {

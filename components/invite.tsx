@@ -5,15 +5,15 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-    Dimensions,
-    FlatList,
-    Image,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import CustomButton from "./custom_button";
 
@@ -106,7 +106,6 @@ export default function InviteMatches({
       const response = await apiCall(formData);
 
       if (response.result) {
-
         const selectedMatchesData = matches.filter((match) =>
           selectedMatches.includes(match.id)
         );
@@ -119,10 +118,10 @@ export default function InviteMatches({
         setSearchText("");
         onClose();
       } else {
-        showToast(response.message || "Failed to send invites", "error");
+        showToast(response.message || t("invite.failedToSendInvites"), "error");
       }
     } catch (error) {
-      showToast("Something went wrong. Please try again.", "error");
+      showToast(t("invite.somethingWentWrong"), "error");
     } finally {
       setIsSubmitting(false);
     }

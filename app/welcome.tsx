@@ -10,11 +10,11 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    BackHandler,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  BackHandler,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -89,9 +89,7 @@ export default function Welcome() {
         <Text style={styles.appName}>Andra</Text>
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{t("auth.signup")}</Text>
-          <Text style={styles.subtitle}>
-            {t("auth.chooseSignupMethod")}
-          </Text>
+          <Text style={styles.subtitle}>{t("auth.chooseSignupMethod")}</Text>
 
           <View style={styles.buttonContainer}>
             {/* Social Authentication Component */}
@@ -120,7 +118,9 @@ export default function Welcome() {
           </View>
 
           <View style={styles.loginSection}>
-            <Text style={styles.loginText}>{t("auth.alreadyHaveAccount")} </Text>
+            <Text style={styles.loginText}>
+              {t("auth.alreadyHaveAccount")}{" "}
+            </Text>
             <TouchableOpacity onPress={handleLogin}>
               <Text style={styles.loginLink}>{t("auth.login")}</Text>
             </TouchableOpacity>
@@ -129,11 +129,7 @@ export default function Welcome() {
       </View>
 
       <View>
-        <Text style={styles.termsText}>
-          By signing up, you agree to our{" "}
-          <Text style={styles.linkText}>Terms</Text> and{" "}
-          <Text style={styles.linkText}>Privacy Policy</Text>
-        </Text>
+        <Text style={styles.termsText}>{t("welcomeTerms")}</Text>
       </View>
     </SafeAreaView>
   );

@@ -4,21 +4,21 @@ const parseMMDDYYYY = (dateStr: string): Date => {
 };
 
 // Format gender interest for display
-export const formatGenderInterest = (genderInterest: string): string => {
-  if (!genderInterest) return "All";
+export const formatGenderInterest = (genderInterest: string, t?: (key: string, options?: any) => string): string => {
+  if (!genderInterest) return t ? t("helper.genderInterest.all") : "All";
   
   const normalized = genderInterest.toLowerCase().trim();
   
   if (normalized === "female" || normalized === "f") {
-    return "Women";
+    return t ? t("helper.genderInterest.women") : "Women";
   } else if (normalized === "male" || normalized === "m") {
-    return "Men";
+    return t ? t("helper.genderInterest.men") : "Men";
   } else if (normalized === "both" || normalized === "all" || normalized === "other") {
-    return "All";
+    return t ? t("helper.genderInterest.all") : "All";
   }
   
   // Fallback for any other values
-  return "All";
+  return t ? t("helper.genderInterest.all") : "All";
 };
 
 // Capitalize first letter of a string
@@ -145,10 +145,10 @@ const INTEREST_MAPPING: { [key: string]: string } = {
   "27": "🔬 Science",
 };
 
-const convertInterestIdsToNames = (interestIds: string[]): string[] => {
+const convertInterestIdsToNames = (interestIds: string[], t?: (key: string, options?: any) => string): string[] => {
   return interestIds
-    .map((id) => INTEREST_MAPPING[id] || `Unknown Interest (${id})`)
-    .filter((name) => name !== `Unknown Interest (${interestIds})`); // Optional: filter out unknown interests
+    .map((id) => INTEREST_MAPPING[id] || (t ? t("helper.unknown.interest", { id }) : `Unknown Interest (${id})`))
+    .filter((name) => !name.includes("Unknown Interest")); // Optional: filter out unknown interests
 };
 
 export const calculateAge = (dob: string): number => {
@@ -285,14 +285,14 @@ const LOOKING_FOR_MAPPING: { [key: string]: string } =
     return acc;
   }, {} as { [key: string]: string });
 
-const convertLookingForIdsToLabels = (lookingForIds: string[]): string[] => {
+const convertLookingForIdsToLabels = (lookingForIds: string[], t?: (key: string, options?: any) => string): string[] => {
   return lookingForIds
-    .map((id) => LOOKING_FOR_MAPPING[id] || `Unknown Option (${id})`)
-    .filter((label) => !label.startsWith("Unknown Option")); // Optional: filter out unknown options
+    .map((id) => LOOKING_FOR_MAPPING[id] || (t ? t("helper.unknown.option", { id }) : `Unknown Option (${id})`))
+    .filter((label) => !label.includes("Unknown Option")); // Optional: filter out unknown options
 };
 
 // Add new function specifically for looking_for
-export const parseLookingForWithLabels = (jsonString: string): string[] => {
+export const parseLookingForWithLabels = (jsonString: string, t?: (key: string) => string): string[] => {
   try {
     if (!jsonString) return [];
     
@@ -307,7 +307,7 @@ export const parseLookingForWithLabels = (jsonString: string): string[] => {
     const lookingForIds = JSON.parse(cleanedString);
     
     if (Array.isArray(lookingForIds)) {
-      return convertLookingForIdsToLabels(lookingForIds);
+      return convertLookingForIdsToLabels(lookingForIds, t);
     } else {
       console.warn("Looking for data is not an array:", lookingForIds);
       return [];
@@ -320,7 +320,7 @@ export const parseLookingForWithLabels = (jsonString: string): string[] => {
       const matches = jsonString.match(/"([^"]+)"/g);
       if (matches) {
         const values = matches.map((match) => match.replace(/"/g, ""));
-        return convertLookingForIdsToLabels(values);
+        return convertLookingForIdsToLabels(values, t);
       }
     } catch (fallbackError) {
       console.error("Fallback parsing also failed:", fallbackError);
@@ -450,7 +450,7 @@ export const formatTimeForDisplay = (time: string) => {
   }
 };
 
-export const formatTimeAgo = (date: string, time: string) => {
+export const formatTimeAgo = (date: string, time: string, t?: (key: string, options?: any) => string) => {
   try {
     // Parse the date format "Jul 22, 2025" or "Sep 12, 2025 06:31 PM"
     const monthMap: { [key: string]: number } = {
@@ -505,7 +505,7 @@ export const formatTimeAgo = (date: string, time: string) => {
     const matchDate = new Date(year, month, day, hour24, minutes);
 
     if (isNaN(matchDate.getTime())) {
-      return "Recently";
+      return t ? t("helper.time.recently") : "Recently";
     }
 
     const now = new Date();
@@ -514,17 +514,17 @@ export const formatTimeAgo = (date: string, time: string) => {
     const diffInDays = Math.floor(diffInHours / 24);
 
     if (diffInHours < 1) {
-      return "Just now";
+      return t ? t("helper.time.justNow") : "Just now";
     } else if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+      return t ? t(diffInHours > 1 ? "helper.time.hoursAgo_plural" : "helper.time.hoursAgo", { count: diffInHours }) : `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
     } else if (diffInDays === 1) {
-      return "1 day ago";
+      return t ? t("helper.time.dayAgo") : "1 day ago";
     } else {
-      return `${diffInDays} days ago`;
+      return t ? t("helper.time.daysAgo", { count: diffInDays }) : `${diffInDays} days ago`;
     }
   } catch (error) {
     console.warn("Error formatting time ago:", error);
-    return "Recently";
+    return t ? t("helper.time.recently") : "Recently";
   }
 };
 
@@ -574,7 +574,7 @@ export const parseCreatedAtWithOffset = (
 /**
  * Calculate time ago from a Date object
  */
-export const calculateTimeAgo = (date: Date): string => {
+export const calculateTimeAgo = (date: Date, t?: (key: string, options?: any) => string): string => {
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();
   const diffInSeconds = Math.floor(diffInMs / 1000);
@@ -583,15 +583,15 @@ export const calculateTimeAgo = (date: Date): string => {
   const diffInDays = Math.floor(diffInHours / 24);
 
   if (diffInMinutes < 1) {
-    return "Just now";
+    return t ? t("helper.time.justNow") : "Just now";
   } else if (diffInHours < 1) {
-    return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+    return t ? t(diffInMinutes > 1 ? "helper.time.minutesAgo_plural" : "helper.time.minutesAgo", { count: diffInMinutes }) : `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
   } else if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    return t ? t(diffInHours > 1 ? "helper.time.hoursAgo_plural" : "helper.time.hoursAgo", { count: diffInHours }) : `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
   } else if (diffInDays === 1) {
-    return "1 day ago";
+    return t ? t("helper.time.dayAgo") : "1 day ago";
   } else {
-    return `${diffInDays} days ago`;
+    return t ? t("helper.time.daysAgo", { count: diffInDays }) : `${diffInDays} days ago`;
   }
 };
 
@@ -715,28 +715,29 @@ export const getUserDisplayName = (name: string, age: number): string => {
 /**
  * Get user location string
  */
-export const getUserLocationString = (city: string, state: string, country: string): string => {
+export const getUserLocationString = (city: string, state: string, country: string, t?: (key: string, options?: any) => string): string => {
   const parts = [city, state, country].filter(Boolean);
-  return parts.length > 0 ? parts.join(", ") : "Location not specified";
+  return parts.length > 0 ? parts.join(", ") : (t ? t("helper.location.notSpecified") : "Location not specified");
 };
 
 /**
  * Get user online status
  */
-export const getUserOnlineStatus = (status: string): string => {
-  return status === "1" ? "Online" : "Offline";
+export const getUserOnlineStatus = (status: string, t?: (key: string, options?: any) => string): string => {
+  return status === "1" ? (t ? t("helper.status.online") : "Online") : (t ? t("helper.status.offline") : "Offline");
 };
 
 /**
  * Format height for display
  */
-export const formatHeight = (heightStr: string): string => {
+export const formatHeight = (heightStr: string, t?: (key: string, options?: any) => string): string => {
   if (!heightStr || heightStr === "0") return "";
   
   const height = parseFloat(heightStr);
   if (isNaN(height)) return "";
   
-  return `${height} cm`;
+  const unit = t ? t("helper.height.unit") : "cm";
+  return `${height} ${unit}`;
 };
 
 /**

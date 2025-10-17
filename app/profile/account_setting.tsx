@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Platform,
@@ -21,6 +22,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountSettings() {
+  const { t } = useTranslation();
   const { user, updateUserData, userData } = useAppContext();
   const { showToast } = useToast();
   const [accountData, setAccountData] = useState({
@@ -82,32 +84,50 @@ export default function AccountSettings() {
 
   const validateFields = () => {
     if (!accountData.fullName.trim()) {
-      Alert.alert("Validation Error", "Please enter your full name.");
+      Alert.alert(
+        t("validation.validationError"),
+        t("validation.enterFullName")
+      );
       return false;
     }
 
     if (!accountData.dateOfBirth.trim()) {
-      Alert.alert("Validation Error", "Please select your date of birth.");
+      Alert.alert(
+        t("validation.validationError"),
+        t("validation.selectDateOfBirth")
+      );
       return false;
     }
 
     if (!accountData.phoneNumber.trim()) {
-      Alert.alert("Validation Error", "Please enter your phone number.");
+      Alert.alert(
+        t("validation.validationError"),
+        t("validation.enterPhoneNumber")
+      );
       return false;
     }
 
     if (!validatePhoneNumber(accountData.phoneNumber)) {
-      Alert.alert("Validation Error", "Please enter a valid phone number.");
+      Alert.alert(
+        t("validation.validationError"),
+        t("validation.enterValidPhoneNumber")
+      );
       return false;
     }
 
     if (!accountData.email.trim()) {
-      Alert.alert("Validation Error", "Please enter your email address.");
+      Alert.alert(
+        t("validation.validationError"),
+        t("validation.enterEmailAddress")
+      );
       return false;
     }
 
     if (!validateEmail(accountData.email)) {
-      Alert.alert("Validation Error", "Please enter a valid email address.");
+      Alert.alert(
+        t("validation.validationError"),
+        t("validation.enterValidEmailAddress")
+      );
       return false;
     }
 
@@ -124,7 +144,7 @@ export default function AccountSettings() {
 
   const handleSaveChanges = async () => {
     if (!user?.user_id) {
-      Alert.alert("Error", "User session expired. Please login again.");
+      Alert.alert(t("common.error"), t("validation.userSessionExpired"));
       return;
     }
 
@@ -155,21 +175,15 @@ export default function AccountSettings() {
         });
 
         setIsChanged(false);
-        showToast(
-          "Your account settings have been updated successfully.",
-          "success"
-        );
+
         setTimeout(() => {
           router.back();
         }, 1000);
       } else {
-        showToast("Failed to update account settings", "error");
+        showToast(t("account.failedToUpdateSettings"), "error");
       }
     } catch (error) {
-      showToast(
-        `Failed to update account settings. Please try again. || ${error}`,
-        "error"
-      );
+      showToast(t("validation.failedToUpdateSettings"), "error");
     } finally {
       setIsLoading(false);
     }
@@ -177,15 +191,15 @@ export default function AccountSettings() {
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      "Delete Account",
-      "Are you sure you want to delete your account? This action cannot be undone.",
+      t("account.deleteAccount"),
+      t("profile.deleteAccountConfirmation"),
       [
         {
-          text: "Cancel",
+          text: t("common.cancel"),
           style: "cancel",
         },
         {
-          text: "Delete",
+          text: t("common.delete"),
           style: "destructive",
           onPress: () => {
             console.log("Account deletion confirmed");
@@ -219,26 +233,28 @@ export default function AccountSettings() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <Header title={"Account Settings"} divider={true} />
+      <Header title={t("profile.accountSettings")} divider={true} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Full Name */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Full Name</Text>
+          <Text style={styles.fieldLabel}>{t("profile.fullName")}</Text>
           <TextInput
             style={styles.textInput}
             value={accountData.fullName}
             onChangeText={(value) => handleInputChange("fullName", value)}
-            placeholder="Enter your full name"
+            placeholder={t("profile.enterFullName")}
             placeholderTextColor={color.gray14}
             editable={!isLoading}
           />
-          <Text style={styles.fieldNote}>Changeable only once in 6 months</Text>
+          <Text style={styles.fieldNote}>
+            {t("profile.changeableOnceIn6Months")}
+          </Text>
         </View>
 
         {/* Date of Birth */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Date of Birth</Text>
+          <Text style={styles.fieldLabel}>{t("profile.dateOfBirth")}</Text>
           <TouchableOpacity
             style={[styles.dateInput, isLoading && { opacity: 0.6 }]}
             onPress={handleDatePress}
@@ -251,7 +267,7 @@ export default function AccountSettings() {
                 Platform.OS === "ios" && { paddingVertical: 16 },
               ]}
               value={accountData.dateOfBirth}
-              placeholder="mm/dd/yyyy"
+              placeholder={t("profile.dateFormat")}
               placeholderTextColor={color.gray14}
               editable={false}
             />
@@ -269,17 +285,19 @@ export default function AccountSettings() {
               maximumDate={new Date()}
             />
           )}
-          <Text style={styles.fieldNote}>Changeable only once in 6 months</Text>
+          <Text style={styles.fieldNote}>
+            {t("profile.changeableOnceIn6Months")}
+          </Text>
         </View>
 
         {/* Phone Number */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Phone Number</Text>
+          <Text style={styles.fieldLabel}>{t("profile.phoneNumber")}</Text>
           <TextInput
             style={styles.textInput}
             value={accountData.phoneNumber}
             onChangeText={(value) => handleInputChange("phoneNumber", value)}
-            placeholder="Enter your phone number"
+            placeholder={t("profile.enterPhoneNumber")}
             placeholderTextColor={color.gray14}
             keyboardType="phone-pad"
             editable={!isLoading}
@@ -288,12 +306,12 @@ export default function AccountSettings() {
 
         {/* Email */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Email</Text>
+          <Text style={styles.fieldLabel}>{t("profile.email")}</Text>
           <TextInput
             style={styles.textInput}
             value={accountData.email}
             onChangeText={(value) => handleInputChange("email", value)}
-            placeholder="Enter your email"
+            placeholder={t("profile.enterEmail")}
             placeholderTextColor={color.gray14}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -308,7 +326,7 @@ export default function AccountSettings() {
       {/* Action Buttons */}
       <View style={styles.actionContainer}>
         <CustomButton
-          title="Delete My Account"
+          title={t("account.deleteMyAccount")}
           variant="secondary"
           style={{ borderColor: color.error }}
           fontstyle={{ color: color.error }}
@@ -316,7 +334,9 @@ export default function AccountSettings() {
           isDisabled={isLoading}
         />
         <CustomButton
-          title={isLoading ? "Saving..." : "Save Changes"}
+          title={
+            isLoading ? t("validation.saving") : t("validation.saveChanges")
+          }
           onPress={handleSaveChanges}
           isDisabled={!isChanged || isLoading}
           isLoading={isLoading}

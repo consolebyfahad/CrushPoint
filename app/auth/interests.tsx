@@ -53,12 +53,10 @@ export default function Interests() {
       try {
         // Use the already parsed interest IDs from the profile
         const interestIds = userData.originalInterestIds;
-        console.log("Loading existing interests:", interestIds);
 
         const finalInterests = Array.isArray(interestIds)
           ? interestIds
           : [interestIds];
-        console.log("Setting selected interests:", finalInterests);
         setSelectedInterests(finalInterests);
       } catch (error) {
         console.error("Error loading existing interests:", error);
@@ -99,7 +97,6 @@ export default function Interests() {
       );
       return;
     }
-    console.log("selectedInterests", selectedInterests);
     setIsLoading(true);
     try {
       const formData = new FormData();

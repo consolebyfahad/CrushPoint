@@ -9,8 +9,10 @@ import {
   parseNationalityWithLabels,
 } from "@/utils/helper";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function useGetProfile() {
+  const { t } = useTranslation();
   const { user, updateUserData } = useAppContext();
   const [userProfile, setUserProfile] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -20,7 +22,7 @@ export default function useGetProfile() {
 
   const getUserData = async () => {
     if (!user?.user_id) {
-      setError("User ID not available");
+      setError(t("hooks.userIdNotAvailable"));
       return;
     }
 
@@ -34,7 +36,6 @@ export default function useGetProfile() {
       formData.append("id", user.user_id);
 
       const response = await apiCall(formData);
-
       if (response.data && response.data.length > 0) {
         const userData: UserData = response.data[0];
         let photos: string[] = [];
@@ -218,11 +219,11 @@ export default function useGetProfile() {
         setUserProfile(localUserData);
         updateUserData(contextUserData);
       } else {
-        setError("No user data found");
+        setError(t("hooks.noUserDataFound"));
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      setError("Failed to fetch user data");
+      setError(t("hooks.failedToFetchUserData"));
     } finally {
       setLoading(false);
     }

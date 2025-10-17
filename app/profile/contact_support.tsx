@@ -8,19 +8,21 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ContactSupport() {
+  const { t } = useTranslation();
   const { user, userData } = useAppContext();
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,12 +35,12 @@ export default function ContactSupport() {
   });
 
   const subjectOptions = [
-    "Account Issue",
-    "Bug Report",
-    "Feature Request",
-    "Safety Concern",
-    "Billing Question",
-    "Other",
+    t("contactSupport.subjects.accountIssue"),
+    t("contactSupport.subjects.bugReport"),
+    t("contactSupport.subjects.featureRequest"),
+    t("contactSupport.subjects.safetyConcern"),
+    t("contactSupport.subjects.billingQuestion"),
+    t("contactSupport.subjects.other"),
   ];
 
   // Pre-populate user data from context
@@ -70,29 +72,29 @@ export default function ContactSupport() {
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      showToast("Name is required", "error");
+      showToast(t("contactSupport.validation.nameRequired"), "error");
       return false;
     }
 
     if (!formData.email.trim()) {
-      showToast("Email is required", "error");
+      showToast(t("contactSupport.validation.emailRequired"), "error");
       return false;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email.trim())) {
-      showToast("Please enter a valid email", "error");
+      showToast(t("contactSupport.validation.validEmail"), "error");
       return false;
     }
 
     if (!formData.subject) {
-      showToast("Subject is required", "error");
+      showToast(t("contactSupport.validation.subjectRequired"), "error");
       return false;
     }
 
     if (!formData.message.trim()) {
-      showToast("Message is required", "error");
+      showToast(t("contactSupport.validation.messageRequired"), "error");
       return false;
     }
 
@@ -105,7 +107,7 @@ export default function ContactSupport() {
     }
 
     if (!user?.user_id) {
-      showToast("User session expired. Please login again.", "error");
+      showToast(t("contactSupport.validation.sessionExpired"), "error");
       return;
     }
 
@@ -121,7 +123,6 @@ export default function ContactSupport() {
       const response = await apiCall(submissionData);
 
       if (response.result) {
-
         // Reset form (keep name and email)
         setFormData((prev) => ({
           ...prev,
@@ -134,11 +135,14 @@ export default function ContactSupport() {
           router.back();
         }, 1500);
       } else {
-        showToast(response.message || "Failed to send message", "error");
+        showToast(
+          response.message || t("contactSupport.validation.sendFailed"),
+          "error"
+        );
       }
     } catch (error) {
       console.error("Contact support error:", error);
-      showToast("Something went wrong. Please try again.", "error");
+      showToast(t("contactSupport.validation.somethingWrong"), "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -175,7 +179,7 @@ export default function ContactSupport() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <Header title={"Contact Support"} divider />
+      <Header title={t("contactSupport.title")} divider />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -193,20 +197,22 @@ export default function ContactSupport() {
             <View style={styles.helpIcon}>
               <Ionicons name="help-circle-outline" size={32} color="#5FB3D4" />
             </View>
-            <Text style={styles.helpTitle}>{"We're here to help"}</Text>
+            <Text style={styles.helpTitle}>{t("contactSupport.subtitle")}</Text>
             <Text style={styles.helpDescription}>
-              Our support team will get back to you as soon as possible.
+              {t("contactSupport.description")}
             </Text>
           </View>
 
           {/* Name Field */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Name *</Text>
+            <Text style={styles.fieldLabel}>
+              {t("contactSupport.nameLabel")}
+            </Text>
             <TextInput
               style={styles.textInput}
               value={formData.name}
               onChangeText={(value) => handleInputChange("name", value)}
-              placeholder="Enter your name"
+              placeholder={t("contactSupport.namePlaceholder")}
               placeholderTextColor={color.gray14}
               editable={!isSubmitting}
               returnKeyType="next"
@@ -215,12 +221,14 @@ export default function ContactSupport() {
 
           {/* Email Field */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Email *</Text>
+            <Text style={styles.fieldLabel}>
+              {t("contactSupport.emailLabel")}
+            </Text>
             <TextInput
               style={styles.textInput}
               value={formData.email}
               onChangeText={(value) => handleInputChange("email", value)}
-              placeholder="Enter your email"
+              placeholder={t("contactSupport.emailPlaceholder")}
               placeholderTextColor={color.gray14}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -231,7 +239,9 @@ export default function ContactSupport() {
 
           {/* Subject Field */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Subject *</Text>
+            <Text style={styles.fieldLabel}>
+              {t("contactSupport.subjectLabel")}
+            </Text>
             <View style={styles.subjectGrid}>
               {subjectOptions.map(renderSubjectOption)}
             </View>
@@ -239,12 +249,14 @@ export default function ContactSupport() {
 
           {/* Message Field */}
           <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Message *</Text>
+            <Text style={styles.fieldLabel}>
+              {t("contactSupport.messageLabel")}
+            </Text>
             <TextInput
               style={styles.messageInput}
               value={formData.message}
               onChangeText={(value) => handleInputChange("message", value)}
-              placeholder="How can we help?"
+              placeholder={t("contactSupport.messagePlaceholder")}
               placeholderTextColor={color.gray14}
               multiline
               numberOfLines={6}
@@ -255,7 +267,9 @@ export default function ContactSupport() {
               blurOnSubmit={true}
             />
             <Text style={styles.characterCount}>
-              {formData.message.length}/500
+              {t("contactSupport.characterCount", {
+                count: formData.message.length,
+              })}
             </Text>
           </View>
         </ScrollView>
@@ -263,7 +277,11 @@ export default function ContactSupport() {
         {/* Send Button */}
         <View style={styles.sendContainer}>
           <CustomButton
-            title={isSubmitting ? "Sending..." : "Send Message"}
+            title={
+              isSubmitting
+                ? t("contactSupport.sending")
+                : t("contactSupport.sendMessage")
+            }
             onPress={handleSendMessage}
             isDisabled={!isFormValid || isSubmitting}
             icon={<Feather name="send" size={18} color="white" />}

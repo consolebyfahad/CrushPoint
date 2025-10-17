@@ -54,7 +54,7 @@ export default function index() {
   }));
 
   useEffect(() => {
-    if (!isHydrated) return; // Wait for context to hydrate
+    if (!isHydrated) return;
 
     const timer = setTimeout(() => {
       if (isLoggedIn) {
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: "100%",
+    height: "98%",
     resizeMode: "cover",
   },
   fallbackContainer: {

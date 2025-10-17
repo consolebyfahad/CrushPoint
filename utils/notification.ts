@@ -4,10 +4,23 @@ import { PermissionsAndroid, Platform } from "react-native";
 export const requestFCMPermission = async (): Promise<boolean> => {
   try {
     if (Platform.OS === "ios") {
+      // Check if device is registered for remote messages first
+      const isRegistered = messaging().isDeviceRegisteredForRemoteMessages;
+      if (!isRegistered) {
+        await messaging().registerDeviceForRemoteMessages();
+        console.log("📱 iOS device registered for remote messages");
+      }
+
       const authStatus = await messaging().hasPermission();
+      console.log(`🍎 iOS current permission status: ${authStatus}`);
 
       if (authStatus === messaging.AuthorizationStatus.NOT_DETERMINED) {
-        const requestStatus = await messaging().requestPermission();
+        const requestStatus = await messaging().requestPermission({
+          alert: true,
+          badge: true,
+          sound: true,
+          provisional: false,
+        });
         console.log(`🍎 iOS permission requested: ${requestStatus}`);
         return (
           requestStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -45,13 +58,20 @@ export const getFCMToken = async (): Promise<string | null> => {
         await messaging().registerDeviceForRemoteMessages();
         console.log("📱 iOS device registered for remote messages");
       }
+      
+      // Add a small delay for iOS to ensure APNs registration is complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
     const token = await messaging().getToken();
-    console.log("🔑 FCM Token:", token);
+    console.log("🔑 FCM Token:", token ? `${token.substring(0, 20)}...` : "null");
     return token;
   } catch (error) {
     console.error("❌ FCM token retrieval failed:", error);
+    console.error("❌ Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return null;
   }
 };

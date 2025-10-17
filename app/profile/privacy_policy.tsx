@@ -2,6 +2,7 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   ScrollView,
   StyleSheet,
@@ -12,93 +13,84 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivacyPolicy() {
+  const { t } = useTranslation();
   const handleBack = () => {
     router.back();
   };
 
   const sections = [
     {
-      title: "Information We Collect",
+      title: t("privacy.sections.collect.title"),
       icon: "information-circle",
-      content:
-        "We collect information you provide directly (profile details, photos, interests), automatically (location, device info, app usage), and from third parties (social media when you sign in with Google/Apple).",
+      content: t("privacy.sections.collect.content"),
     },
     {
-      title: "How We Use Your Information",
+      title: t("privacy.sections.use.title"),
       icon: "settings",
-      content:
-        "Your information helps us show you relevant matches, improve our services, send important updates, ensure safety, and provide customer support. We never sell your personal data to third parties.",
+      content: t("privacy.sections.use.content"),
     },
     {
-      title: "Location Data",
+      title: t("privacy.sections.location.title"),
       icon: "location",
-      content:
-        "We use your location to show nearby users and events. You can control location sharing in your device settings. Location data is encrypted and stored securely on our servers.",
+      content: t("privacy.sections.location.content"),
     },
     {
-      title: "Photo and Profile Information",
+      title: t("privacy.sections.photos.title"),
       icon: "camera",
-      content:
-        "Your photos and profile details are used to create your profile and show you to potential matches. You can edit or delete your information anytime in your profile settings.",
+      content: t("privacy.sections.photos.content"),
     },
     {
-      title: "Data Sharing",
+      title: t("privacy.sections.sharing.title"),
       icon: "share",
-      content:
-        "We only share your information with other users as intended by our app features (showing profiles to matches). We may share data with service providers who help us operate the app, but they're bound by strict confidentiality agreements.",
+      content: t("privacy.sections.sharing.content"),
     },
     {
-      title: "Data Security",
+      title: t("privacy.sections.security.title"),
       icon: "shield-checkmark",
-      content:
-        "We use industry-standard encryption to protect your data. All information is stored on secure servers with restricted access. We regularly update our security measures to keep your data safe.",
+      content: t("privacy.sections.security.content"),
     },
     {
-      title: "Your Rights",
+      title: t("privacy.sections.rights.title"),
       icon: "person",
-      content:
-        "You can access, update, or delete your account anytime. You can opt out of certain data collection, control who sees your profile, and request a copy of your data. Contact us for assistance.",
+      content: t("privacy.sections.rights.content"),
     },
     {
-      title: "Data Retention",
+      title: t("privacy.sections.retention.title"),
       icon: "time",
-      content:
-        "We keep your data only as long as needed to provide our services. When you delete your account, we remove your personal information within 30 days, though some data may be retained for legal compliance.",
+      content: t("privacy.sections.retention.content"),
     },
     {
-      title: "Children's Privacy",
+      title: t("privacy.sections.children.title"),
       icon: "people",
-      content:
-        "Andra is not intended for users under 18. We do not knowingly collect information from minors. If we discover a minor has provided us with information, we will delete it immediately.",
+      content: t("privacy.sections.children.content"),
     },
     {
-      title: "Changes to This Policy",
+      title: t("privacy.sections.changes.title"),
       icon: "refresh",
-      content:
-        "We may update this Privacy Policy occasionally. We'll notify you of significant changes through the app or email. Continued use of the app after changes means you accept the updated policy.",
+      content: t("privacy.sections.changes.content"),
     },
   ];
 
   const dataTypes = [
     {
-      type: "Profile Information",
-      examples: "Name, age, photos, interests, preferences",
+      type: t("privacy.dataTypes.profile.type"),
+      examples: t("privacy.dataTypes.profile.examples"),
     },
     {
-      type: "Location Data",
-      examples: "GPS coordinates, nearby places, location history",
+      type: t("privacy.dataTypes.location.type"),
+      examples: t("privacy.dataTypes.location.examples"),
     },
     {
-      type: "Usage Information",
-      examples: "App interactions, matches, messages, events attended",
+      type: t("privacy.dataTypes.usage.type"),
+      examples: t("privacy.dataTypes.usage.examples"),
     },
     {
-      type: "Device Information",
-      examples: "Device type, operating system, app version",
+      type: t("privacy.dataTypes.device.type"),
+      examples: t("privacy.dataTypes.device.examples"),
     },
     {
-      type: "Contact Information",
-      examples: "Email, phone number (for verification only)",
+      type: t("privacy.dataTypes.contact.type"),
+      examples: t("privacy.dataTypes.contact.examples"),
     },
   ];
 
@@ -130,7 +122,7 @@ export default function PrivacyPolicy() {
         >
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.title}>Privacy Policy</Text>
+        <Text style={styles.title}>{t("privacy.title")}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -143,19 +135,16 @@ export default function PrivacyPolicy() {
         <View style={styles.introSection}>
           <View style={styles.introHeader}>
             <Ionicons name="shield" size={32} color={color.primary} />
-            <Text style={styles.introTitle}>Your Privacy Matters</Text>
+            <Text style={styles.introTitle}>{t("privacy.intro.title")}</Text>
           </View>
-          <Text style={styles.lastUpdated}>Last updated: December 2023</Text>
-          <Text style={styles.introText}>
-            We're committed to protecting your privacy and being transparent
-            about how we collect, use, and share your information on Andra.
-          </Text>
+          <Text style={styles.lastUpdated}>{t("privacy.lastUpdated")}</Text>
+          <Text style={styles.introText}>{t("privacy.intro.content")}</Text>
         </View>
 
         {/* Data We Collect */}
         <View style={styles.dataSection}>
           <Text style={styles.sectionMainTitle}>
-            What Information We Collect
+            {t("privacy.dataCollect.title")}
           </Text>
           <View style={styles.dataTypesContainer}>
             {dataTypes.map((dataType, index) =>
@@ -167,31 +156,33 @@ export default function PrivacyPolicy() {
         {/* Privacy Sections */}
         <View style={styles.privacyContainer}>
           <Text style={styles.sectionMainTitle}>
-            How We Protect Your Privacy
+            {t("privacy.protection.title")}
           </Text>
           {sections.map((section, index) => renderSection(section, index))}
         </View>
 
         {/* Key Principles */}
         <View style={styles.principlesSection}>
-          <Text style={styles.sectionMainTitle}>Our Privacy Principles</Text>
+          <Text style={styles.sectionMainTitle}>
+            {t("privacy.principles.title")}
+          </Text>
           <View style={styles.principlesContainer}>
             <View style={styles.principleItem}>
               <Ionicons name="lock-closed" size={20} color={color.primary} />
               <Text style={styles.principleText}>
-                We never sell your personal data
+                {t("privacy.principles.noSell")}
               </Text>
             </View>
             <View style={styles.principleItem}>
               <Ionicons name="eye-off" size={20} color={color.primary} />
               <Text style={styles.principleText}>
-                You control who sees your information
+                {t("privacy.principles.control")}
               </Text>
             </View>
             <View style={styles.principleItem}>
               <Ionicons name="trash" size={20} color={color.primary} />
               <Text style={styles.principleText}>
-                You can delete your data anytime
+                {t("privacy.principles.delete")}
               </Text>
             </View>
             <View style={styles.principleItem}>
@@ -201,7 +192,7 @@ export default function PrivacyPolicy() {
                 color={color.primary}
               />
               <Text style={styles.principleText}>
-                We use industry-standard security
+                {t("privacy.principles.security")}
               </Text>
             </View>
           </View>
@@ -211,13 +202,11 @@ export default function PrivacyPolicy() {
         <View style={styles.contactSection}>
           <View style={styles.contactHeader}>
             <Ionicons name="mail" size={24} color={color.primary} />
-            <Text style={styles.contactTitle}>Questions About Privacy?</Text>
+            <Text style={styles.contactTitle}>
+              {t("privacy.contact.title")}
+            </Text>
           </View>
-          <Text style={styles.contactText}>
-            If you have any questions about this Privacy Policy or want to
-            exercise your privacy rights, contact us through the app settings or
-            reach out to our support team.
-          </Text>
+          <Text style={styles.contactText}>{t("privacy.contact.content")}</Text>
         </View>
 
         {/* Bottom Spacing */}

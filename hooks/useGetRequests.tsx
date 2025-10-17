@@ -7,6 +7,7 @@ import {
   sortRequestsByDate,
 } from "@/utils/helper";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface RequestUser {
   id: string;
@@ -31,6 +32,7 @@ interface MeetupRequest {
 const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
 
 const useGetRequests = () => {
+  const { t } = useTranslation();
   const { user, userData } = useAppContext();
   const [incomingRequests, setIncomingRequests] = useState<MeetupRequest[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<MeetupRequest[]>([]);
@@ -118,7 +120,7 @@ const useGetRequests = () => {
 
   const loadData = async () => {
     if (!user?.user_id) {
-      setError("User ID not available");
+      setError(t("hooks.userIdNotAvailable"));
       return;
     }
 
@@ -225,17 +227,16 @@ const useGetRequests = () => {
           sortedIncomingList.length === 0 &&
           sortedOutgoingList.length === 0
         ) {
-          setError("No meetup requests found yet.");
+          setError(t("hooks.noMeetupRequestsFound"));
         }
       } else {
         setIncomingRequests([]);
         setOutgoingRequests([]);
-        setError("No meetup requests found yet.");
+        setError(t("hooks.noMeetupRequestsFound"));
       }
     } catch (error: any) {
       const errorMessage =
-        error.message ||
-        "Network error occurred. Please check your connection.";
+        error.message || t("hooks.networkErrorCheckConnection");
       setError(errorMessage);
       console.error("Fetch requests error:", error);
       setIncomingRequests([]);

@@ -1,6 +1,7 @@
 import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
+import { svgIcon } from "@/utils/SvgIcons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React, { useState } from "react";
@@ -19,17 +20,43 @@ import CustomButton from "./custom_button";
 interface UserCardProps {
   user: any;
   onViewProfile: (user: any) => void;
-  onShowUserOnMap: (user: any) => void; // UPDATED: More descriptive prop name
+  onShowUserOnMap: (user: any) => void;
 }
 
 export default function UserCard({
   user,
   onViewProfile,
-  onShowUserOnMap, // UPDATED: Updated prop name
+  onShowUserOnMap,
 }: UserCardProps) {
   const { t } = useTranslation();
   const { userData: currentUser } = useAppContext();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  // Map emoji actions to SVG icons
+  const getMatchEmoji = (emoji: string) => {
+    const emojiMap: { [key: string]: any } = {
+      like: svgIcon.Like,
+      super_like: svgIcon.Fire,
+      smile: svgIcon.Blink,
+      message: svgIcon.Tea,
+      friend: svgIcon.Hi,
+    };
+
+    return emojiMap[emoji] || svgIcon.Hi;
+  };
+
+  // Get emoji color based on type
+  const getEmojiColor = (emoji: string) => {
+    const colorMap: { [key: string]: string } = {
+      like: "#3B82F6",
+      super_like: "#F59E0B",
+      smile: "#10B981",
+      message: "#8B5CF6",
+      friend: "#F97316",
+    };
+
+    return colorMap[emoji] || "#F97316"; // Default color
+  };
 
   // Helper function to get user coordinates from multiple possible sources
   const getUserCoordinates = (user: any) => {
@@ -103,12 +130,10 @@ export default function UserCard({
     }
   };
 
-  // ENHANCED: Better location validation and error handling
   const hasValidLocation = () => {
     return targetUserCoords !== null;
   };
 
-  // UPDATED: Enhanced show on map function
   const handleShowOnMap = async () => {
     try {
       // Validate location before proceeding
@@ -123,10 +148,8 @@ export default function UserCard({
 
       setIsLoadingLocation(true);
 
-      // Simulate a brief loading state for better UX
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Trigger the map navigation
       onShowUserOnMap(user);
 
       setIsLoadingLocation(false);
@@ -139,12 +162,10 @@ export default function UserCard({
     }
   };
 
-  // Format interests for display
   const formatInterests = (interests: string[] = []) => {
     return interests.slice(0, 3);
   };
 
-  // Format looking for items
   const formatLookingFor = (lookingFor: string[] = []) => {
     return lookingFor.slice(0, 2);
   };
@@ -161,15 +182,34 @@ export default function UserCard({
           </View>
         )}
 
-        {/* Online Status - Only show if user is online */}
-        {user?.isOnline && (
-          <View style={styles.onlineStatus}>
-            <View style={styles.onlineDot} />
-            <Text style={styles.onlineText}>{t("common.online")}</Text>
+        {/* Show match emoji if user has match status, otherwise show online status */}
+        {(user?.match_status === "match_sent" ||
+          user?.match_status === "matched") &&
+        user?.match_emoji ? (
+          <View
+            style={[
+              styles.emojiContainer,
+              { backgroundColor: `${getEmojiColor(user.match_emoji)}20` },
+            ]}
+          >
+            <Text
+              style={[
+                styles.matchEmoji,
+                { color: getEmojiColor(user.match_emoji) },
+              ]}
+            >
+              {getMatchEmoji(user.match_emoji)}
+            </Text>
           </View>
+        ) : (
+          user?.isOnline && (
+            <View style={styles.onlineStatus}>
+              <View style={styles.onlineDot} />
+              <Text style={styles.onlineText}>{t("common.online")}</Text>
+            </View>
+          )
         )}
 
-        {/* Image overlay for viewing more photos */}
         {user?.images && user.images.length > 1 && (
           <View style={styles.imageOverlay}>
             <Text style={styles.imageCount}>
@@ -179,7 +219,6 @@ export default function UserCard({
         )}
       </View>
 
-      {/* User Info */}
       <View style={styles.userInfo}>
         <View style={styles.nameRow}>
           <Text style={styles.userName} numberOfLines={1}>
@@ -356,6 +395,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: font.medium,
     color: color.white,
+  },
+  emojiContainer: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  matchEmoji: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
   imageOverlay: {
     position: "absolute",

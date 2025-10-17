@@ -9,6 +9,7 @@ import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -31,6 +32,7 @@ type PrivateSpot = {
 };
 
 export default function PrivateSpots() {
+  const { t } = useTranslation();
   const { user, userData } = useAppContext();
   console.log("user", user);
   const { showToast } = useToast();
@@ -65,7 +67,7 @@ export default function PrivateSpots() {
       }
     } catch (error) {
       console.error("Error fetching private spots:", error);
-      showToast("Failed to load private spots");
+      showToast(t("privateSpot.failedToLoadPrivateSpots"));
       setPrivateSpots([]);
     } finally {
       setLoading(false);
@@ -106,15 +108,15 @@ export default function PrivateSpots() {
 
   const handleDeletePrivateSpot = (spot: PrivateSpot) => {
     Alert.alert(
-      "Delete Private Spot",
+      t("privateSpot.deletePrivateSpot"),
       `Are you sure you want to delete "${spot.address}"?`,
       [
         {
-          text: "Cancel",
+          text: t("common.cancel"),
           style: "cancel",
         },
         {
-          text: "Delete",
+          text: t("common.delete"),
           style: "destructive",
           onPress: () => deletePrivateSpot(spot.id),
         },
@@ -137,11 +139,13 @@ export default function PrivateSpots() {
       if (response.result) {
         fetchPrivateSpots();
       } else {
-        throw new Error(response.message || "Failed to delete private spot");
+        throw new Error(
+          response.message || t("privateSpot.failedToDeletePrivateSpot")
+        );
       }
     } catch (error) {
       console.error("Error deleting private spot:", error);
-      showToast("Failed to delete private spot");
+      showToast(t("privateSpot.failedToDeletePrivateSpot"));
     }
   };
 
@@ -197,8 +201,8 @@ export default function PrivateSpots() {
       </View>
       <Text style={styles.emptyTitle}>No Private Spots</Text>
       <Text style={styles.emptySubtitle}>
-      Add your first private spot to get started. You can add up to 3 private Spots. 
-
+        Add your first private spot to get started. You can add up to 3 private
+        Spots.
       </Text>
       <CustomButton
         title="Add First Spot"
@@ -215,7 +219,9 @@ export default function PrivateSpots() {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={color.primary} />
-          <Text style={styles.loadingText}>Loading private spots...</Text>
+          <Text style={styles.loadingText}>
+            {t("privateSpot.loadingPrivateSpots")}
+          </Text>
         </View>
       ) : (
         <ScrollView
@@ -237,7 +243,8 @@ export default function PrivateSpots() {
                 color={color.primary}
               />
               <Text style={styles.infoText}>
-              Private spots are locations where you don’t want to be visible to others. These locations will help you protect your privacy.  
+                Private spots are locations where you don’t want to be visible
+                to others. These locations will help you protect your privacy.
               </Text>
             </View>
           </View>

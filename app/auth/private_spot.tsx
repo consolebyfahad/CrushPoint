@@ -303,10 +303,10 @@ export default function PrivateSpot() {
         });
         router.push("/auth/add_photos");
       } else {
-        showToast("Unable to get your location. Please try again.", "error");
+        showToast(t("privateSpot.validation.locationError"), "error");
       }
     } catch (error) {
-      showToast("Unable to get your location. Please try again.", "error");
+      showToast(t("privateSpot.unableToGetLocation"), "error");
     }
   };
 
@@ -328,7 +328,7 @@ export default function PrivateSpot() {
         ? `${location[0].street || ""} ${location[0].city || ""} ${
             location[0].region || ""
           }`.trim()
-        : "Private Spot";
+        : t("privateSpot.title");
 
       if (existingSpotData?.id) {
         // Update existing private spot

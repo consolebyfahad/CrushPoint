@@ -2,6 +2,7 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   ScrollView,
   StyleSheet,
@@ -12,90 +13,75 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TermsOfService() {
+  const { t } = useTranslation();
   const handleBack = () => {
     router.back();
   };
 
   const sections = [
     {
-      title: "1. Acceptance of Terms",
-      content:
-        "By downloading, accessing, or using the Andra mobile application ('App'), you agree to be bound by these Terms of Service ('Terms'). If you do not agree to these Terms, please do not use our App.",
+      title: t("terms.sections.acceptance.title"),
+      content: t("terms.sections.acceptance.content"),
     },
     {
-      title: "2. Description of Service",
-      content:
-        "Andra is a location-based social networking application that facilitates connections between users based on proximity, interests, and preferences. The App includes features such as user profiles, matching, messaging, event discovery, and location-based services.",
+      title: t("terms.sections.description.title"),
+      content: t("terms.sections.description.content"),
     },
     {
-      title: "3. User Eligibility",
-      content:
-        "You must be at least 18 years old to use Andra. By using the App, you represent and warrant that you are at least 18 years of age and have the legal capacity to enter into these Terms.",
+      title: t("terms.sections.eligibility.title"),
+      content: t("terms.sections.eligibility.content"),
     },
     {
-      title: "4. User Accounts and Registration",
-      content:
-        "To use certain features of the App, you must create an account. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account. You agree to provide accurate, current, and complete information during registration and to update such information to keep it accurate, current, and complete.",
+      title: t("terms.sections.accounts.title"),
+      content: t("terms.sections.accounts.content"),
     },
     {
-      title: "5. User Conduct and Prohibited Activities",
-      content:
-        "You agree not to engage in any of the following prohibited activities: harassment, abuse, or threatening behavior towards other users; posting false, misleading, or fraudulent information; using the App for commercial purposes without authorization; sharing personal information of other users without consent; violating any applicable laws or regulations; or attempting to gain unauthorized access to the App or other users' accounts.",
+      title: t("terms.sections.conduct.title"),
+      content: t("terms.sections.conduct.content"),
     },
     {
-      title: "6. Privacy and Data Protection",
-      content:
-        "Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy, which is incorporated into these Terms by reference. By using the App, you consent to the collection, use, and sharing of your information as described in our Privacy Policy.",
+      title: t("terms.sections.privacy.title"),
+      content: t("terms.sections.privacy.content"),
     },
     {
-      title: "7. Location Services",
-      content:
-        "Andra uses location services to provide proximity-based features. By enabling location services, you consent to the collection and use of your location data. You can disable location services at any time through your device settings, though this may limit certain App functionality.",
+      title: t("terms.sections.location.title"),
+      content: t("terms.sections.location.content"),
     },
     {
-      title: "8. Content and Intellectual Property",
-      content:
-        "You retain ownership of content you post to the App, but grant us a license to use, display, and distribute such content in connection with the App. The App and its original content, features, and functionality are owned by Andra and are protected by international copyright, trademark, and other intellectual property laws.",
+      title: t("terms.sections.intellectual.title"),
+      content: t("terms.sections.intellectual.content"),
     },
     {
-      title: "9. Prohibited Content",
-      content:
-        "You may not post content that is illegal, harmful, threatening, abusive, defamatory, vulgar, obscene, or otherwise objectionable. Content that violates others' intellectual property rights, contains viruses or malicious code, or is designed to disrupt the App's operation is prohibited.",
+      title: t("terms.sections.prohibitedContent.title"),
+      content: t("terms.sections.prohibitedContent.content"),
     },
     {
-      title: "10. Safety and Security",
-      content:
-        "While we strive to provide a safe environment, you use the App at your own risk. We are not responsible for the conduct of other users. Always exercise caution when meeting people in person and follow our safety guidelines. Report any suspicious or inappropriate behavior immediately.",
+      title: t("terms.sections.safety.title"),
+      content: t("terms.sections.safety.content"),
     },
     {
-      title: "11. Third-Party Services",
-      content:
-        "The App may integrate with third-party services, including social media platforms and payment processors. Your use of such services is subject to their respective terms of service and privacy policies. We are not responsible for third-party services or their content.",
+      title: t("terms.sections.thirdParty.title"),
+      content: t("terms.sections.thirdParty.content"),
     },
     {
-      title: "12. Disclaimers and Limitations of Liability",
-      content:
-        "THE APP IS PROVIDED 'AS IS' WITHOUT WARRANTIES OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES AND SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES ARISING FROM YOUR USE OF THE APP.",
+      title: t("terms.sections.disclaimers.title"),
+      content: t("terms.sections.disclaimers.content"),
     },
     {
-      title: "13. Termination",
-      content:
-        "We may terminate or suspend your account at any time for violations of these Terms or for any other reason at our discretion. You may terminate your account at any time through the App settings. Upon termination, your right to use the App will cease immediately.",
+      title: t("terms.sections.termination.title"),
+      content: t("terms.sections.termination.content"),
     },
     {
-      title: "14. Modifications to Terms",
-      content:
-        "We reserve the right to modify these Terms at any time. We will notify users of material changes through the App or via email. Your continued use of the App after such modifications constitutes acceptance of the updated Terms.",
+      title: t("terms.sections.modifications.title"),
+      content: t("terms.sections.modifications.content"),
     },
     {
-      title: "15. Governing Law and Dispute Resolution",
-      content:
-        "These Terms are governed by the laws of the jurisdiction where Andra is incorporated. Any disputes arising from these Terms or your use of the App shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.",
+      title: t("terms.sections.governing.title"),
+      content: t("terms.sections.governing.content"),
     },
     {
-      title: "16. Contact Information",
-      content:
-        "If you have any questions about these Terms, please contact us through the App's support feature or at our designated contact address. We will respond to your inquiries in a timely manner.",
+      title: t("terms.sections.contact.title"),
+      content: t("terms.sections.contact.content"),
     },
   ];
 
@@ -117,7 +103,7 @@ export default function TermsOfService() {
         >
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.title}>Terms of Service</Text>
+        <Text style={styles.title}>{t("terms.title")}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -130,14 +116,10 @@ export default function TermsOfService() {
         <View style={styles.introSection}>
           <View style={styles.introHeader}>
             <Ionicons name="document-text" size={32} color={color.primary} />
-            <Text style={styles.introTitle}>Terms of Service</Text>
+            <Text style={styles.introTitle}>{t("terms.title")}</Text>
           </View>
-          <Text style={styles.lastUpdated}>Last updated: December 2023</Text>
-          <Text style={styles.introText}>
-            These Terms of Service govern your use of the Andra mobile
-            application. Please read these terms carefully before using our
-            service.
-          </Text>
+          <Text style={styles.lastUpdated}>{t("terms.lastUpdated")}</Text>
+          <Text style={styles.introText}>{t("terms.intro")}</Text>
         </View>
 
         {/* Terms Sections */}
@@ -153,27 +135,18 @@ export default function TermsOfService() {
               size={24}
               color={color.primary}
             />
-            <Text style={styles.noticeTitle}>Important Notice</Text>
+            <Text style={styles.noticeTitle}>{t("terms.notice.title")}</Text>
           </View>
-          <Text style={styles.noticeText}>
-            By continuing to use Andra, you acknowledge that you have read,
-            understood, and agree to be bound by these Terms of Service. If you
-            do not agree with any part of these terms, please discontinue use of
-            the App.
-          </Text>
+          <Text style={styles.noticeText}>{t("terms.notice.content")}</Text>
         </View>
 
         {/* Contact Section */}
         <View style={styles.contactSection}>
           <View style={styles.contactHeader}>
             <Ionicons name="mail" size={24} color={color.primary} />
-            <Text style={styles.contactTitle}>Questions?</Text>
+            <Text style={styles.contactTitle}>{t("terms.contact.title")}</Text>
           </View>
-          <Text style={styles.contactText}>
-            If you have any questions about these Terms of Service, please
-            contact our support team through the app settings or reach out to us
-            directly.
-          </Text>
+          <Text style={styles.contactText}>{t("terms.contact.content")}</Text>
         </View>
 
         {/* Bottom Spacing */}

@@ -2,6 +2,7 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { formatTimeAgo } from "@/utils/helper";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface EventAttendee {
   id: string;
@@ -34,6 +35,7 @@ const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
 
 const useGetEvents = () => {
   const { user } = useAppContext();
+  const { t } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -104,16 +106,19 @@ const useGetEvents = () => {
 
           return {
             id: event.id || Math.random().toString(),
-            title: event.title || "Untitled Event",
-            category: event.category || "General",
+            title: event.title || t("events.defaultTitle"),
+            category: event.category || t("events.defaultCategory"),
             date: event.date || new Date().toISOString(),
             time: event.time,
-            location: event.location || event.venue || "Location TBD",
+            location:
+              event.location || event.venue || t("events.defaultLocation"),
             description:
-              event.description || event.details || "No description available",
+              event.description ||
+              event.details ||
+              t("events.defaultDescription"),
             image: parseEventImage(event.image || event.event_image),
             organizer: {
-              name: event.organized_by || "Event Organizer",
+              name: event.organized_by || t("events.defaultOrganizer"),
               image:
                 event.organizer_image ||
                 "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
@@ -139,18 +144,16 @@ const useGetEvents = () => {
         setEvents(formattedEvents);
 
         if (formattedEvents.length === 0) {
-          setError("No events found. Check back later for upcoming events!");
+          setError(t("events.noEventsFound"));
         }
       } else if (response?.status === "Error") {
-        setError(response.message || "Failed to load events");
+        setError(response.message || t("events.failedToLoadEvents"));
       } else {
         setEvents([]);
-        setError("No events found. Check back later for upcoming events!");
+        setError(t("events.noEventsFound"));
       }
     } catch (error: any) {
-      const errorMessage =
-        error.message ||
-        "Network error occurred. Please check your connection.";
+      const errorMessage = error.message || t("events.networkError");
       setError(errorMessage);
       console.error("Fetch events error:", error);
     } finally {
@@ -161,7 +164,7 @@ const useGetEvents = () => {
   // Toggle event attendance
   const toggleAttendance = async (eventId: string) => {
     if (!user?.user_id) {
-      setError("User not logged in");
+      setError(t("events.userNotLoggedIn"));
       return;
     }
 
@@ -204,7 +207,7 @@ const useGetEvents = () => {
               : e
           )
         );
-        setError(response.message || "Failed to update attendance");
+        setError(response.message || t("events.failedToUpdateAttendance"));
       }
     } catch (error: any) {
       // Revert optimistic update on error
@@ -220,7 +223,7 @@ const useGetEvents = () => {
         )
       );
       console.error("Toggle attendance error:", error);
-      setError("Failed to update attendance");
+      setError(t("events.failedToUpdateAttendance"));
     }
   };
 

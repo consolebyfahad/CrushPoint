@@ -6,17 +6,17 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -84,12 +84,18 @@ export default function SuggestChanges({
 
   const handleSubmit = async () => {
     if (!newLocation.trim()) {
-      Alert.alert("Error", "Please enter a new location.");
+      Alert.alert(
+        t("suggestChanges.error"),
+        t("suggestChanges.enterNewLocation")
+      );
       return;
     }
 
     if (!user?.user_id) {
-      Alert.alert("Error", "User session expired. Please login again.");
+      Alert.alert(
+        t("suggestChanges.error"),
+        t("suggestChanges.userSessionExpired")
+      );
       return;
     }
 
@@ -122,31 +128,35 @@ export default function SuggestChanges({
       const response = await apiCall(formData);
 
       if (response.result) {
-        Alert.alert("Success", "Changes suggested successfully!", [
-          {
-            text: "OK",
-            onPress: () => {
-              onSubmit({
-                date: formattedDate,
-                time: formattedTime,
-                location: newLocation.trim(),
-                message: message.trim(),
-              });
-              onClose();
+        Alert.alert(
+          t("suggestChanges.success"),
+          t("suggestChanges.changesSuggestedSuccessfully"),
+          [
+            {
+              text: t("suggestChanges.ok"),
+              onPress: () => {
+                onSubmit({
+                  date: formattedDate,
+                  time: formattedTime,
+                  location: newLocation.trim(),
+                  message: message.trim(),
+                });
+                onClose();
+              },
             },
-          },
-        ]);
+          ]
+        );
       } else {
         Alert.alert(
-          "Error",
-          response.message || "Failed to suggest changes. Please try again."
+          t("suggestChanges.error"),
+          response.message || t("suggestChanges.failedToSuggestChanges")
         );
       }
     } catch (error) {
       console.error("❌ Suggest changes error:", error);
       Alert.alert(
-        "Error",
-        "Failed to suggest changes. Please check your connection and try again."
+        t("suggestChanges.error"),
+        t("suggestChanges.failedToSuggestChangesNetwork")
       );
     } finally {
       setIsLoading(false);
@@ -188,7 +198,9 @@ export default function SuggestChanges({
                 size={16}
                 color={color.gray55}
               />
-              <Text style={styles.detailText}>{formatMeetupDate(originalRequest.date)}</Text>
+              <Text style={styles.detailText}>
+                {formatMeetupDate(originalRequest.date)}
+              </Text>
               <Ionicons
                 name="time-outline"
                 size={16}

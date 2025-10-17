@@ -279,7 +279,11 @@ export default function EventDetails({ route }: any) {
           <CustomButton
             title={t("events.inviteMatches")}
             variant="secondary"
-            style={{ width: "48%" }}
+            style={{
+              width: "48%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
             icon={<Users />}
             onPress={handleInviteMatches}
           />

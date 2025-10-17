@@ -2,6 +2,7 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   ScrollView,
   StyleSheet,
@@ -12,71 +13,42 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CommunityGuidelines() {
+  const { t } = useTranslation();
+
   const handleBack = () => {
     router.back();
   };
 
   const guidelines = [
     {
-      title: "Be Respectful",
-      content:
-        "Treat everyone with kindness and respect. We're all here to make meaningful connections, so please be courteous in your interactions.",
+      title: t("communityGuidelines.guidelines.respectful.title"),
+      content: t("communityGuidelines.guidelines.respectful.description"),
     },
     {
-      title: "Authentic Profiles",
-      content:
-        "Use real photos of yourself and accurate information. Catfishing or misleading profiles are not allowed and will result in account suspension.",
+      title: t("communityGuidelines.guidelines.authentic.title"),
+      content: t("communityGuidelines.guidelines.authentic.description"),
     },
     {
-      title: "Safe Interactions",
-      content:
-        "Meet in public places for your first few dates. Always prioritize your safety and trust your instincts when meeting someone new.",
+      title: t("communityGuidelines.guidelines.safety.title"),
+      content: t("communityGuidelines.guidelines.safety.description"),
     },
     {
-      title: "No Harassment",
-      content:
-        "Harassment, bullying, or any form of abuse will not be tolerated. This includes unwanted messages, inappropriate comments, or persistent contact after someone has expressed disinterest.",
+      title: t("communityGuidelines.guidelines.appropriate.title"),
+      content: t("communityGuidelines.guidelines.appropriate.description"),
     },
     {
-      title: "Respect Privacy",
-      content:
-        "Don't share personal information about others without their consent. Respect boundaries and privacy settings.",
+      title: t("communityGuidelines.guidelines.privacy.title"),
+      content: t("communityGuidelines.guidelines.privacy.description"),
     },
     {
-      title: "No Spam or Scams",
-      content:
-        "Don't use Andra for commercial purposes, spam, or fraudulent activities. This includes promoting other services, selling products, or soliciting money.",
-    },
-    {
-      title: "Age Verification",
-      content:
-        "You must be at least 18 years old to use Andra. Providing false age information will result in immediate account termination.",
-    },
-    {
-      title: "Report Inappropriate Behavior",
-      content:
-        "If you encounter someone who violates these guidelines, please report them immediately. We take all reports seriously and will investigate promptly.",
-    },
-    {
-      title: "Content Guidelines",
-      content:
-        "Keep your photos and messages appropriate. Explicit content, violence, or offensive material is prohibited and will result in content removal and potential account suspension.",
-    },
-    {
-      title: "Location Respect",
-      content:
-        "Respect others' private spots and location preferences. Don't share someone's location without permission or show up uninvited to their private spaces.",
+      title: t("communityGuidelines.guidelines.reporting.title"),
+      content: t("communityGuidelines.guidelines.reporting.description"),
     },
   ];
 
-  const safetyTips = [
-    "Always meet in public places for first dates",
-    "Tell a friend or family member about your plans",
-    "Don't share personal financial information",
-    "Trust your instincts - if something feels wrong, it probably is",
-    "Use the in-app messaging system initially",
-    "Don't feel pressured to share personal details too quickly",
-  ];
+  const safetyTips = t("communityGuidelines.safetyTipsList", {
+    returnObjects: true,
+  }) as string[];
 
   const renderGuidelineItem = (item: any, index: number) => (
     <View key={index} style={styles.guidelineItem}>
@@ -101,7 +73,7 @@ export default function CommunityGuidelines() {
         >
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.title}>Community Guidelines</Text>
+        <Text style={styles.title}>{t("communityGuidelines.title")}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -114,18 +86,20 @@ export default function CommunityGuidelines() {
         <View style={styles.introSection}>
           <View style={styles.introHeader}>
             <Ionicons name="heart" size={32} color={color.primary} />
-            <Text style={styles.introTitle}>Welcome to Andra</Text>
+            <Text style={styles.introTitle}>
+              {t("communityGuidelines.welcomeTitle")}
+            </Text>
           </View>
           <Text style={styles.introText}>
-            Andra is designed to help you make meaningful connections with
-            people nearby. To ensure a safe and enjoyable experience for
-            everyone, we've established these community guidelines.
+            {t("communityGuidelines.welcomeDescription")}
           </Text>
         </View>
 
         {/* Guidelines */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Community Guidelines</Text>
+          <Text style={styles.sectionTitle}>
+            {t("communityGuidelines.title")}
+          </Text>
           {guidelines.map((guideline, index) =>
             renderGuidelineItem(guideline, index)
           )}
@@ -133,7 +107,9 @@ export default function CommunityGuidelines() {
 
         {/* Safety Tips */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Safety Tips</Text>
+          <Text style={styles.sectionTitle}>
+            {t("communityGuidelines.safetyTips")}
+          </Text>
           <View style={styles.safetyTipsContainer}>
             {safetyTips.map((tip, index) => (
               <View key={index} style={styles.safetyTipItem}>
@@ -154,11 +130,12 @@ export default function CommunityGuidelines() {
         <View style={styles.contactSection}>
           <View style={styles.contactHeader}>
             <Ionicons name="mail" size={24} color={color.primary} />
-            <Text style={styles.contactTitle}>Need Help?</Text>
+            <Text style={styles.contactTitle}>
+              {t("communityGuidelines.needHelp")}
+            </Text>
           </View>
           <Text style={styles.contactText}>
-            If you have any questions about these guidelines or need to report a
-            violation, please contact our support team through the app settings.
+            {t("communityGuidelines.helpDescription")}
           </Text>
         </View>
 
