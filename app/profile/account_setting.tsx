@@ -202,7 +202,6 @@ export default function AccountSettings() {
           text: t("common.delete"),
           style: "destructive",
           onPress: () => {
-            console.log("Account deletion confirmed");
             // TODO: Implement account deletion API call
           },
         },

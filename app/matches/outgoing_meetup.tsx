@@ -78,13 +78,11 @@ export default function OutgoingMeetup({
   // Handle editing/updating outgoing request (if pending)
   const handleEdit = useCallback(async (requestId: string) => {
     try {
-      console.log("Editing request:", requestId);
       // Feature coming soon - no alert needed
     } catch (error) {
       console.error("Error editing request:", error);
     }
   }, []);
-  console.log("filteredRequests", JSON.stringify(filteredRequests));
   const renderMeetupCard: ListRenderItem<any> = useCallback(
     ({ item }) => (
       <MeetupCard

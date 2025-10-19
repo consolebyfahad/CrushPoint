@@ -99,10 +99,8 @@ export default function InviteMatches({
       formData.append("type", "add_data");
       formData.append("user_id", user.user_id);
       formData.append("table_name", "event_invites");
-      console.log("first", eventId);
       formData.append("event_id", eventId.toString());
       formData.append("invited_id", JSON.stringify(selectedMatches));
-      console.log("formData", formData);
       const response = await apiCall(formData);
 
       if (response.result) {

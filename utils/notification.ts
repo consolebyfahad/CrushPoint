@@ -8,11 +8,9 @@ export const requestFCMPermission = async (): Promise<boolean> => {
       const isRegistered = messaging().isDeviceRegisteredForRemoteMessages;
       if (!isRegistered) {
         await messaging().registerDeviceForRemoteMessages();
-        console.log("📱 iOS device registered for remote messages");
       }
 
       const authStatus = await messaging().hasPermission();
-      console.log(`🍎 iOS current permission status: ${authStatus}`);
 
       if (authStatus === messaging.AuthorizationStatus.NOT_DETERMINED) {
         const requestStatus = await messaging().requestPermission({
@@ -21,7 +19,6 @@ export const requestFCMPermission = async (): Promise<boolean> => {
           sound: true,
           provisional: false,
         });
-        console.log(`🍎 iOS permission requested: ${requestStatus}`);
         return (
           requestStatus === messaging.AuthorizationStatus.AUTHORIZED ||
           requestStatus === messaging.AuthorizationStatus.PROVISIONAL
@@ -38,7 +35,6 @@ export const requestFCMPermission = async (): Promise<boolean> => {
       const result = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
       );
-      console.log(`🤖 Android notification permission: ${result}`);
       return result === PermissionsAndroid.RESULTS.GRANTED;
     }
 
@@ -56,7 +52,6 @@ export const getFCMToken = async (): Promise<string | null> => {
       const isRegistered = messaging().isDeviceRegisteredForRemoteMessages;
       if (!isRegistered) {
         await messaging().registerDeviceForRemoteMessages();
-        console.log("📱 iOS device registered for remote messages");
       }
       
       // Add a small delay for iOS to ensure APNs registration is complete
@@ -64,7 +59,6 @@ export const getFCMToken = async (): Promise<string | null> => {
     }
     
     const token = await messaging().getToken();
-    console.log("🔑 FCM Token:", token ? `${token.substring(0, 20)}...` : "null");
     return token;
   } catch (error) {
     console.error("❌ FCM token retrieval failed:", error);
@@ -80,7 +74,6 @@ export const setupNotificationListeners = (
   handleNotificationPress: (data: any) => void
 ) => {
   const unsubscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
-    console.log("📩 Foreground notification received:", remoteMessage);
     if (remoteMessage?.data) {
       handleNotificationPress(remoteMessage.data);
     }
@@ -89,10 +82,6 @@ export const setupNotificationListeners = (
   const unsubscribeOnOpenedApp = messaging().onNotificationOpenedApp(
     (remoteMessage) => {
       if (remoteMessage?.data) {
-        console.log(
-          "📲 App opened from background notification:",
-          remoteMessage.data
-        );
         handleNotificationPress(remoteMessage.data);
       }
     }
@@ -102,10 +91,6 @@ export const setupNotificationListeners = (
     .getInitialNotification()
     .then((remoteMessage) => {
       if (remoteMessage?.data) {
-        console.log(
-          "🆕 App opened from quit state via notification:",
-          remoteMessage.data
-        );
         handleNotificationPress(remoteMessage.data);
       }
     });

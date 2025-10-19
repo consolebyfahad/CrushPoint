@@ -60,17 +60,14 @@ export default function EventDetails({ route }: any) {
   };
 
   const handleShare = () => {
-    console.log("Share event");
     // Handle share functionality
   };
 
   const handleGetDirections = () => {
-    console.log("Get directions to:", event.location);
     // Open maps app with location
   };
 
   const handleAddToCalendar = () => {
-    console.log("Add to calendar:", event.title);
     // Add event to device calendar
   };
 
@@ -79,7 +76,6 @@ export default function EventDetails({ route }: any) {
   };
 
   const handleSendInvites = (selectedMatches: any) => {
-    console.log("Sending invites to:", selectedMatches);
     // Handle sending invites logic here
     // You could show a success message or navigate somewhere
   };
@@ -114,7 +110,6 @@ export default function EventDetails({ route }: any) {
   };
 
   const handleViewAllAttendees = () => {
-    console.log("View all attendees");
     // Navigate to attendees list
   };
 

@@ -13,7 +13,6 @@ export interface LocationSuggestion {
 export async function requestUserLocation() {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    console.log("status", status);
 
     if (status !== "granted") {
       Alert.alert(

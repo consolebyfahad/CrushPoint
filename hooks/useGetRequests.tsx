@@ -134,7 +134,6 @@ const useGetRequests = () => {
       formData.append("user_id", user.user_id);
 
       const response = await apiCall(formData);
-      console.log("requests response", JSON.stringify(response));
       if (response?.data && Array.isArray(response.data)) {
         const incomingList: MeetupRequest[] = [];
         const outgoingList: MeetupRequest[] = [];

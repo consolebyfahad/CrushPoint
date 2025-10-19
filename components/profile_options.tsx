@@ -25,7 +25,6 @@ export default function ProfileOptions({
     if (onBlock) {
       onBlock();
     } else {
-      console.log(t("common.blockUser"));
     }
   };
 
@@ -33,7 +32,6 @@ export default function ProfileOptions({
     if (onReport) {
       onReport();
     } else {
-      console.log(t("common.reportUser"));
     }
   };
 
@@ -41,7 +39,6 @@ export default function ProfileOptions({
     if (onRemoveMatch) {
       onRemoveMatch();
     } else {
-      console.log(t("common.removeMatch"));
     }
   };
   // Default user data if not provided

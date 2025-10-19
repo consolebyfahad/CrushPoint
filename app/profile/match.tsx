@@ -22,7 +22,6 @@
 // export default function MatchScreen({ route, navigation }: any) {
 //   const { t } = useTranslation();
 //   const params = useLocalSearchParams();
-//   console.log("params", params);
 //   let matchData;
 //   try {
 //     matchData = params?.matchData
@@ -269,7 +268,6 @@
 //   };
 
 //   const handleOptions = () => {
-//     console.log("Options pressed");
 //   };
 
 //   const handleViewProfile = () => {

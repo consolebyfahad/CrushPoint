@@ -19,7 +19,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function BlockedUsers({ navigation }: any) {
   const { t } = useTranslation();
   const { blockedUsers, loading, unblockUser } = useGetBlockedUsers();
-  console.log("blockedUsers", blockedUsers);
   const handleUnblock = (user: any) => {
     Alert.alert(
       t("blockedUsers.unblock.title"),

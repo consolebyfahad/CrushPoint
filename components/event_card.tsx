@@ -11,7 +11,6 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
     if (onPress) {
       onPress(event);
     } else {
-      console.log("Event pressed:", event.title);
     }
   };
 
@@ -19,7 +18,6 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
     if (onToggleAttending) {
       onToggleAttending(event);
     } else {
-      console.log("Toggle attending:", event.title);
     }
   };
 

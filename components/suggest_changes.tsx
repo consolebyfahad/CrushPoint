@@ -117,14 +117,6 @@ export default function SuggestChanges({
       formData.append("new_location", newLocation.trim());
       formData.append("new_message", message.trim());
 
-      console.log("📡 Suggesting changes:", {
-        id: requestId,
-        new_date: formattedDate,
-        new_time: formattedTime,
-        new_location: newLocation.trim(),
-        new_message: message.trim(),
-      });
-
       const response = await apiCall(formData);
 
       if (response.result) {

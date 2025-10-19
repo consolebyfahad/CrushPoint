@@ -77,12 +77,6 @@ export default function MatchCard({
 
     // try {
     //   setIsSubmitting(true);
-    //   console.log(
-    //     "Submitting meetup request:",
-    //     meetupData,
-    //     user.user_id,
-    //     match?.id
-    //   );
 
     //   const formData = new FormData();
     //   formData.append("type", "add_data");
@@ -93,7 +87,6 @@ export default function MatchCard({
     //   formData.append("time", meetupData.time);
     //   formData.append("location", meetupData.location);
     //   formData.append("message", meetupData.message || "Let's meet up!");
-    //   console.log("formDataformData", formData);
     //   const response = await apiCall(formData);
 
     //   if (response?.status === "Success" || response?.success) {
@@ -124,8 +117,6 @@ export default function MatchCard({
   const handleOptions = () => {
     if (onOptions && match) {
       onOptions(match);
-    } else {
-      console.log("Options for:", match?.name || "Unknown user");
     }
   };
 

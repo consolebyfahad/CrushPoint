@@ -142,7 +142,6 @@ export default function Settings() {
       subtitle: t("settings.lastUpdated"),
       icon: "gift-outline",
       hasChevron: true,
-      onPress: () => console.log("Invite a friend"),
     },
     {
       id: "review",
@@ -150,7 +149,6 @@ export default function Settings() {
       subtitle: t("settings.rateOnStore"),
       icon: "star-outline",
       hasExternal: true,
-      onPress: () => console.log("Give us a review"),
     },
     {
       id: "community",

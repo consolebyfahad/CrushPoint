@@ -81,9 +81,7 @@ export default function useGetBlockedUsers() {
       formData.append("type", "get_data");
       formData.append("table_name", "blocked_users");
       formData.append("user_id", user.user_id);
-      // console.log("formData", formData);
       const response = await apiCall(formData);
-      // console.log("response", response);
       if (response.data) {
         const transformedData = transformApiData(response.data);
         setBlockedUsers(transformedData);
@@ -113,9 +111,7 @@ export default function useGetBlockedUsers() {
       formData.append("type", "unblock_user");
       formData.append("user_id", user.user_id);
       formData.append("block_id", blockedUserId);
-      console.log("unblock formData", formData);
       const response = await apiCall(formData);
-      console.log("unblock response", response);
       if (response.result) {
         // Remove user from local state
         setBlockedUsers((prev) =>

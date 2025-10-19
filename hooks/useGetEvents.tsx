@@ -97,7 +97,6 @@ const useGetEvents = () => {
       formData.append("type", "get_data");
       formData.append("table_name", "events");
 
-      console.log("Loading events with formData:", formData);
       const response = await apiCall(formData);
 
       if (Array.isArray(response?.data)) {

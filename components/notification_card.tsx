@@ -53,7 +53,6 @@ export default function NotificationCard({
     if (onPress) {
       onPress(notification);
     } else {
-      console.log("Notification pressed:", notification.title);
     }
   };
 
@@ -61,7 +60,6 @@ export default function NotificationCard({
     if (onDelete) {
       onDelete(notification);
     } else {
-      console.log("Delete notification:", notification.title);
     }
   };
   const iconConfig = getNotificationIcon(notification.type);

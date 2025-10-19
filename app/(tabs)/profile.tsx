@@ -38,7 +38,6 @@ export default function ProfileTab() {
   const pagerRef = useRef<PagerView>(null);
   const photos = userData.photos || [];
   const hasMultiplePhotos = photos.length > 1;
-  console.log("useruser", user);
   // NEW: Auto refresh when screen comes into focus (returning from edit screens)
   useFocusEffect(
     useCallback(() => {

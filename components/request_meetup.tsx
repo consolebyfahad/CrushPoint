@@ -99,12 +99,6 @@ export default function RequestMeetup({
       hour12: true,
     });
 
-    // Debug logging
-    console.log("🕐 Selected time object:", selectedTime);
-    console.log("🕐 Formatted time:", formattedTime);
-    console.log("🕐 Selected date:", selectedDate);
-    console.log("🕐 Formatted date:", formattedDate);
-
     setIsLoading(true);
     try {
       const formData = new FormData();
@@ -117,8 +111,6 @@ export default function RequestMeetup({
       formData.append("time", formattedTime);
       formData.append("location", location.trim());
       formData.append("message", message.trim());
-
-      console.log("📡 Sending meetup request:", JSON.stringify(formData));
 
       const response = await apiCall(formData);
 

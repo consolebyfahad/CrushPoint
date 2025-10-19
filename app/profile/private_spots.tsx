@@ -34,7 +34,6 @@ type PrivateSpot = {
 export default function PrivateSpots() {
   const { t } = useTranslation();
   const { user, userData } = useAppContext();
-  console.log("user", user);
   const { showToast } = useToast();
   const params = useLocalSearchParams();
   const [privateSpots, setPrivateSpots] = useState<PrivateSpot[]>([]);
@@ -133,7 +132,6 @@ export default function PrivateSpots() {
       formData.append("table_name", "private_spots");
       formData.append("user_id", user.user_id);
       formData.append("id", spotId);
-      console.log(formData);
       const response = await apiCall(formData);
 
       if (response.result) {

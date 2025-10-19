@@ -66,7 +66,6 @@ export default function ReportUser({
   const handleSubmitReport = () => {
     if (!selectedReason) {
       // Show error or alert
-      console.log(t("common.pleaseSelectReason"));
       return;
     }
 
@@ -79,7 +78,6 @@ export default function ReportUser({
     if (onSubmit) {
       onSubmit(reportData);
     } else {
-      console.log(t("common.reportSubmitted"), reportData);
     }
 
     // Reset form and close

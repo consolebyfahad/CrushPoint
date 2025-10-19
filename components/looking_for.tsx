@@ -3,11 +3,11 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -68,7 +68,6 @@ export default function LookingFor({
       ...filterData,
       lookingFor: selectedOptions,
     });
-    console.log("Selected looking for:", selectedOptions);
     onClose();
   };
 
@@ -147,7 +146,7 @@ export default function LookingFor({
               selectedOptions.length === 0 && styles.saveButtonTextDisabled,
             ]}
           >
-{t("save")}
+            {t("save")}
           </Text>
         </TouchableOpacity>
       </View>

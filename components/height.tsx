@@ -30,10 +30,6 @@ export default function Height({
         to: toHeight,
       },
     });
-    console.log("Selected height range:", {
-      from: fromHeight,
-      to: toHeight,
-    });
     onClose();
   };
 

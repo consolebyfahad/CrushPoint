@@ -22,29 +22,22 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function MatchScreen({ route, navigation }: any) {
   const params = useLocalSearchParams();
-  console.log("params", params);
 
   // Parse matchData from params
   let matchData;
   try {
     if (params?.matchData) {
       matchData = JSON.parse(params.matchData as string);
-      console.log("🎯 MatchScreen - Parsed matchData:", matchData);
 
       // Fix current user image if it's malformed
       if (
         matchData.currentUser?.image &&
         matchData.currentUser.image.includes("[")
       ) {
-        console.log("🔧 Fixing malformed current user image URL");
         // Extract the first image from the malformed URL
         const imageMatch = matchData.currentUser.image.match(/\["([^"]+)"\]/);
         if (imageMatch && imageMatch[1]) {
           matchData.currentUser.image = `https://7tracking.com/crushpoint/images/${imageMatch[1]}`;
-          console.log(
-            "🔧 Fixed current user image:",
-            matchData.currentUser.image
-          );
         } else {
           matchData.currentUser.image =
             "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
@@ -57,7 +50,6 @@ export default function MatchScreen({ route, navigation }: any) {
         matchData.matchedUser?.distance === "Unknown"
       ) {
         matchData.matchedUser.distance = "Location unknown";
-        console.log("🔧 Fixed distance display");
       }
     } else {
       matchData = {
@@ -93,8 +85,6 @@ export default function MatchScreen({ route, navigation }: any) {
     };
   }
 
-  console.log("🎯 MatchScreen - Final matchData:", matchData);
-
   // Animation refs
   const confettiRef = useRef<LottieView>(null);
   const heartsRef = useRef<LottieView>(null);
@@ -119,9 +109,6 @@ export default function MatchScreen({ route, navigation }: any) {
   const [showLottieAnimations, setShowLottieAnimations] = useState(false);
 
   useEffect(() => {
-    console.log(
-      "🎯 MatchScreen - Component mounted, starting animation sequence"
-    );
     startAnimationSequence();
   }, []);
 
@@ -247,16 +234,9 @@ export default function MatchScreen({ route, navigation }: any) {
     }
   };
 
-  const handleOptions = () => {
-    console.log("Options pressed");
-  };
+  const handleOptions = () => {};
 
   const handleViewProfile = () => {
-    console.log("🎯 MatchScreen - View Profile button pressed");
-    console.log("🎯 MatchScreen - Matched user data:", matchData.matchedUser);
-    console.log(
-      "🎯 MatchScreen - Navigating to /profile/user_profile with matched user data"
-    );
     router.push({
       pathname: "/profile/user_profile",
       params: {
@@ -269,15 +249,6 @@ export default function MatchScreen({ route, navigation }: any) {
   const handleKeepExploring = () => {
     router.back();
   };
-
-  console.log("🎯 MatchScreen - Rendering with data:", {
-    currentUserName: matchData.currentUser?.name,
-    currentUserImage: matchData.currentUser?.image,
-    matchedUserName: matchData.matchedUser?.name,
-    matchedUserAge: matchData.matchedUser?.age,
-    matchedUserDistance: matchData.matchedUser?.distance,
-    matchedUserImage: matchData.matchedUser?.image,
-  });
 
   return (
     <SafeAreaView style={styles.container}>

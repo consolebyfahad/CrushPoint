@@ -153,10 +153,8 @@ export default function Index() {
       if (data?.date_id) {
         try {
           const matchData = await fetchMatchData(data.date_id);
-          console.log("🔔 Fetched match data:", matchData);
 
           if (matchData) {
-            console.log("🔔 Navigating to match profile with data:", matchData);
             router.push({
               pathname: "/profile/match2",
               params: {
@@ -164,7 +162,6 @@ export default function Index() {
               },
             });
           } else {
-            console.log("⚠️ No match data found for date_id:", data.date_id);
           }
         } catch (error) {
           console.error("❌ Failed to fetch match data:", error);
@@ -175,15 +172,12 @@ export default function Index() {
           });
         }
       } else {
-        console.log("⚠️ Notification data missing date_id:", data);
       }
     };
 
-    console.log("🔔 Setting up notification listeners...");
     const unsubscribe = setupNotificationListeners(handleNotificationPress);
 
     return () => {
-      console.log("🔔 Cleaning up notification listeners in main index");
       unsubscribe();
     };
   }, []);
@@ -229,17 +223,12 @@ export default function Index() {
       formData.append("id", dateId);
 
       const response = await apiCall(formData);
-      console.log("🔍 Full API response:", JSON.stringify(response, null, 2));
 
       if (response) {
         // Check if response.data is an array (as shown in your terminal logs)
         const matchedUserData = Array.isArray(response.data)
           ? response.data[0]
           : response.data;
-        console.log(
-          "🔍 Extracted matched user data:",
-          JSON.stringify(matchedUserData, null, 2)
-        );
 
         // Parse the images array from the API response
         let parsedImages = [];
@@ -251,7 +240,6 @@ export default function Index() {
               '"'
             );
             parsedImages = JSON.parse(cleanedImagesString);
-            console.log("🔍 Parsed images:", parsedImages);
           }
         } catch (error) {
           console.warn("Failed to parse images array:", error);
@@ -335,20 +323,14 @@ export default function Index() {
 
         // Parse current user images from context userData
         let currentUserImages: string[] = [];
-        console.log("🔍 Current user images from context:", userData.images);
-        console.log("🔍 Type of current user images:", typeof userData.images);
 
         try {
           if (userData.images && typeof userData.images === "string") {
-            console.log("🔍 Parsing current user images string...");
             // Clean up the escaped quotes in the JSON string
             const imagesString = userData.images as string;
             const cleanedImagesString = imagesString.replace(/\\"/g, '"');
-            console.log("🔍 Cleaned images string:", cleanedImagesString);
             currentUserImages = JSON.parse(cleanedImagesString);
-            console.log("🔍 Parsed current user images:", currentUserImages);
           } else if (Array.isArray(userData.images)) {
-            console.log("🔍 Processing current user images array...");
             // Check if the array contains strings or nested arrays/objects
             if (
               userData.images.length > 0 &&
@@ -358,29 +340,17 @@ export default function Index() {
               const firstElement = userData.images[0] as string;
               if (firstElement.includes("[") && firstElement.includes("]")) {
                 // It's a stringified array, parse it
-                console.log("🔍 String contains JSON array, parsing...");
                 const cleanedString = firstElement.replace(/\\"/g, '"');
                 currentUserImages = JSON.parse(cleanedString);
-                console.log(
-                  "🔍 Parsed current user images from string:",
-                  currentUserImages
-                );
               } else {
                 // It's a direct filename, use the array as is
                 currentUserImages = userData.images as string[];
-                console.log(
-                  "🔍 Using current user images array directly:",
-                  currentUserImages
-                );
               }
             } else if (
               userData.images.length > 0 &&
               typeof userData.images[0] === "object"
             ) {
               // If it's an array containing objects/arrays, try to parse the first element
-              console.log(
-                "🔍 Array contains objects, parsing first element..."
-              );
               const firstElement = userData.images[0] as any;
               if (
                 typeof firstElement === "string" &&
@@ -389,20 +359,13 @@ export default function Index() {
                 // It's a stringified array, parse it
                 const cleanedString = firstElement.replace(/\\"/g, '"');
                 currentUserImages = JSON.parse(cleanedString);
-                console.log(
-                  "🔍 Parsed nested current user images:",
-                  currentUserImages
-                );
               } else {
-                console.log("🔍 Unknown array structure, using fallback");
                 currentUserImages = [];
               }
             } else {
-              console.log("🔍 Empty or unknown array structure");
               currentUserImages = [];
             }
           } else {
-            console.log("🔍 No current user images found");
           }
         } catch (error) {
           console.warn("Failed to parse current user images:", error);
@@ -413,10 +376,8 @@ export default function Index() {
         const getCurrentUserImage = () => {
           if (currentUserImages && currentUserImages.length > 0) {
             const imageUrl = `https://7tracking.com/crushpoint/images/${currentUserImages[0]}`;
-            console.log("🔍 Current user image URL:", imageUrl);
             return imageUrl;
           }
-          console.log("🔍 No current user images, using fallback");
           return "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
         };
 
@@ -454,8 +415,6 @@ export default function Index() {
           },
         };
 
-        console.log("🎯 MatchScreen - Created matchData:", matchData);
-
         return matchData;
       }
 
@@ -487,24 +446,16 @@ export default function Index() {
   };
 
   const requestNotificationPermissions = async () => {
-    console.log("🔔 Requesting notification permissions...");
-
     try {
       const permissionGranted = await requestFCMPermission();
-      console.log("🔔 Permission granted:", permissionGranted);
 
       if (permissionGranted) {
-        console.log(
-          "🔔 Permission granted, proceeding with token registration"
-        );
         // Small delay for iOS to complete APNS registration
         if (Platform.OS === "ios") {
-          console.log("🍎 iOS detected, waiting 500ms for APNS registration");
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
         await registerFCMToken();
       } else {
-        console.log("❌ Notification permission denied");
       }
     } catch (error) {
       console.error("❌ Error requesting notification permissions:", error);
@@ -516,25 +467,14 @@ export default function Index() {
   };
 
   const registerFCMToken = async () => {
-    console.log("🔔 Registering FCM token...");
-
     try {
       const token = await getFCMToken();
-      console.log(
-        "🔔 FCM token received:",
-        token ? `${token.substring(0, 20)}...` : "null"
-      );
 
       if (!token || !user?.user_id) {
-        console.log("❌ Missing token or user ID:", {
-          hasToken: !!token,
-          hasUserId: !!user?.user_id,
-        });
         return;
       }
 
       const deviceInfo = await getDeviceInfo();
-      console.log("🔔 Device info:", deviceInfo);
 
       const formData = new FormData();
       formData.append("type", "update_noti");
@@ -543,16 +483,7 @@ export default function Index() {
       formData.append("deviceRid", token);
       formData.append("deviceModel", deviceInfo.model);
 
-      console.log("🔔 FCM registration API request:", {
-        type: "update_noti",
-        user_id: user.user_id,
-        devicePlatform: deviceInfo.platform,
-        deviceRid: `${token.substring(0, 20)}...`,
-        deviceModel: deviceInfo.model,
-      });
-
       const response = await apiCall(formData);
-      console.log("🔔 FCM registration response:", response);
     } catch (error) {
       console.error("❌ FCM registration failed:", error);
       console.error("❌ Error details:", {

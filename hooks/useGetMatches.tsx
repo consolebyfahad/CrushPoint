@@ -49,21 +49,12 @@ interface MatchUser {
 const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
 
 const useGetMatches = () => {
-  console.log("💖 useGetMatches hook initialized");
-
   const { t } = useTranslation();
   const { user, userData } = useAppContext();
   const [matches, setMatches] = useState<MatchUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  console.log("💖 useGetMatches state:", {
-    matchesCount: matches.length,
-    loading,
-    error,
-    userId: user?.user_id,
-    hasUserData: !!userData,
-  });
   // Parse images similar to useGetUsers
   const parseImages = (
     imagesStr: string,
@@ -137,15 +128,11 @@ const useGetMatches = () => {
   };
 
   const loadData = async () => {
-    console.log("💖 loadData called for matches");
-
     if (!user?.user_id) {
-      console.log("❌ No user ID available for matches");
       setError(t("hooks.userIdNotAvailable"));
       return;
     }
 
-    console.log("💖 Loading matches for user:", user.user_id);
     setLoading(true);
     setError(null);
 
@@ -155,42 +142,14 @@ const useGetMatches = () => {
       formData.append("table_name", "matches");
       formData.append("user_id", user.user_id);
 
-      console.log("💖 Matches API request payload:", {
-        type: "get_data",
-        table_name: "matches",
-        user_id: user.user_id,
-      });
-
       const response = await apiCall(formData);
-      console.log("💖 Matches API response:", {
-        hasData: !!response?.data,
-        dataType: Array.isArray(response?.data)
-          ? "array"
-          : typeof response?.data,
-        dataLength: Array.isArray(response?.data)
-          ? response.data.length
-          : "N/A",
-        result: response?.result,
-      });
-      console.log("💖 Full matches response:", JSON.stringify(response));
       if (Array.isArray(response?.data)) {
-        console.log("💖 Processing matches data:", {
-          totalMatches: response.data.length,
-          rawData: response.data,
-        });
-
         const formattedMatches = response.data
           .filter((match: any) => {
             const isValid = match.match_id !== "0" && match.match;
-            console.log(`💖 Match filter check:`, {
-              matchId: match.match_id,
-              hasMatch: !!match.match,
-              isValid,
-            });
             return isValid;
           })
           .map((match: any, index: number) => {
-            console.log(`💖 Processing match ${index}:`, match);
             const matchUser = match.match;
             const age = calculateAge(matchUser.dob) || 25;
             const gender = matchUser.gender || "unknown";
@@ -268,28 +227,18 @@ const useGetMatches = () => {
               },
             };
 
-            console.log(`💖 Formatted match ${index}:`, formattedMatch);
             return formattedMatch;
           });
-
-        console.log("💖 Setting formatted matches:", {
-          count: formattedMatches.length,
-          matches: formattedMatches,
-        });
 
         setMatches(formattedMatches);
 
         if (formattedMatches.length === 0) {
-          console.log("💖 No matches found, setting error");
           setError(t("hooks.noMatchesFound"));
         } else {
-          console.log("💖 Matches loaded successfully");
         }
       } else if (response?.status === "Error") {
-        console.log("💖 API returned error status:", response.message);
         setError(response.message || t("hooks.failedToLoadMatches"));
       } else {
-        console.log("💖 No valid data in response, setting empty matches");
         setMatches([]);
         setError(t("hooks.noMatchesFound"));
       }
@@ -304,7 +253,6 @@ const useGetMatches = () => {
       });
       setError(errorMessage);
     } finally {
-      console.log("💖 loadData completed, setting loading to false");
       setLoading(false);
     }
   };

@@ -24,7 +24,6 @@ export default function VerificationStatus() {
   });
 
   const handleTryAgain = () => {
-    console.log("Starting verification process...");
     router.push("/auth/verification");
   };
 
