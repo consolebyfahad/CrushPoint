@@ -582,6 +582,8 @@
     "about": "Über Dich",
     "name": "Name",
     "dateOfBirth": "Geburtsdatum",
+    "bio": "Erzähl etwas über dich",
+    "bioPlaceholder": "Bio schreiben",
     "ageValidation": "Sie müssen mindestens 18 Jahre alt sein, um diese App zu nutzen",
     "invalidAge": "Bitte geben Sie ein gültiges Alter ein",
     "continue": "Weiter",

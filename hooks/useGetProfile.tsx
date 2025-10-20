@@ -183,6 +183,7 @@ export default function useGetProfile() {
           zodiac: userData.zodiac || "",
           about: userData.about || "",
           phone: userData.phone || "",
+          status: userData.status || "",
         };
 
         // Create data for context (using context/app_context.tsx interface)
@@ -214,6 +215,7 @@ export default function useGetProfile() {
           zodiac: userData.zodiac || "",
           about: userData.about || "",
           phone: userData.phone || "",
+          status: userData.status || "",
         };
 
         setUserProfile(localUserData);

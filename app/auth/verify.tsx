@@ -28,7 +28,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Verify() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
-  const { user, loginUser, updateUserData } = useAppContext();
+  const { user, loginUser, updateUserData, checkVerificationStatus } =
+    useAppContext();
   const { showToast } = useToast();
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [resendCountdown, setResendCountdown] = useState(59);
@@ -275,7 +276,14 @@ export default function Verify() {
         } else {
           // Existing user - fetch their profile data first
           await fetchUserProfile();
-          router.push("/(tabs)");
+
+          // Check if user is verified after fetching profile
+          const isVerified = await checkVerificationStatus();
+          if (isVerified) {
+            router.push("/(tabs)");
+          } else {
+            router.push("/auth/gender");
+          }
         }
       } else {
         showToast(response.message || t("auth.invalidCode"), "error");

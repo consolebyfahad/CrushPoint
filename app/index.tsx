@@ -11,7 +11,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function index() {
-  const { isLoggedIn, isHydrated } = useAppContext();
+  const { isLoggedIn, isHydrated, checkVerificationStatus, isUserVerified } =
+    useAppContext();
   const containerScale = useSharedValue(0);
   const imageScale = useSharedValue(0);
   const textOpacity = useSharedValue(0);
@@ -56,13 +57,25 @@ export default function index() {
   useEffect(() => {
     if (!isHydrated) return;
 
-    const timer = setTimeout(() => {
+    const checkUserStatus = async () => {
       if (isLoggedIn) {
-        router.replace("/(tabs)");
+        // Check verification status
+        const isVerified = await checkVerificationStatus();
+
+        if (isVerified) {
+          // User is verified, go to tabs
+          router.replace("/(tabs)");
+        } else {
+          // User is not verified, go to verification
+          router.replace("/auth/gender");
+        }
       } else {
+        // User not logged in, go to onboarding
         router.replace("/onboarding");
       }
-    }, 2000);
+    };
+
+    const timer = setTimeout(checkUserStatus, 2000);
 
     return () => clearTimeout(timer);
   }, [isLoggedIn, isHydrated]);

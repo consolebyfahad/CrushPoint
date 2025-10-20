@@ -1,3 +1,4 @@
+import { apiCall } from "@/utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -9,6 +10,7 @@ export interface User {
   image: string | null;
   created: boolean;
   new: boolean;
+  status?: string;
 }
 
 export interface NotificationSetting {
@@ -50,6 +52,7 @@ export interface UserData {
   city?: string;
   languages?: string;
   about?: string;
+  status?: string;
 }
 
 interface AppContextType {
@@ -83,6 +86,10 @@ interface AppContextType {
   // User management
   loginUser: (userData: User) => Promise<void>;
   updateUserProfile: (profileData: Partial<UserData>) => Promise<void>;
+
+  // Verification status
+  isUserVerified: boolean;
+  checkVerificationStatus: () => Promise<boolean>;
 }
 
 const defaultNotificationSettings: NotificationSetting[] = [
@@ -197,6 +204,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [userData, setUserData] = useState<UserData>(defaultUserData);
   const [userImages, setUserImages] = useState<string[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isUserVerified, setIsUserVerified] = useState(false);
 
   // Hydrate state from AsyncStorage on app start
   useEffect(() => {
@@ -315,6 +323,47 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const checkVerificationStatus = async (): Promise<boolean> => {
+    if (!user?.user_id) {
+      setIsUserVerified(false);
+      return false;
+    }
+
+    try {
+      // First check if we have status in userData (from state)
+      if (userData.status === "1") {
+        setIsUserVerified(true);
+        return true;
+      }
+
+      // If not in state, fetch from API
+      const formData = new FormData();
+      formData.append("type", "get_data");
+      formData.append("table_name", "users");
+      formData.append("id", user.user_id);
+
+      const response = await apiCall(formData);
+
+      if (response.data && response.data.length > 0) {
+        const userStatus = response.data[0].status;
+        const isVerified = userStatus === "1";
+        setIsUserVerified(isVerified);
+
+        // Update userData with the fetched status
+        updateUserData({ status: userStatus });
+
+        return isVerified;
+      } else {
+        setIsUserVerified(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("❌ Error checking verification status:", error);
+      setIsUserVerified(false);
+      return false;
+    }
+  };
+
   const logout = async (): Promise<boolean> => {
     try {
       setIsLoggedIn(false);
@@ -348,6 +397,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     isHydrated,
     loginUser,
     updateUserProfile,
+    isUserVerified,
+    checkVerificationStatus,
   };
 
   return (

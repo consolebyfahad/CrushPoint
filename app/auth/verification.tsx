@@ -23,7 +23,7 @@ type VerificationState =
 
 export default function FaceVerification() {
   const { t } = useTranslation();
-  const { userData, user, userImages } = useAppContext();
+  const { userData, user, userImages, updateUserData } = useAppContext();
   const defaultImage =
     userImages.length > 0
       ? `https://7tracking.com/crushpoint/images/${userImages[0]}`
@@ -226,6 +226,7 @@ export default function FaceVerification() {
       );
       submissionData.append("name", userData?.name || "");
       submissionData.append("dob", userData?.dob || "");
+      submissionData.append("about", userData?.about || "");
 
       const finalSelfieFileName = selfieFileName || uploadedSelfieFileName;
       if (finalSelfieFileName) {
@@ -240,10 +241,13 @@ export default function FaceVerification() {
       submissionData.append("radius", (userData?.radius || 50).toString());
       submissionData.append("lat", (userData?.lat || 0).toString());
       submissionData.append("lng", (userData?.lng || 0).toString());
-
+      submissionData.append("status", "1");
       const response = await apiCall(submissionData);
 
       if (response.result) {
+        // Update user verification status in context
+        updateUserData({ status: "1" });
+
         // Add small delay before navigation to ensure state is clean
         setTimeout(() => {
           router.push("/(tabs)");

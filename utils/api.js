@@ -41,7 +41,7 @@ export const apiCall = async (payload, method = "POST") => {
     }
 
     const data = await response.json();
-
+    console.log("data", data);
     // Log response data (be careful with sensitive data)
     if (data && typeof data === "object") {
     }

@@ -28,6 +28,7 @@ const About = () => {
   const { updateUserData } = useAppContext();
   const [name, setName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [about, setAbout] = useState("");
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [ageError, setAgeError] = useState("");
@@ -57,7 +58,7 @@ const About = () => {
   const handleContinue = () => {
     if (ageError) return; // Don't continue if there's an age error
 
-    updateUserData({ name: name, dob: dateOfBirth });
+    updateUserData({ name: name, dob: dateOfBirth, about: about });
     router.push("/auth/looking_for");
   };
 
@@ -153,6 +154,23 @@ const About = () => {
               <Octicons name="calendar" size={18} color={color.gray55} />
             </TouchableOpacity>
             {ageError ? <Text style={styles.errorText}>{ageError}</Text> : null}
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>{t("about.bio")}</Text>
+            <TextInput
+              style={[
+                styles.bioInput,
+                Platform.OS === "ios" && { paddingVertical: 14 },
+              ]}
+              placeholder={t("about.bioPlaceholder")}
+              placeholderTextColor="#999"
+              value={about}
+              onChangeText={setAbout}
+              multiline={true}
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
           </View>
 
           {/* Android Date Picker (inline) */}
@@ -271,6 +289,17 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: color.black,
+  },
+  bioInput: {
+    borderWidth: 1,
+    borderColor: color.gray87,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: color.black,
+    minHeight: 100,
+    maxHeight: 120,
   },
   dateInput: {
     borderWidth: 1,
