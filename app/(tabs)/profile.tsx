@@ -156,6 +156,13 @@ export default function ProfileTab() {
     );
   }
 
+  <CustomButton
+    title="Logout"
+    onPress={() => {
+      router.push("/auth/login");
+    }}
+  />;
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -309,6 +316,19 @@ export default function ProfileTab() {
             )}
           </View>
         </View>
+
+        {/* About/Bio Section */}
+        {userData.about && userData.about.trim() !== "" && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t("profile.about")}</Text>
+              <TouchableOpacity onPress={handleEditProfile}>
+                <Text style={styles.editText}>{t("profile.editProfile")}</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.bioText}>{userData.about}</Text>
+          </View>
+        )}
 
         {/* Basic Info Section */}
         <View style={styles.section}>
@@ -563,6 +583,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.medium,
     color: color.black,
+  },
+  bioText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.black,
+    lineHeight: 24,
   },
   editText: {
     fontSize: 14,

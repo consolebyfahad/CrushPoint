@@ -1,5 +1,7 @@
+import AppleIcon from "@/assets/images/apple.svg";
 import Blink from "@/assets/images/blink.svg";
 import Fire from "@/assets/images/fire.svg";
+import GoogleIcon from "@/assets/images/google.svg";
 import Heart from "@/assets/images/heart.svg";
 import Hi from "@/assets/images/hi.svg";
 import Like from "@/assets/images/like.svg";
@@ -23,67 +25,9 @@ export const svgIcon = {
   Hi: <Hi />,
   Heart: <Heart width={50} />,
   Lovely: <Lovely />,
+  GoogleIcon: <GoogleIcon />,
+  AppleIcon: <AppleIcon />,
 };
-// Google Icon SVG
-export const GoogleIcon = () => (
-  <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <Path
-      d="M10.0003 18.3337C14.6027 18.3337 18.3337 14.6027 18.3337 10.0003C18.3337 5.39795 14.6027 1.66699 10.0003 1.66699C5.39795 1.66699 1.66699 5.39795 1.66699 10.0003C1.66699 14.6027 5.39795 18.3337 10.0003 18.3337Z"
-      stroke="#4285F4"
-      strokeWidth="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <Path
-      d="M10.0003 13.3337C11.8413 13.3337 13.3337 11.8413 13.3337 10.0003C13.3337 8.15938 11.8413 6.66699 10.0003 6.66699C8.15938 6.66699 6.66699 8.15938 6.66699 10.0003C6.66699 11.8413 8.15938 13.3337 10.0003 13.3337Z"
-      stroke="#4285F4"
-      strokeWidth="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <Path
-      d="M17.6417 6.66699H10"
-      stroke="#4285F4"
-      strokeWidth="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <Path
-      d="M3.29199 5.0498L7.11699 11.6665"
-      stroke="#4285F4"
-      strokeWidth="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <Path
-      d="M9.06641 18.2837L12.8831 11.667"
-      stroke="#4285F4"
-      strokeWidth="1.66667"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </Svg>
-);
-
-// Apple Icon SVG
-export const AppleIcon = ({ color = "black" }: { color?: string }) => (
-  <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <Path
-      d="M10.0003 17.4502C11.2503 17.4502 12.292 18.3336 13.3337 18.3336C15.8337 18.3336 18.3337 11.6669 18.3337 8.15022C18.3053 7.07083 17.8513 6.04641 17.0709 5.30026C16.2904 4.55412 15.2466 4.14673 14.167 4.16689C12.317 4.16689 10.8337 5.36689 10.0003 5.83356C9.16699 5.36689 7.68366 4.16689 5.83366 4.16689C4.75345 4.14452 3.70841 4.55118 2.92743 5.29779C2.14646 6.0444 1.69322 7.0701 1.66699 8.15022C1.66699 11.6669 4.16699 18.3336 6.66699 18.3336C7.70866 18.3336 8.75033 17.4502 10.0003 17.4502Z"
-      stroke={color}
-      strokeWidth="1.66667"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <Path
-      d="M8.33301 1.66699C9.16634 2.08366 9.99967 3.33366 9.99967 5.83366"
-      stroke={color}
-      strokeWidth="1.66667"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
 
 // Email Icon SVG
 export const EmailIcon = () => (

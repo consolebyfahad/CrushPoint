@@ -22,6 +22,7 @@ interface Event {
   category: string;
   date: string;
   location: string;
+  address: string;
   description: string;
   image: string;
   organizer: EventOrganizer;
@@ -111,6 +112,8 @@ const useGetEvents = () => {
             time: event.time,
             location:
               event.location || event.venue || t("events.defaultLocation"),
+            address:
+              event.address || event.location || t("events.defaultLocation"),
             description:
               event.description ||
               event.details ||

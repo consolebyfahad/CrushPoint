@@ -16,7 +16,7 @@ import {
 
 interface OutgoingMeetupProps {
   requests: any[];
-  searchText: string;
+  searchText?: string;
   onUpdateStatus?: (requestId: string, status: string) => void;
   onRemoveRequest?: (requestId: string) => void;
   onRefresh?: () => void;
@@ -25,7 +25,7 @@ interface OutgoingMeetupProps {
 
 export default function OutgoingMeetup({
   requests,
-  searchText,
+  searchText = "",
   onUpdateStatus,
   onRemoveRequest,
   onRefresh,
@@ -37,7 +37,7 @@ export default function OutgoingMeetup({
 
   // Filter requests based on search text
   const filteredRequests = useMemo(() => {
-    if (!searchText.trim()) return requests;
+    if (!searchText || !searchText.trim()) return requests;
     return requests.filter(
       (request) =>
         request.user?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -131,7 +131,9 @@ export default function OutgoingMeetup({
           styles.listContainer,
           filteredRequests.length === 0 && { flex: 1 },
         ]}
-        ListEmptyComponent={searchText.trim() ? renderSearchEmptyState() : null}
+        ListEmptyComponent={
+          searchText && searchText.trim() ? renderSearchEmptyState() : null
+        }
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}

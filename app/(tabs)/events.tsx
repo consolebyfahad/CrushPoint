@@ -28,7 +28,8 @@ export default function EventsTab() {
     (event) =>
       event.title.toLowerCase().includes(searchText.toLowerCase()) ||
       event.location.toLowerCase().includes(searchText.toLowerCase()) ||
-      event.category.toLowerCase().includes(searchText.toLowerCase())
+      event.category.toLowerCase().includes(searchText.toLowerCase()) ||
+      event.address.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const handleEventPress = (event: any) => {

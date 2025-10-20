@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Image,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -80,6 +81,26 @@ export default function EventDetails({ route }: any) {
     // You could show a success message or navigate somewhere
   };
 
+  const handleOrganizerWebsite = async () => {
+    if (event?.organizer?.website) {
+      try {
+        const url = event.organizer.website.startsWith("http")
+          ? event.organizer.website
+          : `https://${event.organizer.website}`;
+
+        const canOpen = await Linking.canOpenURL(url);
+        if (canOpen) {
+          await Linking.openURL(url);
+        } else {
+          showToast(t("events.websiteNotAvailable"), "error");
+        }
+      } catch (error) {
+        console.error("Error opening website:", error);
+        showToast(t("events.websiteError"), "error");
+      }
+    }
+  };
+
   const handleRSVP = async () => {
     if (!user?.user_id) {
       showToast(t("events.userSessionExpired"), "error");
@@ -131,7 +152,7 @@ export default function EventDetails({ route }: any) {
       hour12: false,
     });
   };
-
+  console.log("event", JSON.stringify(event));
   return (
     <View style={styles.container}>
       {/* Header Image */}
@@ -188,7 +209,7 @@ export default function EventDetails({ route }: any) {
           <View style={styles.infoRow}>
             <Ionicons name="location-outline" size={20} color={color.gray14} />
             <View style={styles.infoContent}>
-              <Text style={styles.infoText}>{event.location}</Text>
+              <Text style={styles.infoText}>{event.address}</Text>
               <TouchableOpacity onPress={handleGetDirections}>
                 <Text style={styles.directionsText}>
                   {t("events.getDirections")}
@@ -206,20 +227,41 @@ export default function EventDetails({ route }: any) {
               style={styles.organizerImage}
             />
             <View style={styles.organizerInfo}>
-              <Text style={styles.organizerLabel}>
-                {t("events.organizedBy")}
-              </Text>
-              <View style={styles.organizerNameRow}>
-                <Text style={styles.organizerName}>{event.organizer.name}</Text>
-                {event.organizer.verified && (
-                  <Ionicons
-                    name="checkmark"
-                    size={16}
-                    color="#10B981"
-                    style={styles.verifiedIcon}
-                  />
-                )}
+              <View>
+                <Text style={styles.organizerLabel}>
+                  {t("events.organizedBy")}
+                </Text>
+                <View style={styles.organizerNameRow}>
+                  <Text style={styles.organizerName}>
+                    {event.organizer.name}
+                  </Text>
+                  {event.organizer.verified && (
+                    <Ionicons
+                      name="checkmark"
+                      size={16}
+                      color="#10B981"
+                      style={styles.verifiedIcon}
+                    />
+                  )}
+                </View>
               </View>
+              {/* {event.organizer.website && ( */}
+              <TouchableOpacity
+                style={styles.websiteButton}
+                onPress={handleOrganizerWebsite}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name="globe-outline"
+                  size={16}
+                  color={color.primary}
+                  style={styles.websiteIcon}
+                />
+                <Text style={styles.websiteText}>
+                  {t("events.visitWebsite")}
+                </Text>
+              </TouchableOpacity>
+              {/* )} */}
             </View>
           </View>
         </View>
@@ -426,6 +468,7 @@ const styles = StyleSheet.create({
   organizerRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
   organizerImage: {
     width: 40,
@@ -453,6 +496,24 @@ const styles = StyleSheet.create({
   },
   verifiedIcon: {
     marginLeft: 4,
+  },
+  websiteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: color.gray94,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: color.gray87,
+  },
+  websiteIcon: {
+    marginLeft: 6,
+  },
+  websiteText: {
+    fontSize: 14,
+    fontFamily: font.medium,
+    color: color.black,
   },
   section: {
     padding: 20,

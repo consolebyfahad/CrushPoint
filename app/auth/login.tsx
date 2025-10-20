@@ -4,6 +4,7 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { formatPhoneNumber } from "@/utils/formatPhone";
+import SocialAuth from "@/utils/social_auth";
 import { EmailIcon, PhoneIcon } from "@/utils/SvgIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -27,6 +28,7 @@ export default function Login() {
   const [phoneNumber, setPhoneNumber] = useState("+1");
   const [email, setEmail] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
+  const [otherMethodsLoading, setOtherMethodsLoading] = useState(false);
   useEffect(() => {
     if (params.tab === "email") {
       setActiveTab("email");
@@ -84,6 +86,28 @@ export default function Login() {
     } else {
       return email.includes("@") && email.includes(".");
     }
+  };
+
+  // Handle successful social authentication
+  const handleSocialAuthSuccess = (
+    userData: any,
+    provider: "apple" | "google"
+  ) => {
+    setOtherMethodsLoading(true);
+    setUser(userData);
+
+    router.push({
+      pathname: "/auth/verify",
+      params: {
+        type: `${provider} account`,
+        contact: `${provider} account`,
+      },
+    });
+  };
+
+  // Handle social authentication errors
+  const handleSocialAuthError = (message: string) => {
+    // showToast(message, "error");
   };
 
   return (
@@ -184,6 +208,12 @@ export default function Login() {
           isDisabled={!isFormValid()}
           isLoading={loginLoading}
         />
+        <Text style={styles.orText}>OR</Text>
+        <SocialAuth
+          onAuthSuccess={handleSocialAuthSuccess}
+          onAuthError={handleSocialAuthError}
+          isDisabled={otherMethodsLoading}
+        />
       </View>
     </SafeAreaView>
   );
@@ -277,5 +307,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.regular,
     color: color.black,
+  },
+  orText: {
+    fontSize: 14,
+    fontFamily: font.medium,
+    color: color.gray55,
+    textAlign: "center",
+    marginVertical: 16,
   },
 });

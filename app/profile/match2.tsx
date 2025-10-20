@@ -1,5 +1,9 @@
 import CustomButton from "@/components/custom_button";
+import RequestMeetup from "@/components/request_meetup";
+import { useAppContext } from "@/context/app_context";
+import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import { calculateDistance } from "@/utils/distanceCalculator";
 import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
@@ -7,10 +11,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import LottieView from "lottie-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   Easing,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -22,7 +28,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function MatchScreen({ route, navigation }: any) {
   const params = useLocalSearchParams();
-
+  const { user } = useAppContext();
   // Parse matchData from params
   let matchData;
   try {
@@ -44,8 +50,28 @@ export default function MatchScreen({ route, navigation }: any) {
         }
       }
 
-      // Fix distance display
+      // Calculate real distance between users
       if (
+        matchData.currentUser?.lat &&
+        matchData.currentUser?.lng &&
+        matchData.matchedUser?.lat &&
+        matchData.matchedUser?.lng
+      ) {
+        const currentUserCoords = {
+          lat: parseFloat(matchData.currentUser.lat),
+          lng: parseFloat(matchData.currentUser.lng),
+        };
+        const matchedUserCoords = {
+          lat: parseFloat(matchData.matchedUser.lat),
+          lng: parseFloat(matchData.matchedUser.lng),
+        };
+
+        const calculatedDistance = calculateDistance(
+          currentUserCoords,
+          matchedUserCoords
+        );
+        matchData.matchedUser.distance = `${calculatedDistance} away`;
+      } else if (
         matchData.matchedUser?.distance === "Unbekannt" ||
         matchData.matchedUser?.distance === "Unknown"
       ) {
@@ -107,6 +133,9 @@ export default function MatchScreen({ route, navigation }: any) {
 
   // State for controlling animations
   const [showLottieAnimations, setShowLottieAnimations] = useState(false);
+  // State for meetup request modal
+  const [showRequestMeetup, setShowRequestMeetup] = useState(false);
+  const [isSubmittingMeetup, setIsSubmittingMeetup] = useState(false);
 
   useEffect(() => {
     startAnimationSequence();
@@ -236,14 +265,62 @@ export default function MatchScreen({ route, navigation }: any) {
 
   const handleOptions = () => {};
 
-  const handleViewProfile = () => {
-    router.push({
-      pathname: "/profile/user_profile",
-      params: {
-        userData: JSON.stringify(matchData.matchedUser),
-        isMatchedUser: "true",
-      },
-    });
+  const handleRequestMeetup = () => {
+    setShowRequestMeetup(true);
+  };
+
+  const handleSubmitMeetupRequest = async (meetupData: any) => {
+    setIsSubmittingMeetup(true);
+
+    if (!user?.user_id) {
+      Alert.alert("Error", "User not found. Please try again.");
+      setIsSubmittingMeetup(false);
+      return;
+    }
+
+    if (!matchData?.matchedUser?.id) {
+      Alert.alert("Error", "Match information is missing. Please try again.");
+      setIsSubmittingMeetup(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data");
+      formData.append("user_id", user.user_id);
+      formData.append("table_name", "meetup_requests");
+      formData.append("date_id", matchData.matchedUser.id);
+      formData.append("date", meetupData.date);
+      formData.append("new_date", meetupData.date);
+      formData.append("time", meetupData.time);
+      formData.append("location", meetupData.location);
+      formData.append("message", meetupData.message || "Let's meet up!");
+
+      const response = await apiCall(formData);
+
+      if (response?.result) {
+        router.push({
+          pathname: "/matches",
+          params: {
+            activeTab: "requests",
+          },
+        });
+      } else {
+        Alert.alert(
+          "Error",
+          response?.message ||
+            "Failed to send meetup request. Please try again."
+        );
+      }
+    } catch (error: any) {
+      console.error("Error submitting meetup request:", error);
+      Alert.alert(
+        "Error",
+        "Network error occurred. Please check your connection and try again."
+      );
+    } finally {
+      setIsSubmittingMeetup(false);
+    }
   };
 
   const handleKeepExploring = () => {
@@ -441,10 +518,7 @@ export default function MatchScreen({ route, navigation }: any) {
           <SimpleLineIcons name="location-pin" size={14} color={color.gray55} />{" "}
           {matchData.matchedUser.distance}
         </Text>
-        <CustomButton
-          title={`View ${matchData.matchedUser.name}'s Profile`}
-          onPress={handleViewProfile}
-        />
+        <CustomButton title="Request Meetup" onPress={handleRequestMeetup} />
 
         <TouchableOpacity
           style={styles.keepExploringButton}
@@ -453,6 +527,34 @@ export default function MatchScreen({ route, navigation }: any) {
           <Text style={styles.keepExploringText}>Keep Exploring</Text>
         </TouchableOpacity>
       </Animated.View>
+
+      {/* Request Meetup Modal */}
+      <Modal
+        visible={showRequestMeetup}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowRequestMeetup(false)}
+        presentationStyle="overFullScreen"
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowRequestMeetup(false)}
+          />
+          <RequestMeetup
+            onClose={() => setShowRequestMeetup(false)}
+            onSubmit={handleSubmitMeetupRequest}
+            matchData={{
+              id: matchData.matchedUser.id,
+              name: matchData.matchedUser.name,
+              image: matchData.matchedUser.image,
+              distance: matchData.matchedUser.distance,
+              matchedTime: "Just now",
+            }}
+          />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -671,5 +773,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: font.medium,
     color: color.primary,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });

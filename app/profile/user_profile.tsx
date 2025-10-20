@@ -581,6 +581,14 @@ export default function UserProfile() {
             </View>
           </View>
 
+          {/* About/Bio Section */}
+          {userInfo.about && userInfo.about.trim() !== "" && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t("profile.about")}</Text>
+              <Text style={styles.aboutText}>{userInfo.about}</Text>
+            </View>
+          )}
+
           {/* Interests */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("profile.interests")}</Text>

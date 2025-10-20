@@ -3,6 +3,7 @@ import { MatchesTabsHeader } from "@/components/tabs_header";
 import useGetMatches from "@/hooks/useGetMatches";
 import useGetRequests from "@/hooks/useGetRequests";
 import { color, font } from "@/utils/constants";
+import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
@@ -11,8 +12,10 @@ import Matches from "../matches/matches";
 import Requests from "../matches/requests";
 
 export default function MatchesMain() {
+  const params = useLocalSearchParams();
+  console.log("params", JSON.stringify(params));
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("matches");
+  const [activeTab, setActiveTab] = useState(params.activeTab || "matches");
   const { matches } = useGetMatches();
   const { incomingRequests, outgoingRequests } = useGetRequests();
   const matchesCount = matches.length;
@@ -22,7 +25,9 @@ export default function MatchesMain() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <MatchesTabsHeader
-        title={activeTab === "matches" ? t("matches.matches") : t("meetups.requests")}
+        title={
+          activeTab === "matches" ? t("matches.matches") : t("meetups.requests")
+        }
         matches={activeTab === "matches" ? "matches" : "requests"}
         matchesCount={matchesCount}
         totalRequestsCount={totalRequestsCount}

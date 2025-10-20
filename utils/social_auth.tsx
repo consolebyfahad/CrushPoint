@@ -1,5 +1,4 @@
 import CustomButton from "@/components/custom_button";
-import { AppleIcon, GoogleIcon } from "@/utils/SvgIcons";
 import { apiCall } from "@/utils/api";
 import {
   GoogleSignin,
@@ -11,6 +10,7 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
+import { svgIcon } from "./SvgIcons";
 
 interface SocialAuthProps {
   onAuthSuccess: (userData: any, provider: "apple" | "google") => void;
@@ -202,7 +202,7 @@ export default function SocialAuth({
       <CustomButton
         title={t("auth.continueWithApple")}
         onPress={handleAppleSignIn}
-        icon={<AppleIcon />}
+        icon={svgIcon.AppleIcon}
         variant="secondary"
         isLoading={appleLoading}
         isDisabled={isDisabled || googleLoading || Platform.OS !== "ios"}
@@ -211,7 +211,7 @@ export default function SocialAuth({
       <CustomButton
         title={t("auth.continueWithGoogle")}
         onPress={handleGoogleSignIn}
-        icon={<GoogleIcon />}
+        icon={svgIcon.GoogleIcon}
         variant="secondary"
         isLoading={googleLoading}
         isDisabled={isDisabled || appleLoading}

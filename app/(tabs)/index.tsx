@@ -223,7 +223,6 @@ export default function Index() {
       formData.append("id", dateId);
 
       const response = await apiCall(formData);
-
       if (response) {
         // Check if response.data is an array (as shown in your terminal logs)
         const matchedUserData = Array.isArray(response.data)
@@ -385,6 +384,8 @@ export default function Index() {
           currentUser: {
             name: userData.name || "You",
             image: getCurrentUserImage(),
+            lat: userData.lat || "",
+            lng: userData.lng || "",
           },
           matchedUser: {
             name: matchedUserData?.name || t("common.unknown"),
