@@ -334,7 +334,9 @@
     "failedToLoadEvents": "Veranstaltungen konnten nicht geladen werden",
     "networkError": "Netzwerkfehler aufgetreten. Bitte überprüfe deine Verbindung.",
     "userNotLoggedIn": "Benutzer nicht angemeldet",
-    "failedToUpdateAttendance": "Teilnahme konnte nicht aktualisiert werden"
+    "failedToUpdateAttendance": "Teilnahme konnte nicht aktualisiert werden",
+    "website": "Website",
+    "noWebsiteAvailable": "Keine Website verfügbar"
   },
 
   "users": {
@@ -514,7 +516,8 @@
     "continue": "Weiter",
     "gettingLocation": "Deinen Standort ermitteln...",
     "privacyRadius": "Datenschutz-Radius",
-    "enableLocationAccess": "Standortzugriff aktivieren"
+    "enableLocationAccess": "Standortzugriff aktivieren",
+    "loading": "Lädt..."
   },
 
   "filters": {

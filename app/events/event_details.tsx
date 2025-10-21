@@ -4,7 +4,12 @@ import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
-import { AddCalender, Calender, Users } from "@/utils/SvgIcons";
+import {
+  AddCalender,
+  Calender,
+  ExternalLinkIcon,
+  Users,
+} from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { router, useLocalSearchParams } from "expo-router";
@@ -23,7 +28,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-export default function EventDetails({ route }: any) {
+export default function EventDetails() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
   const [event, setEvent] = useState<any>(null);
@@ -98,6 +103,8 @@ export default function EventDetails({ route }: any) {
         console.error("Error opening website:", error);
         showToast(t("events.websiteError"), "error");
       }
+    } else {
+      showToast(t("events.noWebsiteAvailable"), "info");
     }
   };
 
@@ -245,23 +252,16 @@ export default function EventDetails({ route }: any) {
                   )}
                 </View>
               </View>
-              {/* {event.organizer.website && ( */}
-              <TouchableOpacity
-                style={styles.websiteButton}
-                onPress={handleOrganizerWebsite}
-                activeOpacity={0.8}
-              >
-                <Ionicons
-                  name="globe-outline"
-                  size={16}
-                  color={color.primary}
-                  style={styles.websiteIcon}
-                />
-                <Text style={styles.websiteText}>
-                  {t("events.visitWebsite")}
-                </Text>
-              </TouchableOpacity>
-              {/* )} */}
+              {!event.organizer.website && (
+                <TouchableOpacity
+                  style={styles.websiteButton}
+                  onPress={handleOrganizerWebsite}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.websiteText}>{t("events.website")}</Text>
+                  <ExternalLinkIcon />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -478,6 +478,9 @@ const styles = StyleSheet.create({
   },
   organizerInfo: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   organizerLabel: {
     fontSize: 12,
@@ -499,11 +502,11 @@ const styles = StyleSheet.create({
   },
   websiteButton: {
     flexDirection: "row",
+    gap: 4,
     alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: color.gray94,
-    borderRadius: 20,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: color.gray87,
   },
@@ -512,7 +515,7 @@ const styles = StyleSheet.create({
   },
   websiteText: {
     fontSize: 14,
-    fontFamily: font.medium,
+    fontFamily: font.semiBold,
     color: color.black,
   },
   section: {

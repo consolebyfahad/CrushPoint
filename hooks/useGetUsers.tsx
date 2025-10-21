@@ -110,6 +110,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
   const [users, setUsers] = useState<TransformedUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
   const filtersString = JSON.stringify(filters);
   const fetchUsers = async (): Promise<void> => {
     if (!user?.user_id) {

@@ -203,7 +203,7 @@ export default function SocialAuth({
         title={t("auth.continueWithApple")}
         onPress={handleAppleSignIn}
         icon={svgIcon.AppleIcon}
-        variant="secondary"
+        variant="apple"
         isLoading={appleLoading}
         isDisabled={isDisabled || googleLoading || Platform.OS !== "ios"}
       />

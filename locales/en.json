@@ -333,7 +333,9 @@
     "failedToLoadEvents": "Failed to load events",
     "networkError": "Network error occurred. Please check your connection.",
     "userNotLoggedIn": "User not logged in",
-    "failedToUpdateAttendance": "Failed to update attendance"
+    "failedToUpdateAttendance": "Failed to update attendance",
+    "website": "Website",
+    "noWebsiteAvailable": "No website available"
   },
 
   "users": {
@@ -407,6 +409,7 @@
   },
 
   "common": {
+    "loading": "Loading...",
     "search": "Search",
     "filter": "Filter",
     "sort": "Sort",

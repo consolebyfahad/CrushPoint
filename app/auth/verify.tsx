@@ -264,6 +264,7 @@ export default function Verify() {
       formData.append("type", "verify_otp");
       formData.append("user_id", user?.user_id);
       formData.append("code", fullCode);
+      console.log("formData", formData);
       const response = await apiCall(formData);
 
       if (response.result) {
@@ -314,8 +315,9 @@ export default function Verify() {
       const formData = new FormData();
       formData.append("type", "resend_otp");
       formData.append("user_id", user.user_id);
-      // formData.append("contact_type", contactType);
 
+      // formData.append("contact_type", contactType);
+      console.log("formData", formData);
       const response = await apiCall(formData);
 
       if (response.success) {

@@ -15,7 +15,7 @@ interface CustomButtonProps {
   onPress?: (event: GestureResponderEvent) => void;
   isDisabled?: boolean;
   isLoading?: boolean;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "apple";
   icon?: React.ReactElement<{ color?: string }>;
   rightIcon?: React.ReactElement<{ color?: string }>;
   style?: any;
@@ -42,6 +42,7 @@ export default function CustomButton({
 
   const getButtonStyle = () => {
     if (variant === "primary") return styles.primaryButton;
+    if (variant === "apple") return styles.appleButton;
     if (variant === "secondary" && isPressed)
       return styles.secondaryButtonPressed;
     return styles.secondaryButton;
@@ -49,9 +50,10 @@ export default function CustomButton({
 
   const getTextStyle = () => {
     if (variant === "primary") return styles.primaryText;
+    if (variant === "apple") return styles.appleText;
     if (variant === "secondary" && isPressed)
       return styles.secondaryTextPressed;
-    return styles.secondaryText;
+    if (variant === "secondary") return styles.secondaryText;
   };
 
   return (
@@ -190,5 +192,13 @@ const styles = StyleSheet.create({
   iconWrapper: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  appleButton: {
+    backgroundColor: color.black,
+  },
+  appleText: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.white,
   },
 });

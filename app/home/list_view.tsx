@@ -1,7 +1,9 @@
 import UserCard from "@/components/user_card";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -13,7 +15,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 interface ListViewProps {
   onViewProfile: (user: any) => void;
   onShowUserOnMap: (user: any) => void;
@@ -42,7 +43,7 @@ export default function ListView({
 }: ListViewProps) {
   // State to track if refresh control is showing
   const [isRefreshing, setIsRefreshing] = useState(false);
-
+  const { t } = useTranslation();
   // Memoized render function for better performance
   const renderUserCard: ListRenderItem<User> = useCallback(
     ({ item }) => (
@@ -74,6 +75,12 @@ export default function ListView({
       setIsRefreshing(false);
     }
   }, [refetch]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   // Render error state when no users and there's an error
   const renderErrorState = () => (

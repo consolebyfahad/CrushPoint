@@ -191,6 +191,10 @@ export default function UserProfile() {
     };
   }, [userData, currentUser]);
 
+  // Match status state for immediate updates
+  const [matchStatus, setMatchStatus] = useState(userInfo?.match_status || "");
+  const [matchEmoji, setMatchEmoji] = useState(userInfo?.match_emoji || "");
+
   const handleBack = () => {
     router.back();
   };
@@ -271,6 +275,10 @@ export default function UserProfile() {
       const response = await apiCall(formData);
 
       if (response.result) {
+        // Update local state immediately
+        setMatchStatus("match_sent");
+        setMatchEmoji(action);
+
         // Find the corresponding emoji and color for animation
         const emojiData = actionEmojis.find((item) => item.action === action);
 
@@ -478,10 +486,7 @@ export default function UserProfile() {
           )}
 
           {/* Action Emojis - Hide if user has match status */}
-          {!(
-            userInfo.match_status === "match_sent" ||
-            userInfo.match_status === "matched"
-          ) && (
+          {!(matchStatus === "match_sent" || matchStatus === "matched") && (
             <View style={styles.actionEmojis}>
               {actionEmojis.map((item, index) =>
                 renderEmojiButton({ item, index })
@@ -490,27 +495,24 @@ export default function UserProfile() {
           )}
 
           {/* Show match emoji if user has match status */}
-          {(userInfo.match_status === "match_sent" ||
-            userInfo.match_status === "matched") &&
-            userInfo.match_emoji && (
+          {(matchStatus === "match_sent" || matchStatus === "matched") &&
+            matchEmoji && (
               <View style={styles.matchEmojiContainer}>
                 <View
                   style={[
                     styles.matchEmojiBadge,
                     {
-                      backgroundColor: `${getEmojiColor(
-                        userInfo.match_emoji
-                      )}20`,
+                      backgroundColor: `${getEmojiColor(matchEmoji)}20`,
                     },
                   ]}
                 >
                   <Text
                     style={[
                       styles.matchEmojiText,
-                      { color: getEmojiColor(userInfo.match_emoji) },
+                      { color: getEmojiColor(matchEmoji) },
                     ]}
                   >
-                    {getMatchEmoji(userInfo.match_emoji)}
+                    {getMatchEmoji(matchEmoji)}
                   </Text>
                 </View>
               </View>
@@ -585,7 +587,9 @@ export default function UserProfile() {
           {userInfo.about && userInfo.about.trim() !== "" && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t("profile.about")}</Text>
-              <Text style={styles.aboutText}>{userInfo.about}</Text>
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutText}>{userInfo.about}</Text>
+              </View>
             </View>
           )}
 
@@ -898,6 +902,11 @@ const styles = StyleSheet.create({
   locationButtonDisabled: {
     backgroundColor: "#F8F8F8",
     borderColor: "#F0F0F0",
+  },
+  aboutSection: {
+    backgroundColor: color.gray97,
+    borderRadius: 16,
+    padding: 16,
   },
   section: {
     marginBottom: 24,

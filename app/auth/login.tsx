@@ -166,6 +166,7 @@ export default function Login() {
             </View>
 
             <TextInput
+              key={activeTab}
               style={[
                 styles.textInput,
                 Platform.OS === "ios" && { paddingVertical: 16 },

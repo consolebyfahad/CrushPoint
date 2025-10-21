@@ -331,3 +331,21 @@ export const MarkerIcon = () => (
     <Circle cx="24.8089" cy="24.8089" r="6.94656" fill="#49ADBE" />
   </Svg>
 );
+export const ExternalLinkIcon = () => (
+  <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <Path
+      d="M9.24897 2.5C6.20816 2.50548 4.61582 2.58014 3.59819 3.59793C2.5 4.6963 2.5 6.4641 2.5 9.99965C2.5 13.5352 2.5 15.3031 3.59819 16.4014C4.69638 17.4998 6.46389 17.4998 9.99897 17.4998C13.5339 17.4998 15.3015 17.4998 16.3996 16.4014C17.4172 15.3837 17.4919 13.791 17.4974 10.7497"
+      stroke="#49ADBE"
+      stroke-width="1.25"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <Path
+      d="M17.1298 2.91317L9.20703 10.8819M17.1298 2.91317C16.7181 2.50099 13.945 2.53941 13.3588 2.54775M17.1298 2.91317C17.5414 3.32535 17.503 6.10201 17.4947 6.68902"
+      stroke="#49ADBE"
+      stroke-width="1.25"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </Svg>
+);

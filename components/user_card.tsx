@@ -185,30 +185,23 @@ export default function UserCard({
         {/* Show match emoji if user has match status, otherwise show online status */}
         {(user?.match_status === "match_sent" ||
           user?.match_status === "matched") &&
-        user?.match_emoji ? (
-          <View
-            style={[
-              styles.emojiContainer,
-              { backgroundColor: `${getEmojiColor(user.match_emoji)}20` },
-            ]}
-          >
-            <Text
+          user?.match_emoji && (
+            <View
               style={[
-                styles.matchEmoji,
-                { color: getEmojiColor(user.match_emoji) },
+                styles.emojiContainer,
+                { backgroundColor: `${getEmojiColor(user.match_emoji)}20` },
               ]}
             >
-              {getMatchEmoji(user.match_emoji)}
-            </Text>
-          </View>
-        ) : (
-          user?.isOnline && (
-            <View style={styles.onlineStatus}>
-              <View style={styles.onlineDot} />
-              <Text style={styles.onlineText}>{t("common.online")}</Text>
+              <Text
+                style={[
+                  styles.matchEmoji,
+                  { color: getEmojiColor(user.match_emoji) },
+                ]}
+              >
+                {getMatchEmoji(user.match_emoji)}
+              </Text>
             </View>
-          )
-        )}
+          )}
 
         {user?.images && user.images.length > 1 && (
           <View style={styles.imageOverlay}>
