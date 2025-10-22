@@ -28,7 +28,7 @@ export const capitalizeFirstLetter = (text: string): string => {
 };
 
 // Add symbol to religion
-export const formatReligion = (religion: string): string => {
+export const formatReligion = (religion: string, t?: (key: string) => string): string => {
   if (!religion) return "";
   const capitalized = capitalizeFirstLetter(religion);
   
@@ -48,11 +48,21 @@ export const formatReligion = (religion: string): string => {
   };
   
   const symbol = religionSymbols[capitalized] || "🙏";
+  
+  if (t) {
+    const translationKey = `religion.${capitalized.toLowerCase()}`;
+    const translatedValue = t(translationKey);
+    // If translation exists and is different from the key, use it
+    if (translatedValue !== translationKey) {
+      return `${symbol} ${translatedValue}`;
+    }
+  }
+  
   return `${symbol} ${capitalized}`;
 };
 
 // Add symbol to zodiac
-export const formatZodiac = (zodiac: string): string => {
+export const formatZodiac = (zodiac: string, t?: (key: string) => string): string => {
   if (!zodiac) return "";
   const capitalized = capitalizeFirstLetter(zodiac);
   
@@ -71,12 +81,22 @@ export const formatZodiac = (zodiac: string): string => {
     "Pisces": "♓",
   };
   
-  const symbol = zodiacSymbols[capitalized] || "⭐";
+  const symbol = zodiacSymbols[capitalized] || "♈";
+  
+  if (t) {
+    const translationKey = `zodiac.${capitalized.toLowerCase()}`;
+    const translatedValue = t(translationKey);
+    // If translation exists and is different from the key, use it
+    if (translatedValue !== translationKey) {
+      return `${symbol} ${translatedValue}`;
+    }
+  }
+  
   return `${symbol} ${capitalized}`;
 };
 
 // Add symbol to nationality
-export const formatNationality = (nationality: string): string => {
+export const formatNationality = (nationality: string, t?: (key: string) => string): string => {
   if (!nationality) return "";
   const capitalized = capitalizeFirstLetter(nationality);
   
@@ -118,37 +138,61 @@ export const formatNationality = (nationality: string): string => {
   };
   
   const symbol = nationalitySymbols[capitalized] || "🌍";
+  
+  if (t) {
+    const translationKey = `nationality.${capitalized.toLowerCase()}`;
+    const translatedValue = t(translationKey);
+    // If translation exists and is different from the key, use it
+    if (translatedValue !== translationKey) {
+      return `${symbol} ${translatedValue}`;
+    }
+  }
+  
   return `${symbol} ${capitalized}`;
 };
 
-const INTEREST_MAPPING: { [key: string]: string } = {
-  "1": "💻 Tech",
-  "2": "🎨 Art",
-  "3": "🧪 Test",
-  "4": "🎵 Music",
-  "5": "⚽ Sports",
-  "6": "✈️ Travel",
-  "7": "🍔 Food",
-  "8": "🎬 Movies",
-  "9": "📚 Books",
-  "10": "🎮 Gaming",
-  // skipping 11–17
-  "18": "💃 Dancing",
-  "19": "✍️ Writing",
-  "20": "⚽ Sports",
-  "21": "👗 Fashion",
-  "22": "🧘‍♀️ Yoga",
-  "23": "☕ Coffee",
-  "24": "🍷 Wine",
-  "25": "🥾 Hiking",
-  "26": "🗣️ Languages",
-  "27": "🔬 Science",
-};
+const INTEREST_OPTIONS = [
+  { id: "1", emoji: "💻", translationKey: "interests.tech" },
+  { id: "2", emoji: "🎨", translationKey: "interests.art" },
+  { id: "3", emoji: "🧪", translationKey: "interests.test" },
+  { id: "4", emoji: "🎵", translationKey: "interests.music" },
+  { id: "5", emoji: "⚽", translationKey: "interests.sports" },
+  { id: "6", emoji: "✈️", translationKey: "interests.travel" },
+  { id: "7", emoji: "🍔", translationKey: "interests.food" },
+  { id: "8", emoji: "🎬", translationKey: "interests.movies" },
+  { id: "9", emoji: "📚", translationKey: "interests.books" },
+  { id: "10", emoji: "🎮", translationKey: "interests.gaming" },
+  { id: "18", emoji: "💃", translationKey: "interests.dancing" },
+  { id: "19", emoji: "✍️", translationKey: "interests.writing" },
+  { id: "20", emoji: "⚽", translationKey: "interests.sports" },
+  { id: "21", emoji: "👗", translationKey: "interests.fashion" },
+  { id: "22", emoji: "🧘‍♀️", translationKey: "interests.yoga" },
+  { id: "23", emoji: "☕", translationKey: "interests.coffee" },
+  { id: "24", emoji: "🍷", translationKey: "interests.wine" },
+  { id: "25", emoji: "🥾", translationKey: "interests.hiking" },
+  { id: "26", emoji: "🗣️", translationKey: "interests.languages" },
+  { id: "27", emoji: "🔬", translationKey: "interests.science" },
+];
 
 const convertInterestIdsToNames = (interestIds: string[], t?: (key: string, options?: any) => string): string[] => {
   return interestIds
-    .map((id) => INTEREST_MAPPING[id] || (t ? t("helper.unknown.interest", { id }) : `Unknown Interest (${id})`))
-    .filter((name) => !name.includes("Unknown Interest")); // Optional: filter out unknown interests
+    .map((id) => {
+      const option = INTEREST_OPTIONS.find(opt => opt.id === id);
+      if (option && t) {
+        return `${option.emoji} ${t(option.translationKey)}`;
+      } else if (option) {
+        // Fallback to English if no translation function
+        const fallbackLabels: { [key: string]: string } = {
+          "1": "💻 Tech", "2": "🎨 Art", "3": "🧪 Test", "4": "🎵 Music", "5": "⚽ Sports",
+          "6": "✈️ Travel", "7": "🍔 Food", "8": "🎬 Movies", "9": "📚 Books", "10": "🎮 Gaming",
+          "18": "💃 Dancing", "19": "✍️ Writing", "20": "⚽ Sports", "21": "👗 Fashion", "22": "🧘‍♀️ Yoga",
+          "23": "☕ Coffee", "24": "🍷 Wine", "25": "🥾 Hiking", "26": "🗣️ Languages", "27": "🔬 Science"
+        };
+        return fallbackLabels[id] || `Unknown Interest (${id})`;
+      }
+      return t ? t("helper.unknown.interest", { id }) : `Unknown Interest (${id})`;
+    })
+    .filter((name) => !name.includes("Unknown Interest"));
 };
 
 export const calculateAge = (dob: string): number => {
@@ -210,7 +254,7 @@ export const parseJsonString = (jsonString: string): string[] => {
   }
 };
 
-export const parseInterestsWithNames = (jsonString: string): string[] => {
+export const parseInterestsWithNames = (jsonString: string, t?: (key: string) => string): string[] => {
   try {
     if (!jsonString) return [];
     
@@ -227,7 +271,7 @@ export const parseInterestsWithNames = (jsonString: string): string[] => {
       const interestIds = JSON.parse(cleanedString);
       
       if (Array.isArray(interestIds)) {
-        return convertInterestIdsToNames(interestIds);
+        return convertInterestIdsToNames(interestIds, t);
       } else {
         console.warn("Interests data is not an array:", interestIds);
         return [];
@@ -239,10 +283,10 @@ export const parseInterestsWithNames = (jsonString: string): string[] => {
       // Try to parse as comma-separated values
       if (jsonString.includes(',')) {
         const values = jsonString.split(',').map(v => v.trim());
-        return convertInterestIdsToNames(values);
+        return convertInterestIdsToNames(values, t);
       } else {
         // Single value
-        return convertInterestIdsToNames([jsonString.trim()]);
+        return convertInterestIdsToNames([jsonString.trim()], t);
       }
     }
   } catch (error) {
@@ -253,16 +297,16 @@ export const parseInterestsWithNames = (jsonString: string): string[] => {
       const matches = jsonString.match(/"([^"]+)"/g);
       if (matches) {
         const values = matches.map((match) => match.replace(/"/g, ""));
-        return convertInterestIdsToNames(values);
+        return convertInterestIdsToNames(values, t);
       }
       
       // Try comma-separated values
       if (jsonString.includes(',')) {
         const values = jsonString.split(',').map(v => v.trim());
-        return convertInterestIdsToNames(values);
+        return convertInterestIdsToNames(values, t);
       } else {
         // Single value
-        return convertInterestIdsToNames([jsonString.trim()]);
+        return convertInterestIdsToNames([jsonString.trim()], t);
       }
     } catch (fallbackError) {
       console.warn("Fallback parsing also failed:", fallbackError);
@@ -272,23 +316,33 @@ export const parseInterestsWithNames = (jsonString: string): string[] => {
 };
 
 const LOOKING_FOR_OPTIONS = [
-  { id: "serious", label: "🩵 Serious relationship" },
-  { id: "casual", label: "😘 Casual dating" },
-  { id: "friendship", label: "🤝 Friendship" },
-  { id: "open", label: "🔥 Open to possibilities" },
-  { id: "prefer-not", label: "🤫 Prefer not to say" },
+  { id: "serious", emoji: "🩵", translationKey: "lookingFor.serious" },
+  { id: "casual", emoji: "😘", translationKey: "lookingFor.casual" },
+  { id: "friendship", emoji: "🤝", translationKey: "lookingFor.friendship" },
+  { id: "open", emoji: "🔥", translationKey: "lookingFor.open" },
+  { id: "prefer-not", emoji: "🤫", translationKey: "lookingFor.preferNot" },
 ];
-
-const LOOKING_FOR_MAPPING: { [key: string]: string } =
-  LOOKING_FOR_OPTIONS.reduce((acc, option) => {
-    acc[option.id] = option.label;
-    return acc;
-  }, {} as { [key: string]: string });
 
 const convertLookingForIdsToLabels = (lookingForIds: string[], t?: (key: string, options?: any) => string): string[] => {
   return lookingForIds
-    .map((id) => LOOKING_FOR_MAPPING[id] || (t ? t("helper.unknown.option", { id }) : `Unknown Option (${id})`))
-    .filter((label) => !label.includes("Unknown Option")); // Optional: filter out unknown options
+    .map((id) => {
+      const option = LOOKING_FOR_OPTIONS.find(opt => opt.id === id);
+      if (option && t) {
+        return `${option.emoji} ${t(option.translationKey)}`;
+      } else if (option) {
+        // Fallback to English if no translation function
+        const fallbackLabels: { [key: string]: string } = {
+          "serious": "🩵 Serious relationship",
+          "casual": "😘 Casual dating", 
+          "friendship": "🤝 Friendship",
+          "open": "🔥 Open to possibilities",
+          "prefer-not": "🤫 Prefer not to say"
+        };
+        return fallbackLabels[id] || `Unknown Option (${id})`;
+      }
+      return t ? t("helper.unknown.option", { id }) : `Unknown Option (${id})`;
+    })
+    .filter((label) => !label.includes("Unknown Option"));
 };
 
 // Add new function specifically for looking_for
@@ -353,16 +407,25 @@ const NATIONALITY_MAPPING: { [key: string]: string } =
     return acc;
   }, {} as { [key: string]: string });
 
-export const convertNationalityValuesToLabels = (
-  nationalityValues: string[]
-): string[] => {
+export const convertNationalityValuesToLabels = (nationalityValues: string[], t?: (key: string) => string): string[] => {
   return nationalityValues
-    .map((value) => NATIONALITY_MAPPING[value] || value) // Fallback to original value if not found
-    .filter((label) => label && label !== "Not Specified"); // Filter out empty or "Not Specified" values
+    .map((value) => {
+      if (t) {
+        const translationKey = `nationality.${value.toLowerCase()}`;
+        const translatedValue = t(translationKey);
+        // If translation exists and is different from the key, use it
+        if (translatedValue !== translationKey) {
+          const symbol = NATIONALITY_MAPPING[value]?.split(' ')[0] || "🌍";
+          return `${symbol} ${translatedValue}`;
+        }
+      }
+      // Fallback to original mapping
+      return NATIONALITY_MAPPING[value] || value;
+    })
+    .filter((label) => label && label !== "Not Specified");
 };
 
-// Add new function specifically for nationality
-export const parseNationalityWithLabels = (jsonString: string): string[] => {
+export const parseNationalityWithLabels = (jsonString: string, t?: (key: string) => string): string[] => {
   try {
     // Handle heavily escaped JSON strings like the one in the data
     let cleanedString = jsonString;
@@ -378,29 +441,24 @@ export const parseNationalityWithLabels = (jsonString: string): string[] => {
       if (innerArrayMatch) {
         const innerArrayString = `[${innerArrayMatch[1]}]`;
         const nationalityValues = JSON.parse(innerArrayString);
-        return convertNationalityValuesToLabels(nationalityValues);
+        return convertNationalityValuesToLabels(nationalityValues, t);
       }
     }
 
-    // Try normal parsing
+    // Try to parse as regular JSON array
     const nationalityValues = JSON.parse(cleanedString);
-    return convertNationalityValuesToLabels(nationalityValues);
-  } catch (error) {
-    console.error("Error parsing nationality:", error);
-    // Fallback: try to extract values manually if JSON parsing fails
-    try {
-      // Extract values between quotes
-      const matches = jsonString.match(/"([^"]+)"/g);
-      if (matches) {
-        const values = matches.map((match) => match.replace(/"/g, ""));
-        return convertNationalityValuesToLabels(values);
-      }
-    } catch (fallbackError) {
-      console.error("Fallback parsing also failed:", fallbackError);
+    if (Array.isArray(nationalityValues)) {
+      return convertNationalityValuesToLabels(nationalityValues, t);
     }
+
+    return [];
+  } catch (error) {
+    console.warn("Error parsing nationality JSON:", error);
     return [];
   }
 };
+
+
 
 export const religionOptions = [
   { label: "✝️ Christianity", value: "Christianity" },

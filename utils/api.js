@@ -22,7 +22,7 @@ export const apiCall = async (payload, method = "POST") => {
       body: payload,
       signal: controller.signal,
     });
-
+    console.log("response", response);
     clearTimeout(timeoutId);
     const duration = Date.now() - startTime;
 

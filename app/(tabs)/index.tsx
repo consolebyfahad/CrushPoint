@@ -10,6 +10,13 @@ import { useAppContext } from "@/context/app_context";
 import useGetUsers from "@/hooks/useGetUsers";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import {
+  formatReligion,
+  formatZodiac,
+  parseInterestsWithNames,
+  parseLookingForWithLabels,
+  parseNationalityWithLabels,
+} from "@/utils/helper";
 import { requestUserLocation } from "@/utils/location";
 import {
   getFCMToken,
@@ -24,7 +31,7 @@ import * as Device from "expo-device";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -52,17 +59,22 @@ export default function Index() {
   const { user, updateUserData, userData } = useAppContext();
   const params = useLocalSearchParams();
 
-  // Filter data state
-  const [filterData, setFilterData] = useState<UserFilters>({
-    gender: t("common.male"),
-    ageFrom: "18",
-    ageTo: "35",
-    distance: 10,
-    lookingFor: undefined,
-    nationality: undefined,
-    religion: undefined,
-    zodiacSign: undefined,
-  });
+  // Filter data state - memoized to prevent unnecessary re-renders
+  const initialFilterData = useMemo(
+    () => ({
+      gender: t("common.male"),
+      ageFrom: "18",
+      ageTo: "35",
+      distance: 10,
+      lookingFor: undefined,
+      nationality: undefined,
+      religion: undefined,
+      zodiacSign: undefined,
+    }),
+    [t]
+  );
+
+  const [filterData, setFilterData] = useState<UserFilters>(initialFilterData);
 
   const { users, loading, error, refetch } = useGetUsers(filterData);
   const [viewType, setViewType] = useState(t("common.mapView"));
@@ -380,6 +392,36 @@ export default function Index() {
           return "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
         };
 
+        // Parse and translate user data
+        const parseUserData = (data: any) => {
+          try {
+            return {
+              interests: parseInterestsWithNames(data?.interests || "[]", t),
+              lookingFor: parseLookingForWithLabels(
+                data?.looking_for || "[]",
+                t
+              ),
+              nationality: parseNationalityWithLabels(
+                data?.nationality || "[]",
+                t
+              ),
+              religion: formatReligion(data?.religion || "", t),
+              zodiac: formatZodiac(data?.zodiac || "", t),
+            };
+          } catch (error) {
+            console.warn("Error parsing user data:", error);
+            return {
+              interests: [],
+              lookingFor: [],
+              nationality: [],
+              religion: "",
+              zodiac: "",
+            };
+          }
+        };
+
+        const parsedUserData = parseUserData(matchedUserData);
+
         const matchData = {
           currentUser: {
             name: userData.name || "You",
@@ -400,12 +442,12 @@ export default function Index() {
             state: matchedUserData?.state || "",
             gender: matchedUserData?.gender || "",
             height: matchedUserData?.height || "",
-            nationality: matchedUserData?.nationality || "",
-            religion: matchedUserData?.religion || "",
-            zodiac: matchedUserData?.zodiac || "",
+            nationality: parsedUserData.nationality,
+            religion: parsedUserData.religion,
+            zodiac: parsedUserData.zodiac,
             languages: matchedUserData?.languages || "",
-            interests: matchedUserData?.interests || "[]",
-            looking_for: matchedUserData?.looking_for || "[]",
+            interests: parsedUserData.interests,
+            lookingFor: parsedUserData.lookingFor,
             lat: matchedUserData?.lat || "",
             lng: matchedUserData?.lng || "",
             images: parsedImages,

@@ -10,8 +10,10 @@ import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -109,85 +111,100 @@ const About = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Header />
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.content}>
-          <View style={styles.titleSection}>
-            <Text style={styles.title}>{t("about.about")}</Text>
-            <Text style={styles.disclaimerText}>
-              <Octicons name="info" size={14} color={color.gray55} />{" "}
-              {t("about.agePrivacyNote")}
-            </Text>
-          </View>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.content}>
+              <View style={styles.titleSection}>
+                <Text style={styles.title}>{t("about.about")}</Text>
+                <Text style={styles.disclaimerText}>
+                  <Octicons name="info" size={14} color={color.gray55} />{" "}
+                  {t("about.agePrivacyNote")}
+                </Text>
+              </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>{t("about.name")}</Text>
-            <TextInput
-              style={[
-                styles.input,
-                Platform.OS === "ios" && { paddingVertical: 14 },
-              ]}
-              placeholder={t("about.name")}
-              placeholderTextColor="#999"
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>{t("about.name")}</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    Platform.OS === "ios" && { paddingVertical: 14 },
+                  ]}
+                  placeholder={t("about.name")}
+                  placeholderTextColor="#999"
+                  value={name}
+                  onChangeText={setName}
+                />
+              </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>{t("about.dateOfBirth")}</Text>
-            <TouchableOpacity
-              onPress={handleDatePress}
-              style={[styles.dateInput, ageError && styles.dateInputError]}
-            >
-              <TextInput
-                style={[
-                  styles.dateTextInput,
-                  Platform.OS === "ios" && { paddingVertical: 14 },
-                ]}
-                placeholder="mm/dd/yyyy"
-                placeholderTextColor="#999"
-                value={dateOfBirth}
-                editable={false}
-                pointerEvents="none"
-              />
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>{t("about.dateOfBirth")}</Text>
+                <TouchableOpacity
+                  onPress={handleDatePress}
+                  style={[styles.dateInput, ageError && styles.dateInputError]}
+                >
+                  <TextInput
+                    style={[
+                      styles.dateTextInput,
+                      Platform.OS === "ios" && { paddingVertical: 14 },
+                    ]}
+                    placeholder="mm/dd/yyyy"
+                    placeholderTextColor="#999"
+                    value={dateOfBirth}
+                    editable={false}
+                    pointerEvents="none"
+                  />
 
-              <Octicons name="calendar" size={18} color={color.gray55} />
-            </TouchableOpacity>
-            {ageError ? <Text style={styles.errorText}>{ageError}</Text> : null}
-          </View>
+                  <Octicons name="calendar" size={18} color={color.gray55} />
+                </TouchableOpacity>
+                {ageError ? (
+                  <Text style={styles.errorText}>{ageError}</Text>
+                ) : null}
+              </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>{t("about.bio")}</Text>
-            <TextInput
-              style={[
-                styles.bioInput,
-                Platform.OS === "ios" && { paddingVertical: 14 },
-              ]}
-              placeholder={t("about.bioPlaceholder")}
-              placeholderTextColor="#999"
-              value={about}
-              onChangeText={setAbout}
-              multiline={true}
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-          </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>{t("about.bio")}</Text>
+                <TextInput
+                  style={[
+                    styles.bioInput,
+                    Platform.OS === "ios" && { paddingVertical: 14 },
+                  ]}
+                  placeholder={t("about.bioPlaceholder")}
+                  placeholderTextColor="#999"
+                  value={about}
+                  onChangeText={setAbout}
+                  multiline={true}
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
 
-          {/* Android Date Picker (inline) */}
-          {Platform.OS === "android" && showDatePicker && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={date}
-              mode="date"
-              is24Hour={true}
-              display="default"
-              onChange={onDateChange}
-              maximumDate={new Date()}
-              themeVariant="light"
-            />
-          )}
-        </View>
-      </TouchableWithoutFeedback>
+              {/* Android Date Picker (inline) */}
+              {Platform.OS === "android" && showDatePicker && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={date}
+                  mode="date"
+                  is24Hour={true}
+                  display="default"
+                  onChange={onDateChange}
+                  maximumDate={new Date()}
+                  themeVariant="light"
+                />
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
       {/* iOS Date Picker Modal */}
       {Platform.OS === "ios" && (
         <Modal
@@ -249,6 +266,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   content: {
     flex: 1,

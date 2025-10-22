@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
   },
   selectedTextStyle: {
-    backgroundColor: color.primary,
+    // backgroundColor: color.primary,
     fontSize: 16,
     color: color.black,
     fontFamily: font.medium,
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   selectedItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: color.primary || "#5FB3D4",
+    backgroundColor: color.primary,
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginTop: 4,

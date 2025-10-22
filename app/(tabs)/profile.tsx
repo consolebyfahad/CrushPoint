@@ -343,7 +343,7 @@ export default function ProfileTab() {
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>{t("profile.interestedIn")}</Text>
               <Text style={styles.infoValue}>
-                {formatGenderInterest(userData.gender_interest)}
+                {formatGenderInterest(userData.gender_interest, t)}
               </Text>
             </View>
 
@@ -379,7 +379,7 @@ export default function ProfileTab() {
                   </Text>
                   <View style={styles.infoRow}>
                     <Text style={styles.infoValue}>
-                      {formatNationality(userData.parsedNationality[0])}
+                      {formatNationality(userData.parsedNationality[0], t)}
                     </Text>
                     {userData.parsedNationality.length > 1 && (
                       <Text style={styles.additionalGoals}>
@@ -395,7 +395,7 @@ export default function ProfileTab() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.religion")}</Text>
                 <Text style={styles.infoValue}>
-                  {formatReligion(userData.religion)}
+                  {formatReligion(userData.religion, t)}
                 </Text>
               </View>
             )}

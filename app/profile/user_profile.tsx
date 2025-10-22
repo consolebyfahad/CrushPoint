@@ -642,8 +642,7 @@ export default function UserProfile() {
                     (nationality: string, index: number) => (
                       <View key={index} style={styles.nationalityTag}>
                         <Text style={styles.nationalityText}>
-                          {t(`nationalities.${nationality.toLowerCase()}`) ||
-                            formatNationality(nationality)}
+                          {formatNationality(nationality, t)}
                         </Text>
                       </View>
                     )
@@ -657,8 +656,7 @@ export default function UserProfile() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.religion")}</Text>
                 <Text style={styles.infoValue}>
-                  {t(`religions.${userInfo.religion.toLowerCase()}`) ||
-                    formatReligion(userInfo.religion)}
+                  {formatReligion(userInfo.religion, t)}
                 </Text>
               </View>
             )}
@@ -668,8 +666,7 @@ export default function UserProfile() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.zodiac")}</Text>
                 <Text style={styles.infoValue}>
-                  {t(`zodiac.${userInfo.zodiac.toLowerCase()}`) ||
-                    formatZodiac(userInfo.zodiac)}
+                  {formatZodiac(userInfo.zodiac, t)}
                 </Text>
               </View>
             )}

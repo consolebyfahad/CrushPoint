@@ -1,7 +1,6 @@
 import UserCard from "@/components/user_card";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -75,12 +74,6 @@ export default function ListView({
       setIsRefreshing(false);
     }
   }, [refetch]);
-
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [refetch])
-  );
 
   // Render error state when no users and there's an error
   const renderErrorState = () => (

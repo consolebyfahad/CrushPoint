@@ -1,6 +1,7 @@
 // SimpleFaceVerification.ts
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
+import i18n from "i18next";
 
 const FACE_API_CONFIG = {
   API_KEY: "wUMEkbH38iXACQKJsN8wZOAHTvtHMZgX",
@@ -234,8 +235,8 @@ class SimpleFaceVerification {
       let userMessage = "Verification failed. Please try again.";
 
       if (error.message.includes("No face detected")) {
-        userMessage =
-          "No face detected. Please ensure your face is clearly visible and centered in the frame.";
+        userMessage = i18n.t("faceVerification.noFaceDetected");
+          // "No face detected. Please ensure your face is clearly visible and centered in the frame.";
       } else if (error.message.includes("INVALID_IMAGE_SIZE")) {
         userMessage = "Image size issue. Please try taking a new photo with better quality.";
       } else if (error.message.includes("CONCURRENCY_LIMIT_EXCEEDED")) {

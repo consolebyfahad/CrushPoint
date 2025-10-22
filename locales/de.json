@@ -573,12 +573,68 @@
     "casual": "Lockeres Dating",
     "friendship": "Freundschaft",
     "open": "Offen für Möglichkeiten",
+    "preferNot": "Möchte nicht sagen",
     "whatAreYouLookingFor": "Wonach suchst du?",
     "selectAllThatApply": "Wähle alles aus, was zutrifft, um anderen deine Absichten verständlich zu machen",
     "seriousRelationship": "Ernste Beziehung",
     "casualDating": "Lockeres Dating",
     "openToPossibilities": "Offen für Möglichkeiten",
     "preferNotToSay": "Möchte nicht sagen"
+  },
+
+  "interests": {
+    "tech": "Technik",
+    "art": "Kunst",
+    "test": "Test",
+    "music": "Musik",
+    "sports": "Sport",
+    "travel": "Reisen",
+    "food": "Essen",
+    "movies": "Filme",
+    "books": "Bücher",
+    "gaming": "Gaming",
+    "dancing": "Tanzen",
+    "writing": "Schreiben",
+    "fashion": "Mode",
+    "yoga": "Yoga",
+    "coffee": "Kaffee",
+    "wine": "Wein",
+    "hiking": "Wandern",
+    "languages": "Sprachen",
+    "science": "Wissenschaft"
+  },
+
+  "nationality": {
+    "american": "Amerikanisch",
+    "canadian": "Kanadisch",
+    "british": "Britisch",
+    "australian": "Australisch",
+    "german": "Deutsch",
+    "french": "Französisch",
+    "italian": "Italienisch",
+    "spanish": "Spanisch",
+    "japanese": "Japanisch",
+    "chinese": "Chinesisch",
+    "indian": "Indisch",
+    "brazilian": "Brasilianisch",
+    "mexican": "Mexikanisch",
+    "russian": "Russisch",
+    "korean": "Koreanisch"
+  },
+
+  "religion": {
+    "christian": "Christlich",
+    "islam": "Islam",
+    "muslim": "Muslim",
+    "hindu": "Hindu",
+    "buddhist": "Buddhistisch",
+    "jewish": "Jüdisch",
+    "judaism": "Judentum",
+    "sikh": "Sikh",
+    "atheist": "Atheist",
+    "agnostic": "Agnostisch",
+    "spiritual": "Spirituell",
+    "other": "Andere"
   },
 
   "about": {
@@ -591,26 +647,6 @@
     "invalidAge": "Bitte geben Sie ein gültiges Alter ein",
     "continue": "Weiter",
     "agePrivacyNote": "Dein Name und Alter werden auf deinem Profil öffentlich angezeigt."
-  },
-
-  "interests": {
-    "interests": "Interessen",
-    "searchInterests": "Interessen suchen...",
-    "selectAtLeast": "Wählen Sie mindestens {{count}} Interessen aus",
-    "continue": "Weiter",
-    "updateInterestsSubtitle": "Aktualisiere deine Interessen, um bessere Matches zu erhalten",
-    "selected": "Ausgewählt",
-    "minimum": "Minimum",
-    "interest": "Interesse",
-    "interests_plural": "Interessen",
-    "selectedCount": "Ausgewählt: {{count}} (Minimum {{min}})",
-    "selectedCountEdit": "Ausgewählt: {{count}} Interesse",
-    "selectedCountEditPlural": "Ausgewählt: {{count}} Interessen",
-    "errorSessionExpired": "Benutzersitzung abgelaufen. Bitte melde dich erneut an.",
-    "validationError": "Validierungsfehler",
-    "selectAtLeastOne": "Bitte wähle mindestens ein Interesse aus.",
-    "updateFailed": "Interessen konnten nicht aktualisiert werden",
-    "updateFailedRetry": "Interessen konnten nicht aktualisiert werden. Bitte versuche es erneut."
   },
 
   "privateSpots": {

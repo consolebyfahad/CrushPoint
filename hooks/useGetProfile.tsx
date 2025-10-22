@@ -73,7 +73,7 @@ export default function useGetProfile() {
 
         if (userData.interests) {
           try {
-            parsedInterests = parseInterestsWithNames(userData.interests);
+            parsedInterests = parseInterestsWithNames(userData.interests, t);
             originalInterestIds = parseJsonString(userData.interests);
           } catch (error) {
             console.warn("Error parsing interests in profile:", error);
@@ -88,7 +88,10 @@ export default function useGetProfile() {
 
         if (userData.looking_for) {
           try {
-            parsedLookingFor = parseLookingForWithLabels(userData.looking_for);
+            parsedLookingFor = parseLookingForWithLabels(
+              userData.looking_for,
+              t
+            );
             originalLookingForIds = parseJsonString(userData.looking_for);
           } catch (error) {
             console.warn("Error parsing looking_for in profile:", error);
@@ -113,7 +116,8 @@ export default function useGetProfile() {
               if (Array.isArray(parsed) && parsed.length > 0) {
                 originalNationalityValues = parsed;
                 parsedNationality = parseNationalityWithLabels(
-                  userData.nationality
+                  userData.nationality,
+                  t
                 );
               } else {
                 // If parsing fails, try to extract values manually
@@ -126,7 +130,8 @@ export default function useGetProfile() {
                     (v) => v && v !== "Not Specified" && v.trim() !== ""
                   );
                   parsedNationality = convertNationalityValuesToLabels(
-                    originalNationalityValues
+                    originalNationalityValues,
+                    t
                   );
                 }
               }
@@ -139,9 +144,10 @@ export default function useGetProfile() {
                 userData.nationality.trim() !== ""
               ) {
                 originalNationalityValues = [userData.nationality];
-                parsedNationality = convertNationalityValuesToLabels([
-                  userData.nationality,
-                ]);
+                parsedNationality = convertNationalityValuesToLabels(
+                  [userData.nationality],
+                  t
+                );
               }
             }
           } else {
@@ -151,9 +157,10 @@ export default function useGetProfile() {
               userData.nationality.trim() !== ""
             ) {
               originalNationalityValues = [userData.nationality];
-              parsedNationality = convertNationalityValuesToLabels([
-                userData.nationality,
-              ]);
+              parsedNationality = convertNationalityValuesToLabels(
+                [userData.nationality],
+                t
+              );
             }
           }
         }

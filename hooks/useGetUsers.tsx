@@ -4,9 +4,10 @@ import {
   calculateAge,
   parseInterestsWithNames,
   parseLookingForWithLabels,
+  parseNationalityWithLabels,
   parseUserImages,
 } from "@/utils/helper";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface LocationData {
@@ -68,7 +69,7 @@ interface TransformedUser {
   lookingFor: string[];
   religion: string;
   zodiac: string;
-  nationality: string;
+  nationality: string[];
   about: string;
   actualLocation: {
     lat: number;
@@ -111,7 +112,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const filtersString = JSON.stringify(filters);
+  const filtersString = useMemo(() => JSON.stringify(filters), [filters]);
   const fetchUsers = async (): Promise<void> => {
     if (!user?.user_id) {
       setError(t("users.userIdNotAvailable"));
@@ -216,12 +217,12 @@ export default function useGetUsers(filters: UserFilters = {}) {
       languages: safeString(userData.languages),
       match_status: safeString(userData.match_staus),
       match_emoji: safeString(userData.match_emoji),
-      // Fixed: Use proper parsing functions for interests and looking_for
-      interests: parseUserInterests(userData.interests),
-      lookingFor: parseUserLookingFor(userData.looking_for),
+      // Fixed: Use proper parsing functions for interests and looking_for with translation
+      interests: parseUserInterests(userData.interests, t),
+      lookingFor: parseUserLookingFor(userData.looking_for, t),
       religion: safeString(userData.religion),
       zodiac: safeString(userData.zodiac),
-      nationality: safeString(userData.nationality),
+      nationality: parseUserNationality(userData.nationality, t),
       about: safeString(userData.about),
       dob: safeString(userData.dob),
       actualLocation: parseActualLocation(userData.loc),
@@ -238,12 +239,15 @@ export default function useGetUsers(filters: UserFilters = {}) {
   };
 
   // Fixed: Parse interests using the same utility function as profile
-  const parseUserInterests = (interestsStr: string): string[] => {
+  const parseUserInterests = (
+    interestsStr: string,
+    t?: (key: string) => string
+  ): string[] => {
     try {
       if (!interestsStr) return [];
 
       // Use the same utility function that works in profile
-      const parsedInterests = parseInterestsWithNames(interestsStr);
+      const parsedInterests = parseInterestsWithNames(interestsStr, t);
       return Array.isArray(parsedInterests) ? parsedInterests : [];
     } catch (error) {
       console.warn("Error parsing user interests:", error);
@@ -252,15 +256,35 @@ export default function useGetUsers(filters: UserFilters = {}) {
   };
 
   // Fixed: Parse looking_for using the same utility function as profile
-  const parseUserLookingFor = (lookingForStr: string): string[] => {
+  const parseUserLookingFor = (
+    lookingForStr: string,
+    t?: (key: string) => string
+  ): string[] => {
     try {
       if (!lookingForStr) return [];
 
       // Use the same utility function that works in profile
-      const parsedLookingFor = parseLookingForWithLabels(lookingForStr);
+      const parsedLookingFor = parseLookingForWithLabels(lookingForStr, t);
       return Array.isArray(parsedLookingFor) ? parsedLookingFor : [];
     } catch (error) {
       console.warn("Error parsing user looking_for:", error);
+      return [];
+    }
+  };
+
+  // Parse nationality using the same utility function as profile
+  const parseUserNationality = (
+    nationalityStr: string,
+    t?: (key: string) => string
+  ): string[] => {
+    try {
+      if (!nationalityStr) return [];
+
+      // Use the same utility function that works in profile
+      const parsedNationality = parseNationalityWithLabels(nationalityStr, t);
+      return Array.isArray(parsedNationality) ? parsedNationality : [];
+    } catch (error) {
+      console.warn("Error parsing user nationality:", error);
       return [];
     }
   };

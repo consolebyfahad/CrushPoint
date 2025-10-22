@@ -570,12 +570,46 @@
     "casual": "Casual Dating",
     "friendship": "Friendship",
     "open": "Open To Possibilities",
+    "preferNot": "Prefer Not To Say",
     "whatAreYouLookingFor": "What are you looking for?",
     "selectAllThatApply": "Select all that apply to help others understand your intentions",
     "seriousRelationship": "Serious relationship",
     "casualDating": "Casual dating",
     "openToPossibilities": "Open to possibilities",
     "preferNotToSay": "Prefer not to say"
+  },
+
+  "nationality": {
+    "american": "American",
+    "canadian": "Canadian",
+    "british": "British",
+    "australian": "Australian",
+    "german": "German",
+    "french": "French",
+    "italian": "Italian",
+    "spanish": "Spanish",
+    "japanese": "Japanese",
+    "chinese": "Chinese",
+    "indian": "Indian",
+    "brazilian": "Brazilian",
+    "mexican": "Mexican",
+    "russian": "Russian",
+    "korean": "Korean"
+  },
+
+  "religion": {
+    "christian": "Christian",
+    "islam": "Islam",
+    "muslim": "Muslim",
+    "hindu": "Hindu",
+    "buddhist": "Buddhist",
+    "jewish": "Jewish",
+    "judaism": "Judaism",
+    "sikh": "Sikh",
+    "atheist": "Atheist",
+    "agnostic": "Agnostic",
+    "spiritual": "Spiritual",
+    "other": "Other"
   },
 
   "about": {
