@@ -104,6 +104,17 @@ export default function UserProfile() {
     return null;
   };
 
+  // Helper function to get gender emoji
+  const getGenderEmoji = (gender: string) => {
+    const normalizedGender = gender?.toLowerCase().trim();
+    if (normalizedGender === "male" || normalizedGender === "m") {
+      return "👱🏻‍♂️";
+    } else if (normalizedGender === "female" || normalizedGender === "f") {
+      return "👩🏻";
+    }
+    return "👤";
+  };
+
   // Get target user coordinates
   const targetUserCoords = getUserCoordinates(userData);
 
@@ -676,6 +687,7 @@ export default function UserProfile() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.gender")}</Text>
                 <Text style={styles.infoValue}>
+                  {getGenderEmoji(userInfo.gender)}{" "}
                   {t(`common.${userInfo.gender}`) ||
                     capitalizeFirstLetter(userInfo.gender)}
                 </Text>
@@ -1024,6 +1036,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: font.medium,
     color: "#5FB3D4",
+    textTransform: "capitalize",
   },
   matchEmojiContainer: {
     position: "absolute",

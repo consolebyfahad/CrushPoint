@@ -68,9 +68,31 @@ export default function Verify() {
   }, []);
 
   const handleCodeChange = (text: string, index: number) => {
-    const digit = text.slice(-1);
+    // Handle SMS autofill - text might contain multiple digits
+    const digits = text.replace(/[^0-9]/g, ""); // Extract only digits
 
-    if (digit && !/^\d$/.test(digit)) {
+    if (digits.length > 1) {
+      // SMS autofill detected - fill all inputs at once
+      const newCode = [...code];
+      for (let i = 0; i < Math.min(digits.length, 6); i++) {
+        newCode[i] = digits[i];
+      }
+      setCode(newCode);
+
+      // Auto-submit if we have 6 digits
+      if (digits.length === 6) {
+        handleVerifyCode(digits);
+      } else {
+        // Focus the appropriate input
+        const nextIndex = Math.min(digits.length, 5);
+        inputRefs.current[nextIndex]?.focus();
+      }
+      return;
+    }
+
+    // Regular single digit input
+    const digit = text.slice(-1);
+    if (!digit || !/^\d$/.test(digit)) {
       return;
     }
 
@@ -281,7 +303,7 @@ export default function Verify() {
           // Check if user is verified after fetching profile
           const isVerified = await checkVerificationStatus();
           if (isVerified) {
-            router.push("/(tabs)");
+            router.replace("/(tabs)");
           } else {
             router.push("/auth/gender");
           }
@@ -363,6 +385,7 @@ export default function Verify() {
             <Text style={styles.subtitle}>
               {t("auth.enterCodeSent", { contactInfo })}
             </Text>
+            <Text style={styles.subtitle}>{t("auth.enterCodeSent2")}</Text>
           </View>
 
           {/* PIN Input Boxes */}
@@ -386,11 +409,13 @@ export default function Verify() {
                   onChangeText={(text) => handleCodeChange(text, index)}
                   onKeyPress={(event) => handleKeyPress(event, index)}
                   keyboardType="numeric"
-                  maxLength={1}
+                  maxLength={index === 0 ? 6 : 1}
                   selectTextOnFocus
                   textAlign="center"
                   editable={!isVerifying}
                   caretHidden={false}
+                  textContentType={index === 0 ? "oneTimeCode" : "none"}
+                  autoComplete={index === 0 ? "sms-otp" : "off"}
                 />
               </Animated.View>
             ))}

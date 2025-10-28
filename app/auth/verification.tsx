@@ -250,7 +250,7 @@ export default function FaceVerification() {
 
         // Add small delay before navigation to ensure state is clean
         setTimeout(() => {
-          router.push("/(tabs)");
+          router.replace("/(tabs)");
         }, 100);
       } else {
         throw new Error(response.message || t("common.failedToCreateProfile"));

@@ -11,6 +11,7 @@ import useGetUsers from "@/hooks/useGetUsers";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import {
+  formatGenderInterest,
   formatReligion,
   formatZodiac,
   parseInterestsWithNames,
@@ -30,10 +31,16 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Device from "expo-device";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import {
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+} from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  BackHandler,
   Modal,
   Platform,
   StyleSheet,
@@ -58,11 +65,21 @@ export default function Index() {
   const { t } = useTranslation();
   const { user, updateUserData, userData } = useAppContext();
   const params = useLocalSearchParams();
+  const navigation = useNavigation();
+
+  // Disable swipe back gesture on iOS
+  useEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: false,
+    });
+  }, [navigation]);
 
   // Filter data state - memoized to prevent unnecessary re-renders
   const initialFilterData = useMemo(
     () => ({
-      gender: t("common.male"),
+      gender:
+        formatGenderInterest(userData?.gender_interest || "", t) ||
+        t("filters.both"),
       ageFrom: "18",
       ageTo: "35",
       distance: 10,
@@ -71,10 +88,30 @@ export default function Index() {
       religion: undefined,
       zodiacSign: undefined,
     }),
-    [t]
+    [t, userData?.gender_interest]
   );
 
   const [filterData, setFilterData] = useState<UserFilters>(initialFilterData);
+
+  // Update filter data when userData changes
+  useEffect(() => {
+    if (userData?.gender_interest) {
+      const updatedGender = formatGenderInterest(userData.gender_interest, t);
+      console.log("🔄 Updating filter gender from userData:", {
+        gender_interest: userData.gender_interest,
+        formatted: updatedGender,
+      });
+      setFilterData((prev) => ({
+        ...prev,
+        gender: updatedGender,
+      }));
+    }
+  }, [userData?.gender_interest, t]);
+
+  // Log filter data changes
+  useEffect(() => {
+    console.log("🔄 Filter data updated:", JSON.stringify(filterData, null, 2));
+  }, [filterData]);
 
   const { users, loading, error, refetch } = useGetUsers(filterData);
   const [viewType, setViewType] = useState(t("common.mapView"));
@@ -95,6 +132,20 @@ export default function Index() {
     latitude: number;
     longitude: number;
   } | null>(null);
+
+  // Prevent going back to auth screens
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        // Prevent back navigation on Android
+        // On iOS, swipe gesture is handled by the navigation stack
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   // Update location every time user comes to this screen
   useFocusEffect(
@@ -525,8 +576,9 @@ export default function Index() {
       formData.append("devicePlatform", deviceInfo.platform);
       formData.append("deviceRid", token);
       formData.append("deviceModel", deviceInfo.model);
-
+      console.log("formData for FCM registration", formData);
       const response = await apiCall(formData);
+      console.log("response for FCM registration", response);
     } catch (error) {
       console.error("❌ FCM registration failed:", error);
       console.error("❌ Error details:", {

@@ -122,8 +122,9 @@ export default function EventDetails() {
       formData.append("user_id", user.user_id);
       formData.append("table_name", "event_rsvp");
       formData.append("event_id", event.id.toString());
-
+      console.log("formData", formData);
       const response = await apiCall(formData);
+      console.log("response for RSVP", response);
 
       if (response.result) {
         setIsAttending(!isAttending);
@@ -141,25 +142,6 @@ export default function EventDetails() {
     // Navigate to attendees list
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
-  console.log("event", JSON.stringify(event));
   return (
     <View style={styles.container}>
       {/* Header Image */}

@@ -596,6 +596,7 @@ const styles = StyleSheet.create({
     color: "#5FB3D4",
   },
   photosContainer: {
+    // flex: 1,
     flexDirection: "row",
     gap: 12,
   },
@@ -603,7 +604,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   photo: {
-    width: 108,
+    width: 100,
     height: 108,
     borderRadius: 12,
     resizeMode: "cover",

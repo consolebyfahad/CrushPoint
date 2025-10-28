@@ -57,6 +57,7 @@
     "verificationCode": "Verification Code",
     "enterCode": "Enter the verification code sent to your phone",
     "enterCodeSent": "Enter the 6-digit code sent to {{contactInfo}}",
+    "enterCodeSent2": "Please check your spam order, if you haven't received an email.",
     "verifyYour": "Verify your {{contactType}}",
     "resendCode": "Resend Code",
     "resendCodeIn": "Resend code in {{count}}s",
@@ -192,6 +193,7 @@
     "fullName": "Full Name",
     "enterFullName": "Enter your full name",
     "changeableOnceIn6Months": "Changeable only once in 6 months",
+    "lockedAfterFirstEntry": "Locked after first entry. Cannot be changed.",
     "dateOfBirth": "Date of Birth",
     "dateFormat": "mm/dd/yyyy",
     "phoneNumber": "Phone Number",
@@ -514,7 +516,14 @@
     "continue": "Continue",
     "gettingLocation": "Getting your location...",
     "privacyRadius": "Privacy Radius",
-    "enableLocationAccess": "Enable Location Access"
+    "enableLocationAccess": "Enable Location Access",
+    "enableLocationTitle": "Enable Location",
+    "enableLocationDescription": "We need your location to show you people nearby and help you make meaningful connections in your area.",
+    "success": "Success",
+    "error": "Error",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete"
   },
 
   "filters": {
@@ -621,7 +630,7 @@
     "ageValidation": "You must be at least 18 years old to use this app",
     "invalidAge": "Please enter a valid age",
     "continue": "Continue",
-    "agePrivacyNote": "We don't display your age publicly without your consent"
+    "agePrivacyNote": "Your name and age will be publicly displayed on your profile."
   },
 
   "interests": {
@@ -641,7 +650,26 @@
     "validationError": "Validation Error",
     "selectAtLeastOne": "Please select at least one interest.",
     "updateFailed": "Failed to update interests",
-    "updateFailedRetry": "Failed to update interests. Please try again."
+    "updateFailedRetry": "Failed to update interests. Please try again.",
+    "tech": "Technik",
+    "art": "Art",
+    "test": "Test",
+    "music": "Music",
+    "sports": "Sports",
+    "travel": "Travel",
+    "food": "Food",
+    "movies": "Movies",
+    "books": "Books",
+    "gaming": "Gaming",
+    "dancing": "Dancing",
+    "writing": "Writing",
+    "fashion": "Fashion",
+    "yoga": "Yoga",
+    "coffee": "Coffee",
+    "wine": "Wine",
+    "hiking": "Hiking",
+    "languages": "Languages",
+    "science": "Science"
   },
 
   "privateSpots": {
@@ -1292,6 +1320,7 @@
   },
 
   "suggestChanges": {
+    "title": "Suggest Changes",
     "error": "Error",
     "enterNewLocation": "Please enter a new location.",
     "userSessionExpired": "User session expired. Please login again.",
@@ -1299,12 +1328,29 @@
     "changesSuggestedSuccessfully": "Changes suggested successfully!",
     "ok": "OK",
     "failedToSuggestChanges": "Failed to suggest changes. Please try again.",
-    "failedToSuggestChangesNetwork": "Failed to suggest changes. Please check your connection and try again."
+    "failedToSuggestChangesNetwork": "Failed to suggest changes. Please check your connection and try again.",
+    "originalRequest": "Original Request:",
+    "newDate": "New Date",
+    "newTime": "New Time",
+    "newLocation": "New Location",
+    "message": "Message (Optional)",
+    "messagePlaceholder": "Explain why you'd like to change...",
+    "locationPlaceholder": "Enter new location",
+    "suggestChanges": "Suggest Changes",
+    "required": "*"
   },
 
   "invite": {
+    "inviteMatches": "Invite Matches",
+    "searchMatches": "Search matches...",
+    "matchesSelected": "matches selected",
+    "sendInvites": "Send Invites",
+    "sending": "Sending...",
     "failedToSendInvites": "Failed to send invites",
-    "somethingWentWrong": "Something went wrong. Please try again."
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "loadingMatches": "Loading matches...",
+    "noMatchesFound": "No matches found",
+    "invitesSentSuccessfully": "Invites sent successfully!"
   },
 
   "privateSpot": {
@@ -1314,6 +1360,15 @@
     "failedToLoadPrivateSpots": "Failed to load private spots",
     "failedToDeletePrivateSpot": "Failed to delete private spot",
     "title": "Private Spot",
+    "privateSpots": "Private Spots",
+    "confirmDelete": "Are you sure you want to delete",
+    "radius": "Radius",
+    "edit": "Edit",
+    "noPrivateSpots": "No Private Spots",
+    "noPrivateSpotsDescription": "Add your first private spot to get started. You can add up to 3 private Spots.",
+    "addFirstSpot": "Add First Spot",
+    "addAnotherSpot": "Add Another Spot",
+    "infoDescription": "Private spots are locations where you don't want to be visible to others. These locations will help you protect your privacy.",
     "validation": {
       "locationError": "Unable to get your location. Please try again."
     }

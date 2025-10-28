@@ -49,16 +49,30 @@ export const getFCMToken = async (): Promise<string | null> => {
   try {
     // iOS requires explicit device registration for remote notifications
     if (Platform.OS === "ios") {
+      console.log("🍎 iOS: Checking device registration...");
       const isRegistered = messaging().isDeviceRegisteredForRemoteMessages;
+      console.log("🍎 iOS: Device registered for remote messages:", isRegistered);
+      
       if (!isRegistered) {
+        console.log("🍎 iOS: Registering device for remote messages...");
         await messaging().registerDeviceForRemoteMessages();
+        console.log("🍎 iOS: Device registration completed");
       }
       
+      // Check authorization status
+      const authStatus = await messaging().hasPermission();
+      console.log("🍎 iOS: Current authorization status:", authStatus);
+      
       // Add a small delay for iOS to ensure APNs registration is complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log("🍎 iOS: Waiting for APNs registration...");
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
     const token = await messaging().getToken();
+    console.log("📱 FCM Token retrieved:", token ? "SUCCESS" : "FAILED");
+    if (token) {
+      console.log("📱 Token preview:", token.substring(0, 20) + "...");
+    }
     return token;
   } catch (error) {
     console.error("❌ FCM token retrieval failed:", error);

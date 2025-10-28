@@ -37,4 +37,8 @@ export const image = {
   splash: require("@/assets/images/Splash.png"),
   welcome: require("@/assets/images/welcome.png"),
   femaleDefault: require("@/assets/images/femaleDefault.jpg"),
+  matchNotification: require("@/assets/images/Background.png"),
+  profileNotification: require("@/assets/images/Background-2.png"),
+  eventNotification: require("@/assets/images/Background-3.png"),
+  chatNotification: require("@/assets/images/Background-4.png"),
 };

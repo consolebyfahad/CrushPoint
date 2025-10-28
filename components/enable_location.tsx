@@ -34,12 +34,11 @@ export default function AccessLocation({
           </View>
 
           {/* Title */}
-          <Text style={styles.title}>Enable Location</Text>
+          <Text style={styles.title}>{t("common.enableLocationTitle")}</Text>
 
           {/* Description */}
           <Text style={styles.description}>
-            We need your location to show you people nearby and help you make
-            meaningful connections in your area.
+            {t("common.enableLocationDescription")}
           </Text>
 
           {/* Allow Button */}

@@ -3,7 +3,7 @@ import { color, font } from "@/utils/constants";
 import { formatGenderInterest } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -33,14 +33,22 @@ export default function Filters({
   const { userData } = useAppContext();
   const [selectedGender, setSelectedGender] = useState(() => {
     return (
-      formatGenderInterest(userData?.gender_interest || "") ||
       filterData.gender ||
-      "Men"
+      formatGenderInterest(userData?.gender_interest || "", t) ||
+      t("filters.both")
     );
   });
   const [ageFrom, setAgeFrom] = useState(filterData.ageFrom || "18");
   const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");
-  const [distance, setDistance] = useState(filterData.distance || 10);
+  const [distance, setDistance] = useState(filterData.distance || 50);
+
+  // Update selected gender when filterData changes
+  useEffect(() => {
+    if (filterData.gender) {
+      setSelectedGender(filterData.gender);
+    }
+  }, [filterData.gender]);
+
   const genderOptions = [
     t("filters.men"),
     t("filters.women"),
@@ -102,14 +110,14 @@ export default function Filters({
   ];
 
   const handleReset = () => {
-    setSelectedGender(t("filters.men"));
+    setSelectedGender(t("filters.both"));
     setAgeFrom("18");
     setAgeTo("35");
     setDistance(10);
 
     // Reset all filter data
     setFilterData({
-      gender: t("filters.men"),
+      gender: t("filters.both"),
       ageFrom: "18",
       ageTo: "99",
       distance: 10,
@@ -129,7 +137,10 @@ export default function Filters({
       ageTo,
       distance,
     };
-
+    console.log(
+      "🎯 Applying filters:",
+      JSON.stringify(updatedFilterData, null, 2)
+    );
     setFilterData(updatedFilterData);
 
     // setTimeout(() => {

@@ -117,7 +117,9 @@ export default function Matches() {
         formData.append("table_name", "matches");
         formData.append("user_id", user?.user_id || "");
         formData.append("match_id", selectedMatch.match_id);
+        console.log("formData", formData);
         const response = await apiCall(formData);
+        console.log("response for remove match", response);
         if (response.result) {
           // Remove from local state using the hook function
           removeMatch(selectedMatch.match_id);

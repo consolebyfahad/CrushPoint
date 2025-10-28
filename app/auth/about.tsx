@@ -185,7 +185,9 @@ const About = () => {
                   multiline={true}
                   numberOfLines={4}
                   textAlignVertical="top"
+                  maxLength={100}
                 />
+                <Text style={styles.characterCount}>{about.length}/100</Text>
               </View>
 
               {/* Android Date Picker (inline) */}
@@ -352,6 +354,13 @@ const styles = StyleSheet.create({
     fontFamily: font.regular,
     marginTop: 8,
     marginLeft: 4,
+  },
+  characterCount: {
+    fontSize: 12,
+    color: color.gray55,
+    fontFamily: font.regular,
+    textAlign: "right",
+    marginTop: 4,
   },
   buttonContainer: {
     borderTopWidth: 1,

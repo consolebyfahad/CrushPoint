@@ -32,7 +32,7 @@ interface MeetupRequest {
 const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
 
 const useGetRequests = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, userData } = useAppContext();
   const [incomingRequests, setIncomingRequests] = useState<MeetupRequest[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<MeetupRequest[]>([]);
@@ -184,11 +184,12 @@ const useGetRequests = () => {
               date: String(request.new_date || request.meetup_date || "TBD"),
               time: String(
                 formatTimeForDisplay(
-                  request.time || request.meetup_time || "TBD"
+                  request.time || request.meetup_time || "TBD",
+                  i18n.language || "en-US"
                 )
               ),
-              location: String(request.location || "Location TBD"),
-              message: String(request.message || "Would love to meet up!"),
+              location: String(request.location || "N/A"),
+              message: String(request.message || ""),
               hasChanges:
                 request.status === "change" || request.has_changes === "1",
               type: isIncoming ? "incoming" : "outgoing",

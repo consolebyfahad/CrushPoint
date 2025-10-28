@@ -82,6 +82,17 @@ export default function AccountSettings() {
     return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""));
   };
 
+  // Check if field can be edited (only if empty)
+  const canEditField = (field: string) => {
+    if (field === "phoneNumber") {
+      return !userData?.phone || userData.phone.trim() === "";
+    }
+    if (field === "email") {
+      return !userData?.email || userData.email.trim() === "";
+    }
+    return true;
+  };
+
   const validateFields = () => {
     if (!accountData.fullName.trim()) {
       Alert.alert(
@@ -99,42 +110,56 @@ export default function AccountSettings() {
       return false;
     }
 
-    if (!accountData.phoneNumber.trim()) {
-      Alert.alert(
-        t("validation.validationError"),
-        t("validation.enterPhoneNumber")
-      );
-      return false;
+    // Only validate phone number if it can be edited (empty) or if it has a value
+    if (canEditField("phoneNumber")) {
+      if (!accountData.phoneNumber.trim()) {
+        Alert.alert(
+          t("validation.validationError"),
+          t("validation.enterPhoneNumber")
+        );
+        return false;
+      }
+
+      if (!validatePhoneNumber(accountData.phoneNumber)) {
+        Alert.alert(
+          t("validation.validationError"),
+          t("validation.enterValidPhoneNumber")
+        );
+        return false;
+      }
     }
 
-    if (!validatePhoneNumber(accountData.phoneNumber)) {
-      Alert.alert(
-        t("validation.validationError"),
-        t("validation.enterValidPhoneNumber")
-      );
-      return false;
-    }
+    // Only validate email if it can be edited (empty) or if it has a value
+    if (canEditField("email")) {
+      if (!accountData.email.trim()) {
+        Alert.alert(
+          t("validation.validationError"),
+          t("validation.enterEmailAddress")
+        );
+        return false;
+      }
 
-    if (!accountData.email.trim()) {
-      Alert.alert(
-        t("validation.validationError"),
-        t("validation.enterEmailAddress")
-      );
-      return false;
-    }
-
-    if (!validateEmail(accountData.email)) {
-      Alert.alert(
-        t("validation.validationError"),
-        t("validation.enterValidEmailAddress")
-      );
-      return false;
+      if (!validateEmail(accountData.email)) {
+        Alert.alert(
+          t("validation.validationError"),
+          t("validation.enterValidEmailAddress")
+        );
+        return false;
+      }
     }
 
     return true;
   };
 
   const handleInputChange = (field: string, value: string) => {
+    // Prevent editing if field already has a value
+    if (field === "phoneNumber" && !canEditField(field)) {
+      return;
+    }
+    if (field === "email" && !canEditField(field)) {
+      return;
+    }
+
     setAccountData((prev) => ({
       ...prev,
       [field]: value,
@@ -160,19 +185,35 @@ export default function AccountSettings() {
       formData.append("table_name", "users");
       formData.append("name", accountData.fullName.trim());
       formData.append("dob", accountData.dateOfBirth);
-      formData.append("phone", accountData.phoneNumber.trim());
-      formData.append("email", accountData.email.trim().toLowerCase());
+
+      // Only update phone if it can be edited
+      if (canEditField("phoneNumber")) {
+        formData.append("phone", accountData.phoneNumber.trim());
+      }
+
+      // Only update email if it can be edited
+      if (canEditField("email")) {
+        formData.append("email", accountData.email.trim().toLowerCase());
+      }
 
       const response = await apiCall(formData);
 
       if (response.result) {
-        // Update context with new data
-        updateUserData({
+        // Update context with new data (only editable fields)
+        const updatedData: any = {
           name: accountData.fullName.trim(),
           dob: accountData.dateOfBirth,
-          phone: accountData.phoneNumber.trim(),
-          email: accountData.email.trim().toLowerCase(),
-        });
+        };
+
+        if (canEditField("phoneNumber")) {
+          updatedData.phone = accountData.phoneNumber.trim();
+        }
+
+        if (canEditField("email")) {
+          updatedData.email = accountData.email.trim().toLowerCase();
+        }
+
+        updateUserData(updatedData);
 
         setIsChanged(false);
 
@@ -243,7 +284,7 @@ export default function AccountSettings() {
             value={accountData.fullName}
             onChangeText={(value) => handleInputChange("fullName", value)}
             placeholder={t("profile.enterFullName")}
-            placeholderTextColor={color.gray14}
+            placeholderTextColor={color.gray69}
             editable={!isLoading}
           />
           <Text style={styles.fieldNote}>
@@ -267,7 +308,7 @@ export default function AccountSettings() {
               ]}
               value={accountData.dateOfBirth}
               placeholder={t("profile.dateFormat")}
-              placeholderTextColor={color.gray14}
+              placeholderTextColor={color.gray69}
               editable={false}
             />
             <Ionicons name="calendar-outline" size={20} color={color.gray14} />
@@ -293,13 +334,16 @@ export default function AccountSettings() {
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.phoneNumber")}</Text>
           <TextInput
-            style={styles.textInput}
+            style={[
+              styles.textInput,
+              !canEditField("phoneNumber") && styles.disabledInput,
+            ]}
             value={accountData.phoneNumber}
             onChangeText={(value) => handleInputChange("phoneNumber", value)}
             placeholder={t("profile.enterPhoneNumber")}
-            placeholderTextColor={color.gray14}
+            placeholderTextColor={color.gray69}
             keyboardType="phone-pad"
-            editable={!isLoading}
+            editable={!isLoading && canEditField("phoneNumber")}
           />
         </View>
 
@@ -307,14 +351,17 @@ export default function AccountSettings() {
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.email")}</Text>
           <TextInput
-            style={styles.textInput}
+            style={[
+              styles.textInput,
+              !canEditField("email") && styles.disabledInput,
+            ]}
             value={accountData.email}
             onChangeText={(value) => handleInputChange("email", value)}
             placeholder={t("profile.enterEmail")}
-            placeholderTextColor={color.gray14}
+            placeholderTextColor={color.gray69}
             keyboardType="email-address"
             autoCapitalize="none"
-            editable={!isLoading}
+            editable={!isLoading && canEditField("email")}
           />
         </View>
 
@@ -380,6 +427,11 @@ const styles = StyleSheet.create({
     color: color.black,
     borderWidth: 1,
     borderColor: color.gray87,
+  },
+  disabledInput: {
+    backgroundColor: color.gray97,
+    color: color.black,
+    opacity: 0.6,
   },
   dateInput: {
     borderRadius: 12,

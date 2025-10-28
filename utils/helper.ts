@@ -5,20 +5,20 @@ const parseMMDDYYYY = (dateStr: string): Date => {
 
 // Format gender interest for display
 export const formatGenderInterest = (genderInterest: string, t?: (key: string, options?: any) => string): string => {
-  if (!genderInterest) return t ? t("helper.genderInterest.all") : "All";
+  if (!genderInterest) return t ? t("filters.both") : "Both";
   
   const normalized = genderInterest.toLowerCase().trim();
   
   if (normalized === "female" || normalized === "f") {
-    return t ? t("helper.genderInterest.women") : "Women";
+    return t ? t("filters.women") : "Women";
   } else if (normalized === "male" || normalized === "m") {
-    return t ? t("helper.genderInterest.men") : "Men";
+    return t ? t("filters.men") : "Men";
   } else if (normalized === "both" || normalized === "all" || normalized === "other") {
-    return t ? t("helper.genderInterest.all") : "All";
+    return t ? t("filters.both") : "Both";
   }
   
   // Fallback for any other values
-  return t ? t("helper.genderInterest.all") : "All";
+  return t ? t("filters.both") : "Both";
 };
 
 // Capitalize first letter of a string
@@ -137,7 +137,7 @@ export const formatNationality = (nationality: string, t?: (key: string) => stri
     "Singaporean": "🇸🇬",
   };
   
-  const symbol = nationalitySymbols[capitalized] || "🌍";
+  const symbol = nationalitySymbols[capitalized];
   
   if (t) {
     const translationKey = `nationality.${capitalized.toLowerCase()}`;
@@ -148,7 +148,7 @@ export const formatNationality = (nationality: string, t?: (key: string) => stri
     }
   }
   
-  return `${symbol} ${capitalized}`;
+  return ` ${capitalized}`;
 };
 
 const INTEREST_OPTIONS = [
@@ -488,20 +488,31 @@ export const zodiacOptions = [
 ];
 
 // Format time for display, handling timezone conversion
-export const formatTimeForDisplay = (time: string) => {
+export const formatTimeForDisplay = (time: string, locale?: string) => {
   try {
-    // If time is already in 12-hour format with AM/PM, return as is
-    if (time.includes("AM") || time.includes("PM")) {
+    // Get current language from AsyncStorage or use passed locale
+    const currentLocale = locale || "en-US";
+    const isGerman = currentLocale.includes("de") || currentLocale === "de";
+
+    // If time is already in 12-hour format with AM/PM, return as is (for English)
+    if (!isGerman && (time.includes("AM") || time.includes("PM"))) {
       return time;
     }
 
-    // If time is in 24-hour format (e.g., "18:31"), convert to 12-hour format
+    // Parse time
     const [hours, minutes] = time.split(":").map(Number);
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
-    const displayMinutes = minutes.toString().padStart(2, "0");
 
-    return `${displayHours}:${displayMinutes} ${ampm}`;
+    // German uses 24-hour format, English uses 12-hour format
+    if (isGerman) {
+      // Return 24-hour format for German (e.g., "18:31")
+      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    } else {
+      // Return 12-hour format for English (e.g., "6:31 PM")
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const displayHours = hours % 12 || 12;
+      const displayMinutes = minutes.toString().padStart(2, "0");
+      return `${displayHours}:${displayMinutes} ${ampm}`;
+    }
   } catch (error) {
     console.warn("Error formatting time for display:", error);
     return time;
@@ -819,15 +830,20 @@ export const formatMeetupDate = (dateString: string): string => {
 /**
  * Format date for display in cards (e.g., "Sun, Feb 18")
  */
-export const formatCardDate = (dateString: string): string => {
+export const formatCardDate = (dateString: string, locale?: string): string => {
   try {
     const date = new Date(dateString);
+    const currentLocale = locale || 'en-US';
+    
+    // Use German locale for date formatting
+    const localeToUse = currentLocale.includes('de') || currentLocale === 'de' ? 'de-DE' : 'en-US';
+    
     const options: Intl.DateTimeFormatOptions = {
       weekday: 'short',
       month: 'short',
       day: 'numeric'
     };
-    return date.toLocaleDateString('en-US', options);
+    return date.toLocaleDateString(localeToUse, options);
   } catch (error) {
     console.warn('Error formatting card date:', error);
     return dateString;

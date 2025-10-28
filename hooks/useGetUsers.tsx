@@ -123,38 +123,60 @@ export default function useGetUsers(filters: UserFilters = {}) {
     setError(null);
 
     try {
+      // Log the incoming filters
+      console.log("🔍 Filters received:", JSON.stringify(filters, null, 2));
+
       const formData = new FormData();
       formData.append("type", "get_map_users");
       formData.append("user_id", user.user_id);
 
+      const payload: any = {
+        type: "get_map_users",
+        user_id: user.user_id,
+      };
+
       if (filters.gender && filters.gender !== "Both") {
         formData.append("gender", filters.gender);
+        payload.gender = filters.gender;
       }
       if (filters.ageFrom) {
         formData.append("age_from", filters.ageFrom);
+        payload.age_from = filters.ageFrom;
       }
       if (filters.ageTo) {
         formData.append("age_to", filters.ageTo);
+        payload.age_to = filters.ageTo;
       }
       if (filters.distance) {
         formData.append("distance", filters.distance.toString());
+        payload.distance = filters.distance.toString();
       }
       if (filters.lookingFor) {
         formData.append("looking_for", filters.lookingFor);
+        payload.looking_for = filters.lookingFor;
       }
       if (filters.height) {
         formData.append("height_from", filters.height.from || "");
         formData.append("height_to", filters.height.to || "");
+        payload.height_from = filters.height.from || "";
+        payload.height_to = filters.height.to || "";
       }
       if (filters.nationality) {
         formData.append("nationality", filters.nationality);
+        payload.nationality = filters.nationality;
       }
       if (filters.religion) {
         formData.append("religion", filters.religion);
+        payload.religion = filters.religion;
       }
       if (filters.zodiacSign) {
         formData.append("zodiac", filters.zodiacSign);
+        payload.zodiac = filters.zodiacSign;
       }
+
+      // Log the payload being sent
+      console.log("📤 API Payload:", JSON.stringify(payload, null, 2));
+
       const response: ApiResponse = await apiCall(formData);
       if (response.result && response.data && Array.isArray(response.data)) {
         const transformedUsers: TransformedUser[] = response.data

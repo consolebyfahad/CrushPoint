@@ -1,10 +1,13 @@
 import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
+import useGetMatches from "@/hooks/useGetMatches";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -27,50 +30,15 @@ export default function InviteMatches({
   eventTitle = "Event",
   eventId,
 }: any) {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const { showToast } = useToast();
   const [searchText, setSearchText] = useState("");
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Sample matches data - replace with your actual matches
-  const matches = [
-    {
-      id: "1",
-      name: "Alex",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      isOnline: true,
-    },
-    {
-      id: "2",
-      name: "Sam",
-      image:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      isOnline: false,
-    },
-    {
-      id: "3",
-      name: "Jordan",
-      image:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-      isOnline: true,
-    },
-    {
-      id: "4",
-      name: "Emma",
-      image:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      isOnline: false,
-    },
-    {
-      id: "5",
-      name: "David",
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
-      isOnline: true,
-    },
-  ];
+  // Use the useGetMatches hook to get real matches data
+  const { matches, loading, error } = useGetMatches();
 
   // Filter matches based on search text
   const filteredMatches = matches.filter((match) =>
@@ -105,13 +73,14 @@ export default function InviteMatches({
 
       if (response.result) {
         const selectedMatchesData = matches.filter((match) =>
-          selectedMatches.includes(match.id)
+          selectedMatches.includes(match.user_id)
         );
 
         if (onSendInvites) {
           onSendInvites(selectedMatchesData);
         }
 
+        showToast(t("invite.invitesSentSuccessfully"), "success");
         setSelectedMatches([]);
         setSearchText("");
         onClose();
@@ -126,12 +95,12 @@ export default function InviteMatches({
   };
 
   const renderMatchItem = ({ item }: any) => {
-    const isSelected = selectedMatches.includes(item.id);
+    const isSelected = selectedMatches.includes(item.user_id);
 
     return (
       <TouchableOpacity
         style={styles.matchItem}
-        onPress={() => handleMatchSelect(item.id)}
+        onPress={() => handleMatchSelect(item.user_id)}
         activeOpacity={0.7}
       >
         <View style={styles.matchContent}>
@@ -139,7 +108,10 @@ export default function InviteMatches({
             <Image source={{ uri: item.image }} style={styles.matchImage} />
             {item.isOnline && <View style={styles.onlineIndicator} />}
           </View>
-          <Text style={styles.matchName}>{item.name}</Text>
+          <View style={styles.matchInfo}>
+            <Text style={styles.matchName}>{item.name}</Text>
+            <Text style={styles.matchAge}>{item.age} years old</Text>
+          </View>
         </View>
 
         <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
@@ -168,7 +140,7 @@ export default function InviteMatches({
         <View style={styles.modalContainer}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Invite Matches</Text>
+            <Text style={styles.title}>{t("invite.inviteMatches")}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={color.black} />
             </TouchableOpacity>
@@ -187,7 +159,7 @@ export default function InviteMatches({
                 style={styles.searchInput}
                 value={searchText}
                 onChangeText={setSearchText}
-                placeholder="Search matches..."
+                placeholder={t("invite.searchMatches")}
                 placeholderTextColor={color.gray14}
               />
               {searchText.length > 0 && (
@@ -206,25 +178,56 @@ export default function InviteMatches({
           </View>
 
           {/* Matches List */}
-          <FlatList
-            data={filteredMatches}
-            renderItem={renderMatchItem}
-            keyExtractor={(item) => item.id}
-            style={styles.matchesList}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
-          />
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={color.primary} />
+              <Text style={styles.loadingText}>
+                {t("invite.loadingMatches")}
+              </Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons
+                name="alert-circle-outline"
+                size={48}
+                color={color.error}
+              />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredMatches}
+              renderItem={renderMatchItem}
+              keyExtractor={(item) => item.user_id}
+              style={styles.matchesList}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContent}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyContainer}>
+                  <Ionicons
+                    name="people-outline"
+                    size={48}
+                    color={color.gray14}
+                  />
+                  <Text style={styles.emptyText}>
+                    {t("invite.noMatchesFound")}
+                  </Text>
+                </View>
+              )}
+            />
+          )}
 
           {/* Bottom Section */}
           <View style={styles.bottomSection}>
             {/* Selection Count */}
             <Text style={styles.selectionCount}>
-              {selectedMatches.length} match
-              {selectedMatches.length !== 1 ? "es" : ""} selected
+              {selectedMatches.length} {t("invite.matchesSelected")}
             </Text>
 
             <CustomButton
-              title={isSubmitting ? "Sending..." : "Send Invites"}
+              title={
+                isSubmitting ? t("invite.sending") : t("invite.sendInvites")
+              }
               onPress={handleSendInvites}
               isDisabled={selectedMatches.length === 0 || isSubmitting}
               isLoading={isSubmitting}
@@ -340,10 +343,19 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: color.white,
   },
+  matchInfo: {
+    flex: 1,
+  },
   matchName: {
     fontSize: 16,
     fontFamily: font.medium,
     color: color.black,
+  },
+  matchAge: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray14,
+    marginTop: 2,
   },
   checkbox: {
     width: 24,
@@ -385,5 +397,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.semiBold,
     color: color.white,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.gray14,
+    marginTop: 12,
+    textAlign: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.error,
+    marginTop: 12,
+    textAlign: "center",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.gray14,
+    marginTop: 12,
+    textAlign: "center",
   },
 });

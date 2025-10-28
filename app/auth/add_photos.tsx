@@ -169,24 +169,26 @@ export default function AddPhotos() {
       });
 
       if (!result.canceled && result.assets) {
-        const newPhotos: UploadedPhoto[] = result.assets.map((asset) => ({
-          id: Date.now() + Math.random() + "",
-          uri: asset.uri,
-          width: asset.width,
-          height: asset.height,
-          isUploading: false,
-          isExisting: false,
-        }));
+        const newPhotos: UploadedPhoto[] = result.assets.map(
+          (asset, index) => ({
+            id: Date.now() + index + Math.random() + "",
+            uri: asset.uri,
+            width: asset.width,
+            height: asset.height,
+            isUploading: false,
+            isExisting: false,
+          })
+        );
 
         // Add photos to state first
         setSelectedPhotos((prev) =>
           [...prev, ...newPhotos].slice(0, maxPhotos)
         );
 
-        // Upload each photo to server
-        newPhotos.forEach(async (photo) => {
+        // Upload each photo to server sequentially to maintain order
+        for (const photo of newPhotos) {
           await uploadImageToServer(photo.uri, photo.id);
-        });
+        }
       }
     } catch (error) {
       Alert.alert(t("common.error"), t("profile.failedToPickImages"));

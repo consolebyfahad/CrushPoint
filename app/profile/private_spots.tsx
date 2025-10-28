@@ -108,7 +108,7 @@ export default function PrivateSpots() {
   const handleDeletePrivateSpot = (spot: PrivateSpot) => {
     Alert.alert(
       t("privateSpot.deletePrivateSpot"),
-      `Are you sure you want to delete "${spot.address}"?`,
+      `${t("privateSpot.confirmDelete")} "${spot.address}"?`,
       [
         {
           text: t("common.cancel"),
@@ -165,7 +165,7 @@ export default function PrivateSpots() {
 
         <View style={styles.spotDetails}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Radius:</Text>
+            <Text style={styles.detailLabel}>{t("privateSpot.radius")}:</Text>
             <Text style={styles.detailValue}>{spot.radius} km</Text>
           </View>
         </View>
@@ -178,7 +178,7 @@ export default function PrivateSpots() {
           activeOpacity={0.8}
         >
           <Feather name="edit-2" size={16} color={color.primary} />
-          <Text style={styles.editButtonText}>Edit</Text>
+          <Text style={styles.editButtonText}>{t("privateSpot.edit")}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -197,13 +197,12 @@ export default function PrivateSpots() {
       <View style={styles.emptyIconContainer}>
         <SimpleLineIcons name="location-pin" size={48} color={color.gray87} />
       </View>
-      <Text style={styles.emptyTitle}>No Private Spots</Text>
+      <Text style={styles.emptyTitle}>{t("privateSpot.noPrivateSpots")}</Text>
       <Text style={styles.emptySubtitle}>
-        Add your first private spot to get started. You can add up to 3 private
-        Spots.
+        {t("privateSpot.noPrivateSpotsDescription")}
       </Text>
       <CustomButton
-        title="Add First Spot"
+        title={t("privateSpot.addFirstSpot")}
         onPress={handleAddPrivateSpot}
         style={styles.emptyButton}
       />
@@ -212,7 +211,7 @@ export default function PrivateSpots() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="Private Spots" />
+      <Header title={t("privateSpot.privateSpots")} />
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -241,8 +240,7 @@ export default function PrivateSpots() {
                 color={color.primary}
               />
               <Text style={styles.infoText}>
-                Private spots are locations where you don’t want to be visible
-                to others. These locations will help you protect your privacy.
+                {t("privateSpot.infoDescription")}
               </Text>
             </View>
           </View>
@@ -257,7 +255,7 @@ export default function PrivateSpots() {
               {privateSpots.length < 3 && (
                 <View style={styles.addMoreContainer}>
                   <CustomButton
-                    title="Add Another Spot"
+                    title={t("privateSpot.addAnotherSpot")}
                     onPress={handleAddPrivateSpot}
                     variant="secondary"
                   />

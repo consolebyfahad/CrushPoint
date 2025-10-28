@@ -49,7 +49,7 @@ export default function MeetupCard({
   onEdit,
   isLoading = false,
 }: MeetupCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const getStatusIcon = () => {
     switch (request.status) {
       case "accept":
@@ -222,7 +222,9 @@ export default function MeetupCard({
       <View style={styles.detailsContainer}>
         <View style={styles.detailRow}>
           <Ionicons name="calendar-outline" size={16} color={color.gray55} />
-          <Text style={styles.detailText}>{formatCardDate(request.date)}</Text>
+          <Text style={styles.detailText}>
+            {formatCardDate(request.date, i18n.language)}
+          </Text>
         </View>
         <View style={styles.detailRow}>
           <Ionicons name="time-outline" size={16} color={color.gray55} />

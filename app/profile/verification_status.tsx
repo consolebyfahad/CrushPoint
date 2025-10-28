@@ -1,10 +1,11 @@
 import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
+import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -18,10 +19,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function VerificationStatus() {
   const { t } = useTranslation();
-  const [verificationState, setVerificationState] = useState({
-    status: "faild", // "failed", "pending", "verified"
-    lastAttempt: new Date(),
-  });
+  const { userData } = useAppContext();
+
+  // Map status from userData to verification state
+  const verificationState = useMemo(() => {
+    const status = userData.status || "0";
+
+    if (status === "1") {
+      return { status: "verified" };
+    } else if (status === "2") {
+      return { status: "pending" };
+    } else {
+      return { status: "failed" };
+    }
+  }, [userData.status]);
 
   const handleTryAgain = () => {
     router.push("/auth/verification");
@@ -35,7 +46,7 @@ export default function VerificationStatus() {
     );
   };
 
-  const getStatusInfo = () => {
+  const statusInfo = useMemo(() => {
     switch (verificationState.status) {
       case "verified":
         return {
@@ -66,9 +77,7 @@ export default function VerificationStatus() {
           showTryAgain: true,
         };
     }
-  };
-
-  const statusInfo = getStatusInfo();
+  }, [verificationState.status, t]);
 
   const verificationIssues = [
     {

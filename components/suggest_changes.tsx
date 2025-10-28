@@ -5,6 +5,7 @@ import { formatMeetupDate } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -43,6 +44,7 @@ export default function SuggestChanges({
   requestId,
   originalRequest,
 }: SuggestChangesProps) {
+  const { t } = useTranslation();
   const { user } = useAppContext();
   const [newDate, setNewDate] = useState(new Date());
   const [newTime, setNewTime] = useState(new Date());
@@ -159,7 +161,7 @@ export default function SuggestChanges({
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Suggest Changes</Text>
+        <Text style={styles.title}>{t("suggestChanges.title")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={color.black} />
         </TouchableOpacity>
@@ -173,16 +175,16 @@ export default function SuggestChanges({
             style={styles.userImage}
           />
           <View style={styles.userDetails}>
-            <Text style={styles.userName}>
-              {originalRequest.user.name} Suggest changes
-            </Text>
+            <Text style={styles.userName}>{originalRequest.user.name}</Text>
             <Text style={styles.timestamp}>{originalRequest.timestamp}</Text>
           </View>
         </View>
 
         {/* Original Request */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Original Request:</Text>
+          <Text style={styles.sectionTitle}>
+            {t("suggestChanges.originalRequest")}
+          </Text>
           <View style={styles.originalDetails}>
             <View style={styles.detailRow}>
               <Ionicons
@@ -215,7 +217,8 @@ export default function SuggestChanges({
         {/* New Date */}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
-            New Date <Text style={styles.required}>*</Text>
+            {t("suggestChanges.newDate")}{" "}
+            <Text style={styles.required}>{t("suggestChanges.required")}</Text>
           </Text>
           <TouchableOpacity
             style={styles.dateTimeInput}
@@ -229,7 +232,8 @@ export default function SuggestChanges({
         {/* New Time */}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
-            New Time <Text style={styles.required}>*</Text>
+            {t("suggestChanges.newTime")}{" "}
+            <Text style={styles.required}>{t("suggestChanges.required")}</Text>
           </Text>
           <TouchableOpacity
             style={styles.dateTimeInput}
@@ -243,25 +247,26 @@ export default function SuggestChanges({
         {/* New Location */}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
-            New Location <Text style={styles.required}>*</Text>
+            {t("suggestChanges.newLocation")}{" "}
+            <Text style={styles.required}>{t("suggestChanges.required")}</Text>
           </Text>
           <TextInput
             style={styles.textInput}
             value={newLocation}
             onChangeText={setNewLocation}
-            placeholder="Enter new location"
+            placeholder={t("suggestChanges.locationPlaceholder")}
             placeholderTextColor={color.gray55}
           />
         </View>
 
         {/* Message */}
         <View style={styles.section}>
-          <Text style={styles.inputLabel}>Message (Optional)</Text>
+          <Text style={styles.inputLabel}>{t("suggestChanges.message")}</Text>
           <TextInput
             style={[styles.textInput, styles.messageInput]}
             value={message}
             onChangeText={setMessage}
-            placeholder="Explain why you'd like to change..."
+            placeholder={t("suggestChanges.messagePlaceholder")}
             placeholderTextColor={color.gray55}
             multiline
             numberOfLines={4}
@@ -284,7 +289,9 @@ export default function SuggestChanges({
           {isLoading ? (
             <ActivityIndicator size="small" color={color.white} />
           ) : (
-            <Text style={styles.submitButtonText}>Suggest Changes</Text>
+            <Text style={styles.submitButtonText}>
+              {t("suggestChanges.suggestChanges")}
+            </Text>
           )}
         </TouchableOpacity>
       </View>

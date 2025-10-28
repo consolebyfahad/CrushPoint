@@ -60,6 +60,7 @@
     "verificationCode": "Bestätigungscode",
     "enterCode": "Gib den Bestätigungscode ein, der an dein Telefon gesendet wurde",
     "enterCodeSent": "Gib den 6-stelligen Code ein, der an {{contactInfo}} gesendet wurde",
+    "enterCodeSent2": "Bitte überprüfen deine Spam-Order, solltest du kein E-Mail erhalten haben.",
     "verifyYour": "Bestätige dein {{contactType}}",
     "resendCode": "Code erneut senden",
     "resendCodeIn": "Code in {{count}}s erneut senden",
@@ -238,7 +239,7 @@
     "incoming": "Eingehend",
     "outgoing": "Ausgehend",
     "suggestMeetup": "Treffen vorschlagen",
-    "accept": "Annehmen",
+    "accept": "Angenommen",
     "decline": "Ablehnen",
     "suggestChanges": "Änderungen vorschlagen",
     "acceptChanges": "Änderungen annehmen",
@@ -410,6 +411,9 @@
   },
 
   "common": {
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
     "Female": "Weiblich",
     "save": "Speichern",
     "search": "Suchen",
@@ -517,7 +521,11 @@
     "gettingLocation": "Deinen Standort ermitteln...",
     "privacyRadius": "Datenschutz-Radius",
     "enableLocationAccess": "Standortzugriff aktivieren",
-    "loading": "Lädt..."
+    "enableLocationTitle": "Standort aktivieren",
+    "enableLocationDescription": "Wir benötigen deinen Standort, um dir Personen in deiner Nähe zu zeigen und dir zu helfen, bedeutsame Verbindungen in deiner Gegend zu knüpfen.",
+    "loading": "Lädt...",
+    "success": "Erfolg",
+    "error": "Meldung"
   },
 
   "filters": {
@@ -643,7 +651,7 @@
     "dateOfBirth": "Geburtsdatum",
     "bio": "Erzähl etwas über dich",
     "bioPlaceholder": "Bio schreiben",
-    "ageValidation": "Sie müssen mindestens 18 Jahre alt sein, um diese App zu nutzen",
+    "ageValidation": "Du musst mindestens 18 Jahre alt sein, um diese App zu nutzen",
     "invalidAge": "Bitte geben Sie ein gültiges Alter ein",
     "continue": "Weiter",
     "agePrivacyNote": "Dein Name und Alter werden auf deinem Profil öffentlich angezeigt."
@@ -1305,6 +1313,7 @@
   },
 
   "suggestChanges": {
+    "title": "Änderungen vorschlagen",
     "error": "Fehler",
     "enterNewLocation": "Bitte gib einen neuen Standort ein.",
     "userSessionExpired": "Benutzersitzung abgelaufen. Bitte melde dich erneut an.",
@@ -1312,12 +1321,29 @@
     "changesSuggestedSuccessfully": "Änderungen erfolgreich vorgeschlagen!",
     "ok": "OK",
     "failedToSuggestChanges": "Änderungen konnten nicht vorgeschlagen werden. Bitte versuche es erneut.",
-    "failedToSuggestChangesNetwork": "Änderungen konnten nicht vorgeschlagen werden. Bitte überprüfe deine Verbindung und versuche es erneut."
+    "failedToSuggestChangesNetwork": "Änderungen konnten nicht vorgeschlagen werden. Bitte überprüfe deine Verbindung und versuche es erneut.",
+    "originalRequest": "Ursprüngliche Anfrage:",
+    "newDate": "Neues Datum",
+    "newTime": "Neue Zeit",
+    "newLocation": "Neuer Standort",
+    "message": "Nachricht (Optional)",
+    "messagePlaceholder": "Erkläre, warum du ändern möchtest...",
+    "locationPlaceholder": "Neuen Standort eingeben",
+    "suggestChanges": "Änderungen vorschlagen",
+    "required": "*"
   },
 
   "invite": {
+    "inviteMatches": "Matches einladen",
+    "searchMatches": "Matches suchen...",
+    "matchesSelected": "Matches ausgewählt",
+    "sendInvites": "Einladungen senden",
+    "sending": "Sende...",
     "failedToSendInvites": "Einladungen konnten nicht gesendet werden",
-    "somethingWentWrong": "Etwas ist schief gelaufen. Bitte versuche es erneut."
+    "somethingWentWrong": "Etwas ist schief gelaufen. Bitte versuche es erneut.",
+    "loadingMatches": "Lade Matches...",
+    "noMatchesFound": "Keine Matches gefunden",
+    "invitesSentSuccessfully": "Einladungen erfolgreich gesendet!"
   },
 
   "privateSpot": {
@@ -1327,6 +1353,15 @@
     "failedToLoadPrivateSpots": "Private Orte konnten nicht geladen werden",
     "failedToDeletePrivateSpot": "Privaten Ort konnte nicht gelöscht werden",
     "title": "Privater Ort",
+    "privateSpots": "Private Orte",
+    "confirmDelete": "Bist du sicher, dass du löschen möchtest",
+    "radius": "Radius",
+    "edit": "Bearbeiten",
+    "noPrivateSpots": "Keine privaten Orte",
+    "noPrivateSpotsDescription": "Füge deinen ersten privaten Ort hinzu, um zu beginnen. Du kannst bis zu 3 private Orte hinzufügen.",
+    "addFirstSpot": "Ersten Ort hinzufügen",
+    "addAnotherSpot": "Weiteren Ort hinzufügen",
+    "infoDescription": "Private Orte sind Standorte, an denen du für andere nicht sichtbar sein möchtest. Diese Standorte helfen dir, deine Privatsphäre zu schützen.",
     "validation": {
       "locationError": "Standort konnte nicht ermittelt werden. Bitte versuche es erneut."
     }

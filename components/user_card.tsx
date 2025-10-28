@@ -173,7 +173,10 @@ export default function UserCard({
   return (
     <View style={styles.container}>
       {/* Profile Image */}
-      <View style={styles.imageContainer}>
+      <TouchableOpacity
+        style={styles.imageContainer}
+        onPress={handleViewProfile}
+      >
         {profileImageSource ? (
           <Image source={profileImageSource} style={styles.profileImage} />
         ) : (
@@ -210,7 +213,7 @@ export default function UserCard({
             </Text>
           </View>
         )}
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.userInfo}>
         <View style={styles.nameRow}>
