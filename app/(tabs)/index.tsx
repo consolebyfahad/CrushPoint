@@ -189,14 +189,17 @@ export default function Index() {
 
     try {
       const formData = new FormData();
-      formData.append("type", "update_data");
+      formData.append("type", "add_data");
       formData.append("table_name", "user_locations");
       formData.append("user_id", user.user_id);
       formData.append("lat", location.latitude.toString());
       formData.append("lng", location.longitude.toString());
-
+      console.log(
+        "formData updateLocationInDatabase",
+        JSON.stringify(formData)
+      );
       const response = await apiCall(formData);
-
+      console.log("response updateLocationInDatabase", response);
       if (response.result || response.success) {
         updateUserData({
           lat: location.latitude,
@@ -375,7 +378,7 @@ export default function Index() {
         // Get the first image from the parsed images array
         const getProfileImage = () => {
           if (parsedImages && parsedImages.length > 0) {
-            return `https://7tracking.com/crushpoint/images/${parsedImages[0]}`;
+            return `https://api.andra-dating.com/images/${parsedImages[0]}`;
           }
           return (
             matchedUserData?.image_url ||
@@ -437,7 +440,7 @@ export default function Index() {
         // Get current user image
         const getCurrentUserImage = () => {
           if (currentUserImages && currentUserImages.length > 0) {
-            const imageUrl = `https://7tracking.com/crushpoint/images/${currentUserImages[0]}`;
+            const imageUrl = `https://api.andra-dating.com/images/${currentUserImages[0]}`;
             return imageUrl;
           }
           return "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";

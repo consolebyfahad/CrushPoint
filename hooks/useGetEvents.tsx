@@ -21,6 +21,7 @@ interface Event {
   title: string;
   category: string;
   date: string;
+  time: string;
   location: string;
   address: string;
   description: string;
@@ -30,9 +31,13 @@ interface Event {
   totalAttendees: number;
   isAttending: boolean;
   timeAgo?: string;
+  // New fields from API
+  going: EventAttendee[];
+  going_count: number;
+  user_going: string;
 }
 
-const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
+const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 
 const useGetEvents = () => {
   const { user } = useAppContext();
@@ -48,45 +53,61 @@ const useGetEvents = () => {
 
   // Parse event image
   const parseEventImage = (imageStr: string): string => {
+    console.log("Parsing event image:", imageStr);
     if (!imageStr) {
+      console.log("No image string, using default");
       return getDefaultEventImage();
     }
 
     try {
       // If it's already a full URL, return as is
       if (imageStr.startsWith("http")) {
+        console.log("Image is already a URL:", imageStr);
         return imageStr;
       }
 
       // Otherwise, construct URL with base path
-      return `${IMAGE_BASE_URL}${imageStr}`;
+      const finalUrl = `${IMAGE_BASE_URL}${imageStr}`;
+      console.log("Constructed image URL:", finalUrl);
+      return finalUrl;
     } catch (error) {
       console.warn("Error parsing event image:", error);
       return getDefaultEventImage();
     }
   };
 
-  // Parse attendees from string/JSON
-  const parseAttendees = (attendeesStr: string): EventAttendee[] => {
-    if (!attendeesStr) return [];
+  // Parse attendees from going array
+  const parseGoingUsers = (goingArray: any[]): EventAttendee[] => {
+    if (!goingArray || !Array.isArray(goingArray)) return [];
 
-    try {
-      const parsed = JSON.parse(attendeesStr);
-      if (Array.isArray(parsed)) {
-        return parsed.map((attendee: any) => ({
-          id: attendee.id || attendee.user_id || Math.random().toString(),
-          name: attendee.name || `User ${attendee.id}`,
-          image:
-            attendee.image ||
-            attendee.profile_image ||
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-        }));
+    return goingArray.map((user: any) => {
+      // Check if user already has a complete image URL
+      let imageUrl = user.image;
+
+      // If no direct image URL, try to parse from images array
+      if (!imageUrl && user.images) {
+        try {
+          const images = JSON.parse(user.images.replace(/\\"/g, '"'));
+          if (images.length > 0) {
+            imageUrl = `https://api.andra-dating.com/images/${images[0]}`;
+          }
+        } catch (error) {
+          console.error("Error parsing user images:", error);
+        }
       }
-      return [];
-    } catch (error) {
-      console.warn("Error parsing attendees:", error);
-      return [];
-    }
+
+      // Fallback to default image if no image found
+      if (!imageUrl) {
+        imageUrl =
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face";
+      }
+
+      return {
+        id: user.id || user.name || Math.random().toString(),
+        name: user.name || "Unknown User",
+        image: imageUrl,
+      };
+    });
   };
 
   const loadData = async () => {
@@ -97,14 +118,17 @@ const useGetEvents = () => {
       const formData = new FormData();
       formData.append("type", "get_data");
       formData.append("table_name", "events");
-
+      formData.append("user_id", user?.user_id || "");
+      console.log("formData loadData", JSON.stringify(formData));
       const response = await apiCall(formData);
-
+      console.log("response loadData", JSON.stringify(response));
       if (Array.isArray(response?.data)) {
+        console.log("Raw event data:", response.data[0]);
         const formattedEvents = response.data.map((event: any) => {
-          const attendees = parseAttendees(event.attendees || "[]");
+          const goingUsers = parseGoingUsers(event.going || []);
+          console.log("Going users parsed:", goingUsers);
 
-          return {
+          const formattedEvent = {
             id: event.id || Math.random().toString(),
             title: event.title || t("events.defaultTitle"),
             category: event.category || t("events.defaultCategory"),
@@ -115,6 +139,7 @@ const useGetEvents = () => {
             address:
               event.address || event.location || t("events.defaultLocation"),
             description:
+              event.detail ||
               event.description ||
               event.details ||
               t("events.defaultDescription"),
@@ -129,18 +154,20 @@ const useGetEvents = () => {
                 event.verified === "1" ||
                 false,
             },
-            attendees: attendees.slice(0, 3), // Show only first 3 attendees
-            totalAttendees:
-              parseInt(event.total_attendees) || attendees.length || 0,
-            isAttending:
-              event.is_attending === "1" ||
-              event.user_attending === "1" ||
-              false,
+            attendees: goingUsers.slice(0, 3), // Show only first 3 attendees
+            totalAttendees: event.going_count || goingUsers.length || 0,
+            isAttending: event.user_going === "1" || event.user_going === 1,
             timeAgo: formatTimeAgo(
               event.created_date || event.date,
               event.created_time || "00:00:00"
             ),
+            // New fields
+            going: goingUsers,
+            going_count: event.going_count || 0,
+            user_going: event.user_going || "0",
           };
+          console.log("Formatted event:", formattedEvent);
+          return formattedEvent;
         });
 
         setEvents(formattedEvents);
@@ -183,6 +210,10 @@ const useGetEvents = () => {
               totalAttendees: e.isAttending
                 ? e.totalAttendees - 1
                 : e.totalAttendees + 1,
+              going_count: e.isAttending
+                ? e.going_count - 1
+                : e.going_count + 1,
+              user_going: e.isAttending ? "0" : "1",
             }
           : e
       )
@@ -205,6 +236,8 @@ const useGetEvents = () => {
                   ...e,
                   isAttending: event.isAttending,
                   totalAttendees: event.totalAttendees,
+                  going_count: event.going_count,
+                  user_going: event.user_going,
                 }
               : e
           )
@@ -220,6 +253,8 @@ const useGetEvents = () => {
                 ...e,
                 isAttending: event.isAttending,
                 totalAttendees: event.totalAttendees,
+                going_count: event.going_count,
+                user_going: event.user_going,
               }
             : e
         )

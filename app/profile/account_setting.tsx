@@ -23,7 +23,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountSettings() {
   const { t } = useTranslation();
-  const { user, updateUserData, userData } = useAppContext();
+  const { user, updateUserData, userData, logout } = useAppContext();
   const { showToast } = useToast();
   const [accountData, setAccountData] = useState({
     fullName: "",
@@ -242,8 +242,43 @@ export default function AccountSettings() {
         {
           text: t("common.delete"),
           style: "destructive",
-          onPress: () => {
-            // TODO: Implement account deletion API call
+          onPress: async () => {
+            if (!user?.user_id) {
+              Alert.alert(
+                t("common.error"),
+                t("validation.userSessionExpired")
+              );
+              return;
+            }
+
+            setIsLoading(true);
+            try {
+              const formData = new FormData();
+              formData.append("type", "delete_account");
+              formData.append("user_id", user.user_id);
+
+              const response = await apiCall(formData);
+
+              if (response.result) {
+                showToast(t("account.accountDeletedSuccessfully"), "success");
+
+                // Clear user data and logout
+                setTimeout(async () => {
+                  await logout();
+                  router.replace("/auth/login");
+                }, 1500);
+              } else {
+                showToast(
+                  response.message || t("account.failedToDeleteAccount"),
+                  "error"
+                );
+              }
+            } catch (error) {
+              console.error("Delete account error:", error);
+              showToast(t("account.failedToDeleteAccount"), "error");
+            } finally {
+              setIsLoading(false);
+            }
           },
         },
       ]

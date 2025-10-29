@@ -29,7 +29,7 @@ interface MeetupRequest {
   type: "incoming" | "outgoing";
 }
 
-const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
+const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 
 const useGetRequests = () => {
   const { t, i18n } = useTranslation();

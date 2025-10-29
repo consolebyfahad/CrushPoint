@@ -19,6 +19,8 @@
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload profile pictures and verify your identity.",
         "NSPhotoLibraryAddUsageDescription": "This app needs permission to save photos to your photo library.",
         "NSFaceIDUsageDescription": "This app uses Face ID for secure login.",
+        "NSCalendarsUsageDescription": "This app needs access to your calendar to add events and reminders.",
+        "NSCalendarsWriteOnlyUsageDescription": "This app needs permission to add events to your calendar.",
         "UIBackgroundModes": [
           "remote-notification"
         ]
@@ -26,7 +28,7 @@
       "entitlements": {
         "aps-environment": "production"
       },
-      "appleTeamId": "K9443K94RA"
+      "appleTeamId": "RN3Y8MS69X"
     },
     "android": {
       "adaptiveIcon": {
@@ -44,7 +46,9 @@
         "android.permission.USE_BIOMETRIC",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
       ],
       "edgeToEdgeEnabled": true,
       "package": "com.dating.Andra",
@@ -91,7 +95,8 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-calendar"
     ],
     "experiments": {
       "typedRoutes": true

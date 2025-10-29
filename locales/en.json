@@ -337,7 +337,19 @@
     "userNotLoggedIn": "User not logged in",
     "failedToUpdateAttendance": "Failed to update attendance",
     "website": "Website",
-    "noWebsiteAvailable": "No website available"
+    "noWebsiteAvailable": "No website available",
+    "calendarPermissionDenied": "Calendar Permission Denied",
+    "calendarPermissionMessage": "Please allow calendar access in Settings to add events to your calendar.",
+    "noCalendarFound": "No calendar found on your device",
+    "addedToCalendar": "Event added to your calendar!",
+    "failedToAddToCalendar": "Failed to add event to calendar",
+    "calendarError": "Calendar error occurred",
+    "noWritableCalendarFound": "No writable calendar found. Please check your calendar settings.",
+    "noAttendeesYet": "No one has RSVP'd yet",
+    "noLocationAvailable": "No location available for this event",
+    "failedToOpenMaps": "Failed to open maps application",
+    "eventShared": "Event shared successfully!",
+    "failedToShare": "Failed to share event"
   },
 
   "users": {
@@ -411,6 +423,7 @@
   },
 
   "common": {
+    "settings": "Settings",
     "loading": "Loading...",
     "search": "Search",
     "filter": "Filter",
@@ -523,7 +536,8 @@
     "error": "Error",
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "save": "Save"
   },
 
   "filters": {
@@ -1377,7 +1391,9 @@
   "account": {
     "deleteAccount": "Delete Account",
     "deleteMyAccount": "Delete My Account",
-    "failedToUpdateSettings": "Failed to update account settings"
+    "failedToUpdateSettings": "Failed to update account settings",
+    "accountDeletedSuccessfully": "Account deleted successfully",
+    "failedToDeleteAccount": "Failed to delete account. Please try again."
   },
 
   "hooks": {

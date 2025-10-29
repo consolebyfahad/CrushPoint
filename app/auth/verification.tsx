@@ -26,7 +26,7 @@ export default function FaceVerification() {
   const { userData, user, userImages, updateUserData } = useAppContext();
   const defaultImage =
     userImages.length > 0
-      ? `https://7tracking.com/crushpoint/images/${userImages[0]}`
+      ? `https://api.andra-dating.com/images/${userImages[0]}`
       : null;
   const { showToast } = useToast();
 

@@ -1,8 +1,19 @@
 import { ENV } from "@/config/env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const logout = async () => {
+  try {
+    await AsyncStorage.removeItem("@AppContext");
+    return true;
+  } catch (error) {
+    console.error("❌ Logout error:", error);
+    return false;
+  }
+};
+
 export const apiCall = async (payload, method = "POST") => {
   const requestId = Math.random().toString(36).substring(7);
   const startTime = Date.now();
-
   try {
     // Log FormData contents if it's FormData
     if (payload instanceof FormData) {
@@ -64,6 +75,7 @@ export const apiCall = async (payload, method = "POST") => {
     }
 
     if (error.message.includes("Network request failed")) {
+      await logout();
       throw new Error("Network error. Please check your internet connection.");
     }
 

@@ -43,7 +43,7 @@ export default function MatchScreen({ route, navigation }: any) {
         // Extract the first image from the malformed URL
         const imageMatch = matchData.currentUser.image.match(/\["([^"]+)"\]/);
         if (imageMatch && imageMatch[1]) {
-          matchData.currentUser.image = `https://7tracking.com/crushpoint/images/${imageMatch[1]}`;
+          matchData.currentUser.image = `https://api.andra-dating.com/images/${imageMatch[1]}`;
         } else {
           matchData.currentUser.image =
             "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";

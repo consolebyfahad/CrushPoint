@@ -12,28 +12,92 @@ import {
 } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+import * as Calendar from "expo-calendar";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Alert,
   Dimensions,
   Image,
   Linking,
+  Platform,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+// Attendees Modal Component
+interface AttendeesModalProps {
+  visible: boolean;
+  onClose: () => void;
+  attendees: any[];
+  eventTitle: string;
+}
+
+const AttendeesModal: React.FC<AttendeesModalProps> = ({
+  visible,
+  onClose,
+  attendees,
+  eventTitle,
+}) => {
+  const { t } = useTranslation();
+
+  if (!visible) return null;
+
+  return (
+    <View style={modalStyles.overlay}>
+      <View style={modalStyles.container}>
+        <View style={modalStyles.header}>
+          <Text style={modalStyles.title}>
+            {t("events.whosGoing")} - {eventTitle}
+          </Text>
+          <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
+            <Ionicons name="close" size={24} color={color.gray14} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          style={modalStyles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          {attendees.length === 0 ? (
+            <View style={modalStyles.emptyState}>
+              <Text style={modalStyles.emptyText}>
+                {t("events.noAttendeesYet")}
+              </Text>
+            </View>
+          ) : (
+            attendees.map((attendee, index) => (
+              <View key={attendee.id || index} style={modalStyles.attendeeItem}>
+                <Image
+                  source={{ uri: attendee.image }}
+                  style={modalStyles.attendeeImage}
+                />
+                <Text style={modalStyles.attendeeName}>{attendee.name}</Text>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      </View>
+    </View>
+  );
+};
 
 export default function EventDetails() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
+  console.log("params", params);
   const [event, setEvent] = useState<any>(null);
   const [isAttending, setIsAttending] = useState(false);
   const [showInviteMatches, setShowInviteMatches] = useState(false);
+  const [showAttendeesModal, setShowAttendeesModal] = useState(false);
   const { user } = useAppContext();
   const { showToast } = useToast();
   const [isRSVPing, setIsRSVPing] = useState(false);
@@ -42,7 +106,10 @@ export default function EventDetails() {
       try {
         const eventData = JSON.parse(params.event as string);
         setEvent(eventData);
-        setIsAttending(eventData.isAttending || false);
+        // Set attending status based on user_going field
+        setIsAttending(
+          eventData.user_going === "1" || eventData.user_going === 1
+        );
       } catch (error) {
         console.error("Error parsing event data:", error);
         router.back();
@@ -65,16 +132,167 @@ export default function EventDetails() {
     router.back();
   };
 
-  const handleShare = () => {
-    // Handle share functionality
+  const handleShare = async () => {
+    try {
+      const shareContent = {
+        title: event.title,
+        message: `${event.title}\n\n📅 ${event.date} at ${event.time}\n📍 ${
+          event.address
+        }\n\n${event.description}\n\nOrganized by: ${
+          event.organizer?.name || "Unknown"
+        }\n\nJoin me at this event!`,
+        url: event.image, // Include event image if available
+      };
+
+      const result = await Share.share(shareContent);
+
+      if (result.action === Share.sharedAction) {
+        showToast(t("events.eventShared"), "success");
+      } else if (result.action === Share.dismissedAction) {
+        // User dismissed the share sheet
+        console.log("Share dismissed");
+      }
+    } catch (error) {
+      console.error("Error sharing event:", error);
+      showToast(t("events.failedToShare"), "error");
+    }
   };
 
-  const handleGetDirections = () => {
-    // Open maps app with location
+  const handleGetDirections = async () => {
+    try {
+      const address = event.address || event.location;
+
+      if (!address) {
+        showToast(t("events.noLocationAvailable"), "error");
+        return;
+      }
+
+      // Create the maps URL based on platform
+      let mapsUrl: string;
+
+      if (Platform.OS === "ios") {
+        // Use Apple Maps for iOS
+        mapsUrl = `http://maps.apple.com/?q=${encodeURIComponent(address)}`;
+      } else {
+        // Use Google Maps for Android
+        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          address
+        )}`;
+      }
+
+      // Check if the URL can be opened
+      const canOpen = await Linking.canOpenURL(mapsUrl);
+
+      if (canOpen) {
+        await Linking.openURL(mapsUrl);
+      } else {
+        // Fallback to generic maps URL
+        const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          address
+        )}`;
+        await Linking.openURL(fallbackUrl);
+      }
+    } catch (error) {
+      console.error("Error opening maps:", error);
+      showToast(t("events.failedToOpenMaps"), "error");
+    }
   };
 
-  const handleAddToCalendar = () => {
-    // Add event to device calendar
+  const handleAddToCalendar = async () => {
+    try {
+      // Request calendar permissions
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+
+      if (status !== "granted") {
+        Alert.alert(
+          t("events.calendarPermissionDenied"),
+          t("events.calendarPermissionMessage"),
+          [
+            { text: t("common.cancel"), style: "cancel" },
+            {
+              text: t("common.settings"),
+              onPress: () => {
+                // Open device settings
+                if (Platform.OS === "ios") {
+                  Linking.openURL("app-settings:");
+                } else {
+                  Linking.openSettings();
+                }
+              },
+            },
+          ]
+        );
+        return;
+      }
+
+      // Get writable calendars
+      const calendars = await Calendar.getCalendarsAsync(
+        Calendar.EntityTypes.EVENT
+      );
+
+      console.log(
+        "Available calendars:",
+        calendars.map((cal) => ({
+          id: cal.id,
+          title: cal.title,
+          allowsModifications: cal.allowsModifications,
+          source: cal.source?.name,
+          isLocalAccount: cal.source?.isLocalAccount,
+        }))
+      );
+
+      // Find a writable calendar (not read-only)
+      const writableCalendar =
+        calendars.find(
+          (cal) => cal.allowsModifications && !cal.source?.isLocalAccount
+        ) || calendars.find((cal) => cal.allowsModifications);
+
+      if (!writableCalendar) {
+        showToast(t("events.noWritableCalendarFound"), "error");
+        return;
+      }
+
+      // Parse event date and time
+      const eventDate = new Date(event.date);
+      const startDate = new Date(eventDate);
+      const endDate = new Date(eventDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
+
+      // Create calendar event
+      const eventDetails = {
+        title: event.title,
+        startDate: startDate,
+        endDate: endDate,
+        allDay: false,
+        location: event.location || event.address,
+        notes: `${event.description}\n\nOrganized by: ${
+          event.organizer?.name || "Unknown"
+        }\n\nEvent from Andra Dating App`,
+        alarms: [
+          {
+            relativeOffset: -60, // 1 hour before
+          },
+          {
+            relativeOffset: -1440, // 1 day before
+          },
+        ],
+        calendarId: writableCalendar.id,
+      };
+
+      // Create the event
+      const eventId = await Calendar.createEventAsync(
+        writableCalendar.id,
+        eventDetails
+      );
+
+      if (eventId) {
+        showToast(t("events.addedToCalendar"), "success");
+      } else {
+        showToast(t("events.failedToAddToCalendar"), "error");
+      }
+    } catch (error) {
+      console.error("Calendar error:", error);
+      showToast(t("events.calendarError"), "error");
+    }
   };
 
   const handleInviteMatches = () => {
@@ -139,7 +357,50 @@ export default function EventDetails() {
   };
 
   const handleViewAllAttendees = () => {
-    // Navigate to attendees list
+    setShowAttendeesModal(true);
+  };
+
+  // Parse going users data
+  const parseGoingUsers = () => {
+    if (!event?.going || !Array.isArray(event.going)) {
+      console.log("No going data found:", event?.going);
+      return [];
+    }
+
+    console.log("Parsing going users:", event.going);
+    const parsedUsers = event.going.map((user: any) => {
+      // Check if user already has a complete image URL
+      let imageUrl = user.image;
+
+      // If no direct image URL, try to parse from images array
+      if (!imageUrl && user.images) {
+        try {
+          const images = JSON.parse(user.images.replace(/\\"/g, '"'));
+          if (images.length > 0) {
+            imageUrl = `https://api.andra-dating.com/images/${images[0]}`;
+          }
+        } catch (error) {
+          console.error("Error parsing user images:", error);
+        }
+      }
+
+      // Fallback to default image if no image found
+      if (!imageUrl) {
+        imageUrl =
+          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
+      }
+
+      const result = {
+        id: user.id || user.name, // Use ID if available, otherwise name
+        name: user.name,
+        image: imageUrl,
+      };
+      console.log("Parsed user:", result);
+      return result;
+    });
+
+    console.log("Final parsed users:", parsedUsers);
+    return parsedUsers;
   };
 
   return (
@@ -261,23 +522,25 @@ export default function EventDetails() {
             <View style={styles.attendeesCount}>
               <Feather name="users" size={16} color={color.gray55} />
               <Text style={styles.attendeesCountText}>
-                {event.totalAttendees} {t("events.attending")}
+                {event.going_count || 0} {t("events.attending")}
               </Text>
             </View>
           </View>
 
           <View style={styles.attendeesRow}>
             <View style={styles.attendeesList}>
-              {event.attendees.map((attendee: any, index: number) => (
-                <Image
-                  key={attendee.id}
-                  source={{ uri: attendee.image }}
-                  style={[
-                    styles.attendeeImage,
-                    { marginLeft: index > 0 ? -8 : 0 },
-                  ]}
-                />
-              ))}
+              {parseGoingUsers()
+                .slice(0, 5)
+                .map((attendee: any, index: number) => (
+                  <Image
+                    key={attendee.id}
+                    source={{ uri: attendee.image }}
+                    style={[
+                      styles.attendeeImage,
+                      { marginLeft: index > 0 ? -8 : 0 },
+                    ]}
+                  />
+                ))}
             </View>
 
             <TouchableOpacity onPress={handleViewAllAttendees}>
@@ -324,7 +587,7 @@ export default function EventDetails() {
           }
           icon={<Calender />}
           onPress={handleRSVP}
-          isDisabled={isRSVPing}
+          isDisabled={isRSVPing || isAttending}
           isLoading={isRSVPing}
         />
       </View>
@@ -336,6 +599,14 @@ export default function EventDetails() {
         onSendInvites={handleSendInvites}
         eventTitle={event.title}
         eventId={event.id}
+      />
+
+      {/* Attendees Modal */}
+      <AttendeesModal
+        visible={showAttendeesModal}
+        onClose={() => setShowAttendeesModal(false)}
+        attendees={parseGoingUsers()}
+        eventTitle={event.title}
       />
     </View>
   );
@@ -606,5 +877,77 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.semiBold,
     color: color.white,
+  },
+});
+
+// Modal Styles
+const modalStyles = StyleSheet.create({
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  container: {
+    backgroundColor: color.white,
+    borderRadius: 16,
+    width: "90%",
+    maxHeight: "80%",
+    overflow: "hidden",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F5F5F5",
+  },
+  title: {
+    fontSize: 18,
+    fontFamily: font.semiBold,
+    color: color.black,
+    flex: 1,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  content: {
+    maxHeight: 400,
+    paddingHorizontal: 20,
+  },
+  emptyState: {
+    paddingVertical: 40,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.gray55,
+    textAlign: "center",
+  },
+  attendeeItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F5F5F5",
+  },
+  attendeeImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  attendeeName: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.black,
   },
 });

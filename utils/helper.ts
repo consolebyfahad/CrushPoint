@@ -666,7 +666,7 @@ export const calculateTimeAgo = (date: Date, t?: (key: string, options?: any) =>
 
 // ==================== IMAGE PARSING UTILITIES ====================
 
-const IMAGE_BASE_URL = "https://7tracking.com/crushpoint/images/";
+const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 const DEFAULT_IMAGE_MALE = "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
 const DEFAULT_IMAGE_FEMALE = "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg";
 

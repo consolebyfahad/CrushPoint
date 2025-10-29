@@ -66,7 +66,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
         <View style={styles.locationRow}>
           <Ionicons name="location-outline" size={14} color={color.gray69} />
           <Text style={styles.locationText} numberOfLines={1}>
-            {event.location}
+            {event.address}
           </Text>
         </View>
 

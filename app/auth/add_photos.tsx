@@ -118,8 +118,9 @@ export default function AddPhotos() {
         type: "image/jpeg",
         name: "image.jpg",
       } as any);
-
+      console.log("formData", JSON.stringify(formData));
       const response = await apiCall(formData);
+      console.log("response uploadImageToServer", response);
 
       if (response.result && response.file_name) {
         // Only add to context if not in edit mode (edit mode handles this in save)
@@ -250,9 +251,9 @@ export default function AddPhotos() {
       formData.append("id", user.user_id);
       formData.append("table_name", "users");
       formData.append("images", JSON.stringify(imageFileNames));
-
+      console.log("formData handleSave", formData);
       const response = await apiCall(formData);
-
+      console.log("response handleSave", response);
       if (response.result) {
         // Remove old photos and add new ones to context
         photos.forEach((photoUrl) => {
