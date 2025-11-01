@@ -295,7 +295,7 @@
   },
 
   "events": {
-    "events": "Veranstaltungen",
+    "events": "Events",
     "upcoming": "Bevorstehend",
     "past": "Vergangen",
     "createEvent": "Veranstaltung erstellen",

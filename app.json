@@ -21,9 +21,7 @@
         "NSFaceIDUsageDescription": "This app uses Face ID for secure login.",
         "NSCalendarsUsageDescription": "This app needs access to your calendar to add events and reminders.",
         "NSCalendarsWriteOnlyUsageDescription": "This app needs permission to add events to your calendar.",
-        "UIBackgroundModes": [
-          "remote-notification"
-        ]
+        "UIBackgroundModes": ["remote-notification"]
       },
       "entitlements": {
         "aps-environment": "production"
@@ -65,6 +63,7 @@
       "expo-apple-authentication",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      "@react-native-firebase/messaging",
       "@react-native-google-signin/google-signin",
       [
         "expo-splash-screen",

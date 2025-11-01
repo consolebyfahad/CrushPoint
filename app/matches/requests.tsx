@@ -30,7 +30,8 @@ export default function Requests() {
     removeRequest,
     updateRequestStatus,
   } = useGetRequests();
-
+  console.log("incomingRequests", incomingRequests);
+  console.log("outgoingRequests", outgoingRequests);
   const totalRequests = incomingRequests.length + outgoingRequests.length;
   const incomingCount = incomingRequests.length;
   const outgoingCount = outgoingRequests.length;

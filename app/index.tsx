@@ -64,14 +64,17 @@ export default function index() {
 
         if (isVerified) {
           // User is verified, go to tabs
-          router.replace("/(tabs)");
+          router.dismissAll();
+          router.push("/(tabs)");
         } else {
           // User is not verified, go to verification
-          router.replace("/auth/gender");
+          router.dismissAll();
+          router.push("/auth/gender");
         }
       } else {
         // User not logged in, go to onboarding
-        router.replace("/onboarding");
+        router.dismissAll();
+        router.push("/onboarding");
       }
     };
 

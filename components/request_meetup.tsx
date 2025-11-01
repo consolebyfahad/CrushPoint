@@ -107,13 +107,13 @@ export default function RequestMeetup({
       formData.append("table_name", "meetup_requests");
       formData.append("date_id", matchData.id);
       formData.append("date", formattedDate);
-      formData.append("new_date", formattedDate);
-      formData.append("time", formattedTime);
+      // formData.append("new_date", formattedDate);
+      // formData.append("time", formattedTime);
       formData.append("location", location.trim());
       formData.append("message", message.trim());
-
+      console.log("formData for request meetup", JSON.stringify(formData));
       const response = await apiCall(formData);
-
+      console.log("response for request meetup", response);
       if (response.result) {
         Alert.alert(
           t("success"),

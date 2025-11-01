@@ -143,6 +143,7 @@ const useGetMatches = () => {
       formData.append("user_id", user.user_id);
 
       const response = await apiCall(formData);
+      console.log("response for get matches", JSON.stringify(response));
       if (Array.isArray(response?.data)) {
         const formattedMatches = response.data
           .filter((match: any) => {

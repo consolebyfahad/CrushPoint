@@ -7,7 +7,7 @@ import { color, font } from "@/utils/constants";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
 import { CameraView } from "expo-camera";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, Platform, StyleSheet, Text, View } from "react-native";
@@ -24,10 +24,27 @@ type VerificationState =
 export default function FaceVerification() {
   const { t } = useTranslation();
   const { userData, user, userImages, updateUserData } = useAppContext();
-  const defaultImage =
-    userImages.length > 0
-      ? `https://api.andra-dating.com/images/${userImages[0]}`
-      : null;
+  const routeParams = useLocalSearchParams();
+  // Optional refs passed in as comma-separated URLs
+  const refsParam =
+    typeof routeParams.refs === "string" ? routeParams.refs : undefined;
+  const mode =
+    typeof routeParams.mode === "string" ? routeParams.mode : undefined;
+  const returnTo =
+    typeof routeParams.returnTo === "string" ? routeParams.returnTo : undefined;
+  const photosParam =
+    typeof routeParams.photos === "string" ? routeParams.photos : undefined;
+
+  const referenceImages: string[] = (
+    refsParam
+      ? refsParam
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0)
+      : (userImages || [])
+          .slice(0, 3)
+          .map((img) => `https://api.andra-dating.com/images/${img}`)
+  ).filter(Boolean);
   const { showToast } = useToast();
 
   const [verificationState, setVerificationState] =
@@ -76,7 +93,13 @@ export default function FaceVerification() {
             onPress: () => {
               // Only process photo if verification is successful
               if (isVerified) {
-                processVerifiedPhoto(photoUri);
+                if (mode === "verify_only" && returnTo === "add_photos") {
+                  // In edit mode, go directly to profile screen after verification
+                  // The photos are already uploaded, just save them
+                  router.replace("/(tabs)/profile");
+                } else {
+                  processVerifiedPhoto(photoUri);
+                }
               }
               resolve();
             },
@@ -84,30 +107,53 @@ export default function FaceVerification() {
         ]);
       });
     },
-    [t, processVerifiedPhoto]
+    [t, processVerifiedPhoto, mode, returnTo, photosParam, referenceImages]
   );
 
   // Remove skip verification function - verification is now mandatory
 
   // Simplified face comparison
-  const compareFaces = async (
+  const compareAgainstAllReferences = async (
     capturedImageUri: string,
-    referenceImageUri: string
+    references: string[]
   ) => {
-    try {
-      if (!referenceImageUri) {
-        throw new Error(t("common.noReferenceImage"));
-      }
-
-      const result = await compareSimpleFaces(
-        capturedImageUri,
-        referenceImageUri
-      );
-      return result;
-    } catch (error) {
-      console.error("Face verification error:", error);
-      throw error;
+    if (!references || references.length === 0) {
+      throw new Error(t("common.noReferenceImage"));
     }
+
+    const results: Array<{
+      index: number;
+      verified: boolean;
+      message: string;
+    }> = [];
+    for (let i = 0; i < references.length; i++) {
+      const ref = references[i];
+      try {
+        const result = await compareSimpleFaces(capturedImageUri, ref);
+        results.push({
+          index: i,
+          verified: result.verified,
+          message: result.message,
+        });
+      } catch (err: any) {
+        results.push({
+          index: i,
+          verified: false,
+          message: err?.message || "Comparison failed",
+        });
+      }
+    }
+
+    const anyFailed = results.some((r) => !r.verified);
+    return {
+      verified: !anyFailed,
+      results,
+      message: anyFailed
+        ? `${t("auth.verificationFailed")} (${
+            results.filter((r) => !r.verified).length
+          }/${results.length} failed)`
+        : t("auth.verificationSuccessful"),
+    };
   };
 
   // Fixed image upload for iOS
@@ -147,7 +193,7 @@ export default function FaceVerification() {
   const takePicture = async () => {
     if (!cameraRef.current || isProcessing) return;
 
-    if (!defaultImage) {
+    if (!referenceImages || referenceImages.length === 0) {
       Alert.alert(t("error"), t("auth.noReferenceImage"));
       return;
     }
@@ -165,8 +211,11 @@ export default function FaceVerification() {
 
       let verificationResult;
 
-      // Perform actual verification on all platforms
-      verificationResult = await compareFaces(photo.uri, defaultImage);
+      // Perform verification against all reference images
+      verificationResult = await compareAgainstAllReferences(
+        photo.uri,
+        referenceImages
+      );
 
       // Reset state before showing alert
       setVerificationState("idle");
@@ -318,7 +367,7 @@ export default function FaceVerification() {
         <CustomButton
           title={getButtonText()}
           onPress={takePicture}
-          isDisabled={isProcessing || !defaultImage}
+          isDisabled={isProcessing || referenceImages.length === 0}
           isLoading={isProcessing}
           icon={<Feather name="camera" size={20} color="white" />}
         />

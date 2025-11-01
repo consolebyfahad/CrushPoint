@@ -224,12 +224,69 @@ export default function AddPhotos() {
     router.push("/auth/verification");
   };
 
+  const savePhotosToServer = async () => {
+    const uploadedPhotos = selectedPhotos.filter(
+      (photo) => photo.fileName && !photo.isUploading
+    );
+
+    if (!user?.user_id) {
+      throw new Error(t("profile.userIdNotFound"));
+    }
+
+    const imageFileNames = uploadedPhotos.map((photo) => photo.fileName);
+
+    const formData = new FormData();
+    formData.append("type", "update_data");
+    formData.append("id", user.user_id);
+    formData.append("table_name", "users");
+    formData.append("images", JSON.stringify(imageFileNames));
+    console.log("formData savePhotosToServer", formData);
+    const response = await apiCall(formData);
+    console.log("response savePhotosToServer", response);
+
+    if (response.result) {
+      // Remove old photos and add new ones to context
+      if (photos && Array.isArray(photos)) {
+        photos.forEach((photoUrl) => {
+          const urlParts = photoUrl.split("/");
+          const fileName = urlParts[urlParts.length - 1];
+          removeUserImage(fileName);
+        });
+      }
+      imageFileNames.forEach((fileName) => addUserImage(fileName));
+      return true;
+    } else {
+      throw new Error(response.message || t("profile.failedToUpdatePhotos"));
+    }
+  };
+
   const handleSave = async () => {
     const uploadedPhotos = selectedPhotos.filter(
       (photo) => photo.fileName && !photo.isUploading
     );
 
-    if (uploadedPhotos.length < minPhotos) {
+    // In edit mode, count both existing photos (from params) and new photos
+    let totalPhotoCount = uploadedPhotos.length;
+
+    // If in edit mode and we have existing photos in params, ensure we count them
+    // This handles cases where state might not be perfectly synced after navigation
+    if (isEditMode && photos && Array.isArray(photos) && photos.length > 0) {
+      // Get existing photo filenames from params
+      const existingPhotoFileNames = photos.map((photoUrl) => {
+        const urlParts = photoUrl.split("/");
+        return urlParts[urlParts.length - 1];
+      });
+
+      // Count unique photos (existing + new)
+      const allPhotoFileNames = new Set([
+        ...existingPhotoFileNames,
+        ...uploadedPhotos.map((p) => p.fileName).filter(Boolean),
+      ]);
+
+      totalPhotoCount = allPhotoFileNames.size;
+    }
+
+    if (totalPhotoCount < minPhotos) {
       Alert.alert(
         t("profile.notEnoughPhotos"),
         t("profile.uploadAtLeastSave", { count: minPhotos })
@@ -242,36 +299,56 @@ export default function AddPhotos() {
       return;
     }
 
+    // If in edit mode and user added any new photos, require verification first
+    if (isEditMode) {
+      const hasNewPhotos = selectedPhotos.some(
+        (p) => p.fileName && !p.isExisting
+      );
+      if (hasNewPhotos) {
+        // First, save the photos to server
+        setIsLoading(true);
+        try {
+          await savePhotosToServer();
+          // If save successful, proceed to verification
+          const refs: string[] = selectedPhotos
+            .filter((p) => p.fileName)
+            .slice(0, 3)
+            .map((p) =>
+              p.serverUrl
+                ? p.serverUrl
+                : `https://api.andra-dating.com/images/${p.fileName}`
+            );
+
+          const refsParam = encodeURIComponent(refs.join(","));
+          router.push({
+            pathname: "/auth/verification",
+            params: {
+              mode: "verify_only",
+              returnTo: "add_photos",
+              refs: refsParam,
+              photos: Array.isArray(photos) ? photos.join(",") : photos,
+            },
+          });
+        } catch (error) {
+          console.error("Save error:", error);
+          Alert.alert(t("common.error"), t("profile.failedToSavePhotos"));
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+      }
+    }
+
+    // Regular save flow
     setIsLoading(true);
     try {
-      const imageFileNames = uploadedPhotos.map((photo) => photo.fileName);
-
-      const formData = new FormData();
-      formData.append("type", "update_data");
-      formData.append("id", user.user_id);
-      formData.append("table_name", "users");
-      formData.append("images", JSON.stringify(imageFileNames));
-      console.log("formData handleSave", formData);
-      const response = await apiCall(formData);
-      console.log("response handleSave", response);
-      if (response.result) {
-        // Remove old photos and add new ones to context
-        photos.forEach((photoUrl) => {
-          const urlParts = photoUrl.split("/");
-          const fileName = urlParts[urlParts.length - 1];
-          removeUserImage(fileName);
-        });
-        imageFileNames.forEach((fileName) => addUserImage(fileName));
-
-        Alert.alert(t("common.success"), t("profile.photosUpdatedSuccess"), [
-          {
-            text: t("common.ok"),
-            onPress: () => router.back(),
-          },
-        ]);
-      } else {
-        throw new Error(response.message || t("profile.failedToUpdatePhotos"));
-      }
+      await savePhotosToServer();
+      Alert.alert(t("common.success"), t("profile.photosUpdatedSuccess"), [
+        {
+          text: t("common.ok"),
+          onPress: () => router.back(),
+        },
+      ]);
     } catch (error) {
       console.error("Save error:", error);
       Alert.alert(t("common.error"), t("profile.failedToSavePhotos"));

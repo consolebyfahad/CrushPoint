@@ -116,7 +116,7 @@ export default function Matches() {
         formData.append("type", "delete_data");
         formData.append("table_name", "matches");
         formData.append("user_id", user?.user_id || "");
-        formData.append("match_id", selectedMatch.match_id);
+        formData.append("id", selectedMatch.id);
         console.log("formData", formData);
         const response = await apiCall(formData);
         console.log("response for remove match", response);
@@ -144,24 +144,25 @@ export default function Matches() {
         blockFormData.append("user_id", user?.user_id || "");
         blockFormData.append("table_name", "blocked_users");
         blockFormData.append("block_id", selectedMatch.match_id);
+        // blockFormData.append("id", blockFormData);
         const blockResponse = await apiCall(blockFormData);
+        console.log("blockResponse", blockResponse);
+        // if (blockResponse.result) {
+        //   // Remove match from matches table
+        //   const removeFormData = new FormData();
+        //   removeFormData.append("type", "delete_data");
+        //   removeFormData.append("table_name", "matches");
+        //   removeFormData.append("id", selectedMatch.match_id);
 
-        if (blockResponse.result) {
-          // Remove match from matches table
-          const removeFormData = new FormData();
-          removeFormData.append("type", "delete_data");
-          removeFormData.append("table_name", "matches");
-          removeFormData.append("id", selectedMatch.match_id);
+        //   const removeResponse = await apiCall(removeFormData);
 
-          const removeResponse = await apiCall(removeFormData);
-
-          if (removeResponse.result) {
-            // Remove from local state using the hook function
-            removeMatch(selectedMatch.match_id);
-          }
-        } else {
-          console.error("Block failed:", blockResponse.message);
-        }
+        //   if (removeResponse.result) {
+        //     // Remove from local state using the hook function
+        //     removeMatch(selectedMatch.match_id);
+        //   }
+        // } else {
+        //   console.error("Block failed:", blockResponse.message);
+        // }
       }
     } catch (error) {
       console.error("Block Error:", error);

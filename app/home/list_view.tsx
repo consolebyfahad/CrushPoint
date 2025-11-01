@@ -1,10 +1,11 @@
 import UserCard from "@/components/user_card";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  BackHandler,
   FlatList,
   ListRenderItem,
   RefreshControl,
@@ -74,6 +75,17 @@ export default function ListView({
       setIsRefreshing(false);
     }
   }, [refetch]);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   // Render error state when no users and there's an error
   const renderErrorState = () => (

@@ -69,9 +69,11 @@ export default function Index() {
 
   // Disable swipe back gesture on iOS
   useEffect(() => {
-    navigation.setOptions({
-      gestureEnabled: false,
-    });
+    if (navigation) {
+      navigation.setOptions({
+        gestureEnabled: false,
+      });
+    }
   }, [navigation]);
 
   // Filter data state - memoized to prevent unnecessary re-renders
@@ -138,8 +140,6 @@ export default function Index() {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
-        // Prevent back navigation on Android
-        // On iOS, swipe gesture is handled by the navigation stack
         return true;
       }
     );
