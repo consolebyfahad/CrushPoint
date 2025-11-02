@@ -142,8 +142,20 @@ const useGetRequests = () => {
         response.data.forEach((request: any) => {
           try {
             // Determine if it's incoming or outgoing based on the current user's ID
-            const isIncoming = request.date_id === userData?.id;
+            // Convert both to strings for comparison to handle type mismatches
+            const currentUserId = String(userData?.id || "");
+            const dateId = String(request.date_id || "");
+            const requestUserId = String(request.user_id || "");
 
+            console.log("🔍 Request processing:", {
+              currentUserId,
+              dateId,
+              requestUserId,
+              requestId: request.id,
+            });
+
+            const isIncoming = dateId === currentUserId;
+            console.log("📥 isIncoming:", isIncoming);
             // Get the other user's information
             let otherUser;
             if (isIncoming) {
@@ -182,7 +194,13 @@ const useGetRequests = () => {
                   request.time
                 )
               ),
-              date: String(request.new_date || request.meetup_date || "TBD"),
+              date: String(
+                request.new_date && request.new_date !== "0000-00-00"
+                  ? request.new_date
+                  : request.meetup_date && request.meetup_date !== "0000-00-00"
+                  ? request.meetup_date
+                  : "TBD"
+              ),
               time: String(
                 formatTimeForDisplay(
                   request.time || request.meetup_time || "TBD",
@@ -206,20 +224,41 @@ const useGetRequests = () => {
             // Add to appropriate list
             if (isIncoming) {
               incomingList.push(formattedRequest);
+              console.log("✅ Added to incomingList:", formattedRequest.id);
             } else {
               outgoingList.push(formattedRequest);
+              console.log("✅ Added to outgoingList:", formattedRequest.id);
             }
           } catch (itemError) {
-            console.warn("Error processing request item:", itemError, request);
+            console.warn(
+              "❌ Error processing request item:",
+              itemError,
+              request
+            );
           }
+        });
+
+        console.log("📊 Before filtering:", {
+          incomingCount: incomingList.length,
+          outgoingCount: outgoingList.length,
         });
 
         // Filter out past dates and sort by date
         const filteredIncomingList = filterOutPastDates(incomingList);
         const filteredOutgoingList = filterOutPastDates(outgoingList);
 
+        console.log("📊 After filtering:", {
+          incomingCount: filteredIncomingList.length,
+          outgoingCount: filteredOutgoingList.length,
+        });
+
         const sortedIncomingList = sortRequestsByDate(filteredIncomingList);
         const sortedOutgoingList = sortRequestsByDate(filteredOutgoingList);
+
+        console.log("📊 Final counts:", {
+          incomingCount: sortedIncomingList.length,
+          outgoingCount: sortedOutgoingList.length,
+        });
 
         setIncomingRequests(sortedIncomingList);
         setOutgoingRequests(sortedOutgoingList);

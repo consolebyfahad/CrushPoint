@@ -13,7 +13,6 @@ import Requests from "../matches/requests";
 
 export default function MatchesMain() {
   const params = useLocalSearchParams();
-  console.log("params", JSON.stringify(params));
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(params.activeTab || "matches");
   const { matches } = useGetMatches();

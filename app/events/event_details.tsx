@@ -93,7 +93,6 @@ const AttendeesModal: React.FC<AttendeesModalProps> = ({
 export default function EventDetails() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
-  console.log("params", params);
   const [event, setEvent] = useState<any>(null);
   const [isAttending, setIsAttending] = useState(false);
   const [showInviteMatches, setShowInviteMatches] = useState(false);

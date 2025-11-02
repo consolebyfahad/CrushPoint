@@ -194,7 +194,7 @@ const useGetMatches = () => {
               status: match.status,
               timeAgo: timeAgo,
               distance: calculatedDistance,
-
+              meetup: match.meetup,
               // User profile data
               name: matchUser.name || `User ${match.match_id}`,
               age,

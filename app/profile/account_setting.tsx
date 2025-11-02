@@ -37,9 +37,53 @@ export default function AccountSettings() {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Get change dates from userData
+  const nameChangeDate = (userData as any)?.name_change_date || null;
+  const dobChangeDate = (userData as any)?.dob_change_date || null;
+
+  // Check if 60 days have passed since last change
+  const canEditNameOrDob = (
+    changeDate: string | null,
+    fieldType: "name" | "dob"
+  ) => {
+    // Get today's date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+
+    if (!changeDate) {
+      // If no change date, allow editing (first time or never changed)
+      return true;
+    }
+
+    try {
+      // Parse the change date (assuming YYYY-MM-DD format)
+      const lastChangeDate = new Date(changeDate);
+      lastChangeDate.setHours(0, 0, 0, 0); // Reset time to start of day
+
+      // Check if date is valid
+      if (isNaN(lastChangeDate.getTime())) {
+        return true; // If invalid date, allow editing
+      }
+
+      // Calculate difference in days
+      const diffTime = today.getTime() - lastChangeDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      // Check if less than 60 days
+      return diffDays >= 60;
+    } catch (error) {
+      console.error(`Error checking ${fieldType} edit permission:`, error);
+      return true; // On error, allow editing
+    }
+  };
+
+  const canEditName = canEditNameOrDob(nameChangeDate, "name");
+  const canEditDob = canEditNameOrDob(dobChangeDate, "dob");
+
   // Load existing user data when component mounts
   useEffect(() => {
     if (userData) {
+      console.log("userData", userData);
       try {
         const userProfile = userData;
 
@@ -166,6 +210,8 @@ export default function AccountSettings() {
     }));
     setIsChanged(true);
   };
+  const nameChangeCount = (userData as any)?.name_change_count || "0";
+  const dobChangeCount = (userData as any)?.dob_change_count || "0";
 
   const handleSaveChanges = async () => {
     if (!user?.user_id) {
@@ -179,12 +225,34 @@ export default function AccountSettings() {
 
     setIsLoading(true);
     try {
+      // Check if name or DOB changed
+      const nameChanged =
+        accountData.fullName.trim() !== (userData?.name || "");
+      const dobChanged = accountData.dateOfBirth !== (userData?.dob || "");
+
+      // Get current date in YYYY-MM-DD format
+      const today = new Date();
+      const currentDate = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
       const formData = new FormData();
       formData.append("type", "update_data");
       formData.append("id", user.user_id);
       formData.append("table_name", "users");
       formData.append("name", accountData.fullName.trim());
       formData.append("dob", accountData.dateOfBirth);
+      formData.append("date", currentDate);
+
+      // Only send name_change_count if name was changed
+      if (nameChanged) {
+        formData.append("name_change_count", nameChangeCount);
+      }
+
+      // Only send dob_change_count if DOB was changed
+      if (dobChanged) {
+        formData.append("dob_change_count", dobChangeCount);
+      }
 
       // Only update phone if it can be edited
       if (canEditField("phoneNumber")) {
@@ -315,12 +383,12 @@ export default function AccountSettings() {
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.fullName")}</Text>
           <TextInput
-            style={styles.textInput}
+            style={[styles.textInput, !canEditName && styles.disabledInput]}
             value={accountData.fullName}
             onChangeText={(value) => handleInputChange("fullName", value)}
             placeholder={t("profile.enterFullName")}
             placeholderTextColor={color.gray69}
-            editable={!isLoading}
+            editable={!isLoading && canEditName}
           />
           <Text style={styles.fieldNote}>
             {t("profile.changeableOnceIn6Months")}
@@ -331,15 +399,19 @@ export default function AccountSettings() {
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.dateOfBirth")}</Text>
           <TouchableOpacity
-            style={[styles.dateInput, isLoading && { opacity: 0.6 }]}
+            style={[
+              styles.dateInput,
+              (isLoading || !canEditDob) && { opacity: 0.6 },
+            ]}
             onPress={handleDatePress}
             activeOpacity={0.7}
-            disabled={isLoading}
+            disabled={isLoading || !canEditDob}
           >
             <TextInput
               style={[
                 styles.dateTextInput,
                 Platform.OS === "ios" && { paddingVertical: 16 },
+                !canEditDob && styles.disabledInput,
               ]}
               value={accountData.dateOfBirth}
               placeholder={t("profile.dateFormat")}
@@ -348,7 +420,7 @@ export default function AccountSettings() {
             />
             <Ionicons name="calendar-outline" size={20} color={color.gray14} />
           </TouchableOpacity>
-          {showDatePicker && (
+          {showDatePicker && canEditDob && (
             <DateTimePicker
               testID="dateTimePicker"
               value={date}
@@ -484,10 +556,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fieldNote: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: font.regular,
-    color: color.gray14,
-    marginTop: 8,
+    color: color.error,
+    marginTop: 4,
   },
   bottomSpacing: {
     height: 150,

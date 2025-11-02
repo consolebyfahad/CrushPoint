@@ -2,7 +2,13 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function NotificationCard({
   notification,
@@ -63,6 +69,9 @@ export default function NotificationCard({
     }
   };
   const iconConfig = getNotificationIcon(notification.type);
+  const hasBackgroundImage =
+    notification.backgroundImage !== null &&
+    notification.backgroundImage !== undefined;
 
   return (
     <TouchableOpacity
@@ -70,23 +79,37 @@ export default function NotificationCard({
       onPress={handlePress}
       activeOpacity={0.7}
     >
-      {/* Icon */}
-      <View
-        style={[
-          styles.iconContainer,
-          { backgroundColor: iconConfig.backgroundColor },
-        ]}
-      >
-        {iconConfig.library === "Feather" ? (
-          <Feather name={iconConfig.name} size={20} color={iconConfig.color} />
-        ) : (
-          <Ionicons
-            name={iconConfig.name as any}
-            size={20}
-            color={iconConfig.color}
-          />
-        )}
-      </View>
+      {/* Icon or Background Image */}
+      {hasBackgroundImage ? (
+        <ImageBackground
+          source={notification.backgroundImage}
+          style={styles.imageContainer}
+          imageStyle={styles.imageStyle}
+        >
+          {/* Empty overlay - image is just for background */}
+        </ImageBackground>
+      ) : (
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: iconConfig.backgroundColor },
+          ]}
+        >
+          {iconConfig.library === "Feather" ? (
+            <Feather
+              name={iconConfig.name as any}
+              size={20}
+              color={iconConfig.color}
+            />
+          ) : (
+            <Ionicons
+              name={iconConfig.name as any}
+              size={20}
+              color={iconConfig.color}
+            />
+          )}
+        </View>
+      )}
 
       {/* Content */}
       <View style={styles.content}>
@@ -134,6 +157,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
+  },
+  imageContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 12,
+    overflow: "hidden",
+  },
+  imageStyle: {
+    borderRadius: 22,
+    resizeMode: "cover",
   },
   content: {
     flex: 1,

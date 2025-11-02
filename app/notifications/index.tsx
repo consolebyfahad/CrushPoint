@@ -2,7 +2,7 @@ import NotificationCard from "@/components/notification_card";
 import { NotificationsTabsHeader } from "@/components/tabs_header";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
-import { color, font } from "@/utils/constants";
+import { color, font, image } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -28,6 +28,7 @@ interface Notification {
   created_at?: string;
   user_name?: string;
   emoji?: string;
+  backgroundImage?: any;
 }
 
 export default function Notifications({ navigation }: any) {
@@ -42,12 +43,157 @@ export default function Notifications({ navigation }: any) {
     fetchNotifications();
   }, []);
 
-  const getNotificationEmoji = (type: string) => {
+  const formatTimeAgo = (dateString: string) => {
+    if (!dateString) return t("notifications.recently");
+
+    // Parse the date string - format: "Nov 01, 2025 08:45 PM"
+    const date = new Date(dateString);
+
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return t("notifications.recently");
+    }
+
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    // If negative (future date), return recently
+    if (diffInSeconds < 0) {
+      return t("notifications.recently");
+    }
+
+    if (diffInSeconds < 60) {
+      return t("notifications.justNow");
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return minutes === 1
+        ? t("notifications.minuteAgo", { count: minutes })
+        : t("notifications.minutesAgo", { count: minutes });
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return hours === 1
+        ? t("notifications.hourAgo", { count: hours })
+        : t("notifications.hoursAgo", { count: hours });
+    } else if (diffInSeconds < 2592000) {
+      // Less than 30 days
+      const days = Math.floor(diffInSeconds / 86400);
+      return days === 1
+        ? t("notifications.dayAgo", { count: days })
+        : t("notifications.daysAgo", { count: days });
+    } else if (diffInSeconds < 31536000) {
+      // Less than 1 year (365 days)
+      const months = Math.floor(diffInSeconds / 2592000);
+      return months === 1
+        ? t("notifications.monthAgo", { count: months })
+        : t("notifications.monthsAgo", { count: months });
+    } else {
+      // More than 1 year
+      const years = Math.floor(diffInSeconds / 31536000);
+      return years === 1 ? `${years} year ago` : `${years} years ago`;
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!user?.user_id) {
+      setError(t("notifications.userSessionExpired"));
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("type", "get_data");
+      formData.append("table_name", "notifications");
+      formData.append("user_id", user.user_id);
+
+      const response = await apiCall(formData);
+      console.log("response for get notifications", JSON.stringify(response));
+      if (Array.isArray(response.data)) {
+        // Process the notifications data
+        const processedNotifications = response.data.map(
+          (notif: any, index: number) => {
+            const notificationType = notif.type || "general";
+
+            // Get background image based on type
+            const backgroundImage =
+              getNotificationBackgroundImage(notificationType);
+
+            const processed = {
+              id: notif.id || `notif_${index}`,
+              type: notificationType,
+              title: notif.title || getNotificationTitle(notificationType),
+              message: notif.notification,
+              timeAgo:
+                notif.timestamp || notif.created_at
+                  ? formatTimeAgo(notif.timestamp || notif.created_at)
+                  : t("notifications.recently"),
+              isRead:
+                notif.seen === "1" ||
+                notif.seen === 1 ||
+                notif.is_read ||
+                false,
+              created_at: notif.timestamp || notif.created_at,
+              user_name: notif.user_name || notif.from?.name || notif.from_user,
+              emoji: getNotificationEmoji(notificationType),
+              backgroundImage: backgroundImage,
+            };
+
+            return processed;
+          }
+        );
+
+        setNotifications(processedNotifications);
+        setError(null);
+      } else {
+        // No notifications or result is false
+        setNotifications([]);
+        setError(null);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching notifications:", error);
+
+      setError(t("notifications.failedToLoad"));
+      setNotifications([]);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  const getNotificationTitle = (type: string) => {
     switch (type.toLowerCase()) {
+      case "reaction":
+      case "emoji":
+        return t("notifications.newReaction");
+      case "match":
+      case "new_match":
+        return t("notifications.newMatch");
+      case "profile_view":
+      case "view":
+        return t("notifications.profileView");
+      case "event":
+        return t("notifications.eventNotification");
+      case "message":
+      case "chat":
+        return t("notifications.newMessage");
+      case "like":
+        return t("notifications.someoneLikedYou");
+      case "nearby":
+        return t("notifications.nearbyUser");
+      case "super_like":
+        return t("notifications.superLike");
+      default:
+        return t("notifications.notification");
+    }
+  };
+
+  const getNotificationEmoji = (emoji: string) => {
+    switch (emoji.toLowerCase()) {
       case "reaction":
       case "emoji":
         return "😍";
       case "match":
+      case "new_match":
         return "💖";
       case "profile_view":
       case "view":
@@ -67,117 +213,21 @@ export default function Notifications({ navigation }: any) {
     }
   };
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) {
-      return t("notifications.justNow");
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return minutes === 1
-        ? t("notifications.minuteAgo", { count: minutes })
-        : t("notifications.minutesAgo", { count: minutes });
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return hours === 1
-        ? t("notifications.hourAgo", { count: hours })
-        : t("notifications.hoursAgo", { count: hours });
-    } else if (diffInSeconds < 2592000) {
-      const days = Math.floor(diffInSeconds / 86400);
-      return days === 1
-        ? t("notifications.dayAgo", { count: days })
-        : t("notifications.daysAgo", { count: days });
-    } else {
-      const months = Math.floor(diffInSeconds / 2592000);
-      return months === 1
-        ? t("notifications.monthAgo", { count: months })
-        : t("notifications.monthsAgo", { count: months });
-    }
-  };
-
-  const fetchNotifications = async () => {
-    if (!user?.user_id) {
-      setError(t("notifications.userSessionExpired"));
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append("type", "get_data");
-      formData.append("table_name", "notifications");
-      formData.append("user_id", user.user_id);
-
-      const response = await apiCall(formData);
-
-      if (Array.isArray(response.data)) {
-        // Process the notifications data
-        const processedNotifications = response.data.map(
-          (notif: any, index: number) => {
-            const processed = {
-              id: notif.id || `notif_${index}`,
-              type: notif.type || "general",
-              title: notif.title || getNotificationTitle(notif.type),
-              message: notif.notification,
-              timeAgo: notif.created_at
-                ? formatTimeAgo(notif.created_at)
-                : t("notifications.recently"),
-              isRead: notif.is_read || false,
-              created_at: notif.created_at,
-              user_name: notif.user_name || notif.from_user,
-              emoji: getNotificationEmoji(notif.type || "general"),
-            };
-
-            return processed;
-          }
-        );
-
-        setNotifications(processedNotifications);
-        setError(null);
-      } else {
-        // No notifications or result is false
-        setNotifications([]);
-        setError(null);
-      }
-    } catch (error) {
-      console.error("❌ Error fetching notifications:", error);
-      console.error("❌ Error details:", {
-        message: error.message,
-        stack: error.stack,
-        userId: user?.user_id,
-      });
-      setError(t("notifications.failedToLoad"));
-      setNotifications([]);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
-  const getNotificationTitle = (type: string) => {
+  const getNotificationBackgroundImage = (type: string) => {
     switch (type.toLowerCase()) {
-      case "reaction":
-      case "emoji":
-        return t("notifications.newReaction");
       case "match":
-        return t("notifications.newMatch");
+      case "new_match":
+        return image.matchNotification;
       case "profile_view":
       case "view":
-        return t("notifications.profileView");
+        return image.profileNotification;
       case "event":
-        return t("notifications.eventNotification");
+        return image.eventNotification;
       case "message":
-        return t("notifications.newMessage");
-      case "like":
-        return t("notifications.someoneLikedYou");
-      case "nearby":
-        return t("notifications.nearbyUser");
-      case "super_like":
-        return t("notifications.superLike");
+      case "chat":
+        return image.chatNotification;
       default:
-        return t("notifications.notification");
+        return null; // No background image for other types
     }
   };
 

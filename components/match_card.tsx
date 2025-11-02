@@ -32,7 +32,7 @@ export default function MatchCard({
   const { user } = useAppContext();
   const [showRequestMeetup, setShowRequestMeetup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  console.log("match", JSON.stringify(match));
   // Map emoji actions to SVG icons and get the appropriate emoji
   const getMatchEmoji = (emoji: any) => {
     const emojiMap: { [key: string]: any } = {
@@ -65,53 +65,6 @@ export default function MatchCard({
 
   const handleSubmitMeetupRequest = async (meetupData: any) => {
     setIsSubmitting(true);
-    // if (!user?.user_id) {
-    //   Alert.alert("Error", "User not found. Please try again.");
-    //   return;
-    // }
-
-    // if (!match?.id && !match?.match_id) {
-    //   Alert.alert("Error", "Match information is missing. Please try again.");
-    //   return;
-    // }
-
-    // try {
-    //   setIsSubmitting(true);
-
-    //   const formData = new FormData();
-    //   formData.append("type", "add_data");
-    //   formData.append("user_id", user.user_id);
-    //   formData.append("table_name", "meetup_requests");
-    //   formData.append("date_id", match?.id || match?.match_id);
-    //   formData.append("date", meetupData.date);
-    //   formData.append("time", meetupData.time);
-    //   formData.append("location", meetupData.location);
-    //   formData.append("message", meetupData.message || "Let's meet up!");
-    //   const response = await apiCall(formData);
-
-    //   if (response?.status === "Success" || response?.success) {
-    //     Alert.alert("Success", "Meetup request sent successfully!", [
-    //       {
-    //         text: "OK",
-    //         onPress: () => setShowRequestMeetup(false),
-    //       },
-    //     ]);
-    //   } else {
-    //     Alert.alert(
-    //       "Error",
-    //       response?.message ||
-    //         "Failed to send meetup request. Please try again."
-    //     );
-    //   }
-    // } catch (error: any) {
-    //   console.error("Error submitting meetup request:", error);
-    //   Alert.alert(
-    //     "Error",
-    //     "Network error occurred. Please check your connection and try again."
-    //   );
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
   };
 
   const handleOptions = () => {
@@ -204,7 +157,7 @@ export default function MatchCard({
               ]}
               fontstyle={styles.requestMeetupButtonText}
               onPress={handleRequestMeetup}
-              isDisabled={isSubmitting}
+              isDisabled={isSubmitting || match?.meetup === true}
             />
 
             <View

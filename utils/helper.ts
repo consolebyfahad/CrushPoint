@@ -887,6 +887,11 @@ export const sortRequestsByDate = (requests: any[]): any[] => {
 export const filterOutPastDates = (requests: any[]): any[] => {
   return requests.filter(request => {
     if (!request.date) return false;
+    // Don't filter out requests with placeholder dates like "TBD", "N/A", "0000-00-00"
+    const date = String(request.date).toUpperCase();
+    if (date === "TBD" || date === "N/A" || date === "0000-00-00") {
+      return true;
+    }
     return !isDateInPast(request.date);
   });
 };

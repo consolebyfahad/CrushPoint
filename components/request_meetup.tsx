@@ -93,11 +93,10 @@ export default function RequestMeetup({
       return;
     }
     const formattedDate = selectedDate.toISOString().split("T")[0];
-    const formattedTime = selectedTime.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    // Format time as HH:MM:00 (24-hour format)
+    const hours = selectedTime.getHours().toString().padStart(2, "0");
+    const minutes = selectedTime.getMinutes().toString().padStart(2, "0");
+    const formattedTime = `${hours}:${minutes}:00`;
 
     setIsLoading(true);
     try {
@@ -107,8 +106,8 @@ export default function RequestMeetup({
       formData.append("table_name", "meetup_requests");
       formData.append("date_id", matchData.id);
       formData.append("date", formattedDate);
-      // formData.append("new_date", formattedDate);
-      // formData.append("time", formattedTime);
+      formData.append("new_date", formattedDate);
+      formData.append("time", formattedTime);
       formData.append("location", location.trim());
       formData.append("message", message.trim());
       console.log("formData for request meetup", JSON.stringify(formData));

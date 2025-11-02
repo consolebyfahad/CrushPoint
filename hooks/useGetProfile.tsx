@@ -166,7 +166,7 @@ export default function useGetProfile() {
         }
 
         // Create data for local state (using types/userData.d.ts interface)
-        const localUserData: UserData = {
+        const localUserData: any = {
           ...userData,
           images: userData.images, // Keep original format for local state
           age,
@@ -191,6 +191,9 @@ export default function useGetProfile() {
           about: userData.about || "",
           phone: userData.phone || "",
           status: userData.status || "",
+          // Include change dates from API
+          name_change_date: (userData as any)?.name_change_date || "2025-11-01",
+          dob_change_date: (userData as any)?.dob_change_date || "2025-11-01",
         };
 
         // Create data for context (using context/app_context.tsx interface)
@@ -223,6 +226,9 @@ export default function useGetProfile() {
           about: userData.about || "",
           phone: userData.phone || "",
           status: userData.status || "",
+          // Include change dates from API
+          name_change_date: (userData as any)?.name_change_date || "2025-11-01",
+          dob_change_date: (userData as any)?.dob_change_date || "2025-11-01",
         };
 
         setUserProfile(localUserData);

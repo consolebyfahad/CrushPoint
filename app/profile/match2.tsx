@@ -15,7 +15,6 @@ import {
   Animated,
   Dimensions,
   Easing,
-  Image,
   Modal,
   StyleSheet,
   Text,
@@ -118,14 +117,19 @@ export default function MatchScreen({ route, navigation }: any) {
   const celebrationRef = useRef<LottieView>(null);
   const heartBeatRef = useRef<LottieView>(null);
 
-  // Animation values
+  // Animation values - SEPARATED for iOS compatibility
   const blurOpacity = useRef(new Animated.Value(0)).current;
-  const leftImageAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
-  const rightImageAnim = useRef(new Animated.Value(SCREEN_WIDTH)).current;
+
+  // Left image animations
+  const leftImageX = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const leftImageRotate = useRef(new Animated.Value(0)).current;
-  const rightImageRotate = useRef(new Animated.Value(0)).current;
   const leftImageScale = useRef(new Animated.Value(0.8)).current;
+
+  // Right image animations
+  const rightImageX = useRef(new Animated.Value(SCREEN_WIDTH)).current;
+  const rightImageRotate = useRef(new Animated.Value(0)).current;
   const rightImageScale = useRef(new Animated.Value(0.8)).current;
+
   const matchTextScale = useRef(new Animated.Value(0)).current;
   const matchTextY = useRef(new Animated.Value(50)).current;
   const contentOpacity = useRef(new Animated.Value(0)).current;
@@ -165,7 +169,7 @@ export default function MatchScreen({ route, navigation }: any) {
     setTimeout(() => {
       Animated.parallel([
         // Left image animations
-        Animated.spring(leftImageAnim, {
+        Animated.spring(leftImageX, {
           toValue: SCREEN_WIDTH * 0.12,
           tension: 120,
           friction: 8,
@@ -184,7 +188,7 @@ export default function MatchScreen({ route, navigation }: any) {
           useNativeDriver: true,
         }),
         // Right image animations
-        Animated.spring(rightImageAnim, {
+        Animated.spring(rightImageX, {
           toValue: -SCREEN_WIDTH * 0.12,
           tension: 120,
           friction: 8,
@@ -327,6 +331,17 @@ export default function MatchScreen({ route, navigation }: any) {
     router.back();
   };
 
+  // Interpolate rotation values
+  const leftRotation = leftImageRotate.interpolate({
+    inputRange: [-12, 0],
+    outputRange: ["-12deg", "0deg"],
+  });
+
+  const rightRotation = rightImageRotate.interpolate({
+    inputRange: [0, 12],
+    outputRange: ["0deg", "12deg"],
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Lottie Background Animations */}
@@ -356,7 +371,7 @@ export default function MatchScreen({ route, navigation }: any) {
           <LottieView
             ref={sparklesRef}
             style={styles.sparklesAnimation}
-            source={require("@/assets/animations/confetti.json")} // You'll need to add this
+            source={require("@/assets/animations/confetti.json")}
             autoPlay={false}
             loop={true}
             speed={1.5}
@@ -366,7 +381,7 @@ export default function MatchScreen({ route, navigation }: any) {
           <LottieView
             ref={celebrationRef}
             style={styles.celebrationAnimation}
-            source={require("@/assets/animations/confetti.json")} // You'll need to add this
+            source={require("@/assets/animations/confetti.json")}
             autoPlay={false}
             loop={false}
             speed={1}
@@ -416,32 +431,28 @@ export default function MatchScreen({ route, navigation }: any) {
 
         {/* Images Container */}
         <View style={styles.imagesContainer}>
-          {/* Left Image (Current User) */}
+          {/* Left Image (Current User) - Using absolute positioning with transform */}
           <Animated.View
             style={[
-              styles.imageWrapper,
-              styles.leftImage,
+              styles.leftImageWrapper,
               {
-                transform: [
-                  { translateX: leftImageAnim },
-                  { scale: leftImageScale },
-                  {
-                    rotate: leftImageRotate.interpolate({
-                      inputRange: [-12, -12],
-                      outputRange: ["-12deg", "-12deg"],
-                    }),
-                  },
-                ],
+                transform: [{ translateX: leftImageX }],
               },
             ]}
           >
-            <View style={styles.imageContainer}>
-              <Image
-                source={{ uri: matchData.currentUser.image }}
-                style={styles.userImage}
-              />
-              <View style={styles.imageGlow} />
-            </View>
+            <Animated.Image
+              source={{ uri: matchData.currentUser.image }}
+              style={[
+                styles.userImage,
+                {
+                  transform: [
+                    { rotate: leftRotation },
+                    { scale: leftImageScale },
+                  ],
+                },
+              ]}
+            />
+            <View style={styles.imageGlow} />
           </Animated.View>
 
           {/* Center Heart with Lottie */}
@@ -457,7 +468,7 @@ export default function MatchScreen({ route, navigation }: any) {
               <LottieView
                 ref={heartBeatRef}
                 style={styles.heartBeatAnimation}
-                source={require("@/assets/animations/confetti.json")} // You'll need to add this
+                source={require("@/assets/animations/confetti.json")}
                 autoPlay={false}
                 loop={true}
                 speed={0.8}
@@ -466,32 +477,28 @@ export default function MatchScreen({ route, navigation }: any) {
             </View>
           </Animated.View>
 
-          {/* Right Image (Matched User) */}
+          {/* Right Image (Matched User) - Using absolute positioning with transform */}
           <Animated.View
             style={[
-              styles.imageWrapper,
-              styles.rightImage,
+              styles.rightImageWrapper,
               {
-                transform: [
-                  { translateX: rightImageAnim },
-                  { scale: rightImageScale },
-                  {
-                    rotate: rightImageRotate.interpolate({
-                      inputRange: [12, 12],
-                      outputRange: ["12deg", "12deg"],
-                    }),
-                  },
-                ],
+                transform: [{ translateX: rightImageX }],
               },
             ]}
           >
-            <View style={styles.imageContainer}>
-              <Image
-                source={{ uri: matchData.matchedUser.image }}
-                style={styles.userImage}
-              />
-              <View style={styles.imageGlow} />
-            </View>
+            <Animated.Image
+              source={{ uri: matchData.matchedUser.image }}
+              style={[
+                styles.userImage,
+                {
+                  transform: [
+                    { rotate: rightRotation },
+                    { scale: rightImageScale },
+                  ],
+                },
+              ]}
+            />
+            <View style={styles.imageGlow} />
           </Animated.View>
         </View>
       </View>
@@ -677,22 +684,18 @@ const styles = StyleSheet.create({
     height: 220,
     zIndex: 10,
   },
-  imageWrapper: {
-    position: "relative",
-    justifyContent: "center",
-  },
-  leftImage: {
+  // iOS-Compatible Image Wrappers with absolute positioning
+  leftImageWrapper: {
     position: "absolute",
-    top: 20,
     left: 0,
+    top: 20,
+    zIndex: 5,
   },
-  rightImage: {
+  rightImageWrapper: {
     position: "absolute",
-    top: 0,
     right: 0,
-  },
-  imageContainer: {
-    position: "relative",
+    top: 0,
+    zIndex: 5,
   },
   userImage: {
     width: 150,
