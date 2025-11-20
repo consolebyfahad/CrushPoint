@@ -3,6 +3,7 @@ import { NotificationsTabsHeader } from "@/components/tabs_header";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font, image } from "@/utils/constants";
+import { parseJsonString, parseUserImages } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -29,6 +30,8 @@ interface Notification {
   user_name?: string;
   emoji?: string;
   backgroundImage?: any;
+  from?: any; // User data from notification
+  from_id?: string; // User ID from notification
 }
 
 export default function Notifications({ navigation }: any) {
@@ -136,6 +139,8 @@ export default function Notifications({ navigation }: any) {
               user_name: notif.user_name || notif.from?.name || notif.from_user,
               emoji: getNotificationEmoji(notificationType),
               backgroundImage: backgroundImage,
+              from: notif.from || null, // Store full user object
+              from_id: notif.from_id || notif.from?.id || null, // Store user ID
             };
 
             return processed;
@@ -258,27 +263,123 @@ export default function Notifications({ navigation }: any) {
     // TODO: Call API to mark as read
     // markNotificationAsRead(notification.id);
 
-    // Navigate based on notification type
-    switch (notification.type.toLowerCase()) {
-      case "reaction":
-      case "emoji":
-        // router.push("/reactions");
-        break;
-      case "match":
-        // router.push("/matches");
-        break;
-      case "profile_view":
-      case "view":
-        // router.push("/profile-views");
-        break;
-      case "event":
-        // router.push("/events");
-        break;
-      case "message":
-        // router.push("/messages");
-        break;
-      default:
-        break;
+    const notificationType = notification.type.toLowerCase();
+
+    // Handle meetup notifications - redirect to matches/requests tab
+    if (
+      notificationType === "meetup_accepted" ||
+      notificationType === "meetup_request" ||
+      notificationType === "meetup"
+    ) {
+      router.push({
+        pathname: "/(tabs)/matches",
+        params: { activeTab: "requests" },
+      });
+      return;
+    }
+
+    // Navigate to user profile if user data is available (for match, profile_view, etc.)
+    if (notification.from && notification.from_id) {
+      try {
+        // Parse images from JSON string to array
+        const imagesString = notification.from.images || "[]";
+        const parsedImages = parseUserImages(
+          imagesString,
+          notification.from.gender || "unknown"
+        );
+
+        // Parse lookingFor from JSON string to array
+        const lookingForString = notification.from.looking_for || "[]";
+        let parsedLookingFor: string[] = [];
+        try {
+          parsedLookingFor = parseJsonString(lookingForString);
+        } catch (error) {
+          console.warn("Error parsing lookingFor:", error);
+          parsedLookingFor = [];
+        }
+
+        // Parse interests from JSON string to array
+        const interestsString = notification.from.interests || "[]";
+        let parsedInterests: string[] = [];
+        try {
+          parsedInterests = parseJsonString(interestsString);
+        } catch (error) {
+          console.warn("Error parsing interests:", error);
+          parsedInterests = [];
+        }
+
+        // Parse nationality from JSON string to array
+        const nationalityString = notification.from.nationality || "[]";
+        let parsedNationality: string[] = [];
+        try {
+          if (nationalityString && typeof nationalityString === "string") {
+            if (
+              nationalityString.startsWith("[") &&
+              nationalityString.endsWith("]")
+            ) {
+              parsedNationality = parseJsonString(nationalityString);
+            } else {
+              parsedNationality = [nationalityString];
+            }
+          }
+        } catch (error) {
+          console.warn("Error parsing nationality:", error);
+          parsedNationality = [];
+        }
+
+        // Format user data for profile navigation
+        const userProfileData = {
+          id: notification.from.id || notification.from_id,
+          name: notification.from.name || notification.user_name || "User",
+          images: parsedImages, // Use parsed array instead of string
+          about: notification.from.about || "",
+          height: notification.from.height || "",
+          nationality: parsedNationality, // Use parsed array
+          religion: notification.from.religion || "",
+          zodiac: notification.from.zodiac || "",
+          gender: notification.from.gender || "",
+          country: notification.from.country || "",
+          state: notification.from.state || "",
+          city: notification.from.city || "",
+          languages: notification.from.languages || "",
+          interests: parsedInterests, // Use parsed array
+          lookingFor: parsedLookingFor, // Use parsed array
+          phone: notification.from.phone || "",
+          dob: notification.from.dob || "",
+          lat: notification.from.lat || "",
+          lng: notification.from.lng || "",
+          email: notification.from.email || "",
+          radius: notification.from.radius || "",
+          uploaded_selfie: notification.from.uploaded_selfie || "",
+        };
+
+        router.push({
+          pathname: "/profile/user_profile",
+          params: {
+            user: JSON.stringify(userProfileData),
+            userId: userProfileData.id,
+          },
+        });
+      } catch (error) {
+        console.error("Error navigating to user profile:", error);
+      }
+    } else {
+      // Fallback navigation based on notification type if no user data
+      switch (notificationType) {
+        case "match":
+        case "new_match":
+          router.push("/(tabs)/matches");
+          break;
+        case "event":
+          router.push("/(tabs)/events");
+          break;
+        case "message":
+        case "chat":
+          // router.push("/messages");
+          break;
+        default:
+          break;
+      }
     }
   };
 
