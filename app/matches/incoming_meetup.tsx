@@ -121,42 +121,42 @@ export default function IncomingMeetup({
     [requests]
   );
 
-  const handleSuggestChanges = useCallback(
-    async (changes: any) => {
-      try {
-        setIsLoading(true);
+  // const handleSuggestChanges = useCallback(
+  //   async (changes: any) => {
+  //     try {
+  //       setIsLoading(true);
 
-        const formData = new FormData();
-        formData.append("type", "update_data");
-        formData.append("id", selectedRequest?.id || "");
-        formData.append("table_name", "meetup_requests");
-        formData.append("status", "change");
-        formData.append("user_id", user?.user_id || "");
+  //       const formData = new FormData();
+  //       formData.append("type", "update_data");
+  //       formData.append("id", selectedRequest?.id || "");
+  //       formData.append("table_name", "meetup_requests");
+  //       formData.append("status", "change");
+  //       formData.append("user_id", user?.user_id || "");
 
-        // Add the suggested changes
-        if (changes.date) formData.append("suggested_date", changes.date);
-        if (changes.time) formData.append("suggested_time", changes.time);
-        if (changes.location)
-          formData.append("suggested_location", changes.location);
-        if (changes.message) formData.append("change_message", changes.message);
+  //       // Add the suggested changes
+  //       if (changes.date) formData.append("suggested_date", changes.date);
+  //       if (changes.time) formData.append("suggested_time", changes.time);
+  //       if (changes.location)
+  //         formData.append("suggested_location", changes.location);
+  //       if (changes.message) formData.append("change_message", changes.message);
 
-        const response = await apiCall(formData);
+  //       const response = await apiCall(formData);
 
-        if (response?.result === true) {
-          onUpdateStatus?.(selectedRequest?.id, "change");
-          setShowSuggestChanges(false);
-          setSelectedRequest(null);
-        } else {
-          console.error("Failed to suggest changes:", response?.message);
-        }
-      } catch (error: any) {
-        console.error("Error submitting suggested changes:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [selectedRequest, user?.user_id, onUpdateStatus]
-  );
+  //       if (response?.result === true) {
+  //         onUpdateStatus?.(selectedRequest?.id, "change");
+  //         setShowSuggestChanges(false);
+  //         setSelectedRequest(null);
+  //       } else {
+  //         console.error("Failed to suggest changes:", response?.message);
+  //       }
+  //     } catch (error: any) {
+  //       console.error("Error submitting suggested changes:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   },
+  //   [selectedRequest, user?.user_id, onUpdateStatus]
+  // );
 
   const handleDecline = useCallback(
     async (requestId: string) => {
@@ -167,8 +167,8 @@ export default function IncomingMeetup({
         formData.append("type", "update_data");
         formData.append("id", requestId);
         formData.append("table_name", "meetup_requests");
-        formData.append("status", "declined");
-        formData.append("user_id", user?.user_id || "");
+        formData.append("status", "cancel");
+        // formData.append("user_id", user?.user_id || "");
 
         const response = await apiCall(formData);
 
@@ -271,7 +271,7 @@ export default function IncomingMeetup({
                 setShowSuggestChanges(false);
                 setSelectedRequest(null);
               }}
-              onSubmit={handleSuggestChanges}
+              // onSubmit={handleSuggestChanges}
               requestId={selectedRequest.id}
               originalRequest={{
                 user: selectedRequest.user,
@@ -279,6 +279,7 @@ export default function IncomingMeetup({
                 date: selectedRequest.date,
                 time: selectedRequest.time,
                 location: selectedRequest.location,
+                message: selectedRequest.message,
               }}
             />
           )}

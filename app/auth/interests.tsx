@@ -34,6 +34,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Interests() {
   const { t } = useTranslation();
   const { interests, loading, error, refetch } = useGetInterests();
+  console.log("interests", interests);
   const { updateUserData, user, userData } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
@@ -174,7 +175,7 @@ export default function Interests() {
                 <Octicons name="info" size={14} color={color.gray55} />{" "}
                 {params.isEdit
                   ? t("interests.updateInterestsSubtitle")
-                  : t("interests.selectAtLeast", { count: 3 })}
+                  : t("interests.selectAtLeast", { count: 2 })}
               </Text>
             </View>
           </View>

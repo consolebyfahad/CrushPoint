@@ -18,7 +18,6 @@
   "success": "Success",
   "warning": "Warning",
   "info": "Info",
-
   "onboarding": {
     "title1": "Discover People Nearby",
     "subtitle1": "Find real profiles around you on the map or in list view.",
@@ -29,7 +28,6 @@
     "title4": "Discover Events",
     "subtitle4": "Find your significant other at interesting events."
   },
-
   "language": {
     "selectLanguage": "Select Language",
     "chooseLanguage": "Choose your preferred language",
@@ -37,7 +35,6 @@
     "en": "English",
     "de": "Deutsch"
   },
-
   "auth": {
     "login": "Login",
     "signup": "Create Your Account",
@@ -71,8 +68,10 @@
     "uploading": "Uploading...",
     "submitting": "Submitting...",
     "creatingProfile": "Creating Profile...",
-    "verificationSuccessful": "Verification Successful!",
-    "verificationFailed": "Verification Failed",
+    "verificationSuccessful": "Verification Successful ✅",
+    "verificationSuccessfulmessage": "Your pictures have been successfully uploaded.",
+    "verificationFailed": "Verification Failed ❌",
+    "verificationFailedmessage": "Your face does not match your pictures. Make sure you are clearly recognizable and well lit.",
     "verificationError": "Verification Error",
     "tryAgain": "Try Again",
     "noReferenceImage": "No reference image available",
@@ -101,7 +100,6 @@
     "uploadFailed": "Upload failed",
     "somethingWentWrong": "Something went wrong. Please try again."
   },
-
   "faceVerification": {
     "success": "Identity verification completed! Confidence:",
     "failed": "Face verification failed. Confidence:",
@@ -126,7 +124,6 @@
     "invalidConfidenceScore": "Invalid confidence score received from Face++ API",
     "verificationFailed": "Verification failed"
   },
-
   "profile": {
     "profile": "Profile",
     "editProfile": "Edit Profile",
@@ -202,7 +199,6 @@
     "enterEmail": "Enter your email",
     "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone."
   },
-
   "matches": {
     "matches": "Matches",
     "newMatches": "New Matches",
@@ -232,7 +228,6 @@
     "locationUnavailable": "Location Unavailable",
     "unableToAccessLocation": "Unable to access location. Please enable location services and try again."
   },
-
   "meetups": {
     "meetups": "Meetups",
     "requests": "Requests",
@@ -291,9 +286,9 @@
     "yourRequestAccepted": "Your request was accepted!",
     "suggest": "Suggest",
     "edit": "Edit",
-    "loadingRequests": "Loading requests..."
+    "loadingRequests": "Loading requests...",
+    "keepExploring": "Keep Exploring"
   },
-
   "events": {
     "events": "Events",
     "upcoming": "Upcoming",
@@ -351,14 +346,12 @@
     "eventShared": "Event shared successfully!",
     "failedToShare": "Failed to share event"
   },
-
   "users": {
     "userIdNotAvailable": "User ID not available",
     "noUsersFoundInArea": "No users found in your area",
     "noUsersFoundOrServerError": "No users found or server error occurred",
     "networkError": "Network error occurred. Please check your connection."
   },
-
   "settings": {
     "settings": "Settings",
     "account": "Account",
@@ -382,7 +375,6 @@
     "rateOnStore": "Rate us on app store",
     "lastUpdated": "Last updated: 2023-12-01"
   },
-
   "notifications": {
     "notifications": "Notifications",
     "newMatch": "New Match!",
@@ -421,7 +413,6 @@
     "oopsSomethingWentWrong": "Oops! Something went wrong",
     "pullToRefresh": "Pull to refresh"
   },
-
   "common": {
     "settings": "Settings",
     "loading": "Loading...",
@@ -539,7 +530,6 @@
     "delete": "Delete",
     "save": "Save"
   },
-
   "filters": {
     "filters": "Filters",
     "showMe": "Show me",
@@ -560,7 +550,6 @@
     "searchReligion": "Search religion",
     "searchZodiac": "Search zodiac sign"
   },
-
   "report": {
     "reportUser": "Report User",
     "whatsWrong": "What's wrong with this profile?",
@@ -580,13 +569,11 @@
     "placeholder": "Please provide more information...",
     "submitReport": "Submit Report"
   },
-
   "block": {
     "blockUser": "Block {{userName}}?",
     "areYouSure": "Are you sure?",
     "blockDescription": "{{userName}} will no longer be able to see your profile, send you reactions, or match with you"
   },
-
   "lookingFor": {
     "lookingFor": "Looking for",
     "serious": "Serious Relationship",
@@ -601,7 +588,6 @@
     "openToPossibilities": "Open to possibilities",
     "preferNotToSay": "Prefer not to say"
   },
-
   "nationality": {
     "american": "American",
     "canadian": "Canadian",
@@ -619,7 +605,6 @@
     "russian": "Russian",
     "korean": "Korean"
   },
-
   "religion": {
     "christian": "Christian",
     "islam": "Islam",
@@ -634,7 +619,6 @@
     "spiritual": "Spiritual",
     "other": "Other"
   },
-
   "about": {
     "about": "About",
     "name": "Name",
@@ -646,7 +630,6 @@
     "continue": "Continue",
     "agePrivacyNote": "Your name and age will be publicly displayed on your profile."
   },
-
   "interests": {
     "interests": "Interests",
     "searchInterests": "Search interests...",
@@ -685,7 +668,6 @@
     "languages": "Languages",
     "science": "Science"
   },
-
   "privateSpots": {
     "privateSpots": "Private Spots",
     "addPrivateSpot": "Add Private Spot",
@@ -697,7 +679,6 @@
     "deleted": "Private spot deleted successfully",
     "deleteFailed": "Failed to delete private spot"
   },
-
   "zodiac": {
     "aries": "Aries",
     "taurus": "Taurus",
@@ -712,7 +693,6 @@
     "aquarius": "Aquarius",
     "pisces": "Pisces"
   },
-
   "nationalities": {
     "afghan": "Afghan",
     "albanian": "Albanian",
@@ -907,7 +887,6 @@
     "zambian": "Zambian",
     "zimbabwean": "Zimbabwean"
   },
-
   "religions": {
     "christianity": "Christianity",
     "islam": "Islam",
@@ -917,7 +896,6 @@
     "others": "Others",
     "any": "Any"
   },
-
   "contactSupport": {
     "title": "Contact Support",
     "subtitle": "We're here to help",
@@ -951,7 +929,6 @@
       "somethingWrong": "Something went wrong. Please try again."
     }
   },
-
   "match": {
     "title": "It's a Match",
     "subtitle": "It's a Match",
@@ -959,7 +936,6 @@
     "viewProfile": "View {{name}}'s Profile",
     "keepExploring": "Keep Exploring"
   },
-
   "communityGuidelines": {
     "title": "Community Guidelines",
     "welcomeTitle": "Welcome to Andra",
@@ -1004,7 +980,6 @@
       "Report any suspicious or inappropriate behavior"
     ]
   },
-
   "basicInfo": {
     "interestedIn": {
       "men": "Men",
@@ -1024,7 +999,6 @@
       "relationshipGoalRequired": "Please select at least one relationship goal."
     }
   },
-
   "api": {
     "errors": {
       "somethingWentWrong": "Something went wrong",
@@ -1032,7 +1006,6 @@
       "networkError": "Network error. Please check your internet connection."
     }
   },
-
   "helper": {
     "genderInterest": {
       "all": "All",
@@ -1064,7 +1037,6 @@
       "option": "Unknown Option ({{id}})"
     }
   },
-
   "verification": {
     "status": {
       "title": "Verification Status",
@@ -1111,7 +1083,6 @@
     },
     "tryAgain": "Try Again"
   },
-
   "blockedUsers": {
     "title": "Blocked Users",
     "loading": "Loading blocked users...",
@@ -1130,7 +1101,6 @@
       }
     }
   },
-
   "terms": {
     "title": "Terms of Service",
     "lastUpdated": "Last updated: November 2025",
@@ -1210,7 +1180,6 @@
       }
     }
   },
-
   "privacy": {
     "title": "Privacy Policy",
     "lastUpdated": "Last updated: November 2025",
@@ -1300,7 +1269,6 @@
       }
     }
   },
-
   "errors": {
     "noUsersAvailable": "Oops! No User Available",
     "unableToLoadUsers": "Unable to load users. Please try again.",
@@ -1318,7 +1286,6 @@
     "unableToShowLocation": "Unable to show location on map. Please try again.",
     "ok": "OK"
   },
-
   "validation": {
     "validationError": "Validation Error",
     "enterFullName": "Please enter your full name.",
@@ -1332,7 +1299,6 @@
     "saving": "Saving...",
     "saveChanges": "Save Changes"
   },
-
   "suggestChanges": {
     "title": "Suggest Changes",
     "error": "Error",
@@ -1353,7 +1319,6 @@
     "suggestChanges": "Suggest Changes",
     "required": "*"
   },
-
   "invite": {
     "inviteMatches": "Invite Matches",
     "searchMatches": "Search matches...",
@@ -1366,7 +1331,6 @@
     "noMatchesFound": "No matches found",
     "invitesSentSuccessfully": "Invites sent successfully!"
   },
-
   "privateSpot": {
     "unableToGetLocation": "Unable to get your location. Please try again.",
     "loadingPrivateSpots": "Loading private spots...",
@@ -1387,7 +1351,6 @@
       "locationError": "Unable to get your location. Please try again."
     }
   },
-
   "account": {
     "deleteAccount": "Delete Account",
     "deleteMyAccount": "Delete My Account",
@@ -1395,7 +1358,6 @@
     "accountDeletedSuccessfully": "Account deleted successfully",
     "failedToDeleteAccount": "Failed to delete account. Please try again."
   },
-
   "hooks": {
     "invalidUserData": "Invalid user data: missing required fields",
     "failedToTransformUser": "Failed to transform user",

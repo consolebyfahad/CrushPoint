@@ -84,7 +84,7 @@ export default function Index() {
         t("filters.both"),
       ageFrom: "18",
       ageTo: "35",
-      distance: 10,
+      distance: 50,
       lookingFor: undefined,
       nationality: undefined,
       religion: undefined,

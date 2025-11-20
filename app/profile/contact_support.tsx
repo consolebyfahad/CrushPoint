@@ -115,11 +115,12 @@ export default function ContactSupport() {
 
     try {
       const submissionData = new FormData();
-      submissionData.append("type", "contact_us");
+      submissionData.append("type", "add_data");
+      submissionData.append("table_name", "contact_us");
       submissionData.append("user_id", user.user_id);
       submissionData.append("subject", formData.subject);
       submissionData.append("message", formData.message.trim());
-
+console.log("submissionData", submissionData)
       const response = await apiCall(submissionData);
 
       if (response.result) {

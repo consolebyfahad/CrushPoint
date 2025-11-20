@@ -91,11 +91,8 @@ export default function FaceVerification() {
             text: isVerified ? t("continue") : t("auth.tryAgain"),
             style: isVerified ? "default" : "destructive",
             onPress: () => {
-              // Only process photo if verification is successful
               if (isVerified) {
                 if (mode === "verify_only" && returnTo === "add_photos") {
-                  // In edit mode, go directly to profile screen after verification
-                  // The photos are already uploaded, just save them
                   router.replace("/(tabs)/profile");
                 } else {
                   processVerifiedPhoto(photoUri);
@@ -149,10 +146,10 @@ export default function FaceVerification() {
       verified: !anyFailed,
       results,
       message: anyFailed
-        ? `${t("auth.verificationFailed")} (${
+        ? `${t("auth.verificationFailedmessage")} (${
             results.filter((r) => !r.verified).length
           }/${results.length} failed)`
-        : t("auth.verificationSuccessful"),
+        : t("auth.verificationSuccessfulmessage"),
     };
   };
 
@@ -237,7 +234,7 @@ export default function FaceVerification() {
       setTimeout(() => {
         Alert.alert(
           t("auth.verificationError"),
-          error.message || t("auth.verificationFailed"),
+          error.message || t("auth.verificationFailed ❌" ),
           [
             {
               text: t("auth.tryAgain"),
@@ -294,10 +291,8 @@ export default function FaceVerification() {
       const response = await apiCall(submissionData);
 
       if (response.result) {
-        // Update user verification status in context
         updateUserData({ status: "1" });
 
-        // Add small delay before navigation to ensure state is clean
         setTimeout(() => {
           router.replace("/(tabs)");
         }, 100);

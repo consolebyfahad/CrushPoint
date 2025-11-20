@@ -1,7 +1,7 @@
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { formatTimeAgo } from "@/utils/helper";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface EventAttendee {
@@ -41,10 +41,48 @@ const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 
 const useGetEvents = () => {
   const { user } = useAppContext();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Helper function to get localized value from *_languages field
+  const getLocalizedValue = (
+    event: any,
+    fieldName: string,
+    fallbackValue: string
+  ): string => {
+    const languagesField = `${fieldName}_languages`;
+    const languagesValue = event[languagesField];
+
+    if (!languagesValue) {
+      return fallbackValue || event[fieldName] || "";
+    }
+
+    try {
+      // Parse the JSON string from *_languages field
+      const languages =
+        typeof languagesValue === "string"
+          ? JSON.parse(languagesValue)
+          : languagesValue;
+
+      // Get current language (defaults to "en" if not found)
+      const currentLang = i18n.language || "en";
+      const langCode = currentLang.split("-")[0]; // Get "en" from "en-US"
+
+      // Try to get the value for current language, fallback to "en", then to original value
+      return (
+        languages[langCode] ||
+        languages["en"] ||
+        event[fieldName] ||
+        fallbackValue ||
+        ""
+      );
+    } catch (error) {
+      console.warn(`Error parsing ${languagesField}:`, error);
+      return event[fieldName] || fallbackValue || "";
+    }
+  };
 
   // Get default event image
   const getDefaultEventImage = (): string => {
@@ -110,7 +148,7 @@ const useGetEvents = () => {
     });
   };
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -128,24 +166,63 @@ const useGetEvents = () => {
           const goingUsers = parseGoingUsers(event.going || []);
           console.log("Going users parsed:", goingUsers);
 
-          const formattedEvent = {
-            id: event.id || Math.random().toString(),
-            title: event.title || t("events.defaultTitle"),
-            category: event.category || t("events.defaultCategory"),
-            date: event.date || new Date().toISOString(),
-            time: event.time,
-            location:
-              event.location || event.venue || t("events.defaultLocation"),
-            address:
-              event.address || event.location || t("events.defaultLocation"),
-            description:
-              event.detail ||
+          // Get localized values
+          const localizedTitle = getLocalizedValue(
+            event,
+            "title",
+            event.title || t("events.defaultTitle")
+          );
+          const localizedCategory = getLocalizedValue(
+            event,
+            "category",
+            event.category || t("events.defaultCategory")
+          );
+          const localizedDescription = getLocalizedValue(
+            event,
+            "detail",
+            event.detail ||
               event.description ||
               event.details ||
-              t("events.defaultDescription"),
+              t("events.defaultDescription")
+          );
+          const localizedAddress = getLocalizedValue(
+            event,
+            "address",
+            event.address || event.location || t("events.defaultLocation")
+          );
+
+          // Special handling for organizer - check org_by_languages field
+          let localizedOrganizer =
+            event.organized_by || t("events.defaultOrganizer");
+          if (event.org_by_languages) {
+            try {
+              const orgLanguages =
+                typeof event.org_by_languages === "string"
+                  ? JSON.parse(event.org_by_languages)
+                  : event.org_by_languages;
+              const currentLang = i18n.language || "en";
+              const langCode = currentLang.split("-")[0];
+              localizedOrganizer =
+                orgLanguages[langCode] ||
+                orgLanguages["en"] ||
+                localizedOrganizer;
+            } catch (error) {
+              console.warn("Error parsing org_by_languages:", error);
+            }
+          }
+
+          const formattedEvent = {
+            id: event.id || Math.random().toString(),
+            title: localizedTitle,
+            category: localizedCategory,
+            date: event.date || new Date().toISOString(),
+            time: event.time,
+            location: localizedAddress,
+            address: localizedAddress,
+            description: localizedDescription,
             image: parseEventImage(event.image || event.event_image),
             organizer: {
-              name: event.organized_by || t("events.defaultOrganizer"),
+              name: localizedOrganizer,
               image:
                 event.organizer_image ||
                 "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
@@ -188,7 +265,7 @@ const useGetEvents = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, i18n.language, t]);
 
   // Toggle event attendance
   const toggleAttendance = async (eventId: string) => {
@@ -266,7 +343,7 @@ const useGetEvents = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [i18n.language]);
 
   return {
     loading,

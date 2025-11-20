@@ -166,7 +166,9 @@ export default function PrivateSpots() {
         <View style={styles.spotDetails}>
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>{t("privateSpot.radius")}:</Text>
-            <Text style={styles.detailValue}>{spot.radius} km</Text>
+            <Text style={styles.detailValue}>
+              {spot.radius} {t("filters.km")}
+            </Text>
           </View>
         </View>
       </View>

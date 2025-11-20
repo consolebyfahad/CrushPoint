@@ -13,6 +13,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -69,17 +70,57 @@ export default function RequestMeetup({
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setSelectedDate(selectedDate);
+    // On iOS spinner, don't close immediately - only update the date
+    if (Platform.OS === "ios") {
+      if (selectedDate) {
+        setSelectedDate(selectedDate);
+      }
+      // Only close if user dismissed (event.type === "dismissed")
+      if (event.type === "dismissed") {
+        setShowDatePicker(false);
+      }
+    } else {
+      // On Android, close immediately
+      setShowDatePicker(false);
+      if (selectedDate) {
+        setSelectedDate(selectedDate);
+      }
     }
   };
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setShowTimePicker(false);
-    if (selectedTime) {
-      setSelectedTime(selectedTime);
+    // On iOS spinner, don't close immediately - only update the time
+    if (Platform.OS === "ios") {
+      if (selectedTime) {
+        setSelectedTime(selectedTime);
+      }
+      // Only close if user dismissed (event.type === "dismissed")
+      if (event.type === "dismissed") {
+        setShowTimePicker(false);
+      }
+    } else {
+      // On Android, close immediately
+      setShowTimePicker(false);
+      if (selectedTime) {
+        setSelectedTime(selectedTime);
+      }
     }
+  };
+
+  const handleDateConfirm = () => {
+    setShowDatePicker(false);
+  };
+
+  const handleDateCancel = () => {
+    setShowDatePicker(false);
+  };
+
+  const handleTimeConfirm = () => {
+    setShowTimePicker(false);
+  };
+
+  const handleTimeCancel = () => {
+    setShowTimePicker(false);
   };
 
   const handleSubmit = async () => {
@@ -114,25 +155,26 @@ export default function RequestMeetup({
       const response = await apiCall(formData);
       console.log("response for request meetup", response);
       if (response.result) {
-        Alert.alert(
-          t("success"),
-          t("meetups.meetupRequestSent", { name: matchData.name }),
-          [
-            {
-              text: t("common.ok"),
-              onPress: () => {
-                onSubmit({
-                  matchId: matchData.id,
-                  date: formattedDate,
-                  time: formattedTime,
-                  location: location.trim(),
-                  message: message.trim(),
-                });
-                onClose();
-              },
-            },
-          ]
-        );
+        onClose();
+        // Alert.alert(
+        //   t("success"),
+        //   t("meetups.meetupRequestSent", { name: matchData.name }),
+        //   [
+        //     {
+        //       text: t("common.ok"),
+        //       onPress: () => {
+        //         onSubmit({
+        //           matchId: matchData.id,
+        //           date: formattedDate,
+        //           time: formattedTime,
+        //           location: location.trim(),
+        //           message: message.trim(),
+        //         });
+        //         onClose();
+        //       },
+        //     },
+        //   ]
+        // );
       } else {
         Alert.alert(
           t("common.error"),
@@ -303,23 +345,96 @@ export default function RequestMeetup({
         </View>
       </TouchableWithoutFeedback>
 
-      {/* Date Picker */}
-      {showDatePicker && (
+      {/* Date Picker - iOS Modal */}
+      {Platform.OS === "ios" && showDatePicker && (
+        <Modal
+          visible={showDatePicker}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={handleDateCancel}
+        >
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity
+              style={styles.modalBackground}
+              activeOpacity={1}
+              onPress={handleDateCancel}
+            />
+            <View style={styles.pickerContainer}>
+              <View style={styles.pickerHeader}>
+                <TouchableOpacity onPress={handleDateCancel}>
+                  <Text style={styles.pickerCancelButton}>{t("cancel")}</Text>
+                </TouchableOpacity>
+                <Text style={styles.pickerTitle}>{t("meetups.date")}</Text>
+                <TouchableOpacity onPress={handleDateConfirm}>
+                  <Text style={styles.pickerConfirmButton}>{t("done")}</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display="spinner"
+                onChange={handleDateChange}
+                minimumDate={new Date()}
+                style={styles.picker}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Date Picker - Android */}
+      {Platform.OS === "android" && showDatePicker && (
         <DateTimePicker
           value={selectedDate}
           mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
+          display="default"
           onChange={handleDateChange}
           minimumDate={new Date()}
         />
       )}
 
-      {/* Time Picker */}
-      {showTimePicker && (
+      {/* Time Picker - iOS Modal */}
+      {Platform.OS === "ios" && showTimePicker && (
+        <Modal
+          visible={showTimePicker}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={handleTimeCancel}
+        >
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity
+              style={styles.modalBackground}
+              activeOpacity={1}
+              onPress={handleTimeCancel}
+            />
+            <View style={styles.pickerContainer}>
+              <View style={styles.pickerHeader}>
+                <TouchableOpacity onPress={handleTimeCancel}>
+                  <Text style={styles.pickerCancelButton}>{t("cancel")}</Text>
+                </TouchableOpacity>
+                <Text style={styles.pickerTitle}>{t("meetups.time")}</Text>
+                <TouchableOpacity onPress={handleTimeConfirm}>
+                  <Text style={styles.pickerConfirmButton}>{t("done")}</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={selectedTime}
+                mode="time"
+                display="spinner"
+                onChange={handleTimeChange}
+                style={styles.picker}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Time Picker - Android */}
+      {Platform.OS === "android" && showTimePicker && (
         <DateTimePicker
           value={selectedTime}
           mode="time"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
+          display="default"
           onChange={handleTimeChange}
         />
       )}
@@ -476,5 +591,47 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.semiBold,
     color: color.white,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  pickerContainer: {
+    backgroundColor: color.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: Platform.OS === "ios" ? 34 : 20,
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray94,
+  },
+  pickerTitle: {
+    fontSize: 18,
+    fontFamily: font.semiBold,
+    color: color.black,
+  },
+  pickerCancelButton: {
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.gray55,
+  },
+  pickerConfirmButton: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.primary,
+  },
+  picker: {
+    width: "100%",
+    height: 200,
   },
 });

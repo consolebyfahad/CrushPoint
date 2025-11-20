@@ -883,10 +883,18 @@ export const sortRequestsByDate = (requests: any[]): any[] => {
 
 /**
  * Filter out past dates
+ * Keep accepted requests regardless of date
  */
 export const filterOutPastDates = (requests: any[]): any[] => {
   return requests.filter(request => {
     if (!request.date) return false;
+    
+    // Keep accepted requests regardless of date
+    const status = String(request.status || "").toLowerCase();
+    if (status === "accept" || status === "accepted") {
+      return true;
+    }
+    
     // Don't filter out requests with placeholder dates like "TBD", "N/A", "0000-00-00"
     const date = String(request.date).toUpperCase();
     if (date === "TBD" || date === "N/A" || date === "0000-00-00") {

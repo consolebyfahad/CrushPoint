@@ -11,6 +11,7 @@ import {
   Alert,
   Dimensions,
   Image,
+  Keyboard,
   Platform,
   ScrollView,
   StyleSheet,
@@ -24,7 +25,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface SuggestChangesProps {
   onClose: () => void;
-  onSubmit: (changes: any) => void;
+  onSubmit?: (changes: any) => void;
   requestId: string; // Add meetup request ID
   originalRequest: {
     user: {
@@ -35,6 +36,7 @@ interface SuggestChangesProps {
     date: string;
     time: string;
     location: string;
+    message: string;
   };
 }
 
@@ -46,10 +48,19 @@ export default function SuggestChanges({
 }: SuggestChangesProps) {
   const { t } = useTranslation();
   const { user } = useAppContext();
-  const [newDate, setNewDate] = useState(new Date());
-  const [newTime, setNewTime] = useState(new Date());
+  // Initialize date to current date or later
+  const [newDate, setNewDate] = useState(() => {
+    const now = new Date();
+    return now;
+  });
+  // Initialize time to 12:00 PM (noon) as a reasonable default
+  const [newTime, setNewTime] = useState(() => {
+    const now = new Date();
+    now.setHours(12, 0, 0, 0); // Default to 12:00 PM
+    return now;
+  });
   const [newLocation, setNewLocation] = useState(originalRequest.location);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(originalRequest.message);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,17 +82,53 @@ export default function SuggestChanges({
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+    }
+
     if (selectedDate) {
-      setNewDate(selectedDate);
+      // Create a new Date object to ensure React detects the state change
+      setNewDate(new Date(selectedDate));
     }
   };
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
-    setShowTimePicker(false);
-    if (selectedTime) {
-      setNewTime(selectedTime);
+    // On iOS spinner, don't close immediately - only update the time
+    if (Platform.OS === "ios") {
+      // Always update the time when it changes while scrolling
+      // The onChange event fires continuously as user scrolls in spinner mode
+      if (selectedTime) {
+        setNewTime(new Date(selectedTime)); // Create new Date object to ensure state update
+      }
+      // Don't close on regular changes - only close if user dismissed
+      // The picker will stay open until user taps Done or Cancel
+    } else {
+      // On Android, close immediately
+      setShowTimePicker(false);
+      if (selectedTime) {
+        setNewTime(selectedTime);
+      }
     }
+  };
+
+  const handleDateConfirm = () => {
+    setShowDatePicker(false);
+    Keyboard.dismiss();
+  };
+
+  const handleDateCancel = () => {
+    setShowDatePicker(false);
+    Keyboard.dismiss();
+  };
+
+  const handleTimeConfirm = () => {
+    setShowTimePicker(false);
+    Keyboard.dismiss();
+  };
+
+  const handleTimeCancel = () => {
+    setShowTimePicker(false);
+    Keyboard.dismiss();
   };
 
   const handleSubmit = async () => {
@@ -118,28 +165,29 @@ export default function SuggestChanges({
       formData.append("new_time", formattedTime);
       formData.append("new_location", newLocation.trim());
       formData.append("new_message", message.trim());
-
+      console.log("formData for suggest changes", JSON.stringify(formData));
       const response = await apiCall(formData);
 
       if (response.result) {
-        Alert.alert(
-          t("suggestChanges.success"),
-          t("suggestChanges.changesSuggestedSuccessfully"),
-          [
-            {
-              text: t("suggestChanges.ok"),
-              onPress: () => {
-                onSubmit({
-                  date: formattedDate,
-                  time: formattedTime,
-                  location: newLocation.trim(),
-                  message: message.trim(),
-                });
-                onClose();
-              },
-            },
-          ]
-        );
+        onClose();
+        // Alert.alert(
+        //   t("suggestChanges.success"),
+        //   t("suggestChanges.changesSuggestedSuccessfully"),
+        //   [
+        //     {
+        //       text: t("suggestChanges.ok"),
+        //       onPress: () => {
+        //         onSubmit({
+        //           date: formattedDate,
+        //           time: formattedTime,
+        //           location: newLocation.trim(),
+        //           message: message.trim(),
+        //         });
+        //         onClose();
+        //       },
+        //     },
+        //   ]
+        // );
       } else {
         Alert.alert(
           t("suggestChanges.error"),
@@ -296,25 +344,97 @@ export default function SuggestChanges({
         </TouchableOpacity>
       </View>
 
-      {/* Date Picker */}
-      {showDatePicker && (
+      {/* Android Date Picker */}
+      {Platform.OS === "android" && showDatePicker && (
         <DateTimePicker
           value={newDate}
           mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
+          display="default"
           onChange={handleDateChange}
           minimumDate={new Date()}
         />
       )}
 
-      {/* Time Picker */}
-      {showTimePicker && (
+      {/* iOS Date Picker - Custom Overlay (not Modal to avoid nested modals) */}
+      {Platform.OS === "ios" && showDatePicker && (
+        <View style={styles.customModalOverlay}>
+          <TouchableOpacity
+            style={styles.customModalBackground}
+            activeOpacity={1}
+            onPress={handleDateCancel}
+          />
+          <View style={styles.datePickerContainer}>
+            <View style={styles.datePickerHeader}>
+              <TouchableOpacity onPress={handleDateCancel}>
+                <Text style={styles.cancelButton}>{t("cancel")}</Text>
+              </TouchableOpacity>
+              <Text style={styles.datePickerTitle}>
+                {t("suggestChanges.newDate")}
+              </Text>
+              <TouchableOpacity onPress={handleDateConfirm}>
+                <Text style={styles.confirmButton}>{t("done")}</Text>
+              </TouchableOpacity>
+            </View>
+            <DateTimePicker
+              testID="datePicker"
+              value={newDate}
+              mode="date"
+              display="spinner"
+              themeVariant="light"
+              onChange={handleDateChange}
+              minimumDate={new Date()}
+              style={styles.datePicker}
+              locale="en_US"
+              textColor={color.black}
+            />
+          </View>
+        </View>
+      )}
+
+      {/* Android Time Picker */}
+      {Platform.OS === "android" && showTimePicker && (
         <DateTimePicker
           value={newTime}
           mode="time"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
+          display="default"
           onChange={handleTimeChange}
+          themeVariant="light"
         />
+      )}
+
+      {/* iOS Time Picker - Custom Overlay (not Modal to avoid nested modals) */}
+      {Platform.OS === "ios" && showTimePicker && (
+        <View style={styles.customModalOverlay}>
+          <TouchableOpacity
+            style={styles.customModalBackground}
+            activeOpacity={1}
+            onPress={handleTimeCancel}
+          />
+          <View style={styles.datePickerContainer}>
+            <View style={styles.datePickerHeader}>
+              <TouchableOpacity onPress={handleTimeCancel}>
+                <Text style={styles.cancelButton}>{t("cancel")}</Text>
+              </TouchableOpacity>
+              <Text style={styles.datePickerTitle}>
+                {t("suggestChanges.newTime")}
+              </Text>
+              <TouchableOpacity onPress={handleTimeConfirm}>
+                <Text style={styles.confirmButton}>{t("done")}</Text>
+              </TouchableOpacity>
+            </View>
+            <DateTimePicker
+              testID="timePicker"
+              value={newTime}
+              mode="time"
+              display="spinner"
+              onChange={handleTimeChange}
+              style={styles.datePicker}
+              locale="en_US"
+              textColor={color.black}
+              themeVariant="light"
+            />
+          </View>
+        </View>
       )}
     </View>
   );
@@ -463,5 +583,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.semiBold,
     color: color.white,
+  },
+  // Custom modal overlay using absolute positioning (not React Native Modal)
+  // This avoids nested modal issues on iOS
+  customModalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+    justifyContent: "flex-end",
+  },
+  customModalBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  datePickerContainer: {
+    backgroundColor: color.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 34,
+    zIndex: 1001,
+  },
+  datePickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray94,
+  },
+  datePickerTitle: {
+    fontSize: 18,
+    fontFamily: font.semiBold,
+    color: color.black,
+  },
+  cancelButton: {
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.gray55,
+  },
+  confirmButton: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.primary,
+  },
+  datePicker: {
+    backgroundColor: color.white,
+    alignSelf: "center",
   },
 });

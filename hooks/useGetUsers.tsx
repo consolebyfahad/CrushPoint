@@ -113,6 +113,44 @@ export default function useGetUsers(filters: UserFilters = {}) {
   const [error, setError] = useState<string | null>(null);
 
   const filtersString = useMemo(() => JSON.stringify(filters), [filters]);
+
+  // Convert translated gender values back to English API values
+  const normalizeGenderToEnglish = (gender: string): string => {
+    if (!gender) return "";
+
+    const normalized = gender.toLowerCase().trim();
+
+    // Map common translations back to English
+    const genderMap: { [key: string]: string } = {
+      // English
+      both: "Both",
+      men: "Men",
+      male: "Men",
+      women: "Women",
+      female: "Women",
+      // German
+      beide: "Both",
+      männer: "Men",
+      frauen: "Women",
+      // Add other languages as needed
+    };
+
+    // Check exact match first
+    if (genderMap[normalized]) {
+      return genderMap[normalized];
+    }
+
+    // Check if it contains any of the map keys
+    for (const [key, value] of Object.entries(genderMap)) {
+      if (normalized.includes(key)) {
+        return value;
+      }
+    }
+
+    // Default to Both if we can't determine
+    return "Both";
+  };
+
   const fetchUsers = async (): Promise<void> => {
     if (!user?.user_id) {
       setError(t("users.userIdNotAvailable"));
@@ -135,9 +173,12 @@ export default function useGetUsers(filters: UserFilters = {}) {
         user_id: user.user_id,
       };
 
-      if (filters.gender && filters.gender !== "Both") {
-        formData.append("gender", filters.gender);
-        payload.gender = filters.gender;
+      // Normalize gender to English before sending
+      if (filters.gender) {
+        const normalizedGender = normalizeGenderToEnglish(filters.gender);
+        // Always send normalized gender to API (Both means show both genders)
+        formData.append("gender", normalizedGender);
+        payload.gender = normalizedGender;
       }
       if (filters.ageFrom) {
         formData.append("age_from", filters.ageFrom);

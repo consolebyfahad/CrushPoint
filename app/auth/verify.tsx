@@ -13,16 +13,10 @@ import {
   parseNationalityWithLabels,
 } from "@/utils/helper";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ActivityIndicator,
-  Animated,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { OtpInput } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Verify() {
@@ -31,7 +25,7 @@ export default function Verify() {
   const { user, loginUser, updateUserData, checkVerificationStatus } =
     useAppContext();
   const { showToast } = useToast();
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [code, setCode] = useState("");
   const [resendCountdown, setResendCountdown] = useState(59);
   const [canResend, setCanResend] = useState(false);
   const rawContactType = params.type || "phone";
@@ -42,16 +36,7 @@ export default function Verify() {
   const defaultPhoto =
     "https://img.freepik.com/vecteurs-libre/homme-affaires-caractere-avatar-isole_24877-60111.jpg?semt=ais_hybrid&w=740";
 
-  const inputRefs = useRef<(TextInput | null)[]>([]);
-  const animatedValues = useRef(code.map(() => new Animated.Value(1))).current;
-
   useEffect(() => {
-    if (inputRefs.current[0]) {
-      setTimeout(() => {
-        inputRefs.current[0]?.focus();
-      }, 100);
-    }
-
     // Start countdown timer
     const timer = setInterval(() => {
       setResendCountdown((prev) => {
@@ -66,71 +51,6 @@ export default function Verify() {
 
     return () => clearInterval(timer);
   }, []);
-
-  const handleCodeChange = (text: string, index: number) => {
-    // Handle SMS autofill - text might contain multiple digits
-    const digits = text.replace(/[^0-9]/g, ""); // Extract only digits
-
-    if (digits.length > 1) {
-      // SMS autofill detected - fill all inputs at once
-      const newCode = [...code];
-      for (let i = 0; i < Math.min(digits.length, 6); i++) {
-        newCode[i] = digits[i];
-      }
-      setCode(newCode);
-
-      // Auto-submit if we have 6 digits
-      if (digits.length === 6) {
-        handleVerifyCode(digits);
-      } else {
-        // Focus the appropriate input
-        const nextIndex = Math.min(digits.length, 5);
-        inputRefs.current[nextIndex]?.focus();
-      }
-      return;
-    }
-
-    // Regular single digit input
-    const digit = text.slice(-1);
-    if (!digit || !/^\d$/.test(digit)) {
-      return;
-    }
-
-    const newCode = [...code];
-    newCode[index] = digit;
-    setCode(newCode);
-
-    // Animate current box
-    Animated.sequence([
-      Animated.timing(animatedValues[index], {
-        toValue: 0.9,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animatedValues[index], {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    if (digit && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-
-    if (digit && index === 5) {
-      const fullCode = newCode.join("");
-      if (fullCode.length === 6) {
-        handleVerifyCode(fullCode);
-      }
-    }
-  };
-
-  const handleKeyPress = (event: any, index: number) => {
-    if (event.nativeEvent.key === "Backspace" && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
 
   const fetchUserProfile = async () => {
     if (!user?.user_id) return;
@@ -291,40 +211,28 @@ export default function Verify() {
 
       if (response.result) {
         await loginUser(user);
-        setCode(["", "", "", "", "", ""]);
+        setCode("");
 
         if (user?.new) {
-          // New user - go to profile setup
-          router.push("/auth/gender");
+          router.replace("/auth/gender");
         } else {
-          // Existing user - fetch their profile data first
           await fetchUserProfile();
-
-          // Check if user is verified after fetching profile
           const isVerified = await checkVerificationStatus();
           if (isVerified) {
             router.replace("/(tabs)");
           } else {
-            router.push("/auth/gender");
+            router.replace("/auth/gender");
           }
         }
       } else {
         showToast(response.message || t("auth.invalidCode"), "error");
         console.error("Verification Error:", response.message);
-        setCode(["", "", "", "", "", ""]);
-        setTimeout(() => {
-          inputRefs.current[0]?.focus();
-        }, 100);
+        setCode("");
       }
     } catch (error) {
       showToast(t("api.errors.somethingWentWrong"), "error");
       console.error("Verification Error:", error);
-
-      setCode(["", "", "", "", "", ""]);
-
-      setTimeout(() => {
-        inputRefs.current[0]?.focus();
-      }, 100);
+      setCode("");
     } finally {
       setIsVerifying(false);
     }
@@ -346,8 +254,7 @@ export default function Verify() {
         // Reset countdown and state
         setResendCountdown(59);
         setCanResend(false);
-        setCode(["", "", "", "", "", ""]);
-        inputRefs.current[0]?.focus();
+        setCode("");
 
         // Start new countdown timer
         const timer = setInterval(() => {
@@ -368,7 +275,7 @@ export default function Verify() {
       console.error("Resend Error:", error);
     }
   };
-
+console.log("contactType", contactType)
   return (
     <SafeAreaView style={styles.container}>
       <Header />
@@ -385,40 +292,31 @@ export default function Verify() {
             <Text style={styles.subtitle}>
               {t("auth.enterCodeSent", { contactInfo })}
             </Text>
-            <Text style={styles.subtitle}>{t("auth.enterCodeSent2")}</Text>
           </View>
+{(contactType === "E-Mail" || contactType === "email") && (
+  <Text style={styles.subtitle}>{t("auth.enterCodeSent2")}</Text>
+)}
 
           {/* PIN Input Boxes */}
-          <View style={styles.pinContainer}>
-            {code.map((digit, index) => (
-              <Animated.View
-                key={index}
-                style={[
-                  styles.pinBoxContainer,
-                  {
-                    transform: [{ scale: animatedValues[index] }],
-                  },
-                ]}
-              >
-                <TextInput
-                  ref={(ref) => {
-                    inputRefs.current[index] = ref;
-                  }}
-                  style={[styles.pinBox, digit ? styles.pinBoxFilled : null]}
-                  value={digit}
-                  onChangeText={(text) => handleCodeChange(text, index)}
-                  onKeyPress={(event) => handleKeyPress(event, index)}
-                  keyboardType="numeric"
-                  maxLength={index === 0 ? 6 : 1}
-                  selectTextOnFocus
-                  textAlign="center"
-                  editable={!isVerifying}
-                  caretHidden={false}
-                  textContentType={index === 0 ? "oneTimeCode" : "none"}
-                  autoComplete={index === 0 ? "sms-otp" : "off"}
-                />
-              </Animated.View>
-            ))}
+          <View style={styles.pinWrapper}>
+            <OtpInput
+              numberOfDigits={6}
+              onTextChange={(text) => setCode(text)}
+              onFilled={(text) => handleVerifyCode(text)}
+              theme={{
+                containerStyle: styles.pinContainer,
+                pinCodeContainerStyle: styles.pinBox,
+                pinCodeTextStyle: styles.pinBoxText,
+                focusedPinCodeContainerStyle: styles.pinBoxFilled,
+                focusStickStyle: styles.focusStick,
+              }}
+              autoFocus
+              disabled={isVerifying}
+              textInputProps={{
+                textContentType: "oneTimeCode",
+                autoComplete: "sms-otp",
+              }}
+            />
           </View>
 
           {/* Resend Code Button */}
@@ -467,30 +365,36 @@ const styles = StyleSheet.create({
     color: color.gray55,
     lineHeight: 22,
   },
+  pinWrapper: {
+    marginBottom: 60,
+  },
   pinContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 60,
-  },
-  pinBoxContainer: {
-    flex: 1,
-    marginHorizontal: 4,
+    gap: 8,
   },
   pinBox: {
+    flex: 1,
     height: 56,
     borderWidth: 1,
     borderColor: color.gray87,
     borderRadius: 12,
+    backgroundColor: color.white,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pinBoxText: {
     fontSize: 20,
     fontFamily: font.semiBold,
     color: color.black,
-    backgroundColor: color.white,
-    textAlign: "center",
-    paddingTop: 0,
-    paddingBottom: 0,
   },
   pinBoxFilled: {
     borderColor: color.primary,
     backgroundColor: color.white,
+  },
+  focusStick: {
+    width: 2,
+    height: 30,
+    backgroundColor: color.primary,
   },
 });

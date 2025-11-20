@@ -234,7 +234,9 @@ export default function MeetupCard({
           <Ionicons name="location-outline" size={16} color={color.gray55} />
           <Text style={styles.detailText}>{request.location}</Text>
         </View>
-        <Text style={styles.message}>"{request.message}"</Text>
+        {request.message && (
+          <Text style={styles.message}>"{request.message}"</Text>
+        ) }
       </View>
 
       {/* Message */}

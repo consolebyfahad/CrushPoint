@@ -33,6 +33,7 @@ export default function BasicInfo() {
     nationality: userData.originalNationalityValues || [],
     religion: userData.religion || "",
     zodiacSign: userData.zodiac || "",
+    about: userData.about || "",
   });
 
   // Changed to array for multi-select
@@ -334,6 +335,7 @@ export default function BasicInfo() {
       formData.append("gender_interest", basicInfo.interestedIn);
       formData.append("looking_for", JSON.stringify(relationshipGoals));
       formData.append("height", basicInfo.height);
+      formData.append("about", basicInfo.about);
 
       // Handle nationality properly - ensure it's a clean array
       const cleanNationality = Array.isArray(basicInfo.nationality)
@@ -355,6 +357,7 @@ export default function BasicInfo() {
           originalNationalityValues: cleanNationality,
           religion: basicInfo.religion,
           zodiac: basicInfo.zodiacSign,
+          about: basicInfo.about,
         });
         router.back();
       } else {
@@ -441,6 +444,23 @@ export default function BasicInfo() {
       <Header title={t("profile.basicInfo")} divider />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+
+        {/* about */}
+        <View style={styles.fieldContainer}>
+          <Text style={styles.fieldLabel}>{t("profile.about")}</Text>
+          <TextInput
+            style={styles.bioInput}
+            placeholder={t("profile.enterYourBio")}
+            value={basicInfo.about}
+            onChangeText={(value) => updateField("about", value)}
+            multiline
+            numberOfLines={4}
+            maxLength={100}
+          />
+          <Text style={styles.charCount}>
+            {basicInfo?.about.length}/100 
+          </Text>
+        </View> 
         {/* Interested in */}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.interestedIn")}</Text>
@@ -632,6 +652,27 @@ const styles = StyleSheet.create({
     marginTop: 24,
     zIndex: 1,
   },
+  bioInput: {
+    borderWidth: 1,
+    borderColor: color.gray600,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    fontFamily: font.medium,
+    color: color.black,
+    backgroundColor: color.white,
+    textAlignVertical: "top",
+  },
+  charCount: {
+    marginTop: 4,
+    fontSize: 12,
+    fontFamily: font.regular,
+    color: color.gray55,
+    textAlign: "right",
+  },
+
+
   fieldLabel: {
     fontSize: 16,
     fontFamily: font.medium,

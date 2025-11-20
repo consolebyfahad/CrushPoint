@@ -10,6 +10,7 @@ import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import LottieView from "lottie-react-native";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Animated,
@@ -26,6 +27,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function MatchScreen({ route, navigation }: any) {
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { user } = useAppContext();
   // Parse matchData from params
@@ -404,7 +406,7 @@ export default function MatchScreen({ route, navigation }: any) {
         <TouchableOpacity style={styles.headerButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>It's a Match</Text>
+        <Text style={styles.headerTitle}>{t("match.title")}</Text>
         <TouchableOpacity style={styles.headerButton} onPress={handleOptions}>
           <Ionicons name="ellipsis-vertical" size={24} color={color.black} />
         </TouchableOpacity>
@@ -425,7 +427,7 @@ export default function MatchScreen({ route, navigation }: any) {
           ]}
         >
           <View style={styles.matchBubble}>
-            <Text style={styles.matchText}>{"It's a Match"}</Text>
+            <Text style={styles.matchText}>{t("match.title")}</Text>
           </View>
         </Animated.View>
 
@@ -513,7 +515,8 @@ export default function MatchScreen({ route, navigation }: any) {
         ]}
       >
         <Text style={styles.messageText}>
-          Forget chatting, go talk to{"\n"}
+          {t("match.description")}
+          {"\n"}
           <Text style={styles.nameText}>
             {matchData.matchedUser.name}
             {matchData.matchedUser.age > 0
@@ -525,13 +528,18 @@ export default function MatchScreen({ route, navigation }: any) {
           <SimpleLineIcons name="location-pin" size={14} color={color.gray55} />{" "}
           {matchData.matchedUser.distance}
         </Text>
-        <CustomButton title="Request Meetup" onPress={handleRequestMeetup} />
+        <CustomButton
+          title={t("meetups.requestMeetup")}
+          onPress={handleRequestMeetup}
+        />
 
         <TouchableOpacity
           style={styles.keepExploringButton}
           onPress={handleKeepExploring}
         >
-          <Text style={styles.keepExploringText}>Keep Exploring</Text>
+          <Text style={styles.keepExploringText}>
+            {t("meetups.keepExploring")}
+          </Text>
         </TouchableOpacity>
       </Animated.View>
 

@@ -1,7 +1,7 @@
 import { useAppContext } from "@/context/app_context";
 import { color, font, image } from "@/utils/constants";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   Easing,
@@ -18,6 +18,7 @@ export default function index() {
   const textOpacity = useSharedValue(0);
   const textTranslateY = useSharedValue(20);
   const [imageError, setImageError] = useState(false);
+  const navigationPerformedRef = useRef(false);
 
   useEffect(() => {
     containerScale.value = withTiming(1, {
@@ -56,25 +57,22 @@ export default function index() {
 
   useEffect(() => {
     if (!isHydrated) return;
-
+const navigationPerformed = navigationPerformedRef.current;
     const checkUserStatus = async () => {
+      if (navigationPerformedRef.current) return;
       if (isLoggedIn) {
-        // Check verification status
         const isVerified = await checkVerificationStatus();
 
         if (isVerified) {
-          // User is verified, go to tabs
-          router.dismissAll();
-          router.push("/(tabs)");
+          navigationPerformedRef.current = true;
+          router.replace("/(tabs)");
         } else {
-          // User is not verified, go to verification
-          router.dismissAll();
-          router.push("/auth/gender");
+          navigationPerformedRef.current = true;
+          router.replace("/auth/gender");
         }
       } else {
-        // User not logged in, go to onboarding
-        router.dismissAll();
-        router.push("/onboarding");
+          navigationPerformedRef.current = true;
+        router.replace("/onboarding");
       }
     };
 

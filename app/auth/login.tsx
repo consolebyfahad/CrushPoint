@@ -62,7 +62,7 @@ export default function Login() {
       };
       setUser(userData);
 
-      router.push({
+      router.replace({
         pathname: "/auth/verify",
         params: {
           type: activeTab,
