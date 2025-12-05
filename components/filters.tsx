@@ -297,7 +297,7 @@ export default function Filters({
             />
             <View style={styles.sliderLabels}>
               <Text style={styles.sliderLabel}>1 {t("filters.km")}</Text>
-              <Text style={styles.sliderLabel}>200 {t("filters.km")}</Text>
+              <Text style={styles.sliderLabel}>600 {t("filters.km")}</Text>
             </View>
           </View>
         </View>
