@@ -858,6 +858,8 @@ export const isDateInPast = (dateString: string): boolean => {
     const date = new Date(dateString);
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset time to start of day
+    date.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+    
     return date < today;
   } catch (error) {
     console.warn('Error checking if date is in past:', error);
@@ -884,6 +886,7 @@ export const sortRequestsByDate = (requests: any[]): any[] => {
 /**
  * Filter out past dates
  * Keep accepted requests regardless of date
+ * Keep pending requests for today and future
  */
 export const filterOutPastDates = (requests: any[]): any[] => {
   return requests.filter(request => {
@@ -895,11 +898,17 @@ export const filterOutPastDates = (requests: any[]): any[] => {
       return true;
     }
     
+    // Keep pending requests regardless of date (they need to be shown)
+    if (status === "pending") {
+      return true;
+    }
+    
     // Don't filter out requests with placeholder dates like "TBD", "N/A", "0000-00-00"
     const date = String(request.date).toUpperCase();
     if (date === "TBD" || date === "N/A" || date === "0000-00-00") {
       return true;
     }
+    
     return !isDateInPast(request.date);
   });
 };

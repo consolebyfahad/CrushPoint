@@ -517,13 +517,8 @@ export default function useGetUsers(filters: UserFilters = {}) {
           .filter((user): user is TransformedUser => user !== null);
 
         setUsers(transformedUsers);
-
-        // Clear error if we have users, set error if no users found
-        if (transformedUsers.length > 0) {
-          setError(null); // ✅ Clear error when users are found
-        } else {
-          setError(t("users.noUsersFoundInArea")); // ⚠️ Set error only when no users
-        }
+        // Always clear error on successful response (even if empty)
+        setError(null);
       } else {
         // API returned error or invalid response
         setUsers([]); // Clear users on error

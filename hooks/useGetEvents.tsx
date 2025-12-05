@@ -248,15 +248,16 @@ const useGetEvents = () => {
         });
 
         setEvents(formattedEvents);
-
-        if (formattedEvents.length === 0) {
-          setError(t("events.noEventsFound"));
-        }
+        // Don't set error for empty data - let UI show empty state
+        setError(null);
       } else if (response?.status === "Error") {
+        // Actual API error
+        setEvents([]);
         setError(response.message || t("events.failedToLoadEvents"));
       } else {
+        // No data returned but no error
         setEvents([]);
-        setError(t("events.noEventsFound"));
+        setError(null); // Don't set error - just empty data
       }
     } catch (error: any) {
       const errorMessage = error.message || t("events.networkError");

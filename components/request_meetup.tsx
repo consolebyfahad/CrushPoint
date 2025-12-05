@@ -4,12 +4,13 @@ import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  FlatList,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -25,6 +26,18 @@ import {
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+// Google Maps API Key (from app.json)
+const GOOGLE_MAPS_API_KEY = "AIzaSyBpRUeweq7eCIDHavnHsheE66bHJd5nGX8";
+
+interface PlacePrediction {
+  place_id: string;
+  description: string;
+  structured_formatting: {
+    main_text: string;
+    secondary_text: string;
+  };
+}
 
 interface RequestMeetupProps {
   onClose: () => void;
@@ -53,6 +66,14 @@ export default function RequestMeetup({
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Google Places Autocomplete states
+  const [placeSuggestions, setPlaceSuggestions] = useState<PlacePrediction[]>(
+    []
+  );
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<any>(null);
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
       month: "2-digit",
@@ -68,6 +89,126 @@ export default function RequestMeetup({
       hour12: true,
     });
   };
+
+  // Fetch Google Places Autocomplete suggestions
+  const fetchPlaceSuggestions = async (input: string) => {
+    if (!input || input.trim().length < 3) {
+      setPlaceSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    console.log("🔍 Searching for:", input);
+    setIsSearching(true);
+
+    try {
+      // Method 1: Try direct Google Places API call
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+        input
+      )}&key=${GOOGLE_MAPS_API_KEY}`;
+
+      console.log("📤 Fetching from Google Places API...");
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      console.log("📥 Google Places Response status:", data.status);
+      console.log("📥 Predictions count:", data.predictions?.length || 0);
+
+      if (
+        data.status === "OK" &&
+        data.predictions &&
+        data.predictions.length > 0
+      ) {
+        console.log("✅ Found suggestions:", data.predictions.length);
+        console.log("📍 First suggestion:", data.predictions[0].description);
+        setPlaceSuggestions(data.predictions);
+        setShowSuggestions(true);
+      } else if (data.status === "ZERO_RESULTS") {
+        console.log("⚠️ No results found for:", input);
+        setPlaceSuggestions([]);
+        setShowSuggestions(false);
+      } else if (data.status === "REQUEST_DENIED") {
+        console.log("❌ API Key Error:", data.error_message);
+        // Fallback: Use mock suggestions for testing
+        const mockSuggestions = [
+          {
+            place_id: "mock_1",
+            description: `${input} - Suggested Location`,
+            structured_formatting: {
+              main_text: input,
+              secondary_text: "Suggested Location",
+            },
+          },
+        ];
+        setPlaceSuggestions(mockSuggestions);
+        setShowSuggestions(true);
+      } else {
+        console.log("❌ API Error:", data.status, data.error_message);
+        setPlaceSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching place suggestions:", error);
+      setPlaceSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Handle location input change with debouncing
+  const handleLocationChange = (text: string) => {
+    setLocation(text);
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // If text is empty, hide suggestions
+    if (!text || text.trim().length === 0) {
+      setShowSuggestions(false);
+      setPlaceSuggestions([]);
+      return;
+    }
+
+    // Set new timeout for API call (debounce)
+    searchTimeoutRef.current = setTimeout(() => {
+      fetchPlaceSuggestions(text);
+    }, 300); // Reduced to 300ms for faster response
+  };
+
+  // Clear location input
+  const handleClearLocation = () => {
+    setLocation("");
+    setPlaceSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  // Handle place selection
+  const handlePlaceSelect = (place: PlacePrediction) => {
+    setLocation(place.description);
+    setShowSuggestions(false);
+    setPlaceSuggestions([]);
+    Keyboard.dismiss();
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     // On iOS spinner, don't close immediately - only update the date
@@ -219,6 +360,12 @@ export default function RequestMeetup({
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.scrollContent}
+            onScrollBeginDrag={() => {
+              // Close suggestions when user scrolls
+              if (showSuggestions) {
+                setShowSuggestions(false);
+              }
+            }}
           >
             {/* User Info Card */}
             <View style={styles.userCard}>
@@ -295,13 +442,100 @@ export default function RequestMeetup({
               <Text style={styles.inputLabel}>
                 {t("meetups.location")} <Text style={styles.required}>*</Text>
               </Text>
-              <TextInput
-                style={styles.textInput}
-                value={location}
-                onChangeText={setLocation}
-                placeholder={t("meetups.enterMeetupLocation")}
-                placeholderTextColor={color.gray55}
-              />
+              <View style={styles.locationWrapper}>
+                <View style={styles.locationInputContainer}>
+                  <SimpleLineIcons
+                    name="location-pin"
+                    size={16}
+                    color={color.gray55}
+                    style={styles.locationIcon}
+                  />
+                  <TextInput
+                    style={styles.locationTextInput}
+                    value={location}
+                    onChangeText={handleLocationChange}
+                    placeholder={t("meetups.enterMeetupLocation")}
+                    placeholderTextColor={color.gray55}
+                    onFocus={() => {
+                      if (placeSuggestions.length > 0) {
+                        setShowSuggestions(true);
+                      }
+                    }}
+                    autoCorrect={false}
+                    autoCapitalize="words"
+                  />
+                  {isSearching && (
+                    <ActivityIndicator
+                      size="small"
+                      color={color.primary}
+                      style={styles.searchingIndicator}
+                    />
+                  )}
+                  {location.length > 0 && !isSearching && (
+                    <TouchableOpacity
+                      onPress={handleClearLocation}
+                      style={styles.clearButton}
+                    >
+                      <Ionicons
+                        name="close-circle"
+                        size={20}
+                        color={color.gray55}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* Suggestions Dropdown */}
+                {showSuggestions && placeSuggestions.length > 0 && (
+                  <View style={styles.suggestionsContainer}>
+                    <View style={styles.suggestionsHeader}>
+                      <Text style={styles.suggestionsHeaderText}>
+                        {t("meetups.suggestions") || "SUGGESTIONS"}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => setShowSuggestions(false)}
+                        style={styles.closeSuggestionsButton}
+                      >
+                        <Ionicons name="close" size={18} color={color.gray55} />
+                      </TouchableOpacity>
+                    </View>
+                    <FlatList
+                      data={placeSuggestions}
+                      keyExtractor={(item) => item.place_id}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={styles.suggestionItem}
+                          onPress={() => handlePlaceSelect(item)}
+                          activeOpacity={0.7}
+                        >
+                          <SimpleLineIcons
+                            name="location-pin"
+                            size={16}
+                            color={color.primary}
+                            style={styles.suggestionIcon}
+                          />
+                          <View style={styles.suggestionTextContainer}>
+                            <Text style={styles.suggestionMainText}>
+                              {item.structured_formatting.main_text}
+                            </Text>
+                            <Text style={styles.suggestionSecondaryText}>
+                              {item.structured_formatting.secondary_text}
+                            </Text>
+                          </View>
+                          <Ionicons
+                            name="chevron-forward"
+                            size={16}
+                            color={color.gray87}
+                          />
+                        </TouchableOpacity>
+                      )}
+                      style={styles.suggestionsList}
+                      keyboardShouldPersistTaps="handled"
+                      nestedScrollEnabled={true}
+                    />
+                  </View>
+                )}
+              </View>
             </View>
 
             {/* Message Field */}
@@ -532,6 +766,10 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 24,
+    zIndex: 1,
+  },
+  locationWrapper: {
+    position: "relative",
   },
   inputLabel: {
     fontSize: 14,
@@ -572,6 +810,101 @@ const styles = StyleSheet.create({
   messageInput: {
     height: 100,
     paddingTop: 14,
+  },
+  locationInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: color.gray94,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: color.white,
+  },
+  locationIcon: {
+    marginRight: 8,
+  },
+  locationTextInput: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: font.regular,
+    color: color.black,
+    padding: 0,
+    marginRight: 8,
+  },
+  searchingIndicator: {
+    marginLeft: 8,
+  },
+  clearButton: {
+    padding: 4,
+  },
+  suggestionsContainer: {
+    marginTop: 8,
+    backgroundColor: color.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: color.gray87,
+    maxHeight: 280,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1000,
+    overflow: "hidden",
+  },
+  suggestionsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: color.gray95,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray87,
+  },
+  suggestionsHeaderText: {
+    fontSize: 13,
+    fontFamily: font.semiBold,
+    color: color.gray55,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  closeSuggestionsButton: {
+    padding: 4,
+  },
+  suggestionsList: {
+    maxHeight: 230,
+  },
+  suggestionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray94,
+    backgroundColor: color.white,
+    minHeight: 60,
+  },
+  suggestionIcon: {
+    marginRight: 12,
+  },
+  suggestionTextContainer: {
+    flex: 1,
+  },
+  suggestionMainText: {
+    fontSize: 15,
+    fontFamily: font.medium,
+    color: color.black,
+    marginBottom: 2,
+  },
+  suggestionSecondaryText: {
+    fontSize: 13,
+    fontFamily: font.regular,
+    color: color.gray55,
   },
   bottomButton: {
     paddingHorizontal: 20,

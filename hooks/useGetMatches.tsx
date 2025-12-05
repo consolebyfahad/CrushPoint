@@ -232,16 +232,16 @@ const useGetMatches = () => {
           });
 
         setMatches(formattedMatches);
-
-        if (formattedMatches.length === 0) {
-          setError(t("hooks.noMatchesFound"));
-        } else {
-        }
+        // Don't set error for empty data - let UI show empty state
+        setError(null);
       } else if (response?.status === "Error") {
+        // Actual API error
+        setMatches([]);
         setError(response.message || t("hooks.failedToLoadMatches"));
       } else {
+        // No data returned but no error
         setMatches([]);
-        setError(t("hooks.noMatchesFound"));
+        setError(null); // Don't set error - just empty data
       }
     } catch (error: any) {
       const errorMessage =

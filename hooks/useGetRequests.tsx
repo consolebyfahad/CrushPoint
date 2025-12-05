@@ -262,17 +262,13 @@ const useGetRequests = () => {
 
         setIncomingRequests(sortedIncomingList);
         setOutgoingRequests(sortedOutgoingList);
-
-        if (
-          sortedIncomingList.length === 0 &&
-          sortedOutgoingList.length === 0
-        ) {
-          setError(t("hooks.noMeetupRequestsFound"));
-        }
+        // Don't set error for empty data - let UI show empty state
+        setError(null);
       } else {
+        // No data returned but no error
         setIncomingRequests([]);
         setOutgoingRequests([]);
-        setError(t("hooks.noMeetupRequestsFound"));
+        setError(null); // Don't set error - just empty data
       }
     } catch (error: any) {
       const errorMessage =
