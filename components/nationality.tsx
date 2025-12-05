@@ -253,14 +253,14 @@ export default function Nationality({
     nationality.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const handleNationalitySelect = (nationality: string) => {
+  const handleNationalitySelect = (nationalityId: string) => {
     setSelectedNationalities((prev) => {
-      if (prev.includes(nationality)) {
+      if (prev.includes(nationalityId)) {
         // Remove nationality if already selected
-        return prev.filter((n) => n !== nationality);
+        return prev.filter((n) => n !== nationalityId);
       } else {
         // Add nationality if not selected
-        return [...prev, nationality];
+        return [...prev, nationalityId];
       }
     });
   };
@@ -274,17 +274,17 @@ export default function Nationality({
   };
 
   // Check if nationality is selected
-  const isSelected = (nationality: string) => {
-    return selectedNationalities.includes(nationality);
+  const isSelected = (nationalityId: string) => {
+    return selectedNationalities.includes(nationalityId);
   };
 
   const renderNationalityItem = ({ item }: any) => (
     <TouchableOpacity
       style={[
         styles.nationalityItem,
-        isSelected(item.name) && styles.selectedNationalityItem,
+        isSelected(item.id) && styles.selectedNationalityItem,
       ]}
-      onPress={() => handleNationalitySelect(item.name)}
+      onPress={() => handleNationalitySelect(item.id)}
       activeOpacity={0.7}
     >
       <View style={styles.nationalityContent}>
@@ -292,13 +292,13 @@ export default function Nationality({
         <Text
           style={[
             styles.nationalityText,
-            isSelected(item.name) && styles.selectedNationalityText,
+            isSelected(item.id) && styles.selectedNationalityText,
           ]}
         >
           {item.name}
         </Text>
       </View>
-      {isSelected(item.name) && (
+      {isSelected(item.id) && (
         <Ionicons name="checkmark" size={20} color={color.primary} />
       )}
     </TouchableOpacity>

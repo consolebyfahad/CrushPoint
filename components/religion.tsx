@@ -54,14 +54,14 @@ export default function Religion({
     // { id: "any", name: t("religions.any"), icon: "🤲", color: "#A3A3A3" },
   ];
 
-  const handleReligionSelect = (religion: string) => {
+  const handleReligionSelect = (religionId: string) => {
     setSelectedReligions((prev) => {
-      if (prev.includes(religion)) {
+      if (prev.includes(religionId)) {
         // Remove religion if already selected
-        return prev.filter((r) => r !== religion);
+        return prev.filter((r) => r !== religionId);
       } else {
         // Add religion if not selected
-        return [...prev, religion];
+        return [...prev, religionId];
       }
     });
   };
@@ -75,8 +75,8 @@ export default function Religion({
   };
 
   // Check if religion is selected
-  const isSelected = (religion: string) => {
-    return selectedReligions.includes(religion);
+  const isSelected = (religionId: string) => {
+    return selectedReligions.includes(religionId);
   };
 
   return (
@@ -99,10 +99,10 @@ export default function Religion({
             key={religion.id}
             style={[
               styles.religionItem,
-              isSelected(religion.name) && styles.selectedReligionItem,
+              isSelected(religion.id) && styles.selectedReligionItem,
               index === religions.length - 1 && styles.lastReligionItem,
             ]}
-            onPress={() => handleReligionSelect(religion.name)}
+            onPress={() => handleReligionSelect(religion.id)}
             activeOpacity={0.7}
           >
             <View style={styles.religionContent}>
@@ -117,13 +117,13 @@ export default function Religion({
               <Text
                 style={[
                   styles.religionText,
-                  isSelected(religion.name) && styles.selectedReligionText,
+                  isSelected(religion.id) && styles.selectedReligionText,
                 ]}
               >
                 {religion.name}
               </Text>
             </View>
-            {isSelected(religion.name) && (
+            {isSelected(religion.id) && (
               <Ionicons name="checkmark" size={20} color={color.primary} />
             )}
           </TouchableOpacity>

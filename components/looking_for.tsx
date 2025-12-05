@@ -51,14 +51,14 @@ export default function LookingFor({
     },
   ];
 
-  const handleOptionSelect = (optionTitle: string) => {
+  const handleOptionSelect = (optionId: string) => {
     setSelectedOptions((prev) => {
-      if (prev.includes(optionTitle)) {
+      if (prev.includes(optionId)) {
         // Remove option if already selected
-        return prev.filter((option) => option !== optionTitle);
+        return prev.filter((option) => option !== optionId);
       } else {
         // Add option if not selected
-        return [...prev, optionTitle];
+        return [...prev, optionId];
       }
     });
   };
@@ -72,8 +72,8 @@ export default function LookingFor({
   };
 
   // Check if option is selected
-  const isSelected = (optionTitle: string) => {
-    return selectedOptions.includes(optionTitle);
+  const isSelected = (optionId: string) => {
+    return selectedOptions.includes(optionId);
   };
 
   return (
@@ -96,9 +96,9 @@ export default function LookingFor({
             key={option.id}
             style={[
               styles.optionItem,
-              isSelected(option.title) && styles.selectedOption,
+              isSelected(option.id) && styles.selectedOption,
             ]}
-            onPress={() => handleOptionSelect(option.title)}
+            onPress={() => handleOptionSelect(option.id)}
             activeOpacity={0.8}
           >
             <View style={styles.optionContent}>
@@ -106,13 +106,13 @@ export default function LookingFor({
               <Text
                 style={[
                   styles.optionText,
-                  isSelected(option.title) && styles.selectedOptionText,
+                  isSelected(option.id) && styles.selectedOptionText,
                 ]}
               >
                 {option.title}
               </Text>
             </View>
-            {isSelected(option.title) && (
+            {isSelected(option.id) && (
               <Ionicons name="checkmark" size={24} color={color.primary} />
             )}
           </TouchableOpacity>

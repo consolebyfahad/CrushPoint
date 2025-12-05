@@ -275,7 +275,7 @@ export default function Verify() {
       console.error("Resend Error:", error);
     }
   };
-console.log("contactType", contactType)
+  console.log("contactType", contactType);
   return (
     <SafeAreaView style={styles.container}>
       <Header />
@@ -292,11 +292,11 @@ console.log("contactType", contactType)
             <Text style={styles.subtitle}>
               {t("auth.enterCodeSent", { contactInfo })}
             </Text>
-          </View>
-{(contactType === "E-Mail" || contactType === "email") && (
-  <Text style={styles.subtitle}>{t("auth.enterCodeSent2")}</Text>
-)}
 
+            {(contactType === "E-Mail" || contactType === "Email") && (
+              <Text style={styles.subtitle}>{t("auth.enterCodeSent2")}</Text>
+            )}
+          </View>
           {/* PIN Input Boxes */}
           <View style={styles.pinWrapper}>
             <OtpInput

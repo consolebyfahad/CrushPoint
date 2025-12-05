@@ -13,7 +13,7 @@ import { Platform, StyleSheet, View } from "react-native";
 import { svgIcon } from "./SvgIcons";
 
 interface SocialAuthProps {
-  onAuthSuccess: (userData: any, provider: "apple" | "google") => void;
+  onAuthSuccess: (userData: any, provider: "apple" | "google") => void | Promise<void>;
   onAuthError: (message: string) => void;
   isDisabled?: boolean;
 }
@@ -89,7 +89,7 @@ export default function SocialAuth({
             new: apiResponse?.new,
           };
 
-          onAuthSuccess(userData, "google");
+          await onAuthSuccess(userData, "google");
         } else {
           onAuthError(apiResponse.message || t("auth.googleSignInFailed"));
           console.error("Google Sign-In API Error:", apiResponse.message);
@@ -175,7 +175,7 @@ export default function SocialAuth({
           new: apiResponse?.new,
         };
 
-        onAuthSuccess(userInfo, "apple");
+        await onAuthSuccess(userInfo, "apple");
       } else {
         onAuthError(apiResponse.message || t("auth.appleSignInFailed"));
         console.error("Apple Sign-In API Error:", apiResponse.message);

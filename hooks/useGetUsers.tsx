@@ -98,15 +98,15 @@ interface UserFilters {
   ageFrom?: string;
   ageTo?: string;
   distance?: number;
-  lookingFor?: string;
+  lookingFor?: string | string[]; // Accept both string and array
   height?: { from?: string; to?: string };
-  nationality?: string;
-  religion?: string;
-  zodiacSign?: string;
+  nationality?: string | string[]; // Accept both string and array
+  religion?: string | string[]; // Accept both string and array
+  zodiacSign?: string | string[]; // Accept both string and array
 }
 
 export default function useGetUsers(filters: UserFilters = {}) {
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
   const { t } = useTranslation();
   const [users, setUsers] = useState<TransformedUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -114,24 +114,24 @@ export default function useGetUsers(filters: UserFilters = {}) {
 
   const filtersString = useMemo(() => JSON.stringify(filters), [filters]);
 
-  // Convert translated gender values back to English API values
+  // Convert translated gender values to backend API values (male/female/both)
   const normalizeGenderToEnglish = (gender: string): string => {
     if (!gender) return "";
 
     const normalized = gender.toLowerCase().trim();
 
-    // Map common translations back to English
+    // Map UI values to backend API values
     const genderMap: { [key: string]: string } = {
-      // English
-      both: "Both",
-      men: "Men",
-      male: "Men",
-      women: "Women",
-      female: "Women",
-      // German
-      beide: "Both",
-      männer: "Men",
-      frauen: "Women",
+      // English UI values
+      both: "both",
+      men: "male",
+      male: "male",
+      women: "female",
+      female: "female",
+      // German UI values
+      beide: "both",
+      männer: "male",
+      frauen: "female",
       // Add other languages as needed
     };
 
@@ -147,8 +147,222 @@ export default function useGetUsers(filters: UserFilters = {}) {
       }
     }
 
-    // Default to Both if we can't determine
-    return "Both";
+    // Default to both if we can't determine
+    return "both";
+  };
+
+  // Normalize looking_for values to English IDs
+  const normalizeLookingForToEnglish = (
+    lookingFor: string | string[]
+  ): string => {
+    if (!lookingFor) return "";
+
+    // If it's already an array of IDs, join them
+    if (Array.isArray(lookingFor)) {
+      // Return empty string for empty array
+      if (lookingFor.length === 0) return "";
+
+      // Check if first element is already an ID (not translated)
+      const validIds = [
+        "serious",
+        "casual",
+        "friendship",
+        "open",
+        "prefer-not",
+      ];
+      if (
+        lookingFor.length > 0 &&
+        validIds.includes(lookingFor[0].toLowerCase())
+      ) {
+        return lookingFor.join(",");
+      }
+
+      // Otherwise, it might be translated values - normalize each
+      return lookingFor
+        .map((item) => {
+          const normalized = item.toLowerCase().trim();
+          const lookingForMap: { [key: string]: string } = {
+            // English
+            serious: "serious",
+            "serious relationship": "serious",
+            casual: "casual",
+            "casual dating": "casual",
+            friendship: "friendship",
+            open: "open",
+            "open to possibilities": "open",
+            "prefer-not": "prefer-not",
+            "prefer not to say": "prefer-not",
+            // German
+            "ernsthafte beziehung": "serious",
+            "lockeres dating": "casual",
+            freundschaft: "friendship",
+            "offen für möglichkeiten": "open",
+            "möchte ich nicht sagen": "prefer-not",
+          };
+          return lookingForMap[normalized] || item;
+        })
+        .join(",");
+    }
+
+    // If it's a string, return as is (should already be IDs)
+    return lookingFor;
+  };
+
+  // Normalize religion values to English IDs
+  const normalizeReligionToEnglish = (religion: string | string[]): string => {
+    if (!religion) return "";
+
+    // If it's already an array of IDs, join them
+    if (Array.isArray(religion)) {
+      // Return empty string for empty array
+      if (religion.length === 0) return "";
+
+      // Check if first element is already an ID
+      const validIds = [
+        "christianity",
+        "islam",
+        "hinduism",
+        "buddhism",
+        "judaism",
+        "others",
+      ];
+      if (religion.length > 0 && validIds.includes(religion[0].toLowerCase())) {
+        return religion.join(",");
+      }
+
+      // Otherwise, normalize each
+      return religion
+        .map((item) => {
+          const normalized = item.toLowerCase().trim();
+          const religionMap: { [key: string]: string } = {
+            // English
+            christianity: "christianity",
+            christian: "christianity",
+            islam: "islam",
+            muslim: "islam",
+            hinduism: "hinduism",
+            hindu: "hinduism",
+            buddhism: "buddhism",
+            buddhist: "buddhism",
+            judaism: "judaism",
+            jewish: "judaism",
+            others: "others",
+            other: "others",
+            // German
+            christentum: "christianity",
+            muslimisch: "islam",
+            hinduistisch: "hinduism",
+            buddhistisch: "buddhism",
+            jüdisch: "judaism",
+            andere: "others",
+          };
+          return religionMap[normalized] || item;
+        })
+        .join(",");
+    }
+
+    return religion;
+  };
+
+  // Normalize nationality values to English IDs
+  const normalizeNationalityToEnglish = (
+    nationality: string | string[]
+  ): string => {
+    if (!nationality) return "";
+
+    // If it's already an array of IDs, join them
+    if (Array.isArray(nationality)) {
+      // Return empty string for empty array
+      if (nationality.length === 0) return "";
+
+      // IDs are lowercase like "american", "british", etc.
+      // If already IDs (all lowercase, no spaces), return as is
+      if (
+        nationality.length > 0 &&
+        nationality[0].toLowerCase() === nationality[0] &&
+        !nationality[0].includes(" ")
+      ) {
+        return nationality.join(",");
+      }
+
+      // Otherwise, normalize each (translated names to IDs)
+      return nationality
+        .map((item) => {
+          // Convert to lowercase and replace spaces with underscores for ID format
+          return item.toLowerCase().replace(/\s+/g, "_");
+        })
+        .join(",");
+    }
+
+    return nationality;
+  };
+
+  // Normalize zodiac values to English IDs
+  const normalizeZodiacToEnglish = (zodiac: string | string[]): string => {
+    if (!zodiac) return "";
+
+    // If it's already an array of IDs, join them
+    if (Array.isArray(zodiac)) {
+      // Return empty string for empty array
+      if (zodiac.length === 0) return "";
+
+      // Check if first element is already an ID
+      const validIds = [
+        "aries",
+        "taurus",
+        "gemini",
+        "cancer",
+        "leo",
+        "virgo",
+        "libra",
+        "scorpio",
+        "sagittarius",
+        "capricorn",
+        "aquarius",
+        "pisces",
+      ];
+      if (zodiac.length > 0 && validIds.includes(zodiac[0].toLowerCase())) {
+        return zodiac.join(",");
+      }
+
+      // Otherwise, normalize each
+      return zodiac
+        .map((item) => {
+          const normalized = item.toLowerCase().trim();
+          const zodiacMap: { [key: string]: string } = {
+            // English
+            aries: "aries",
+            taurus: "taurus",
+            gemini: "gemini",
+            cancer: "cancer",
+            leo: "leo",
+            virgo: "virgo",
+            libra: "libra",
+            scorpio: "scorpio",
+            sagittarius: "sagittarius",
+            capricorn: "capricorn",
+            aquarius: "aquarius",
+            pisces: "pisces",
+            // German
+            widder: "aries",
+            stier: "taurus",
+            zwillinge: "gemini",
+            krebs: "cancer",
+            löwe: "leo",
+            jungfrau: "virgo",
+            waage: "libra",
+            skorpion: "scorpio",
+            schütze: "sagittarius",
+            steinbock: "capricorn",
+            wassermann: "aquarius",
+            fische: "pisces",
+          };
+          return zodiacMap[normalized] || item;
+        })
+        .join(",");
+    }
+
+    return zodiac;
   };
 
   const fetchUsers = async (): Promise<void> => {
@@ -161,64 +375,130 @@ export default function useGetUsers(filters: UserFilters = {}) {
     setError(null);
 
     try {
-      // Log the incoming filters
-      console.log("🔍 Filters received:", JSON.stringify(filters, null, 2));
-
       const formData = new FormData();
       formData.append("type", "get_map_users");
       formData.append("user_id", user.user_id);
 
+      // Build payload with only required fields
       const payload: any = {
         type: "get_map_users",
         user_id: user.user_id,
       };
 
+      // Add current user's location for distance calculation (only if valid)
+      if (
+        userData?.lat &&
+        userData?.lng &&
+        userData.lat !== 0 &&
+        userData.lng !== 0
+      ) {
+        formData.append("lat", userData.lat.toString());
+        formData.append("lng", userData.lng.toString());
+        payload.lat = userData.lat;
+        payload.lng = userData.lng;
+      }
+
       // Normalize gender to English before sending
       if (filters.gender) {
         const normalizedGender = normalizeGenderToEnglish(filters.gender);
-        // Always send normalized gender to API (Both means show both genders)
-        formData.append("gender", normalizedGender);
-        payload.gender = normalizedGender;
+        // Only send if not empty
+        if (normalizedGender && normalizedGender.trim() !== "") {
+          formData.append("gender", normalizedGender);
+          payload.gender = normalizedGender;
+        }
       }
-      if (filters.ageFrom) {
+
+      // Only send age_from if it has a value
+      if (filters.ageFrom && filters.ageFrom.trim() !== "") {
         formData.append("age_from", filters.ageFrom);
         payload.age_from = filters.ageFrom;
       }
-      if (filters.ageTo) {
+
+      // Only send age_to if it has a value
+      if (filters.ageTo && filters.ageTo.trim() !== "") {
         formData.append("age_to", filters.ageTo);
         payload.age_to = filters.ageTo;
       }
-      if (filters.distance) {
+
+      // Only send distance if it has a valid value
+      if (filters.distance && filters.distance > 0) {
         formData.append("distance", filters.distance.toString());
         payload.distance = filters.distance.toString();
       }
+      // Normalize looking_for to English IDs before sending
       if (filters.lookingFor) {
-        formData.append("looking_for", filters.lookingFor);
-        payload.looking_for = filters.lookingFor;
+        const normalizedLookingFor = normalizeLookingForToEnglish(
+          filters.lookingFor
+        );
+        // Only send if not empty
+        if (normalizedLookingFor && normalizedLookingFor.trim() !== "") {
+          // Convert comma-separated string to array
+          const lookingForArray = normalizedLookingFor
+            .split(",")
+            .map((item) => item.trim());
+          formData.append("looking_for", JSON.stringify(lookingForArray));
+          payload.looking_for = lookingForArray;
+        }
       }
+      // Only send height filters if they have values
       if (filters.height) {
-        formData.append("height_from", filters.height.from || "");
-        formData.append("height_to", filters.height.to || "");
-        payload.height_from = filters.height.from || "";
-        payload.height_to = filters.height.to || "";
+        if (filters.height.from && filters.height.from.trim() !== "") {
+          formData.append("height_from", filters.height.from);
+          payload.height_from = filters.height.from;
+        }
+        if (filters.height.to && filters.height.to.trim() !== "") {
+          formData.append("height_to", filters.height.to);
+          payload.height_to = filters.height.to;
+        }
       }
+      // Normalize nationality to English IDs before sending
       if (filters.nationality) {
-        formData.append("nationality", filters.nationality);
-        payload.nationality = filters.nationality;
+        const normalizedNationality = normalizeNationalityToEnglish(
+          filters.nationality
+        );
+        // Only send if not empty
+        if (normalizedNationality && normalizedNationality.trim() !== "") {
+          // Convert comma-separated string to array
+          const nationalityArray = normalizedNationality
+            .split(",")
+            .map((item) => item.trim());
+          formData.append("nationality", JSON.stringify(nationalityArray));
+          payload.nationality = nationalityArray;
+        }
       }
+      // Normalize religion to English IDs before sending
       if (filters.religion) {
-        formData.append("religion", filters.religion);
-        payload.religion = filters.religion;
+        const normalizedReligion = normalizeReligionToEnglish(filters.religion);
+        // Only send if not empty
+        if (normalizedReligion && normalizedReligion.trim() !== "") {
+          // Convert comma-separated string to array
+          const religionArray = normalizedReligion
+            .split(",")
+            .map((item) => item.trim());
+          formData.append("religion", JSON.stringify(religionArray));
+          payload.religion = religionArray;
+        }
       }
+      // Normalize zodiac to English IDs before sending
       if (filters.zodiacSign) {
-        formData.append("zodiac", filters.zodiacSign);
-        payload.zodiac = filters.zodiacSign;
+        const normalizedZodiac = normalizeZodiacToEnglish(filters.zodiacSign);
+        // Only send if not empty
+        if (normalizedZodiac && normalizedZodiac.trim() !== "") {
+          // Convert comma-separated string to array
+          const zodiacArray = normalizedZodiac
+            .split(",")
+            .map((item) => item.trim());
+          formData.append("zodiac", JSON.stringify(zodiacArray));
+          payload.zodiac = zodiacArray;
+        }
       }
 
-      // Log the payload being sent
+      // Log the payload being sent to API
       console.log("📤 API Payload:", JSON.stringify(payload, null, 2));
 
       const response: ApiResponse = await apiCall(formData);
+      console.log("📥 API Response:", JSON.stringify(response, null, 2));
+
       if (response.result && response.data && Array.isArray(response.data)) {
         const transformedUsers: TransformedUser[] = response.data
           .map((userData: ApiUserData) => {
@@ -238,13 +518,15 @@ export default function useGetUsers(filters: UserFilters = {}) {
 
         setUsers(transformedUsers);
 
-        // Clear error if successful
+        // Clear error if we have users, set error if no users found
         if (transformedUsers.length > 0) {
-          setError(null);
-        } else if (transformedUsers.length === 0) {
-          setError(t("users.noUsersFoundInArea"));
+          setError(null); // ✅ Clear error when users are found
+        } else {
+          setError(t("users.noUsersFoundInArea")); // ⚠️ Set error only when no users
         }
       } else {
+        // API returned error or invalid response
+        setUsers([]); // Clear users on error
         setError(t("users.noUsersFoundOrServerError"));
       }
     } catch (err: any) {

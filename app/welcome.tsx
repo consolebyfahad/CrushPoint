@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Welcome() {
   const { t } = useTranslation();
-  const { setUser } = useAppContext();
+  const { setUser, checkVerificationStatus } = useAppContext();
   const { showToast } = useToast();
   const [otherMethodsLoading, setOtherMethodsLoading] = useState(false);
   const { ensurePermissions } = useCombinedPermissions();
@@ -38,19 +38,26 @@ export default function Welcome() {
   };
 
   // Handle successful social authentication
-  const handleSocialAuthSuccess = (
+  const handleSocialAuthSuccess = async (
     userData: any,
     provider: "apple" | "google"
   ) => {
     setUser(userData);
 
-    router.push({
-      pathname: "/auth/verify",
-      params: {
-        type: `${provider} account`,
-        contact: `${provider} account`,
-      },
-    });
+    // Skip OTP for social auth - go directly to appropriate screen
+    if (userData.new) {
+      // New user - go to profile setup
+      router.replace("/auth/gender");
+    } else {
+      // Existing user - check verification status
+      const isVerified = await checkVerificationStatus();
+
+      if (isVerified) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/auth/gender");
+      }
+    }
   };
 
   // Handle social authentication errors

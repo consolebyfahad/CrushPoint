@@ -44,14 +44,14 @@ export default function ZodiacSign({
     { id: "pisces", name: t("zodiac.pisces"), icon: "♓", symbol: "🐟" },
   ];
 
-  const handleZodiacSelect = (zodiac: string) => {
+  const handleZodiacSelect = (zodiacId: string) => {
     setSelectedZodiacs((prev) => {
-      if (prev.includes(zodiac)) {
+      if (prev.includes(zodiacId)) {
         // Remove zodiac if already selected
-        return prev.filter((z) => z !== zodiac);
+        return prev.filter((z) => z !== zodiacId);
       } else {
         // Add zodiac if not selected
-        return [...prev, zodiac];
+        return [...prev, zodiacId];
       }
     });
   };
@@ -65,8 +65,8 @@ export default function ZodiacSign({
   };
 
   // Check if zodiac is selected
-  const isSelected = (zodiac: string) => {
-    return selectedZodiacs.includes(zodiac);
+  const isSelected = (zodiacId: string) => {
+    return selectedZodiacs.includes(zodiacId);
   };
 
   return (
@@ -89,10 +89,10 @@ export default function ZodiacSign({
             key={zodiac.id}
             style={[
               styles.zodiacItem,
-              isSelected(zodiac.name) && styles.selectedZodiacItem,
+              isSelected(zodiac.id) && styles.selectedZodiacItem,
               index === zodiacSigns.length - 1 && styles.lastZodiacItem,
             ]}
-            onPress={() => handleZodiacSelect(zodiac.name)}
+            onPress={() => handleZodiacSelect(zodiac.id)}
             activeOpacity={0.7}
           >
             <View style={styles.zodiacContent}>
@@ -102,13 +102,13 @@ export default function ZodiacSign({
               <Text
                 style={[
                   styles.zodiacText,
-                  isSelected(zodiac.name) && styles.selectedZodiacText,
+                  isSelected(zodiac.id) && styles.selectedZodiacText,
                 ]}
               >
                 {zodiac.name}
               </Text>
             </View>
-            {isSelected(zodiac.name) && (
+            {isSelected(zodiac.id) && (
               <Ionicons name="checkmark" size={20} color={color.primary} />
             )}
           </TouchableOpacity>

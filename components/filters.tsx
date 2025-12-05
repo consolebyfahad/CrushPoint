@@ -53,7 +53,8 @@ export default function Filters({
     t("filters.men"),
     t("filters.women"),
     t("filters.both"),
-  ];console.log("first",filterData)
+  ];
+  console.log("first", filterData);
 
   // Helper function to format multiple selection display
   const formatMultipleSelectionDisplay = (selection: any) => {
@@ -286,7 +287,7 @@ export default function Filters({
             <Slider
               style={styles.slider}
               minimumValue={1}
-              maximumValue={200}
+              maximumValue={600}
               value={distance}
               onValueChange={setDistance}
               step={1}
