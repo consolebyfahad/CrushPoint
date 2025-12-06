@@ -84,32 +84,65 @@ export const getFCMToken = async (): Promise<string | null> => {
   }
 };
 
+// Track handled notifications to prevent duplicates
+const handledNotifications = new Set<string>();
+
 export const setupNotificationListeners = (
   handleNotificationPress: (data: any) => void
 ) => {
-  const unsubscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
+  // Helper to prevent duplicate handling
+  const handleWithDuplicateCheck = (remoteMessage: any, source: string) => {
     if (remoteMessage?.data) {
+      // Create unique key from notification data
+      const notificationId = remoteMessage.messageId || remoteMessage.data.date_id || JSON.stringify(remoteMessage.data);
+      
+      console.log(`🔔 Notification received from ${source}:`, notificationId);
+      
+      // Check if already handled
+      if (handledNotifications.has(notificationId)) {
+        console.log(`🚫 Duplicate notification ignored (${source}):`, notificationId);
+        return;
+      }
+      
+      // Mark as handled
+      handledNotifications.add(notificationId);
+      
+      // Clean up old entries after 5 seconds
+      setTimeout(() => {
+        handledNotifications.delete(notificationId);
+      }, 5000);
+      
+      console.log(`✅ Processing notification (${source}):`, notificationId);
       handleNotificationPress(remoteMessage.data);
     }
+  };
+
+  // 1. Foreground notification handler
+  const unsubscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
+    console.log("📨 onMessage triggered (foreground)");
+    handleWithDuplicateCheck(remoteMessage, "foreground");
   });
 
+  // 2. Background tap handler
   const unsubscribeOnOpenedApp = messaging().onNotificationOpenedApp(
     (remoteMessage) => {
-      if (remoteMessage?.data) {
-        handleNotificationPress(remoteMessage.data);
-      }
+      console.log("📨 onNotificationOpenedApp triggered (background tap)");
+      handleWithDuplicateCheck(remoteMessage, "background");
     }
   );
 
+  // 3. Initial notification (cold start)
   messaging()
     .getInitialNotification()
     .then((remoteMessage) => {
-      if (remoteMessage?.data) {
-        handleNotificationPress(remoteMessage.data);
+      if (remoteMessage) {
+        console.log("📨 getInitialNotification triggered (cold start)");
+        handleWithDuplicateCheck(remoteMessage, "initial");
       }
     });
 
   return () => {
+    console.log("🧹 Cleaning up notification listeners");
     unsubscribeOnMessage();
     unsubscribeOnOpenedApp();
   };

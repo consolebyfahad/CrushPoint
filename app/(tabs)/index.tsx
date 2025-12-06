@@ -37,7 +37,7 @@ import {
   useLocalSearchParams,
   useNavigation,
 } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BackHandler,
@@ -211,12 +211,47 @@ export default function Index() {
     }
   };
 
+  // Track if notification has been handled to prevent duplicates
+  const notificationHandledRef = useRef<Set<string>>(new Set());
+
   // Notification setup
   useEffect(() => {
     requestNotificationPermissions();
 
     const handleNotificationPress = async (data: any) => {
       if (data?.date_id) {
+        // Create unique key for this notification
+        const notificationKey = `${data.date_id}_${Date.now()}`;
+
+        // Check if this notification was already handled recently (within 2 seconds)
+        const recentKeys = Array.from(notificationHandledRef.current).filter(
+          (key) => {
+            const timestamp = parseInt(key.split("_")[1]);
+            return Date.now() - timestamp < 2000; // 2 seconds
+          }
+        );
+
+        // Clean up old keys
+        notificationHandledRef.current = new Set(recentKeys);
+
+        // Check if we already have a recent notification for this date_id
+        const alreadyHandled = recentKeys.some((key) =>
+          key.startsWith(`${data.date_id}_`)
+        );
+
+        if (alreadyHandled) {
+          console.log(
+            "🚫 Notification already handled recently:",
+            data.date_id
+          );
+          return;
+        }
+
+        // Mark as handled
+        notificationHandledRef.current.add(notificationKey);
+
+        console.log("🔔 Handling notification for date_id:", data.date_id);
+
         try {
           const matchData = await fetchMatchData(data.date_id);
 
@@ -227,7 +262,6 @@ export default function Index() {
                 matchData: JSON.stringify(matchData),
               },
             });
-          } else {
           }
         } catch (error) {
           console.error("❌ Failed to fetch match data:", error);
@@ -237,7 +271,6 @@ export default function Index() {
             dateId: data.date_id,
           });
         }
-      } else {
       }
     };
 
@@ -246,7 +279,7 @@ export default function Index() {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, []); // Empty deps is fine - we use ref for state
 
   // Handle navigation parameters from user profile
   useEffect(() => {

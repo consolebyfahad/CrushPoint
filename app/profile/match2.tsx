@@ -5,7 +5,6 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
 import { svgIcon } from "@/utils/SvgIcons";
-import { Ionicons } from "@expo/vector-icons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router, useLocalSearchParams } from "expo-router";
 import LottieView from "lottie-react-native";
@@ -29,7 +28,8 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 export default function MatchScreen({ route, navigation }: any) {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
+  console.log("params", userData);
   // Parse matchData from params
   let matchData;
   try {
@@ -49,6 +49,44 @@ export default function MatchScreen({ route, navigation }: any) {
           matchData.currentUser.image =
             "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
         }
+      }
+
+      // If current user image is still empty, get from userData
+      if (!matchData.currentUser?.image || matchData.currentUser.image.trim() === "") {
+        console.log("🖼️ Current user image empty, getting from userData");
+        
+        // Get image from userData.photos (already parsed URLs)
+        if (userData?.photos && Array.isArray(userData.photos) && userData.photos.length > 0) {
+          matchData.currentUser.image = userData.photos[0];
+          console.log("✅ Using image from userData.photos:", matchData.currentUser.image);
+        } 
+        // Fallback to images array
+        else if (userData?.images && Array.isArray(userData.images) && userData.images.length > 0) {
+          const imageUrl = userData.images[0].startsWith("http")
+            ? userData.images[0]
+            : `https://api.andra-dating.com/images/${userData.images[0]}`;
+          matchData.currentUser.image = imageUrl;
+          console.log("✅ Using image from userData.images:", matchData.currentUser.image);
+        }
+        // Final fallback to default image
+        else {
+          const defaultImage = userData?.gender === "female"
+            ? "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg"
+            : "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
+          matchData.currentUser.image = defaultImage;
+          console.log("⚠️ Using default image:", matchData.currentUser.image);
+        }
+      }
+
+      // Update current user name if empty
+      if (!matchData.currentUser?.name || matchData.currentUser.name === "You") {
+        matchData.currentUser.name = userData?.name || "You";
+      }
+
+      // Update current user location if empty
+      if (!matchData.currentUser?.lat || !matchData.currentUser?.lng) {
+        matchData.currentUser.lat = userData?.lat || "";
+        matchData.currentUser.lng = userData?.lng || "";
       }
 
       // Calculate real distance between users
@@ -330,7 +368,12 @@ export default function MatchScreen({ route, navigation }: any) {
   };
 
   const handleKeepExploring = () => {
-    router.back();
+    router.push({
+      pathname: "/(tabs)",
+      params: {
+        activeTab: "matches",
+      },
+    });
   };
 
   // Interpolate rotation values
@@ -403,13 +446,13 @@ export default function MatchScreen({ route, navigation }: any) {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton} onPress={handleBack}>
+        {/* <TouchableOpacity style={styles.headerButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t("match.title")}</Text>
-        <TouchableOpacity style={styles.headerButton} onPress={handleOptions}>
+        </TouchableOpacity> */}
+        {/* <Text style={styles.headerTitle}>{t("match.title")}</Text> */}
+        {/* <TouchableOpacity style={styles.headerButton} onPress={handleOptions}>
           <Ionicons name="ellipsis-vertical" size={24} color={color.black} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Match Animation Container */}

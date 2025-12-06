@@ -36,7 +36,7 @@ interface Notification {
 
 export default function Notifications({ navigation }: any) {
   const { t } = useTranslation();
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -278,7 +278,114 @@ export default function Notifications({ navigation }: any) {
       return;
     }
 
-    // Navigate to user profile if user data is available (for match, profile_view, etc.)
+    // Handle new match notification - navigate to match2 screen
+    if (notificationType === "new_match" || notificationType === "match") {
+      if (notification.from && notification.from_id) {
+        try {
+          // Parse images from JSON string to array
+          const imagesString = notification.from.images || "[]";
+          const parsedImages = parseUserImages(
+            imagesString,
+            notification.from.gender || "unknown"
+          );
+
+          // Calculate age from DOB
+          const calculateAge = (dob: string) => {
+            if (!dob) return 0;
+            try {
+              const birthDate = new Date(dob);
+              const today = new Date();
+              let age = today.getFullYear() - birthDate.getFullYear();
+              const monthDiff = today.getMonth() - birthDate.getMonth();
+              if (
+                monthDiff < 0 ||
+                (monthDiff === 0 && today.getDate() < birthDate.getDate())
+              ) {
+                age--;
+              }
+              return age;
+            } catch (error) {
+              return 0;
+            }
+          };
+
+          // Get current user image from userData
+          let currentUserImage = "";
+          
+          // Try to get from userData.photos (already parsed URLs)
+          if (userData?.photos && Array.isArray(userData.photos) && userData.photos.length > 0) {
+            currentUserImage = userData.photos[0];
+          } 
+          // Fallback to images array
+          else if (userData?.images && Array.isArray(userData.images) && userData.images.length > 0) {
+            currentUserImage = userData.images[0].startsWith("http")
+              ? userData.images[0]
+              : `https://api.andra-dating.com/images/${userData.images[0]}`;
+          }
+          // Final fallback based on gender
+          else {
+            currentUserImage = userData?.gender === "female"
+              ? "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg"
+              : "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
+          }
+
+          // Build match data for match2 screen
+          const matchData = {
+            currentUser: {
+              name: userData?.name || user?.name || "You",
+              image: currentUserImage,
+              lat: userData?.lat?.toString() || "",
+              lng: userData?.lng?.toString() || "",
+            },
+            matchedUser: {
+              id: notification.from.id || notification.from_id,
+              name: notification.from.name || notification.user_name || "User",
+              age: calculateAge(notification.from.dob),
+              distance: "0 km", // Distance not available in notification
+              image: parsedImages[0] || "",
+              images: parsedImages,
+              about: notification.from.about || "",
+              city: notification.from.city || "",
+              country: notification.from.country || "",
+              state: notification.from.state || "",
+              gender: notification.from.gender || "",
+              height: notification.from.height || "",
+              nationality: notification.from.nationality || "",
+              religion: notification.from.religion || "",
+              zodiac: notification.from.zodiac || "",
+              languages: notification.from.languages || "",
+              interests: notification.from.interests || "[]",
+              lookingFor: notification.from.looking_for || "[]",
+              lat: notification.from.lat || "",
+              lng: notification.from.lng || "",
+              email: notification.from.email || "",
+              phone: notification.from.phone || "",
+              timestamp: notification.created_at || "",
+              uploaded_selfie: notification.from.uploaded_selfie || "",
+            },
+          };
+
+          router.push({
+            pathname: "/profile/match2",
+            params: {
+              matchData: JSON.stringify(matchData),
+            },
+          });
+          return;
+        } catch (error) {
+          console.error("Error navigating to match2 from notification:", error);
+          // Fallback to matches screen
+          router.push("/(tabs)/matches");
+          return;
+        }
+      } else {
+        // No user data, fallback to matches screen
+        router.push("/(tabs)/matches");
+        return;
+      }
+    }
+
+    // Navigate to user profile if user data is available (for other notifications)
     if (notification.from && notification.from_id) {
       try {
         // Parse images from JSON string to array
@@ -366,10 +473,6 @@ export default function Notifications({ navigation }: any) {
     } else {
       // Fallback navigation based on notification type if no user data
       switch (notificationType) {
-        case "match":
-        case "new_match":
-          router.push("/(tabs)/matches");
-          break;
         case "event":
           router.push("/(tabs)/events");
           break;
@@ -378,6 +481,7 @@ export default function Notifications({ navigation }: any) {
           // router.push("/messages");
           break;
         default:
+          // For other types without user data, do nothing
           break;
       }
     }
