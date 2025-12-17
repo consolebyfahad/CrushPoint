@@ -311,22 +311,31 @@ export default function Notifications({ navigation }: any) {
 
           // Get current user image from userData
           let currentUserImage = "";
-          
+
           // Try to get from userData.photos (already parsed URLs)
-          if (userData?.photos && Array.isArray(userData.photos) && userData.photos.length > 0) {
+          if (
+            userData?.photos &&
+            Array.isArray(userData.photos) &&
+            userData.photos.length > 0
+          ) {
             currentUserImage = userData.photos[0];
-          } 
+          }
           // Fallback to images array
-          else if (userData?.images && Array.isArray(userData.images) && userData.images.length > 0) {
+          else if (
+            userData?.images &&
+            Array.isArray(userData.images) &&
+            userData.images.length > 0
+          ) {
             currentUserImage = userData.images[0].startsWith("http")
               ? userData.images[0]
               : `https://api.andra-dating.com/images/${userData.images[0]}`;
           }
           // Final fallback based on gender
           else {
-            currentUserImage = userData?.gender === "female"
-              ? "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg"
-              : "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
+            currentUserImage =
+              userData?.gender === "female"
+                ? "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg"
+                : "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
           }
 
           // Build match data for match2 screen
