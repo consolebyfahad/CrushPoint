@@ -234,7 +234,7 @@ export default function FaceVerification() {
       setTimeout(() => {
         Alert.alert(
           t("auth.verificationError"),
-          error.message || t("auth.verificationFailed ❌" ),
+          error.message || t("auth.verificationFailed ❌"),
           [
             {
               text: t("auth.tryAgain"),

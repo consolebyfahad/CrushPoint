@@ -222,9 +222,9 @@ export default function Matches() {
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyEmoji}>💕</Text>
         <Text style={styles.emptyTitle}>{t("matches.noMatchesYet")}</Text>
-        <Text style={styles.emptyText}>{t("matches.startSwiping")}</Text>
+        {/* <Text style={styles.emptyText}>{t("matches.startSwiping")}</Text> */}
         <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-          <Text style={styles.retryButtonText}>{t("matches.refresh")}</Text>
+          <Text style={styles.retryButtonText}>{t("match.keepExploring")}</Text>
         </TouchableOpacity>
       </View>
     ),

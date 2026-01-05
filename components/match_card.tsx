@@ -4,18 +4,11 @@ import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import React, { useState } from "react";
+import { router } from "expo-router";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomButton from "./custom_button";
-import RequestMeetup from "./request_meetup";
 
 interface MatchCardProps {
   match: any;
@@ -30,8 +23,6 @@ export default function MatchCard({
 }: MatchCardProps) {
   const { t } = useTranslation();
   const { user } = useAppContext();
-  const [showRequestMeetup, setShowRequestMeetup] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   console.log("match", JSON.stringify(match));
   // Map emoji actions to SVG icons and get the appropriate emoji
   const getMatchEmoji = (emoji: any) => {
@@ -59,12 +50,26 @@ export default function MatchCard({
     return colorMap[emoji] || "#F97316"; // Default color
   };
 
-  const handleRequestMeetup = () => {
-    setShowRequestMeetup(true);
-  };
+  const handleChat = () => {
+    // match.id = match record ID (from matches table)
+    // match.match_id = matched user's ID
+    const matchRecordId = match?.id;
+    const matchedUserId = match?.match_id;
 
-  const handleSubmitMeetupRequest = async (meetupData: any) => {
-    setIsSubmitting(true);
+    if (!matchRecordId || !matchedUserId) {
+      console.error("Missing match data for chat");
+      return;
+    }
+
+    router.push({
+      pathname: "/chat/conversation",
+      params: {
+        matchId: matchRecordId,
+        userId: matchedUserId,
+        userName: match?.name || t("matches.unknown"),
+        userImage: match?.image || (match?.images && match.images[0]) || "",
+      },
+    });
   };
 
   const handleOptions = () => {
@@ -150,14 +155,10 @@ export default function MatchCard({
           {/* Action Buttons */}
           <View style={styles.actionContainer}>
             <CustomButton
-              title={t("meetups.requestMeetup")}
-              style={[
-                styles.requestMeetupButton,
-                isSubmitting && styles.disabledButton,
-              ]}
-              fontstyle={styles.requestMeetupButtonText}
-              onPress={handleRequestMeetup}
-              isDisabled={isSubmitting || match?.meetup === true}
+              title={t("chat.letsChat")}
+              style={styles.chatButton}
+              fontstyle={styles.chatButtonText}
+              onPress={handleChat}
             />
 
             <View
@@ -178,34 +179,6 @@ export default function MatchCard({
           </View>
         </View>
       </View>
-
-      {/* Request Meetup Modal */}
-      <Modal
-        visible={showRequestMeetup}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowRequestMeetup(false)}
-        presentationStyle="overFullScreen"
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={styles.modalBackground}
-            activeOpacity={1}
-            onPress={() => setShowRequestMeetup(false)}
-          />
-          <RequestMeetup
-            onClose={() => setShowRequestMeetup(false)}
-            onSubmit={handleSubmitMeetupRequest}
-            matchData={{
-              id: match?.match_id,
-              name: match?.name || t("matches.unknown"),
-              image: match?.image || (match?.images && match.images[0]),
-              distance: match?.distance || "2.5 km",
-              matchedTime: match?.timeAgo || "2 hours ago",
-            }}
-          />
-        </View>
-      </Modal>
     </>
   );
 }
@@ -315,12 +288,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  requestMeetupButton: {
+  chatButton: {
     flex: 1,
     paddingVertical: 8,
     marginRight: 12,
   },
-  requestMeetupButtonText: {
+  chatButtonText: {
     fontSize: 14,
     fontFamily: font.medium,
   },

@@ -1,5 +1,6 @@
 import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
+import { isUserInPrivateSpot } from "@/utils/distanceCalculator";
 import { MarkerIcon } from "@/utils/SvgIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useEffect, useRef, useState } from "react";
@@ -165,10 +166,39 @@ export default function Map({
     return null;
   };
 
-  // Filter users that have valid coordinates
+  // Filter users that have valid coordinates and are not in private spots
   const usersWithLocation = users.filter((user) => {
     const coords = getUserCoordinates(user);
-    return coords && coords.latitude !== 0 && coords.longitude !== 0;
+    if (!coords || coords.latitude === 0 || coords.longitude === 0) {
+      return false;
+    }
+
+    // Check if user has private spots and is currently in one
+    if (
+      user.private_spots &&
+      Array.isArray(user.private_spots) &&
+      user.private_spots.length > 0
+    ) {
+      const userLocation = {
+        lat: coords.latitude,
+        lng: coords.longitude,
+      };
+
+      // Check if user is in any of their private spots
+      const isInPrivateSpot = isUserInPrivateSpot(
+        userLocation,
+        user.private_spots
+      );
+
+      if (isInPrivateSpot) {
+        console.log(
+          `🔒 User ${user.id || user.name} is in private spot, hiding from map`
+        );
+        return false; // Hide user from map
+      }
+    }
+
+    return true;
   });
 
   // Get the location to display

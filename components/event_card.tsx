@@ -73,7 +73,10 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
         {/* Time Info */}
         <View style={styles.timeRow}>
           <Ionicons name="time-outline" size={14} color={color.gray69} />
-          <Text style={styles.timeText}>{event.time}</Text>
+          <Text style={styles.timeText}>
+            {event.time}
+            {event.to_time ? ` - ${event.to_time}` : ""}
+          </Text>
         </View>
 
         <Text style={styles.description} numberOfLines={2}>

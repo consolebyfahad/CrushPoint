@@ -1,4 +1,5 @@
 import { useAppContext } from "@/context/app_context";
+import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
 import {
   calculateAge,
@@ -49,6 +50,11 @@ interface ApiUserData {
   match_staus: string;
   match_emoji: string;
   loc: LocationData | null;
+  private_spots?: Array<{
+    lat: string | number;
+    lng: string | number;
+    radius: string | number;
+  }>; // Optional: private spots array
 }
 
 interface TransformedUser {
@@ -80,6 +86,11 @@ interface TransformedUser {
     lng: number;
     radius: number;
   };
+  private_spots?: Array<{
+    lat: number | string;
+    lng: number | string;
+    radius: number | string;
+  }>; // Array of private spots
   dob: string;
   match_status: string;
   match_emoji: string;
@@ -106,6 +117,8 @@ interface UserFilters {
 }
 
 export default function useGetUsers(filters: UserFilters = {}) {
+  // Get interests from API for interest name conversion
+  const { interests: apiInterests } = useGetInterests();
   const { user, userData } = useAppContext();
   const { t } = useTranslation();
   const [users, setUsers] = useState<TransformedUser[]>([]);
@@ -571,6 +584,8 @@ export default function useGetUsers(filters: UserFilters = {}) {
         userData.lng,
         userData.radius
       ),
+      // Include private_spots array if available from API
+      private_spots: userData.private_spots || undefined,
       loc: userData.loc,
       // Add direct lat/lng properties for map display
       lat: userData.lat,
@@ -586,8 +601,12 @@ export default function useGetUsers(filters: UserFilters = {}) {
     try {
       if (!interestsStr) return [];
 
-      // Use the same utility function that works in profile
-      const parsedInterests = parseInterestsWithNames(interestsStr, t);
+      // Use the same utility function that works in profile, with API interests
+      const parsedInterests = parseInterestsWithNames(
+        interestsStr,
+        t,
+        apiInterests
+      );
       return Array.isArray(parsedInterests) ? parsedInterests : [];
     } catch (error) {
       console.warn("Error parsing user interests:", error);

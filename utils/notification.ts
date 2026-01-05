@@ -94,7 +94,7 @@ export const setupNotificationListeners = (
   const handleWithDuplicateCheck = (remoteMessage: any, source: string) => {
     if (remoteMessage?.data) {
       // Create unique key from notification data
-      const notificationId = remoteMessage.messageId || remoteMessage.data.date_id || JSON.stringify(remoteMessage.data);
+      const notificationId = remoteMessage.messageId || remoteMessage.data.match_id || remoteMessage.data.to_id || remoteMessage.data.date_id || JSON.stringify(remoteMessage.data);
       
       console.log(`🔔 Notification received from ${source}:`, notificationId);
       

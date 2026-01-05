@@ -1,4 +1,5 @@
 import { useAppContext } from "@/context/app_context";
+import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
 import { calculateDistance } from "@/utils/distanceCalculator";
 import {
@@ -51,6 +52,8 @@ const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 const useGetMatches = () => {
   const { t } = useTranslation();
   const { user, userData } = useAppContext();
+  // Get interests from API for interest name conversion
+  const { interests: apiInterests } = useGetInterests();
   const [matches, setMatches] = useState<MatchUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -107,7 +110,11 @@ const useGetMatches = () => {
   const parseUserInterests = (interestsStr: string): string[] => {
     try {
       if (!interestsStr) return [];
-      const parsedInterests = parseInterestsWithNames(interestsStr);
+      const parsedInterests = parseInterestsWithNames(
+        interestsStr,
+        undefined,
+        apiInterests
+      );
       return Array.isArray(parsedInterests) ? parsedInterests : [];
     } catch (error) {
       console.warn("Error parsing user interests:", error);

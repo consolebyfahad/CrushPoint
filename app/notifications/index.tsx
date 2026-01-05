@@ -251,7 +251,7 @@ export default function Notifications({ navigation }: any) {
     fetchNotifications();
   };
 
-  const handleNotificationPress = (notification: Notification) => {
+  const handleNotificationPress = async (notification: Notification) => {
     // Mark as read locally
     setNotifications((prevNotifications) => {
       const updated = prevNotifications.map((notif) =>
@@ -265,17 +265,66 @@ export default function Notifications({ navigation }: any) {
 
     const notificationType = notification.type.toLowerCase();
 
-    // Handle meetup notifications - redirect to matches/requests tab
+    // Handle chat/message notifications - redirect to chat conversation
     if (
-      notificationType === "meetup_accepted" ||
-      notificationType === "meetup_request" ||
-      notificationType === "meetup"
+      notificationType === "message" ||
+      notificationType === "chat" ||
+      notificationType === "new_message"
     ) {
-      router.push({
-        pathname: "/(tabs)/matches",
-        params: { activeTab: "requests" },
-      });
-      return;
+      // If notification has match_id and user data, navigate to chat conversation
+      if (notification.from_id && notification.from) {
+        try {
+          // Try to find match record ID
+          let matchRecordId: string | null = null;
+          if (user?.user_id) {
+            try {
+              const formData = new FormData();
+              formData.append("type", "get_data");
+              formData.append("table_name", "matches");
+              formData.append("user_id", user.user_id);
+
+              const response = await apiCall(formData);
+              if (response?.data && Array.isArray(response.data)) {
+                const matchRecord = response.data.find(
+                  (m: any) => m.match_id === notification.from_id
+                );
+                matchRecordId = matchRecord?.id || null;
+              }
+            } catch (error) {
+              console.warn("Failed to find match record:", error);
+            }
+          }
+
+          // Navigate to chat conversation
+          router.push({
+            pathname: "/chat/conversation",
+            params: {
+              matchId: matchRecordId || notification.from_id,
+              userId: notification.from_id,
+              userName:
+                notification.from.name || notification.user_name || "User",
+              userImage: notification.from.images
+                ? Array.isArray(notification.from.images)
+                  ? notification.from.images[0]
+                  : parseUserImages(
+                      notification.from.images,
+                      notification.from.gender || "unknown"
+                    )[0]
+                : "",
+            },
+          });
+          return;
+        } catch (error) {
+          console.error("Error navigating to chat:", error);
+          // Fallback to chat list
+          router.push("/(tabs)/chat");
+          return;
+        }
+      } else {
+        // No user data, fallback to chat list
+        router.push("/(tabs)/chat");
+        return;
+      }
     }
 
     // Handle new match notification - navigate to match2 screen
@@ -487,7 +536,8 @@ export default function Notifications({ navigation }: any) {
           break;
         case "message":
         case "chat":
-          // router.push("/messages");
+        case "new_message":
+          router.push("/(tabs)/chat");
           break;
         default:
           // For other types without user data, do nothing

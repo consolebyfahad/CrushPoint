@@ -135,9 +135,9 @@ export default function EventDetails() {
     try {
       const shareContent = {
         title: event.title,
-        message: `${event.title}\n\n📅 ${event.date} at ${event.time}\n📍 ${
-          event.address
-        }\n\n${event.description}\n\nOrganized by: ${
+        message: `${event.title}\n\n📅 ${event.date} at ${event.time}${
+          event.to_time ? ` - ${event.to_time}` : ""
+        }\n📍 ${event.address}\n\n${event.description}\n\nOrganized by: ${
           event.organizer?.name || "Unknown"
         }\n\nJoin me at this event!`,
         url: event.image, // Include event image if available
@@ -159,6 +159,26 @@ export default function EventDetails() {
 
   const handleGetDirections = async () => {
     try {
+      // Prefer using lat/lng for more accurate directions
+      if (event.lat && event.lng) {
+        let mapsUrl: string;
+
+        if (Platform.OS === "ios") {
+          // Use Apple Maps with coordinates for iOS
+          mapsUrl = `http://maps.apple.com/?ll=${event.lat},${event.lng}`;
+        } else {
+          // Use Google Maps with coordinates for Android
+          mapsUrl = `https://www.google.com/maps/search/?api=1&query=${event.lat},${event.lng}`;
+        }
+
+        const canOpen = await Linking.canOpenURL(mapsUrl);
+        if (canOpen) {
+          await Linking.openURL(mapsUrl);
+          return;
+        }
+      }
+
+      // Fallback to address if coordinates not available
       const address = event.address || event.location;
 
       if (!address) {
@@ -254,7 +274,22 @@ export default function EventDetails() {
       // Parse event date and time
       const eventDate = new Date(event.date);
       const startDate = new Date(eventDate);
-      const endDate = new Date(eventDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
+
+      // Calculate end date - use to_time if available, otherwise default to 2 hours
+      let endDate: Date;
+      if (event.to_time) {
+        // Parse to_time (format: "HH:MM" or "HH:MM:SS")
+        const [hours, minutes] = event.to_time.split(":").map(Number);
+        endDate = new Date(eventDate);
+        endDate.setHours(hours, minutes || 0, 0);
+        // If end time is earlier than start time, assume it's next day (e.g., 00:00)
+        if (endDate < startDate) {
+          endDate.setDate(endDate.getDate() + 1);
+        }
+      } else {
+        // Default to 2 hours duration if to_time not available
+        endDate = new Date(eventDate.getTime() + 2 * 60 * 60 * 1000);
+      }
 
       // Create calendar event
       const eventDetails = {
@@ -304,11 +339,11 @@ export default function EventDetails() {
   };
 
   const handleOrganizerWebsite = async () => {
-    if (event?.organizer?.website) {
+    if (event?.web_link) {
       try {
-        const url = event.organizer.website.startsWith("http")
-          ? event.organizer.website
-          : `https://${event.organizer.website}`;
+        const url = event.web_link.startsWith("http")
+          ? event.web_link
+          : `https://${event.web_link}`;
 
         const canOpen = await Linking.canOpenURL(url);
         if (canOpen) {
@@ -401,7 +436,7 @@ export default function EventDetails() {
     console.log("Final parsed users:", parsedUsers);
     return parsedUsers;
   };
-
+  console.log("event", event);
   return (
     <View style={styles.container}>
       {/* Header Image */}
@@ -448,7 +483,10 @@ export default function EventDetails() {
             <Ionicons name="calendar-outline" size={20} color={color.gray14} />
             <View style={styles.infoContent}>
               <Text style={styles.infoText}>{event.date}</Text>
-              <Text style={styles.infoSubtext}>{event.time}</Text>
+              <Text style={styles.infoSubtext}>
+                {event.time}
+                {event.to_time ? ` - ${event.to_time}` : ""}
+              </Text>
             </View>
           </View>
         </View>
@@ -472,7 +510,9 @@ export default function EventDetails() {
         <View style={styles.infoSection}>
           <View style={styles.organizerRow}>
             <Image
-              source={{ uri: event.organizer.image }}
+              source={{
+                uri: event.organizer.image,
+              }}
               style={styles.organizerImage}
             />
             <View style={styles.organizerInfo}>
@@ -494,7 +534,7 @@ export default function EventDetails() {
                   )}
                 </View>
               </View>
-              {!event.organizer.website && (
+              {event.web_link && (
                 <TouchableOpacity
                   style={styles.websiteButton}
                   onPress={handleOrganizerWebsite}

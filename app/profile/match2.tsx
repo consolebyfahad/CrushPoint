@@ -1,5 +1,4 @@
 import CustomButton from "@/components/custom_button";
-import RequestMeetup from "@/components/request_meetup";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
@@ -11,11 +10,9 @@ import LottieView from "lottie-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Alert,
   Animated,
   Dimensions,
   Easing,
-  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -199,8 +196,6 @@ export default function MatchScreen({ route, navigation }: any) {
   // State for controlling animations
   const [showLottieAnimations, setShowLottieAnimations] = useState(false);
   // State for meetup request modal
-  const [showRequestMeetup, setShowRequestMeetup] = useState(false);
-  const [isSubmittingMeetup, setIsSubmittingMeetup] = useState(false);
 
   useEffect(() => {
     startAnimationSequence();
@@ -330,62 +325,41 @@ export default function MatchScreen({ route, navigation }: any) {
 
   const handleOptions = () => {};
 
-  const handleRequestMeetup = () => {
-    setShowRequestMeetup(true);
-  };
-
-  const handleSubmitMeetupRequest = async (meetupData: any) => {
-    setIsSubmittingMeetup(true);
-
-    if (!user?.user_id) {
-      Alert.alert("Error", "User not found. Please try again.");
-      setIsSubmittingMeetup(false);
-      return;
-    }
-
-    if (!matchData?.matchedUser?.id) {
-      Alert.alert("Error", "Match information is missing. Please try again.");
-      setIsSubmittingMeetup(false);
-      return;
-    }
-
+  const handleChat = async () => {
+    // Try to find the match record ID by querying matches table
+    let matchRecordId = "";
+    if (user?.user_id && matchData?.matchedUser?.id) {
     try {
       const formData = new FormData();
-      formData.append("type", "add_data");
+        formData.append("type", "get_data");
+        formData.append("table_name", "matches");
       formData.append("user_id", user.user_id);
-      formData.append("table_name", "meetup_requests");
-      formData.append("date_id", matchData.matchedUser.id);
-      formData.append("date", meetupData.date);
-      formData.append("new_date", meetupData.date);
-      formData.append("time", meetupData.time);
-      formData.append("location", meetupData.location);
-      formData.append("message", meetupData.message || "Let's meet up!");
 
       const response = await apiCall(formData);
-
-      if (response?.result) {
-        router.push({
-          pathname: "/matches",
-          params: {
-            activeTab: "requests",
-          },
-        });
-      } else {
-        Alert.alert(
-          "Error",
-          response?.message ||
-            "Failed to send meetup request. Please try again."
-        );
+        if (response?.data && Array.isArray(response.data)) {
+          const matchRecord = response.data.find(
+            (m: any) =>
+              m.match_id === matchData.matchedUser.id ||
+              m.match?.id === matchData.matchedUser.id
+          );
+          if (matchRecord) {
+            matchRecordId = matchRecord.id; // Use match record ID, not match_id (which is user ID)
+          }
       }
-    } catch (error: any) {
-      console.error("Error submitting meetup request:", error);
-      Alert.alert(
-        "Error",
-        "Network error occurred. Please check your connection and try again."
-      );
-    } finally {
-      setIsSubmittingMeetup(false);
+      } catch (error) {
+        console.warn("Failed to find match record:", error);
+      }
     }
+
+    router.push({
+      pathname: "/chat/conversation",
+      params: {
+        matchId: matchRecordId || matchData?.matchedUser?.id || "",
+        userId: matchData?.matchedUser?.id || "",
+        userName: matchData?.matchedUser?.name || "",
+        userImage: matchData?.matchedUser?.image || "",
+      },
+    });
   };
 
   const handleKeepExploring = () => {
@@ -592,10 +566,7 @@ export default function MatchScreen({ route, navigation }: any) {
           <SimpleLineIcons name="location-pin" size={14} color={color.gray55} />{" "}
           {matchData.matchedUser.distance}
         </Text>
-        <CustomButton
-          title={t("meetups.requestMeetup")}
-          onPress={handleRequestMeetup}
-        />
+        <CustomButton title={t("chat.letsChat")} onPress={handleChat} />
 
         <TouchableOpacity
           style={styles.keepExploringButton}
@@ -606,34 +577,6 @@ export default function MatchScreen({ route, navigation }: any) {
           </Text>
         </TouchableOpacity>
       </Animated.View>
-
-      {/* Request Meetup Modal */}
-      <Modal
-        visible={showRequestMeetup}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowRequestMeetup(false)}
-        presentationStyle="overFullScreen"
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={styles.modalBackground}
-            activeOpacity={1}
-            onPress={() => setShowRequestMeetup(false)}
-          />
-          <RequestMeetup
-            onClose={() => setShowRequestMeetup(false)}
-            onSubmit={handleSubmitMeetupRequest}
-            matchData={{
-              id: matchData.matchedUser.id,
-              name: matchData.matchedUser.name,
-              image: matchData.matchedUser.image,
-              distance: matchData.matchedUser.distance,
-              matchedTime: "Just now",
-            }}
-          />
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }

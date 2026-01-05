@@ -151,6 +151,18 @@ export const formatNationality = (nationality: string, t?: (key: string) => stri
   return ` ${capitalized}`;
 };
 
+// Interface for API interest
+interface ApiInterest {
+  id: string;
+  name: string;
+  name_languages?: string;
+  image_url?: string;
+  distance?: number;
+  date?: string;
+  time?: string;
+}
+
+// Static fallback (deprecated - kept for backward compatibility)
 const INTEREST_OPTIONS = [
   { id: "1", emoji: "💻", translationKey: "interests.tech" },
   { id: "2", emoji: "🎨", translationKey: "interests.art" },
@@ -174,10 +186,58 @@ const INTEREST_OPTIONS = [
   { id: "27", emoji: "🔬", translationKey: "interests.science" },
 ];
 
-const convertInterestIdsToNames = (interestIds: string[], t?: (key: string, options?: any) => string): string[] => {
+// Extract emoji from interest name (e.g., "⚽Football" -> "⚽")
+const extractEmoji = (name: string): string => {
+  const emojiMatch = name.match(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u);
+  return emojiMatch ? emojiMatch[0] : "🎯";
+};
+
+// Get localized name from API interest
+const getLocalizedNameFromApi = (interest: ApiInterest, t?: (key: string) => string): string => {
+  if (!interest.name_languages) {
+    return interest.name || "";
+  }
+
+  try {
+    const nameLanguages =
+      typeof interest.name_languages === "string"
+        ? JSON.parse(interest.name_languages)
+        : interest.name_languages;
+
+    // Try to get current language from i18n if available
+    if (t && typeof (t as any).i18n !== "undefined") {
+      const currentLang = (t as any).i18n?.language || "en";
+      const langCode = currentLang.split("-")[0];
+      return nameLanguages[langCode] || nameLanguages["en"] || interest.name || "";
+    }
+
+    // Fallback to English
+    return nameLanguages["en"] || interest.name || "";
+  } catch (error) {
+    console.warn("Error parsing name_languages:", error);
+    return interest.name || "";
+  }
+};
+
+const convertInterestIdsToNames = (
+  interestIds: string[],
+  t?: (key: string, options?: any) => string,
+  apiInterests?: ApiInterest[]
+): string[] => {
   return interestIds
     .map((id) => {
-      const option = INTEREST_OPTIONS.find(opt => opt.id === id);
+      // First, try to find in API interests
+      if (apiInterests && apiInterests.length > 0) {
+        const apiInterest = apiInterests.find((interest) => interest.id === id);
+        if (apiInterest) {
+          const localizedName = getLocalizedNameFromApi(apiInterest, t);
+          const emoji = extractEmoji(apiInterest.name);
+          return `${emoji} ${localizedName}`;
+        }
+      }
+
+      // Fallback to static options (for backward compatibility)
+      const option = INTEREST_OPTIONS.find((opt) => opt.id === id);
       if (option && t) {
         return `${option.emoji} ${t(option.translationKey)}`;
       } else if (option) {
@@ -254,7 +314,11 @@ export const parseJsonString = (jsonString: string): string[] => {
   }
 };
 
-export const parseInterestsWithNames = (jsonString: string, t?: (key: string) => string): string[] => {
+export const parseInterestsWithNames = (
+  jsonString: string,
+  t?: (key: string) => string,
+  apiInterests?: ApiInterest[]
+): string[] => {
   try {
     if (!jsonString) return [];
     
@@ -271,7 +335,7 @@ export const parseInterestsWithNames = (jsonString: string, t?: (key: string) =>
       const interestIds = JSON.parse(cleanedString);
       
       if (Array.isArray(interestIds)) {
-        return convertInterestIdsToNames(interestIds, t);
+        return convertInterestIdsToNames(interestIds, t, apiInterests);
       } else {
         console.warn("Interests data is not an array:", interestIds);
         return [];
@@ -283,10 +347,10 @@ export const parseInterestsWithNames = (jsonString: string, t?: (key: string) =>
       // Try to parse as comma-separated values
       if (jsonString.includes(',')) {
         const values = jsonString.split(',').map(v => v.trim());
-        return convertInterestIdsToNames(values, t);
+        return convertInterestIdsToNames(values, t, apiInterests);
       } else {
         // Single value
-        return convertInterestIdsToNames([jsonString.trim()], t);
+        return convertInterestIdsToNames([jsonString.trim()], t, apiInterests);
       }
     }
   } catch (error) {
@@ -297,16 +361,16 @@ export const parseInterestsWithNames = (jsonString: string, t?: (key: string) =>
       const matches = jsonString.match(/"([^"]+)"/g);
       if (matches) {
         const values = matches.map((match) => match.replace(/"/g, ""));
-        return convertInterestIdsToNames(values, t);
+        return convertInterestIdsToNames(values, t, apiInterests);
       }
       
       // Try comma-separated values
       if (jsonString.includes(',')) {
         const values = jsonString.split(',').map(v => v.trim());
-        return convertInterestIdsToNames(values, t);
+        return convertInterestIdsToNames(values, t, apiInterests);
       } else {
         // Single value
-        return convertInterestIdsToNames([jsonString.trim()], t);
+        return convertInterestIdsToNames([jsonString.trim()], t, apiInterests);
       }
     } catch (fallbackError) {
       console.warn("Fallback parsing also failed:", fallbackError);

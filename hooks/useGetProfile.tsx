@@ -1,4 +1,5 @@
 import { useAppContext } from "@/context/app_context";
+import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
 import {
   calculateAge,
@@ -8,10 +9,12 @@ import {
   parseLookingForWithLabels,
   parseNationalityWithLabels,
 } from "@/utils/helper";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export default function useGetProfile() {
+  // Get interests from API for interest name conversion
+  const { interests: apiInterests } = useGetInterests();
   const { t } = useTranslation();
   const { user, updateUserData } = useAppContext();
   const [userProfile, setUserProfile] = useState<UserData | null>(null);
@@ -20,7 +23,7 @@ export default function useGetProfile() {
   const defaultPhoto =
     "https://img.freepik.com/vecteurs-libre/homme-affaires-caractere-avatar-isole_24877-60111.jpg?semt=ais_hybrid&w=740";
 
-  const getUserData = async () => {
+  const getUserData = useCallback(async () => {
     if (!user?.user_id) {
       setError(t("hooks.userIdNotAvailable"));
       return;
@@ -73,7 +76,11 @@ export default function useGetProfile() {
 
         if (userData.interests) {
           try {
-            parsedInterests = parseInterestsWithNames(userData.interests, t);
+            parsedInterests = parseInterestsWithNames(
+              userData.interests,
+              t,
+              apiInterests
+            );
             originalInterestIds = parseJsonString(userData.interests);
           } catch (error) {
             console.warn("Error parsing interests in profile:", error);
@@ -242,11 +249,11 @@ export default function useGetProfile() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.user_id, apiInterests, t]);
 
   useEffect(() => {
     getUserData();
-  }, [user?.user_id]);
+  }, [getUserData]);
 
   return {
     userProfile,

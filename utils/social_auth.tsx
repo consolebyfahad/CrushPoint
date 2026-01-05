@@ -13,7 +13,10 @@ import { Platform, StyleSheet, View } from "react-native";
 import { svgIcon } from "./SvgIcons";
 
 interface SocialAuthProps {
-  onAuthSuccess: (userData: any, provider: "apple" | "google") => void | Promise<void>;
+  onAuthSuccess: (
+    userData: any,
+    provider: "apple" | "google"
+  ) => void | Promise<void>;
   onAuthError: (message: string) => void;
   isDisabled?: boolean;
 }
@@ -32,7 +35,7 @@ GoogleSignin.configure({
   webClientId:
     "323137189211-bsva08l18ig45dvalqhcbs08mqrgsi4j.apps.googleusercontent.com",
   iosClientId:
-    "323137189211-bsva08l18ig45dvalqhcbs08mqrgsi4j.apps.googleusercontent.com",
+    "323137189211-jqjki7ji9ap6hc4puj1ielaqjei9odut.apps.googleusercontent.com", // iOS client ID from GoogleService-Info.plist
   offlineAccess: true,
   forceCodeForRefreshToken: true,
 });

@@ -2,6 +2,7 @@ import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
+import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import {
@@ -20,6 +21,8 @@ import { OtpInput } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Verify() {
+  // Get interests from API for interest name conversion
+  const { interests: apiInterests } = useGetInterests();
   const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { user, loginUser, updateUserData, checkVerificationStatus } =
@@ -98,7 +101,11 @@ export default function Verify() {
         let originalInterestIds: string[] = [];
         if (userData.interests) {
           try {
-            parsedInterests = parseInterestsWithNames(userData.interests);
+            parsedInterests = parseInterestsWithNames(
+              userData.interests,
+              undefined,
+              apiInterests
+            );
             originalInterestIds = parseJsonString(userData.interests);
           } catch (error) {
             console.warn("Error parsing interests:", error);

@@ -22,6 +22,7 @@ interface Event {
   category: string;
   date: string;
   time: string;
+  to_time?: string; // End time
   location: string;
   address: string;
   description: string;
@@ -35,6 +36,13 @@ interface Event {
   going: EventAttendee[];
   going_count: number;
   user_going: string;
+  // Additional fields from raw data
+  web_link?: string; // Website link
+  lat?: string; // Latitude for map
+  lng?: string; // Longitude for map
+  distance?: number; // Distance from user
+  org_image?: string; // Organization image
+  timestamp?: string; // Original timestamp from API
 }
 
 const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
@@ -111,6 +119,26 @@ const useGetEvents = () => {
     } catch (error) {
       console.warn("Error parsing event image:", error);
       return getDefaultEventImage();
+    }
+  };
+
+  // Parse organizer image
+  const parseOrganizerImage = (imageStr: string): string => {
+    if (!imageStr) {
+      return "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face";
+    }
+
+    try {
+      // If it's already a full URL, return as is
+      if (imageStr.startsWith("http")) {
+        return imageStr;
+      }
+
+      // Otherwise, construct URL with base path
+      return `${IMAGE_BASE_URL}${imageStr}`;
+    } catch (error) {
+      console.warn("Error parsing organizer image:", error);
+      return "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face";
     }
   };
 
@@ -217,15 +245,16 @@ const useGetEvents = () => {
             category: localizedCategory,
             date: event.date || new Date().toISOString(),
             time: event.time,
+            to_time: event.to_time || undefined, // End time
             location: localizedAddress,
             address: localizedAddress,
             description: localizedDescription,
             image: parseEventImage(event.image || event.event_image),
             organizer: {
               name: localizedOrganizer,
-              image:
-                event.organizer_image ||
-                "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
+              image: parseOrganizerImage(
+                event.organizer_image || event.org_image || ""
+              ),
               verified:
                 event.organizer_verified === "1" ||
                 event.verified === "1" ||
@@ -234,14 +263,32 @@ const useGetEvents = () => {
             attendees: goingUsers.slice(0, 3), // Show only first 3 attendees
             totalAttendees: event.going_count || goingUsers.length || 0,
             isAttending: event.user_going === "1" || event.user_going === 1,
-            timeAgo: formatTimeAgo(
-              event.created_date || event.date,
-              event.created_time || "00:00:00"
-            ),
+            timeAgo: (() => {
+              try {
+                const dateValue =
+                  event.created_date || event.date || event.timestamp;
+                const timeValue = event.created_time || "00:00:00";
+                if (dateValue) {
+                  return formatTimeAgo(dateValue, timeValue);
+                }
+                return t("events.recently");
+              } catch (error) {
+                console.warn("Error formatting time ago:", error);
+                return t("events.recently");
+              }
+            })(),
             // New fields
             going: goingUsers,
             going_count: event.going_count || 0,
             user_going: event.user_going || "0",
+            // Additional fields from raw data
+            web_link: event.web_link || undefined,
+            lat: event.lat || undefined,
+            lng: event.lng || undefined,
+            distance:
+              event.distance !== undefined ? Number(event.distance) : undefined,
+            org_image: event.org_image || undefined,
+            timestamp: event.timestamp || undefined,
           };
           console.log("Formatted event:", formattedEvent);
           return formattedEvent;

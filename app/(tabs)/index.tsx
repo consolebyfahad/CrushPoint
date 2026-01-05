@@ -7,6 +7,7 @@ import Nationality from "@/components/nationality";
 import Religion from "@/components/religion";
 import ZodiacSign from "@/components/zodic";
 import { useAppContext } from "@/context/app_context";
+import useGetInterests from "@/hooks/useGetInterests";
 import useGetUsers from "@/hooks/useGetUsers";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
@@ -62,6 +63,8 @@ interface UserFilters {
 }
 
 export default function Index() {
+  // Get interests from API for interest name conversion
+  const { interests: apiInterests } = useGetInterests();
   const { t } = useTranslation();
   const { user, updateUserData, userData } = useAppContext();
   const params = useLocalSearchParams();
@@ -219,6 +222,71 @@ export default function Index() {
     requestNotificationPermissions();
 
     const handleNotificationPress = async (data: any) => {
+      // Handle chat/message notifications with match_id
+      if (data?.match_id || data?.to_id) {
+        const matchId = data.match_id;
+        const userId = data.to_id || data.user_id;
+        const userName = data.user_name || "User";
+        const userImage = data.user_image || "";
+
+        // Create unique key for this notification
+        const notificationKey = `${matchId || userId}_${Date.now()}`;
+
+        // Check if this notification was already handled recently (within 2 seconds)
+        const recentKeys = Array.from(notificationHandledRef.current).filter(
+          (key) => {
+            const timestamp = parseInt(key.split("_")[1]);
+            return Date.now() - timestamp < 2000; // 2 seconds
+          }
+        );
+
+        // Clean up old keys
+        notificationHandledRef.current = new Set(recentKeys);
+
+        // Check if we already have a recent notification for this match/user
+        const alreadyHandled = recentKeys.some((key) =>
+          key.startsWith(`${matchId || userId}_`)
+        );
+
+        if (alreadyHandled) {
+          console.log(
+            "🚫 Notification already handled recently:",
+            matchId || userId
+          );
+          return;
+        }
+
+        // Mark as handled
+        notificationHandledRef.current.add(notificationKey);
+
+        console.log("🔔 Handling chat notification for match_id:", matchId);
+
+        try {
+          // Navigate directly to chat conversation
+          router.push({
+            pathname: "/chat/conversation",
+            params: {
+              matchId: matchId || userId,
+              userId: userId,
+              userName: userName,
+              userImage: userImage,
+            },
+          });
+        } catch (error) {
+          console.error("❌ Failed to navigate to chat:", error);
+          console.error("❌ Error details:", {
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+            matchId: matchId,
+            userId: userId,
+          });
+          // Fallback to chat list
+          router.push("/(tabs)/chat");
+        }
+        return;
+      }
+
+      // Handle match notifications with date_id (for backward compatibility)
       if (data?.date_id) {
         // Create unique key for this notification
         const notificationKey = `${data.date_id}_${Date.now()}`;
@@ -483,7 +551,11 @@ export default function Index() {
         const parseUserData = (data: any) => {
           try {
             return {
-              interests: parseInterestsWithNames(data?.interests || "[]", t),
+              interests: parseInterestsWithNames(
+                data?.interests || "[]",
+                t,
+                apiInterests
+              ),
               lookingFor: parseLookingForWithLabels(
                 data?.looking_for || "[]",
                 t
