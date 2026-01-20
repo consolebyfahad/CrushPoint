@@ -48,7 +48,7 @@ interface Event {
 const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 
 const useGetEvents = () => {
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
   const { t, i18n } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -185,6 +185,20 @@ const useGetEvents = () => {
       formData.append("type", "get_data");
       formData.append("table_name", "events");
       formData.append("user_id", user?.user_id || "");
+      
+      // Add user location if available
+      if (userData?.lat && userData?.lng && 
+          userData.lat !== 0 && userData.lng !== 0) {
+        formData.append("lat", userData.lat.toString());
+        formData.append("lng", userData.lng.toString());
+        console.log("📍 [useGetEvents] Added user location to payload:", {
+          lat: userData.lat,
+          lng: userData.lng,
+        });
+      } else {
+        console.log("⚠️ [useGetEvents] User location not available, skipping lat/lng");
+      }
+      
       console.log("formData loadData", JSON.stringify(formData));
       const response = await apiCall(formData);
       console.log("response loadData", JSON.stringify(response));
@@ -313,7 +327,7 @@ const useGetEvents = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, i18n.language, t]);
+  }, [user, userData?.lat, userData?.lng, i18n.language, t]);
 
   // Toggle event attendance
   const toggleAttendance = async (eventId: string) => {
