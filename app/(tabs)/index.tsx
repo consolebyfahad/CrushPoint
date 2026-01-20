@@ -281,7 +281,7 @@ export default function Index() {
             userId: userId,
           });
           // Fallback to chat list
-          router.push("/(tabs)/chat");
+          router.push("/(tabs)/matches");
         }
         return;
       }

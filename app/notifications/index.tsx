@@ -433,12 +433,12 @@ export default function Notifications({ navigation }: any) {
         } catch (error) {
           console.error("Error navigating to chat:", error);
           // Fallback to chat list
-          router.push("/(tabs)/chat");
+          router.push("/(tabs)/matches");
           return;
         }
       } else {
         // No user data, fallback to chat list
-        router.push("/(tabs)/chat");
+        router.push("/(tabs)/matches");
         return;
       }
     }
@@ -653,7 +653,7 @@ export default function Notifications({ navigation }: any) {
         case "message":
         case "chat":
         case "new_message":
-          router.push("/(tabs)/chat");
+          router.push("/(tabs)/matches");
           break;
         default:
           // For other types without user data, do nothing
