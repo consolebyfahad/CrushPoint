@@ -1,10 +1,11 @@
 import ReportUser from "@/components//report_user";
 import BlockConfirmation from "@/components/block_option";
 import CustomSearchBar from "@/components/custom_search";
-import MatchCard from "@/components/match_card";
 import ProfileOptions from "@/components/profile_options";
 import RemoveMatch from "@/components/remove_match";
+import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
+import useGetChats from "@/hooks/useGetChats";
 import useGetMatches from "@/hooks/useGetMatches";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
@@ -13,7 +14,9 @@ import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
+  Image,
   ListRenderItem,
   RefreshControl,
   StyleSheet,
@@ -26,11 +29,29 @@ interface Match {
   id: string;
   name: string;
   age: number;
+  image?: string;
+  images?: string[];
+  isOnline?: boolean;
+  match_id?: string;
+  [key: string]: any; // Allow additional properties
+}
+
+interface ChatItem {
+  id: string;
+  matchId: string;
+  userId: string;
+  name: string;
+  image: string;
+  lastMessage: string;
+  timestamp: string;
+  unreadCount: number;
+  isOnline: boolean;
 }
 
 export default function Matches() {
   const { t } = useTranslation();
   const { user } = useAppContext();
+  const { showToast } = useToast();
   const [searchText, setSearchText] = useState("");
   const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
@@ -41,10 +62,25 @@ export default function Matches() {
   // Use the useGetMatches hook
   const { matches, loading, error, refetch, removeMatch, updateMatchStatus } =
     useGetMatches();
+  console.log("matches", matches);
+  // Use the useGetChats hook
+  const {
+    chats,
+    loading: chatsLoading,
+    error: chatsError,
+    refetch: refetchChats,
+  } = useGetChats();
 
   // Filter matches based on search text
   const filteredMatches = matches.filter((match) =>
     match.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  // Filter chats based on search text
+  const filteredChats = chats.filter(
+    (chat) =>
+      chat.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      chat.lastMessage.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const handleViewProfile = useCallback((match: any) => {
@@ -202,59 +238,158 @@ export default function Matches() {
     [selectedMatch, user?.user_id, removeMatch]
   );
 
-  // Memoized render function for better performance
-  const renderMatchCard: ListRenderItem<Match> = useCallback(
-    ({ item }) => (
-      <MatchCard
-        match={item}
-        onViewProfile={handleViewProfile}
-        onOptions={handleMatchOptions}
-      />
-    ),
-    [handleViewProfile, handleMatchOptions]
-  );
+  // Render horizontal match card (compact version)
+  const renderHorizontalMatchCard: ListRenderItem<Match> = useCallback(
+    ({ item }) => {
+      const imageSource = item?.image
+        ? { uri: item.image }
+        : item?.images && item.images.length > 0
+        ? { uri: item.images[0] }
+        : undefined;
 
-  // Memoized key extractor
-  const keyExtractor = useCallback((item: Match) => `match-${item.id}`, []);
-
-  const renderEmptyState = useCallback(
-    () => (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyEmoji}>💕</Text>
-        <Text style={styles.emptyTitle}>{t("matches.noMatchesYet")}</Text>
-        {/* <Text style={styles.emptyText}>{t("matches.startSwiping")}</Text> */}
-        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-          <Text style={styles.retryButtonText}>{t("match.keepExploring")}</Text>
-        </TouchableOpacity>
-      </View>
-    ),
-    [refetch, t]
-  );
-
-  const renderErrorState = useCallback(
-    () => (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyEmoji}>😔</Text>
-        <Text style={styles.emptyTitle}>
-          {t("matches.errorLoadingMatches")}
-        </Text>
-        <Text style={styles.emptyText}>
-          {error || t("matches.somethingWentWrong")}
-        </Text>
+      return (
         <TouchableOpacity
-          style={[styles.retryButton, loading && styles.retryButtonDisabled]}
-          onPress={refetch}
-          disabled={loading}
+          style={styles.horizontalMatchCard}
+          onPress={() => handleViewProfile(item)}
+          activeOpacity={0.8}
         >
-          {loading ? (
-            <ActivityIndicator size="small" color={color.white} />
-          ) : (
-            <Text style={styles.retryButtonText}>{t("common.tryAgain")}</Text>
-          )}
+          <View style={styles.horizontalMatchImageContainer}>
+            {imageSource ? (
+              <Image source={imageSource} style={styles.horizontalMatchImage} />
+            ) : (
+              <View
+                style={[styles.horizontalMatchImage, styles.placeholderImage]}
+              >
+                <Text style={styles.placeholderText}>
+                  {item?.name?.charAt(0)?.toUpperCase() || "?"}
+                </Text>
+              </View>
+            )}
+            {item?.isOnline && (
+              <View style={styles.horizontalOnlineIndicator} />
+            )}
+          </View>
+          <Text style={styles.horizontalMatchName} numberOfLines={1}>
+            {item?.name || t("matches.unknown")}
+          </Text>
         </TouchableOpacity>
-      </View>
+      );
+    },
+    [handleViewProfile, t]
+  );
+
+  const handleDeleteChat = (chat: ChatItem) => {
+    Alert.alert(
+      t("chat.deleteChat"),
+      t("chat.deleteChatConfirm", { name: chat.name }),
+      [
+        {
+          text: t("common.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("chat.delete"),
+          style: "destructive",
+          onPress: async () => {
+            if (!user?.user_id) {
+              showToast(t("chat.userNotLoggedIn"), "error");
+              return;
+            }
+
+            try {
+              const formData = new FormData();
+              formData.append("type", "chat_delete");
+              formData.append("user_id", user.user_id);
+              // Use chat.userId (matched user's ID) as to_chat_id, not chat.matchId (match record ID)
+              formData.append("to_chat_id", chat.userId);
+
+              // Log FormData contents (FormData doesn't serialize well, so we log the values)
+              console.log("🗑️ [Matches] Delete chat - FormData contents:", {
+                type: "chat_delete",
+                user_id: user.user_id,
+                to_chat_id: chat.userId, // Matched user's ID (e.g., "1")
+                matchId: chat.matchId, // Match record ID (for reference only, e.g., "26")
+                chatId: chat.id,
+              });
+
+              const response = await apiCall(formData);
+              if (response && response.result) {
+                showToast(t("chat.chatDeleted"), "success");
+                refetch(); // Refresh chat list
+              } else {
+                showToast(
+                  response?.message || t("chat.failedToDelete"),
+                  "error"
+                );
+              }
+            } catch (error: any) {
+              showToast(error?.message || t("chat.failedToDelete"), "error");
+              console.error("Failed to delete chat:", error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Render chat item
+  const renderChatItem: ListRenderItem<ChatItem> = useCallback(
+    ({ item }) => (
+      <TouchableOpacity
+        style={styles.chatItem}
+        onLongPress={() => handleDeleteChat(item)}
+        onPress={() => {
+          router.push({
+            pathname: "/chat/conversation",
+            params: {
+              matchId: item.matchId,
+              userId: item.userId,
+              userName: item.name,
+              userImage: item.image,
+            },
+          });
+        }}
+        activeOpacity={0.7}
+      >
+        <View style={styles.avatarContainer}>
+          <Image
+            source={{ uri: item.image }}
+            style={styles.avatar}
+            onError={() => {
+              // Image failed to load, will show placeholder
+            }}
+          />
+          {item.isOnline && <View style={styles.onlineIndicator} />}
+        </View>
+        <View style={styles.chatContent}>
+          <View style={styles.chatHeader}>
+            <Text style={styles.chatName}>{item.name}</Text>
+            <Text style={styles.timestamp}>{item.timestamp}</Text>
+          </View>
+          <View style={styles.chatFooter}>
+            <Text style={styles.lastMessage} numberOfLines={1}>
+              {item.lastMessage}
+            </Text>
+            {item.unreadCount > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadText}>{item.unreadCount}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
     ),
-    [error, loading, refetch, t]
+    []
+  );
+
+  // Memoized key extractors
+  const matchKeyExtractor = useCallback(
+    (item: Match) => `match-${item.id}`,
+    []
+  );
+  const chatKeyExtractor = useCallback(
+    (item: ChatItem) => `chat-${item.id}`,
+    []
   );
 
   const renderLoadingState = useCallback(
@@ -274,30 +409,77 @@ export default function Matches() {
 
   return (
     <View style={styles.container}>
-      {/* Search Bar - only show if there are matches */}
-      {matches.length > 0 && (
-        <CustomSearchBar
-          searchText={searchText}
-          onChangeText={setSearchText}
-          placeholder={t("matches.searchMatches")}
-        />
+      {/* Search Bar */}
+      <CustomSearchBar
+        searchText={searchText}
+        onChangeText={setSearchText}
+        placeholder={t("matches.searchMatches")}
+      />
+
+      {/* Horizontal Matches List */}
+      {filteredMatches.length > 0 && (
+        <View style={styles.horizontalMatchesContainer}>
+          <FlatList
+            data={filteredMatches}
+            renderItem={renderHorizontalMatchCard}
+            keyExtractor={matchKeyExtractor}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalMatchesList}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            initialNumToRender={5}
+          />
+        </View>
       )}
 
-      {/* Matches List */}
+      {/* Chats Section Header */}
+      {filteredChats.length > 0 && (
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t("chat.chats")}</Text>
+        </View>
+      )}
+
+      {/* Vertical Chats List */}
       <FlatList
-        data={filteredMatches}
-        renderItem={renderMatchCard}
-        keyExtractor={keyExtractor}
+        data={filteredChats}
+        renderItem={renderChatItem}
+        keyExtractor={chatKeyExtractor}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
-          styles.listContainer,
-          filteredMatches.length === 0 && { flex: 1 },
+          styles.chatsListContainer,
+          filteredChats.length === 0 && { flex: 1 },
         ]}
-        ListEmptyComponent={error ? renderErrorState : renderEmptyState}
+        ListEmptyComponent={
+          chatsError && chats.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyEmoji}>😔</Text>
+              <Text style={styles.emptyTitle}>{t("chat.errorLoading")}</Text>
+              <Text style={styles.emptyText}>{chatsError}</Text>
+              <TouchableOpacity
+                style={styles.retryButton}
+                onPress={refetchChats}
+              >
+                <Text style={styles.retryButtonText}>
+                  {t("common.tryAgain")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : filteredChats.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyEmoji}>💬</Text>
+              <Text style={styles.emptyTitle}>{t("chat.noConversations")}</Text>
+              <Text style={styles.emptyText}>{t("chat.startChatting")}</Text>
+            </View>
+          ) : null
+        }
         refreshControl={
           <RefreshControl
-            refreshing={loading}
-            onRefresh={refetch}
+            refreshing={loading || chatsLoading}
+            onRefresh={() => {
+              refetch();
+              refetchChats();
+            }}
             colors={[color.primary]}
             tintColor={color.primary}
           />
@@ -359,10 +541,152 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
   },
-  listContainer: {
+  // Horizontal Matches Styles
+  horizontalMatchesContainer: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray94,
+  },
+  horizontalMatchesList: {
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  horizontalMatchCard: {
+    alignItems: "center",
+    marginRight: 12,
+    width: 80,
+  },
+  horizontalMatchImageContainer: {
+    position: "relative",
+    marginBottom: 8,
+  },
+  horizontalMatchImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: color.gray94,
+  },
+  placeholderImage: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: color.gray94,
+  },
+  placeholderText: {
+    fontSize: 24,
+    fontFamily: font.bold,
+    color: color.gray55,
+  },
+  horizontalOnlineIndicator: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: color.success,
+    borderWidth: 2,
+    borderColor: color.white,
+  },
+  horizontalMatchName: {
+    fontSize: 12,
+    fontFamily: font.medium,
+    color: color.black,
+    textAlign: "center",
+  },
+  // Section Header
+  sectionHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
+    backgroundColor: color.white,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontFamily: font.bold,
+    color: color.black,
+  },
+  // Chats List Styles
+  chatsListContainer: {
     paddingTop: 8,
     paddingBottom: 100,
     flexGrow: 1,
+  },
+  chatItem: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    alignItems: "center",
+    backgroundColor: color.white,
+    borderBottomWidth: 1,
+    borderBottomColor: color.gray94,
+  },
+  avatarContainer: {
+    position: "relative",
+    marginRight: 12,
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: color.gray94,
+  },
+  onlineIndicator: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: color.success,
+    borderWidth: 2,
+    borderColor: color.white,
+  },
+  chatContent: {
+    flex: 1,
+  },
+  chatHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  chatName: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.black,
+    flex: 1,
+  },
+  timestamp: {
+    fontSize: 12,
+    fontFamily: font.regular,
+    color: color.gray55,
+    marginLeft: 8,
+  },
+  chatFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  lastMessage: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray55,
+    flex: 1,
+    marginRight: 8,
+  },
+  unreadBadge: {
+    backgroundColor: color.primary,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  unreadText: {
+    color: color.white,
+    fontSize: 12,
+    fontFamily: font.semiBold,
   },
   // Loading state
   loadingText: {

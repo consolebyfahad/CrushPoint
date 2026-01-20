@@ -24,7 +24,7 @@
     "title2": "Meet in Person",
     "subtitle2": "Explore real people based on shared interests and intentions. Forget swiping left and right. ",
     "title3": "Express Yourself Authentically",
-    "subtitle3": "No chats needed. Send your crush a fun emoji to get their attention. ",
+    "subtitle3": "Send your crush a fun emoji to get their attention and chat together.",
     "title4": "Discover Events",
     "subtitle4": "Find your significant other at interesting events."
   },
@@ -76,6 +76,9 @@
     "tryAgain": "Try Again",
     "noReferenceImage": "No reference image available",
     "invalidCode": "Please enter a valid verification code",
+    "phonePlaceholder": "Enter phone number",
+    "emailPlaceholder": "Enter email address",
+    "orText": "OR",
     "loginSuccess": "Login successful!",
     "logoutSuccess": "Logged out successfully",
     "failedToResendCode": "Failed to resend code. Please try again.",
@@ -133,6 +136,7 @@
     "interests": "Interests",
     "lookingFor": "Looking For",
     "about": "About",
+    "defaultAbout": "This is me",
     "addPhotos": "Add your best photos",
     "editPhotos": "Edit your photos",
     "photosSubtitle": "Photos should be clear and show your face. Add at least 2 photos to continue.",
@@ -368,7 +372,13 @@
     "noLocationAvailable": "No location available for this event",
     "failedToOpenMaps": "Failed to open maps application",
     "eventShared": "Event shared successfully!",
-    "failedToShare": "Failed to share event"
+    "failedToShare": "Failed to share event",
+    "websiteNotAvailable": "Website not available",
+    "websiteError": "Error opening website",
+    "invalidDateTimeFormat": "Invalid date/time format",
+    "invalidDateCheck": "Invalid date format. Please check the event date: {{date}}",
+    "invalidYearRange": "Invalid date format. Year must be between 2000-2100. Got: {{year}}",
+    "cannotAddEventContactSupport": "Cannot add event: Invalid date format (year: {{year}}). Please contact support."
   },
   "users": {
     "userIdNotAvailable": "User ID not available",
@@ -422,6 +432,8 @@
     "daysAgo": "{{count}} days ago",
     "monthAgo": "{{count}} month ago",
     "monthsAgo": "{{count}} months ago",
+    "yearAgo": "{{count}} year ago",
+    "yearsAgo": "{{count}} years ago",
     "recently": "recently",
     "newReaction": "New Reaction",
     "profileView": "Profile View",
@@ -431,6 +443,12 @@
     "superLike": "Super Like!",
     "notification": "Notification",
     "loadingNotifications": "Loading notifications...",
+    "messageFromUser": "You have a new message from {{name}}!",
+    "messageFromUserReply": "You have a new message from {{name}}! Reply now.",
+    "matchWithUser": "You have a new match with {{name}}!",
+    "matchWithUserChat": "You have a new match with {{name}}! Start chatting now.",
+    "startChatting": "Start chatting now.",
+    "replyNow": "Reply now.",
     "allQuietHere": "All quiet here!",
     "noNotificationsText": "No notifications to show right now.\nWe'll let you know when something exciting happens! ✨",
     "checkAgain": "Check Again",
@@ -553,7 +571,11 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "delete": "Delete",
-    "save": "Save"
+    "save": "Save",
+    "newMessageReceived": "New Message Received",
+    "newMessageReceivedDesc": "When you receive a message",
+    "eventInvitationReceived": "Event Invitation Received",
+    "eventInvitationReceivedDesc": "When you receive an event invitation"
   },
   "filters": {
     "filters": "Filters",
@@ -935,6 +957,9 @@
     "characterCount": "{{count}}/500",
     "sending": "Sending...",
     "sendMessage": "Send Message",
+    "success": {
+      "messageSent": "Your message has been sent successfully! We'll get back to you soon."
+    },
     "subjects": {
       "accountIssue": "Account Issue",
       "bugReport": "Bug Report",

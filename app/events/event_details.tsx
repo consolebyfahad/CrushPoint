@@ -272,23 +272,239 @@ export default function EventDetails() {
       }
 
       // Parse event date and time
-      const eventDate = new Date(event.date);
-      const startDate = new Date(eventDate);
-
-      // Calculate end date - use to_time if available, otherwise default to 2 hours
+      // event.date might be in format "Jul 22, 2025" or "2025-07-22" or ISO string
+      // event.time might be in format "10:04 PM" or "22:04" (12-hour or 24-hour)
+      
+      let startDate: Date;
       let endDate: Date;
-      if (event.to_time) {
-        // Parse to_time (format: "HH:MM" or "HH:MM:SS")
-        const [hours, minutes] = event.to_time.split(":").map(Number);
-        endDate = new Date(eventDate);
-        endDate.setHours(hours, minutes || 0, 0);
-        // If end time is earlier than start time, assume it's next day (e.g., 00:00)
-        if (endDate < startDate) {
-          endDate.setDate(endDate.getDate() + 1);
+      
+      try {
+        // Try to parse the date
+        let eventDate: Date;
+        if (typeof event.date === "string") {
+          const dateStr = event.date.trim();
+          
+          // Check for DD-MM-YYYY format first (e.g., "25-01-2026")
+          // IMPORTANT: This must be checked BEFORE new Date() because new Date() misinterprets DD-MM-YYYY
+          const ddMmYyyyMatch = dateStr.match(/^\d{2}-\d{2}-\d{4}$/);
+          console.log("🔍 [Calendar] Checking date format:", {
+            dateStr,
+            ddMmYyyyMatch: !!ddMmYyyyMatch,
+          });
+          
+          if (ddMmYyyyMatch) {
+            const [day, month, year] = dateStr.split("-").map(Number);
+            eventDate = new Date(year, month - 1, day); // month is 0-indexed
+            console.log("✅ [Calendar] Parsed DD-MM-YYYY format:", {
+              original: dateStr,
+              day,
+              month: month - 1,
+              year,
+              parsed: eventDate.toISOString(),
+              parsedYear: eventDate.getFullYear(),
+            });
+          }
+          // Check for YYYY-MM-DD format (e.g., "2026-01-25")
+          else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            const [year, month, day] = dateStr.split("-").map(Number);
+            eventDate = new Date(year, month - 1, day);
+            console.log("📅 [Calendar] Parsed YYYY-MM-DD format:", {
+              original: dateStr,
+              parsed: eventDate.toISOString(),
+            });
+          }
+          // Check for MMM DD, YYYY format (e.g., "Jul 22, 2025")
+          else if (dateStr.match(/^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}$/)) {
+            const monthMap: { [key: string]: number } = {
+              Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+              Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+            };
+            
+            const parts = dateStr.split(" ");
+            if (parts.length >= 3) {
+              const month = monthMap[parts[0]];
+              const day = parseInt(parts[1].replace(",", ""));
+              const year = parseInt(parts[2]);
+              eventDate = new Date(year, month, day);
+              console.log("📅 [Calendar] Parsed MMM DD, YYYY format:", {
+                original: dateStr,
+                parsed: eventDate.toISOString(),
+              });
+            } else {
+              throw new Error("Invalid date format");
+            }
+          }
+          // Try parsing as ISO string or standard format
+          else {
+            eventDate = new Date(dateStr);
+            if (isNaN(eventDate.getTime())) {
+              throw new Error(`Invalid date format: ${dateStr}`);
+            }
+            console.log("📅 [Calendar] Parsed as ISO/standard format:", {
+              original: dateStr,
+              parsed: eventDate.toISOString(),
+            });
+          }
+        } else {
+          eventDate = new Date(event.date);
         }
-      } else {
-        // Default to 2 hours duration if to_time not available
-        endDate = new Date(eventDate.getTime() + 2 * 60 * 60 * 1000);
+        
+        // Validate the parsed date
+        if (isNaN(eventDate.getTime())) {
+          throw new Error(`Failed to parse date: ${event.date}`);
+        }
+        
+        // Additional validation: check if year is reasonable (not year 30!)
+        const parsedYear = eventDate.getFullYear();
+        console.log("🔍 [Calendar] Validating parsed date:", {
+          originalDate: event.date,
+          parsedYear,
+          parsedDate: eventDate.toISOString(),
+        });
+        
+        if (parsedYear < 2000 || parsedYear > 2100) {
+          console.error("❌ [Calendar] Parsed year seems incorrect:", {
+            originalDate: event.date,
+            parsedYear,
+            parsedDate: eventDate.toISOString(),
+          });
+          showToast(
+            t("events.invalidDateCheck", { date: event.date }),
+            "error"
+          );
+          throw new Error(`Invalid year in date: ${parsedYear}. Original: ${event.date}`);
+        }
+
+        // Parse start time (event.time)
+        startDate = new Date(eventDate);
+        
+        if (event.time) {
+          const timeStr = event.time.trim();
+          
+          // Check if it's 12-hour format (contains AM/PM)
+          if (timeStr.includes("AM") || timeStr.includes("PM")) {
+            const timeParts = timeStr.split(" ");
+            const timeValue = timeParts[0];
+            const ampm = timeParts[1]?.toUpperCase();
+            const [hours, minutes] = timeValue.split(":").map(Number);
+            
+            // Convert to 24-hour format
+            let hour24 = hours;
+            if (ampm === "PM" && hours !== 12) {
+              hour24 += 12;
+            } else if (ampm === "AM" && hours === 12) {
+              hour24 = 0;
+            }
+            
+            startDate.setHours(hour24, minutes || 0, 0, 0);
+          } else {
+            // 24-hour format (e.g., "22:04" or "22:04:00")
+            const [hours, minutes] = timeStr.split(":").map(Number);
+            startDate.setHours(hours || 0, minutes || 0, 0, 0);
+          }
+        } else {
+          // No time specified, default to 12:00 PM
+          startDate.setHours(12, 0, 0, 0);
+        }
+
+        console.log("📅 [Calendar] Parsed start date:", {
+          originalDate: event.date,
+          originalTime: event.time,
+          parsedStartDate: startDate.toISOString(),
+        });
+
+        // Calculate end date - use to_time if available, otherwise default to 2 hours
+        if (event.to_time) {
+          const toTimeStr = event.to_time.trim();
+          
+          // Check if it's 12-hour format
+          if (toTimeStr.includes("AM") || toTimeStr.includes("PM")) {
+            const timeParts = toTimeStr.split(" ");
+            const timeValue = timeParts[0];
+            const ampm = timeParts[1]?.toUpperCase();
+            const [hours, minutes] = timeValue.split(":").map(Number);
+            
+            // Convert to 24-hour format
+            let hour24 = hours;
+            if (ampm === "PM" && hours !== 12) {
+              hour24 += 12;
+            } else if (ampm === "AM" && hours === 12) {
+              hour24 = 0;
+            }
+            
+            endDate = new Date(eventDate);
+            endDate.setHours(hour24, minutes || 0, 0, 0);
+          } else {
+            // 24-hour format
+            const [hours, minutes] = toTimeStr.split(":").map(Number);
+            endDate = new Date(eventDate);
+            endDate.setHours(hours || 0, minutes || 0, 0, 0);
+          }
+          
+          // If end time is earlier than start time, assume it's next day
+          if (endDate < startDate) {
+            endDate.setDate(endDate.getDate() + 1);
+          }
+        } else {
+          // Default to 2 hours duration if to_time not available
+          endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+        }
+
+        console.log("📅 [Calendar] Parsed end date:", {
+          originalToTime: event.to_time,
+          parsedEndDate: endDate.toISOString(),
+        });
+      } catch (error) {
+        console.error("❌ [Calendar] Error parsing date/time:", error);
+        showToast(
+          t("events.invalidDateTimeFormat") || "Invalid date/time format",
+          "error"
+        );
+        return;
+      }
+
+      // Validate dates
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error("❌ [Calendar] Invalid dates:", {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        });
+        showToast(
+          t("events.invalidDateTimeFormat") || "Invalid date/time format",
+          "error"
+        );
+        return;
+      }
+
+      // Validate year is reasonable (should have been caught earlier, but double-check)
+      const startYear = startDate.getFullYear();
+      const endYear = endDate.getFullYear();
+      if (startYear < 2000 || startYear > 2100 || endYear < 2000 || endYear > 2100) {
+        console.error("❌ [Calendar] Invalid year in dates:", {
+          startYear,
+          endYear,
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          originalDate: event.date,
+          originalTime: event.time,
+        });
+        showToast(
+          t("events.invalidYearRange", { year: startYear }),
+          "error"
+        );
+        return;
+      }
+
+      if (endDate <= startDate) {
+        console.error("❌ [Calendar] End date must be after start date:", {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        });
+        showToast(
+          t("events.invalidDateTimeFormat") || "Invalid date/time format",
+          "error"
+        );
+        return;
       }
 
       // Create calendar event
@@ -297,8 +513,8 @@ export default function EventDetails() {
         startDate: startDate,
         endDate: endDate,
         allDay: false,
-        location: event.location || event.address,
-        notes: `${event.description}\n\nOrganized by: ${
+        location: event.location || event.address || "",
+        notes: `${event.description || ""}\n\nOrganized by: ${
           event.organizer?.name || "Unknown"
         }\n\nEvent from Andra Dating App`,
         alarms: [
@@ -312,15 +528,61 @@ export default function EventDetails() {
         calendarId: writableCalendar.id,
       };
 
+      // Final validation before creating event
+      const finalStartYear = startDate.getFullYear();
+      const finalEndYear = endDate.getFullYear();
+      
+      console.log("📅 [Calendar] Final validation before creating event:", {
+        startYear: finalStartYear,
+        endYear: finalEndYear,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        originalDate: event.date,
+        originalTime: event.time,
+      });
+      
+      if (finalStartYear < 2000 || finalStartYear > 2100) {
+        console.error("❌ [Calendar] BLOCKED: Invalid start year detected:", finalStartYear);
+        showToast(
+          t("events.cannotAddEventContactSupport", { year: finalStartYear }),
+          "error"
+        );
+        return;
+      }
+      
+      if (finalEndYear < 2000 || finalEndYear > 2100) {
+        console.error("❌ [Calendar] BLOCKED: Invalid end year detected:", finalEndYear);
+        showToast(
+          t("events.cannotAddEventContactSupport", { year: finalEndYear }),
+          "error"
+        );
+        return;
+      }
+
+      console.log("📅 [Calendar] Creating event with details:", {
+        title: eventDetails.title,
+        startDate: eventDetails.startDate.toISOString(),
+        endDate: eventDetails.endDate.toISOString(),
+        location: eventDetails.location,
+        calendarId: eventDetails.calendarId,
+        calendarName: writableCalendar.title,
+      });
+
       // Create the event
       const eventId = await Calendar.createEventAsync(
         writableCalendar.id,
         eventDetails
       );
 
+      console.log("📅 [Calendar] Event creation result:", {
+        eventId,
+        success: !!eventId,
+      });
+
       if (eventId) {
         showToast(t("events.addedToCalendar"), "success");
       } else {
+        console.error("❌ [Calendar] Failed to create event - no eventId returned");
         showToast(t("events.failedToAddToCalendar"), "error");
       }
     } catch (error) {

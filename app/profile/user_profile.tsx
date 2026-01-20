@@ -184,7 +184,7 @@ export default function UserProfile() {
       nationality: parseNationality(userData.nationality),
       religion: userData.religion || "",
       zodiac: userData.zodiac || "",
-      about: userData.about || "This is me",
+      about: userData.about || t("profile.defaultAbout") || "",
       email: userData.email || "",
       gender: userData.gender === "female" ? "Female" : userData.gender || "",
       country: userData.country || "",
@@ -386,9 +386,9 @@ export default function UserProfile() {
       // Validate location before proceeding
       if (!hasValidLocation()) {
         Alert.alert(
-          "Location Unavailable",
-          "This user's location is not available on the map.",
-          [{ text: "OK", style: "default" }]
+          t("errors.locationUnavailable"),
+          t("errors.locationNotAvailable"),
+          [{ text: t("common.ok"), style: "default" }]
         );
         setIsLoadingLocation(false);
         return;
@@ -397,8 +397,22 @@ export default function UserProfile() {
       // Simulate a brief loading state for better UX
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Navigate to home tab with map view and user data (same as list view)
-      router.push({
+      // Prepare user data for map view (same structure as user_card)
+      const userForMap = {
+        id: userInfo.id,
+        name: userInfo.name,
+        actualLocation: userData.actualLocation,
+        loc: userData.loc,
+        lat: userData.lat,
+        lng: userData.lng,
+        image: userInfo.images?.[0] || userData.image,
+        images: userInfo.images || userData.images,
+        ...userData, // Include all user data
+      };
+
+      // Navigate to home tab with map view and user data
+      // Use replace to avoid navigation stack issues and ensure clean state
+      router.replace({
         pathname: "/(tabs)",
         params: {
           viewType: "Map",
@@ -410,14 +424,17 @@ export default function UserProfile() {
             lat: userData.lat,
             lng: userData.lng,
           }),
+          // Add timestamp to ensure params are processed
+          _timestamp: Date.now().toString(),
         },
       });
 
       setIsLoadingLocation(false);
     } catch (error) {
+      console.error("Error in handleShowOnMap:", error);
       setIsLoadingLocation(false);
-      Alert.alert(t("common.error"), t("errors.unableToShowLocation"), [
-        { text: t("errors.ok"), style: "default" },
+      Alert.alert(t("common.error"), t("errors.unableToShowLocation") || "Unable to show location", [
+        { text: t("errors.ok") || "OK", style: "default" },
       ]);
     }
   };

@@ -322,7 +322,7 @@ export default function Index() {
 
         try {
           const matchData = await fetchMatchData(data.date_id);
-
+          console.log("matchData", matchData);
           if (matchData) {
             router.push({
               pathname: "/profile/match2",
@@ -349,8 +349,19 @@ export default function Index() {
     };
   }, []); // Empty deps is fine - we use ref for state
 
+  // Ref to track processed params to prevent re-processing
+  const processedParamsRef = useRef<Set<string>>(new Set());
+
   // Handle navigation parameters from user profile
   useEffect(() => {
+    // Create a unique key for these params
+    const paramKey = `${params.selectedUserId}_${params._timestamp || ""}`;
+    
+    // Skip if we've already processed these params
+    if (processedParamsRef.current.has(paramKey)) {
+      return;
+    }
+
     if (params.viewType) {
       setViewType(params.viewType as string);
     }
@@ -364,10 +375,14 @@ export default function Index() {
           ...locationData,
         };
 
+        // Mark these params as processed
+        processedParamsRef.current.add(paramKey);
+
         // Switch to map view first
         setViewType(t("common.mapView"));
 
-        // Small delay to ensure map tab is active before setting selected user
+        // Longer delay to ensure map is fully loaded and ready
+        // This prevents the map from freezing
         setTimeout(() => {
           setSelectedUser(selectedUserData);
 
@@ -375,12 +390,21 @@ export default function Index() {
           setTimeout(() => {
             setSelectedUser(null);
           }, 10000);
-        }, 100);
+        }, 500); // Increased from 100ms to 500ms to ensure map is ready
       } catch (error) {
         console.error("Error parsing selected user location:", error);
       }
     }
-  }, [params]);
+
+    // Clean up old param keys (keep only last 10)
+    if (processedParamsRef.current.size > 10) {
+      const keysArray = Array.from(processedParamsRef.current);
+      processedParamsRef.current.clear();
+      keysArray.slice(-10).forEach((key) => {
+        processedParamsRef.current.add(key);
+      });
+    }
+  }, [params, t]);
 
   const fetchMatchData = async (dateId: string) => {
     try {

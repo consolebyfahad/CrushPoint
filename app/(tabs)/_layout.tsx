@@ -14,7 +14,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" />
       <Tabs.Screen name="matches" />
       <Tabs.Screen name="events" />
-      <Tabs.Screen name="chat" />
+      {/* <Tabs.Screen name="chat" /> */}
       <Tabs.Screen name="profile" />
     </Tabs>
   );

@@ -2,11 +2,14 @@ import { AppProvider } from "@/context/app_context";
 import { color } from "@/utils/constants";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { I18nextProvider } from "react-i18next";
 import { ActivityIndicator, StatusBar, View } from "react-native";
 import { ToastProvider } from "../components/toast_provider";
 import i18n from "../utils/i18n";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -16,6 +19,10 @@ export default function RootLayout() {
     "Inter-Bold": require("../assets/fonts/Inter_24pt-Bold.ttf"),
     "Inter-ExtraBold": require("../assets/fonts/Inter_24pt-ExtraBold.ttf"),
   });
+
+  useEffect(() => {
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
 
   const [isReady, setIsReady] = useState(false);
   useEffect(() => {

@@ -86,9 +86,9 @@ const useGetChats = () => {
       const chatListFormData = new FormData();
       chatListFormData.append("type", "chat_list");
       chatListFormData.append("user_id", user.user_id);
-
+      console.log("chatListFormData", JSON.stringify(chatListFormData));
       const chatListResponse = await apiCall(chatListFormData);
-
+      console.log("chatListResponse", JSON.stringify(chatListResponse));
       if (chatListResponse?.data && Array.isArray(chatListResponse.data)) {
         const chatList: ChatItem[] = chatListResponse.data.map((chat: any) => {
           // Parse chat data from API response

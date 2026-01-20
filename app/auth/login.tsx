@@ -181,7 +181,9 @@ export default function Login() {
                 Platform.OS === "ios" && { paddingVertical: 16 },
               ]}
               placeholder={
-                activeTab === "phone" ? "+92 300 1234567" : "you@example.com"
+                activeTab === "phone"
+                  ? t("auth.phonePlaceholder")
+                  : t("auth.emailPlaceholder")
               }
               placeholderTextColor={color.gray69}
               value={activeTab === "phone" ? phoneNumber : email}
@@ -218,7 +220,7 @@ export default function Login() {
           isDisabled={!isFormValid()}
           isLoading={loginLoading}
         />
-        <Text style={styles.orText}>OR</Text>
+        <Text style={styles.orText}>{t("auth.orText")}</Text>
         <SocialAuth
           onAuthSuccess={handleSocialAuthSuccess}
           onAuthError={handleSocialAuthError}

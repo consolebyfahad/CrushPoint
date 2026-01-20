@@ -22,8 +22,8 @@ export default function NotificationSettings({ navigation }: any) {
 
   const [notificationSettings, setNotificationSettings] = useState({
     newMatches: true,
-    newMeetup: true,
-    meetupRespondReceived: true,
+    newMessageReceived: true,
+    eventInvitationReceived: true,
     emojiReceived: true,
     nearbyMatches: true,
     nearbyUsers: true,
@@ -142,16 +142,16 @@ export default function NotificationSettings({ navigation }: any) {
       enabled: notificationSettings.newMatches,
     },
     {
-      key: "newMeetup",
-      title: t("common.meetupRequests"),
-      description: t("common.meetupRequestsDesc"),
-      enabled: notificationSettings.newMeetup,
+      key: "newMessageReceived",
+      title: t("common.newMessageReceived") || "New Message Received",
+      description: t("common.newMessageReceivedDesc") || "When you receive a message.",
+      enabled: notificationSettings.newMessageReceived,
     },
     {
-      key: "meetupRespondReceived",
-      title: t("common.meetupRespondReceived"),
-      description: t("common.meetupRespondReceivedDesc"),
-      enabled: notificationSettings.meetupRespondReceived,
+      key: "eventInvitationReceived",
+      title: t("common.eventInvitationReceived") || "Event Invitation Received",
+      description: t("common.eventInvitationReceivedDesc") || "When you receive an event invitation.",
+      enabled: notificationSettings.eventInvitationReceived,
     },
     {
       key: "emojiReceived",

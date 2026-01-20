@@ -92,8 +92,139 @@ export default function Notifications({ navigation }: any) {
     } else {
       // More than 1 year
       const years = Math.floor(diffInSeconds / 31536000);
-      return years === 1 ? `${years} year ago` : `${years} years ago`;
+      return years === 1
+        ? t("notifications.yearAgo", { count: years })
+        : t("notifications.yearsAgo", { count: years });
     }
+  };
+
+  const getNotificationTitle = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "reaction":
+      case "emoji":
+        return t("notifications.newReaction");
+      case "match":
+      case "new_match":
+        return t("notifications.newMatch");
+      case "profile_view":
+      case "view":
+        return t("notifications.profileView");
+      case "event":
+        return t("notifications.eventNotification");
+      case "message":
+      case "chat":
+      case "new_message":
+        return t("notifications.newMessage");
+      case "like":
+        return t("notifications.someoneLikedYou");
+      case "nearby":
+        return t("notifications.nearbyUser");
+      case "super_like":
+        return t("notifications.superLike");
+      default:
+        return t("notifications.notification");
+    }
+  };
+
+  const translateNotificationTitle = (apiTitle: string, type: string) => {
+    // If API title matches common patterns, translate it
+    if (apiTitle) {
+      const lowerTitle = apiTitle.toLowerCase();
+      if (lowerTitle.includes("new message") || lowerTitle.includes("neue nachricht")) {
+        return t("notifications.newMessage");
+      }
+      if (lowerTitle.includes("new match") || lowerTitle.includes("neues match")) {
+        return t("notifications.newMatch");
+      }
+      if (lowerTitle.includes("reaction") || lowerTitle.includes("reaktion")) {
+        return t("notifications.newReaction");
+      }
+      if (lowerTitle.includes("profile view") || lowerTitle.includes("profilansicht")) {
+        return t("notifications.profileView");
+      }
+      if (lowerTitle.includes("event") || lowerTitle.includes("veranstaltung")) {
+        return t("notifications.eventNotification");
+      }
+      if (lowerTitle.includes("like")) {
+        return t("notifications.someoneLikedYou");
+      }
+      if (lowerTitle.includes("nearby") || lowerTitle.includes("in der nähe")) {
+        return t("notifications.nearbyUser");
+      }
+      if (lowerTitle.includes("super like")) {
+        return t("notifications.superLike");
+      }
+    }
+
+    // Fallback to type-based translation
+    return getNotificationTitle(type);
+  };
+
+  const translateNotificationMessage = (
+    apiMessage: string,
+    type: string,
+    userName: string
+  ) => {
+    if (!apiMessage) return "";
+
+    // Translate common notification message patterns
+    const lowerMessage = apiMessage.toLowerCase();
+
+    // If message contains user name, try to preserve it in translation
+    if (userName && apiMessage.includes(userName)) {
+      // For new message: "You have a new message from {name}! Reply now."
+      if (
+        lowerMessage.includes("new message") &&
+        lowerMessage.includes("reply now")
+      ) {
+        return t("notifications.messageFromUserReply", { name: userName });
+      }
+
+      // For new match: "You have a new match with {name}! Start chatting now."
+      if (
+        lowerMessage.includes("new match") &&
+        lowerMessage.includes("start chatting")
+      ) {
+        return t("notifications.matchWithUserChat", { name: userName });
+      }
+    }
+
+    // New message notifications
+    if (
+      lowerMessage.includes("new message from") ||
+      lowerMessage.includes("neue nachricht von") ||
+      lowerMessage.includes("you have a new message")
+    ) {
+      return t("notifications.messageFromUser", { name: userName });
+    }
+
+    // New match notifications
+    if (
+      lowerMessage.includes("new match with") ||
+      lowerMessage.includes("neues match mit") ||
+      lowerMessage.includes("you have a new match")
+    ) {
+      return t("notifications.matchWithUser", { name: userName });
+    }
+
+    // Start chatting notifications
+    if (
+      lowerMessage.includes("start chatting") ||
+      lowerMessage.includes("beginne zu chatten")
+    ) {
+      return t("notifications.startChatting");
+    }
+
+    // Reply now notifications
+    if (
+      lowerMessage.includes("reply now") ||
+      lowerMessage.includes("jetzt antworten")
+    ) {
+      return t("notifications.replyNow");
+    }
+
+    // Return original message if no pattern matches
+    return apiMessage;
   };
 
   const fetchNotifications = async () => {
@@ -121,11 +252,22 @@ export default function Notifications({ navigation }: any) {
             const backgroundImage =
               getNotificationBackgroundImage(notificationType);
 
+            // Translate notification title and message
+            const translatedTitle = translateNotificationTitle(
+              notif.title,
+              notificationType
+            );
+            const translatedMessage = translateNotificationMessage(
+              notif.notification,
+              notificationType,
+              notif.from?.name || notif.user_name || ""
+            );
+
             const processed = {
               id: notif.id || `notif_${index}`,
               type: notificationType,
-              title: notif.title || getNotificationTitle(notificationType),
-              message: notif.notification,
+              title: translatedTitle,
+              message: translatedMessage,
               timeAgo:
                 notif.timestamp || notif.created_at
                   ? formatTimeAgo(notif.timestamp || notif.created_at)
@@ -165,32 +307,6 @@ export default function Notifications({ navigation }: any) {
     }
   };
 
-  const getNotificationTitle = (type: string) => {
-    switch (type.toLowerCase()) {
-      case "reaction":
-      case "emoji":
-        return t("notifications.newReaction");
-      case "match":
-      case "new_match":
-        return t("notifications.newMatch");
-      case "profile_view":
-      case "view":
-        return t("notifications.profileView");
-      case "event":
-        return t("notifications.eventNotification");
-      case "message":
-      case "chat":
-        return t("notifications.newMessage");
-      case "like":
-        return t("notifications.someoneLikedYou");
-      case "nearby":
-        return t("notifications.nearbyUser");
-      case "super_like":
-        return t("notifications.superLike");
-      default:
-        return t("notifications.notification");
-    }
-  };
 
   const getNotificationEmoji = (emoji: string) => {
     switch (emoji.toLowerCase()) {

@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function ProfileOptions({
@@ -47,7 +47,7 @@ export default function ProfileOptions({
     age: 25,
     image:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    timeAgo: "1 day ago",
+    timeAgo: t("common.dayAgo", { count: 1 }),
     ...userData,
   };
 

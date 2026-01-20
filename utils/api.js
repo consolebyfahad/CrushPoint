@@ -24,9 +24,9 @@ export const apiCall = async (payload, method = "POST") => {
       body: payload,
       signal: controller.signal,
     });
-    console.log("response", response);
+    // console.log("response", response);
     const data = await response.json();
-    console.log("data", data);
+    // console.log("data", data);
 
     return data;
   } catch (error) {

@@ -31,17 +31,26 @@ interface Message {
 export default function ChatConversation() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
+  console.log("user", userData);
   const { showToast } = useToast();
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   const textInputRef = useRef<TextInput>(null);
 
-  const matchId = params.matchId as string;
-  const otherUserId = params.userId as string;
+  const matchId = params.matchId as string; // Match record ID (from matches table)
+  const otherUserId = params.userId as string; // Matched user's ID (should be used as to_chat_id)
   const userName = params.userName as string;
   const userImage = params.userImage as string;
 
+  console.log("💬 [Chat] Conversation params:", {
+    matchId, // Match record ID (e.g., "26")
+    otherUserId, // Matched user ID (e.g., "1") - this should be used as to_chat_id
+    userName,
+    userImage,
+    currentUserId: userData?.id,
+  });
+  console.log("currentUserId", user?.user_id);
   // Validate required params
   useEffect(() => {
     if (!matchId || !otherUserId || !user?.user_id) {
@@ -85,25 +94,44 @@ export default function ChatConversation() {
   }, []);
 
   // Fetch full chat history (getchat API)
+  // to_chat_id should be the matched user's ID (otherUserId), not the match record ID
   const fetchChatHistory = useCallback(
-    async (toChatId: string, userIdParam: string, showLoading = true) => {
+    async (
+      currentUserId: string,
+      toChatId: string,
+      userIdParam: string,
+      showLoading = true
+    ) => {
       if (showLoading) {
         setIsLoading(true);
       }
-
+      console.log("📤 [Chat] Fetching chat history", {
+        toChatId, // This should be the matched user's ID (otherUserId)
+        userIdParam, // Current user's ID
+        matchId, // Match record ID (for reference only)
+      });
       const formData = new FormData();
       formData.append("type", "getchat");
       formData.append("user_id", userIdParam);
-      formData.append("to_chat_id", toChatId);
+      formData.append("to_chat_id", toChatId); // Should be otherUserId (matched user's ID)
+
+      // Log FormData contents (FormData doesn't serialize well, so we log the values)
+      console.log("📋 [Chat] FormData contents:", {
+        type: "getchat",
+        user_id: userIdParam,
+        to_chat_id: toChatId,
+      });
 
       try {
         const response = await apiCall(formData);
+        console.log("response for getchat", JSON.stringify(response));
         if (response && response.chat) {
-          const fromId = response.user?.id || userIdParam;
+          const fromId = currentUserId;
+          console.log("fromId", fromId);
           const formattedMessages = response.chat.map((msg: any) => ({
             id: msg.id,
             text: msg.msg,
-            sender: msg.from_id === fromId ? "user" : "other",
+            sender: msg.sender_id === fromId ? "user" : "other",
             timestamp: Number(msg.datetime) || Date.now(),
             userId: msg.from_id,
           }));
@@ -116,7 +144,11 @@ export default function ChatConversation() {
             lastMessageTimestampRef.current = Math.max(...timestamps);
           }
 
-          setMessages(formattedMessages.reverse());
+          // Sort messages chronologically (oldest first, newest last) - don't reverse
+          const sortedMessages = formattedMessages.sort(
+            (a: Message, b: Message) => a.timestamp - b.timestamp
+          );
+          setMessages(sortedMessages);
         } else {
           setMessages([]);
         }
@@ -152,7 +184,7 @@ export default function ChatConversation() {
             : Math.floor(Date.now() / 1000);
 
         formData.append("mysqli_query", utcTimestamp.toString());
-
+        console.log("formData for checkmsg", JSON.stringify(formData));
         const response = await apiCall(formData);
         if (response && response.chat && Array.isArray(response.chat)) {
           if (response.chat.length > 0) {
@@ -198,12 +230,17 @@ export default function ChatConversation() {
 
   useFocusEffect(
     useCallback(() => {
-      if (!matchId || !user?.user_id) return;
+      if (!otherUserId || !user?.user_id) return;
 
       let isFocused = true;
 
       // Initial fetch - get full chat history
-      fetchChatHistory(matchId, user.user_id);
+      // Use otherUserId (matched user's ID) as to_chat_id, not matchId (match record ID)
+      console.log(
+        "🔄 [Chat] useFocusEffect - using otherUserId as to_chat_id:",
+        otherUserId
+      );
+      fetchChatHistory(userData?.id, otherUserId, user.user_id);
 
       // Set up interval to check for new messages every 10 seconds
       if (intervalRef.current) {
@@ -211,8 +248,9 @@ export default function ChatConversation() {
       }
 
       intervalRef.current = setInterval(() => {
-        if (isFocused && matchId && user?.user_id) {
-          checkNewMessages(matchId, user.user_id);
+        if (isFocused && otherUserId && user?.user_id) {
+          // Use otherUserId (matched user's ID) as to_chat_id, not matchId (match record ID)
+          checkNewMessages(otherUserId, user.user_id);
         }
       }, 10000) as ReturnType<typeof setInterval>;
 
@@ -224,11 +262,11 @@ export default function ChatConversation() {
         }
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matchId, user?.user_id])
+    }, [otherUserId, user?.user_id])
   );
 
   const sendMessage = async () => {
-    if (!matchId || !user?.user_id || inputMessage.trim() === "") return;
+    if (!otherUserId || !user?.user_id || inputMessage.trim() === "") return;
 
     try {
       setIsLoading(true);
@@ -236,18 +274,35 @@ export default function ChatConversation() {
       const formData = new FormData();
       formData.append("type", "sendmsg");
       formData.append("user_id", user.user_id);
-      formData.append("to_chat_id", matchId);
+      formData.append("to_chat_id", otherUserId); // Use otherUserId (matched user's ID), not matchId (match record ID)
       formData.append("msg", inputMessage.trim());
-      formData.append("msg_type", "text");
+      formData.append("msg_type", "msg");
+
+      console.log("📤 [Chat] Sending message - FormData contents:", {
+        type: "sendmsg",
+        user_id: user.user_id,
+        to_chat_id: otherUserId, // This should be the matched user's ID (e.g., "1")
+        msg: inputMessage.trim(),
+        msg_type: "msg",
+        matchId, // Match record ID (for reference only)
+      });
 
       const response = await apiCall(formData);
+      console.log("✅ [Chat] Send message response:", JSON.stringify(response));
+
       if (response && response.result) {
         setInputMessage("");
-        showToast(t("chat.messageSent"), "success");
+        // showToast(t("chat.messageSent"), "success");
 
         // Refresh chat history to show the new message
-        if (matchId && user.user_id) {
-          await fetchChatHistory(matchId, user.user_id, false);
+        // Use otherUserId (matched user's ID) as to_chat_id, not matchId (match record ID)
+        if (otherUserId && user.user_id) {
+          await fetchChatHistory(
+            userData?.id,
+            otherUserId,
+            user.user_id,
+            false
+          );
         }
       } else {
         const errorMsg = response?.message || t("chat.failedToSend");

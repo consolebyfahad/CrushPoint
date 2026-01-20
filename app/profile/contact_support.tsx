@@ -124,6 +124,12 @@ console.log("submissionData", submissionData)
       const response = await apiCall(submissionData);
 
       if (response.result) {
+        // Show success confirmation message
+        showToast(
+          t("contactSupport.success.messageSent"),
+          "success"
+        );
+
         // Reset form (keep name and email)
         setFormData((prev) => ({
           ...prev,
@@ -131,10 +137,10 @@ console.log("submissionData", submissionData)
           message: "",
         }));
 
-        // Optional: Navigate back after success
+        // Navigate back after showing success message
         setTimeout(() => {
           router.back();
-        }, 1500);
+        }, 2000); // Increased to 2000ms to give user time to see the success message
       } else {
         showToast(
           response.message || t("contactSupport.validation.sendFailed"),
