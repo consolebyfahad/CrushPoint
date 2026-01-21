@@ -1,6 +1,7 @@
 import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
+import { formatLookingFor } from "@/utils/helper";
 import { svgIcon } from "@/utils/SvgIcons";
 import Feather from "@expo/vector-icons/Feather";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
@@ -166,7 +167,8 @@ export default function UserCard({
     return interests.slice(0, 3);
   };
 
-  const formatLookingFor = (lookingFor: string[] = []) => {
+  // Limit looking for display to first 2 items
+  const limitLookingFor = (lookingFor: string[] = []) => {
     return lookingFor.slice(0, 2);
   };
 
@@ -236,15 +238,19 @@ export default function UserCard({
           <View style={styles.lookingForSection}>
             <Text style={styles.sectionLabel}>{t("common.lookingFor")}</Text>
             <View style={styles.lookingForContainer}>
-              {formatLookingFor(user.lookingFor).map(
-                (lookingFor: string, index: number) => (
-                  <View
-                    key={`looking-for-${index}-${lookingFor}`}
-                    style={styles.lookingForTag}
-                  >
-                    <Text style={styles.lookingForText}>{lookingFor}</Text>
-                  </View>
-                )
+              {limitLookingFor(user.lookingFor).map(
+                (lookingForId: string, index: number) => {
+                  // Format dynamically using current language
+                  const formatted = formatLookingFor(lookingForId, t);
+                  return (
+                    <View
+                      key={`looking-for-${index}-${lookingForId}`}
+                      style={styles.lookingForTag}
+                    >
+                      <Text style={styles.lookingForText}>{formatted}</Text>
+                    </View>
+                  );
+                }
               )}
               {user.lookingFor.length > 2 && (
                 <View style={styles.moreTag}>

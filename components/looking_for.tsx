@@ -1,9 +1,11 @@
 import { color, font } from "@/utils/constants";
+import { LOOKING_FOR_OPTIONS } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -24,32 +26,15 @@ export default function LookingFor({
     Array.isArray(filterData.lookingFor) ? filterData.lookingFor : []
   );
 
-  const lookingForOptions = [
-    {
-      id: "serious",
-      title: t("lookingFor.serious"),
-      emoji: "🩵",
-      color: "#3B82F6",
-    },
-    {
-      id: "casual",
-      title: t("lookingFor.casual"),
-      emoji: "😊",
-      color: "#F59E0B",
-    },
-    {
-      id: "friendship",
-      title: t("lookingFor.friendship"),
-      emoji: "🤝",
-      color: "#10B981",
-    },
-    {
-      id: "open",
-      title: t("lookingFor.open"),
-      emoji: "🔥",
-      color: "#EF4444",
-    },
-  ];
+  // Use base options from helper and translate labels
+  const lookingForOptions = useMemo(() => {
+    return LOOKING_FOR_OPTIONS.map((option) => ({
+      id: option.id,
+      title: t(option.translationKey),
+      emoji: option.emoji,
+      color: "#3B82F6", // Default color, can be customized per option if needed
+    }));
+  }, [t]);
 
   const handleOptionSelect = (optionId: string) => {
     setSelectedOptions((prev) => {
@@ -89,20 +74,23 @@ export default function LookingFor({
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
-      <View style={styles.content}>
-        {lookingForOptions.map((option) => (
+      {/* Looking For List */}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {lookingForOptions.map((option, index) => (
           <TouchableOpacity
             key={option.id}
             style={[
               styles.optionItem,
               isSelected(option.id) && styles.selectedOption,
+              index === lookingForOptions.length - 1 && styles.lastOptionItem,
             ]}
             onPress={() => handleOptionSelect(option.id)}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
           >
             <View style={styles.optionContent}>
-              <Text style={styles.optionEmoji}>{option.emoji}</Text>
+              <View style={styles.iconContainer}>
+                <Text style={styles.optionEmoji}>{option.emoji}</Text>
+              </View>
               <Text
                 style={[
                   styles.optionText,
@@ -113,11 +101,11 @@ export default function LookingFor({
               </Text>
             </View>
             {isSelected(option.id) && (
-              <Ionicons name="checkmark" size={24} color={color.primary} />
+              <Ionicons name="checkmark" size={20} color={color.primary} />
             )}
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
       {/* Selected count */}
       {/* {selectedOptions.length > 0 && (
@@ -201,19 +189,19 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 8,
   },
   optionItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#E5E5E5",
-    backgroundColor: color.white,
+    paddingVertical: 16,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F5F5F5",
+  },
+  lastOptionItem: {
+    borderBottomWidth: 0,
   },
   selectedOption: {
     borderColor: color.primary,
@@ -224,9 +212,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
-  optionEmoji: {
-    fontSize: 24,
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 16,
+    backgroundColor: "#F3E8FF",
+  },
+  optionEmoji: {
+    fontSize: 16,
   },
   optionText: {
     fontSize: 16,

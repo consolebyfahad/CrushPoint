@@ -4,6 +4,7 @@ import { color, font } from "@/utils/constants";
 import { saveLanguagePreference } from "@/utils/i18n";
 import { svgIcon } from "@/utils/SvgIcons";
 import Feather from "@expo/vector-icons/Feather";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -108,10 +109,19 @@ export default function Onboarding() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleContinue = () => {
+  const markOnboardingCompleted = async () => {
+    try {
+      await AsyncStorage.setItem("@onboarding_completed", "true");
+    } catch (error) {
+      console.error("Error marking onboarding as completed:", error);
+    }
+  };
+
+  const handleContinue = async () => {
     if (isAnimating) return;
 
     if (isLastScreen) {
+      await markOnboardingCompleted();
       router.push("/welcome");
     } else {
       setIsAnimating(true);
@@ -122,7 +132,8 @@ export default function Onboarding() {
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    await markOnboardingCompleted();
     router.push("/welcome");
   };
 
@@ -131,7 +142,8 @@ export default function Onboarding() {
     setShowLanguageModal(false);
   };
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
+    await markOnboardingCompleted();
     router.push("/welcome");
   };
 

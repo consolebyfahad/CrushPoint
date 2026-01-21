@@ -50,8 +50,13 @@ export default function Religion({
       icon: "✡️",
       color: "#8B5CF6",
     },
-    { id: "others", name: t("religions.others"), icon: "🌍", color: "#60A5FA" },
-    // { id: "any", name: t("religions.any"), icon: "🤲", color: "#A3A3A3" },
+    {
+      id: "sikhism",
+      name: t("religions.sikhism") || "Sikhism",
+      icon: "☬",
+      color: "#8B5CF6",
+    },
+    { id: "others", name: t("religions.others"), icon: "🙏", color: "#60A5FA" },
   ];
 
   const handleReligionSelect = (religionId: string) => {

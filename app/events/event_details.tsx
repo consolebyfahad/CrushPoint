@@ -274,7 +274,7 @@ export default function EventDetails() {
       // Parse event date and time
       // event.date might be in format "Jul 22, 2025" or "2025-07-22" or ISO string
       // event.time might be in format "10:04 PM" or "22:04" (12-hour or 24-hour)
-      
+
       let startDate: Date;
       let endDate: Date;
       
@@ -414,7 +414,7 @@ export default function EventDetails() {
         });
 
         // Calculate end date - use to_time if available, otherwise default to 2 hours
-        if (event.to_time) {
+      if (event.to_time) {
           const toTimeStr = event.to_time.trim();
           
           // Check if it's 12-hour format
@@ -432,7 +432,7 @@ export default function EventDetails() {
               hour24 = 0;
             }
             
-            endDate = new Date(eventDate);
+        endDate = new Date(eventDate);
             endDate.setHours(hour24, minutes || 0, 0, 0);
           } else {
             // 24-hour format
@@ -442,11 +442,11 @@ export default function EventDetails() {
           }
           
           // If end time is earlier than start time, assume it's next day
-          if (endDate < startDate) {
-            endDate.setDate(endDate.getDate() + 1);
-          }
-        } else {
-          // Default to 2 hours duration if to_time not available
+        if (endDate < startDate) {
+          endDate.setDate(endDate.getDate() + 1);
+        }
+      } else {
+        // Default to 2 hours duration if to_time not available
           endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
         }
 

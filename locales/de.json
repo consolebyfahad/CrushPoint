@@ -28,6 +28,9 @@
     "title4": "Entdecke Events",
     "subtitle4": "Finden deinen Partner oder Partnerin bei interessanten Veranstaltungen."
   },
+  "campaign": {
+    "downloadNow": "Jetzt herunterladen"
+  },
   "language": {
     "selectLanguage": "Sprache auswählen",
     "chooseLanguage": "Wähle deine bevorzugte Sprache",
@@ -690,17 +693,19 @@
   },
   "religion": {
     "christian": "Christlich",
+    "christianity": "Christentum",
     "islam": "Islam",
     "muslim": "Muslim",
     "hindu": "Hindu",
+    "hinduism": "Hinduismus",
     "buddhist": "Buddhistisch",
+    "buddhism": "Buddhismus",
     "jewish": "Jüdisch",
     "judaism": "Judentum",
     "sikh": "Sikh",
-    "atheist": "Atheist",
-    "agnostic": "Agnostisch",
-    "spiritual": "Spirituell",
-    "other": "Andere"
+    "sikhism": "Sikhismus",
+    "other": "Andere",
+    "others": "Andere"
   },
   "about": {
     "about": "Über Dich",
@@ -992,8 +997,8 @@
     "hinduism": "Hinduismus",
     "buddhism": "Buddhismus",
     "judaism": "Judentum",
-    "others": "Andere",
-    "any": "Beliebig"
+    "sikhism": "Sikhismus",
+    "others": "Andere"
   },
   "contactSupport": {
     "title": "Support kontaktieren",

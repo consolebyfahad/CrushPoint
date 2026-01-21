@@ -1,6 +1,4 @@
-import Chat from "@/assets/images/chat.svg";
 import Event from "@/assets/images/event.svg";
-import ActiveChat from "@/assets/images/focusedchat.svg";
 import ActiveEvent from "@/assets/images/focusedevent.svg";
 import ActiveHome from "@/assets/images/focusedhome.svg";
 import ActiveMatches from "@/assets/images/focusedmatch.svg";
@@ -44,7 +42,6 @@ export default function CustomTabBar({ state, descriptors, navigation }: any) {
                 (focused ? <ActiveMatches /> : <Matches />)}
               {route.name === "events" &&
                 (focused ? <ActiveEvent /> : <Event />)}
-              {route.name === "chat" && (focused ? <ActiveChat /> : <Chat />)}
               {route.name === "profile" &&
                 (focused ? <ActiveProfile /> : <Profile />)}
             </TouchableOpacity>
@@ -62,7 +59,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: "center",
-    paddingHorizontal: screenWidth > 400 ? 70 : screenWidth * 0.15,
+    // paddingHorizontal: screenWidth > 400 ? 70 : screenWidth * 0.15,
   },
   tabBar: {
     flexDirection: "row",
@@ -78,7 +75,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     padding: 10,
-    minWidth: 330,
+    // minWidth: 330,
   },
   tabItem: {
     borderRadius: 99,

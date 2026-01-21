@@ -1,15 +1,16 @@
 import { color, font } from "@/utils/constants";
+import { NATIONALITY_OPTIONS } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    FlatList,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -26,7 +27,17 @@ export default function Nationality({
     Array.isArray(filterData.nationality) ? filterData.nationality : []
   );
 
-  const nationalities = [
+  // Use base options from helper and translate labels
+  const nationalities = useMemo(() => {
+    return NATIONALITY_OPTIONS.map((option) => ({
+      id: option.id,
+      name: t(`nationalities.${option.id}`),
+      flag: option.flag,
+    }));
+  }, [t]);
+
+  // OLD nationalities array - keeping for reference but not used
+  const oldNationalities = [
     { id: "afghan", name: t("nationalities.afghan"), flag: "🇦🇫" },
     { id: "albanian", name: t("nationalities.albanian"), flag: "🇦🇱" },
     { id: "algerian", name: t("nationalities.algerian"), flag: "🇩🇿" },

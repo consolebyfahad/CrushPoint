@@ -1,5 +1,6 @@
 import CustomButton from "@/components/custom_button";
 import { apiCall } from "@/utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   GoogleSignin,
   isErrorWithCode,
@@ -35,7 +36,7 @@ GoogleSignin.configure({
   webClientId:
     "323137189211-bsva08l18ig45dvalqhcbs08mqrgsi4j.apps.googleusercontent.com",
   iosClientId:
-    "323137189211-jqjki7ji9ap6hc4puj1ielaqjei9odut.apps.googleusercontent.com", // iOS client ID from GoogleService-Info.plist
+    "323137189211-jqjki7ji9ap6hc4puj1ielaqjei9odut.apps.googleusercontent.com", 
   offlineAccess: true,
   forceCodeForRefreshToken: true,
 });
@@ -64,7 +65,7 @@ export default function SocialAuth({
       }
 
       const response = await GoogleSignin.signIn();
-
+console.log("response for google sign in", JSON.stringify(response));
       if (isSuccessResponse(response)) {
         const { user } = response.data;
 
@@ -133,6 +134,24 @@ export default function SocialAuth({
     }
   };
 
+  // Helper function to decode JWT and extract email
+  const decodeJWT = (token: string): any => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error("Error decoding JWT:", error);
+      return null;
+    }
+  };
+
   const handleAppleSignIn = async () => {
     setAppleLoading(true);
 
@@ -149,26 +168,64 @@ export default function SocialAuth({
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
       });
-
+      console.log("credential for apple sign in", JSON.stringify(credential));
+      
       if (!credential.identityToken) {
         onAuthError(t("auth.appleSignInNoToken"));
         return;
       }
-      const name = credential.fullName
-        ? [credential.fullName.givenName, credential.fullName.familyName]
-            .filter(Boolean)
-            .join(" ")
-        : "";
+
+      // Extract email from JWT token if credential.email is null
+      // Apple only provides email in credential on first sign-in, but it's always in the JWT
+      let email = credential.email ?? "";
+      if (!email && credential.identityToken) {
+        const decodedToken = decodeJWT(credential.identityToken);
+        if (decodedToken?.email) {
+          email = decodedToken.email;
+          console.log("Extracted email from JWT:", email);
+        }
+      }
+
+      // Get name from credential (only available on first sign-in)
+      let name = "";
+      if (credential.fullName) {
+        name = [
+          credential.fullName.givenName,
+          credential.fullName.familyName,
+        ]
+          .filter(Boolean)
+          .join(" ");
+      }
+
+      // If name is not available, try to get it from AsyncStorage (stored from first login)
+      if (!name && credential.user) {
+        const storedName = await AsyncStorage.getItem(`apple_name_${credential.user}`);
+        if (storedName) {
+          name = storedName;
+          console.log("Retrieved name from storage:", name);
+        }
+      }
+
       // API call to your backend
       const formData = new FormData();
       formData.append("type", "social_login");
-      formData.append("token", credential.identityToken);
-      formData.append("email", credential.email ?? "");
+      formData.append("token", credential.user);
+      formData.append("email", email);
       formData.append("name", name);
-
+      console.log("formData for apple sign in", formData);
+      
       const apiResponse = await apiCall(formData);
+      console.log("apiResponse for apple sign in", JSON.stringify(apiResponse));
 
       if (apiResponse.success) {
+        // Store name in AsyncStorage if we got it (for future logins)
+        // This persists even after logout since it uses a different key than @AppContext
+        const finalName = apiResponse.name || name;
+        if (finalName && credential.user) {
+          await AsyncStorage.setItem(`apple_name_${credential.user}`, finalName);
+          console.log("Stored name for future logins:", finalName);
+        }
+
         const userInfo: UserData = {
           user_id: apiResponse.user_id,
           email: apiResponse.email,

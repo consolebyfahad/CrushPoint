@@ -50,10 +50,10 @@ interface MatchUser {
 const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 
 const useGetMatches = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, userData } = useAppContext();
   // Get interests from API for interest name conversion
-  const { interests: apiInterests } = useGetInterests();
+  const { rawInterests: apiInterests } = useGetInterests();
   const [matches, setMatches] = useState<MatchUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -110,10 +110,11 @@ const useGetMatches = () => {
   const parseUserInterests = (interestsStr: string): string[] => {
     try {
       if (!interestsStr) return [];
+      const currentLanguage = i18n.language || "en";
       const parsedInterests = parseInterestsWithNames(
         interestsStr,
-        undefined,
-        apiInterests
+        apiInterests,
+        currentLanguage
       );
       return Array.isArray(parsedInterests) ? parsedInterests : [];
     } catch (error) {

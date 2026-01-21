@@ -1,6 +1,6 @@
 import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
-import { formatGenderInterest } from "@/utils/helper";
+import { formatGenderInterest, formatLookingFor, formatNationality, formatReligion, formatZodiac } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import React, { useEffect, useState } from "react";
@@ -57,21 +57,51 @@ export default function Filters({
   console.log("first", filterData);
 
   // Helper function to format multiple selection display
-  const formatMultipleSelectionDisplay = (selection: any) => {
+  const formatMultipleSelectionDisplay = (selection: any, type?: "religion" | "zodiac" | "nationality" | "lookingFor") => {
     if (!selection || (Array.isArray(selection) && selection.length === 0)) {
       return null;
     }
 
     if (Array.isArray(selection)) {
       if (selection.length === 1) {
+        // Format single selection based on type
+        if (type === "religion") {
+          return formatReligion(selection[0], t);
+        } else if (type === "zodiac") {
+          return formatZodiac(selection[0], t);
+        } else if (type === "lookingFor") {
+          return formatLookingFor(selection[0], t);
+        } else if (type === "nationality") {
+          return formatNationality(selection[0], t);
+        }
         return selection[0];
       } else if (selection.length > 1) {
+        // Format first item based on type
+        let firstItem = selection[0];
+        if (type === "religion") {
+          firstItem = formatReligion(selection[0], t);
+        } else if (type === "zodiac") {
+          firstItem = formatZodiac(selection[0], t);
+        } else if (type === "lookingFor") {
+          firstItem = formatLookingFor(selection[0], t);
+        } else if (type === "nationality") {
+          firstItem = formatNationality(selection[0], t);
+        }
         const additionalCount = selection.length - 1;
-        return `${selection[0]} ${additionalCount}+`;
+        return `${firstItem} ${additionalCount}+`;
       }
     }
 
     // If it's a string (backward compatibility)
+    if (type === "religion") {
+      return formatReligion(selection, t);
+    } else if (type === "zodiac") {
+      return formatZodiac(selection, t);
+    } else if (type === "lookingFor") {
+      return formatLookingFor(selection, t);
+    } else if (type === "nationality") {
+      return formatNationality(selection, t);
+    }
     return selection;
   };
 
@@ -79,7 +109,7 @@ export default function Filters({
     {
       title: t("filters.lookingFor"),
       hasNavigation: true,
-      value: formatMultipleSelectionDisplay(filterData.lookingFor),
+      value: formatMultipleSelectionDisplay(filterData.lookingFor, "lookingFor"),
       onPress: onNavigateToLookingFor,
     },
     // {
@@ -93,19 +123,19 @@ export default function Filters({
     {
       title: t("filters.nationality"),
       hasNavigation: true,
-      value: formatMultipleSelectionDisplay(filterData.nationality),
+      value: formatMultipleSelectionDisplay(filterData.nationality, "nationality"),
       onPress: onNavigateToNationality,
     },
     {
       title: t("filters.religion"),
       hasNavigation: true,
-      value: formatMultipleSelectionDisplay(filterData.religion),
+      value: formatMultipleSelectionDisplay(filterData.religion, "religion"),
       onPress: onNavigateToReligion,
     },
     {
       title: t("filters.zodiacSign"),
       hasNavigation: true,
-      value: formatMultipleSelectionDisplay(filterData.zodiacSign),
+      value: formatMultipleSelectionDisplay(filterData.zodiacSign, "zodiac"),
       onPress: onNavigateToZodiac,
     },
   ];

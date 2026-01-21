@@ -4,9 +4,9 @@ import { apiCall } from "@/utils/api";
 import {
   calculateAge,
   parseInterestsWithNames,
-  parseLookingForWithLabels,
+  parseJsonString,
   parseNationalityWithLabels,
-  parseUserImages,
+  parseUserImages
 } from "@/utils/helper";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -118,9 +118,9 @@ interface UserFilters {
 
 export default function useGetUsers(filters: UserFilters = {}) {
   // Get interests from API for interest name conversion
-  const { interests: apiInterests } = useGetInterests();
+  const { rawInterests: apiInterests } = useGetInterests();
   const { user, userData } = useAppContext();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [users, setUsers] = useState<TransformedUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -237,6 +237,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
         "hinduism",
         "buddhism",
         "judaism",
+        "sikhism",
         "others",
       ];
       if (religion.length > 0 && validIds.includes(religion[0].toLowerCase())) {
@@ -259,6 +260,8 @@ export default function useGetUsers(filters: UserFilters = {}) {
             buddhist: "buddhism",
             judaism: "judaism",
             jewish: "judaism",
+            sikhism: "sikhism",
+            sikh: "sikhism",
             others: "others",
             other: "others",
             // German
@@ -267,6 +270,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
             hinduistisch: "hinduism",
             buddhistisch: "buddhism",
             jüdisch: "judaism",
+            sikhismus: "sikhism",
             andere: "others",
           };
           return religionMap[normalized] || item;
@@ -602,10 +606,11 @@ export default function useGetUsers(filters: UserFilters = {}) {
       if (!interestsStr) return [];
 
       // Use the same utility function that works in profile, with API interests
+      const currentLanguage = i18n.language || "en";
       const parsedInterests = parseInterestsWithNames(
         interestsStr,
-        t,
-        apiInterests
+        apiInterests,
+        currentLanguage
       );
       return Array.isArray(parsedInterests) ? parsedInterests : [];
     } catch (error) {
@@ -614,7 +619,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
     }
   };
 
-  // Fixed: Parse looking_for using the same utility function as profile
+  // Parse looking_for to get raw IDs (not formatted strings) for dynamic formatting
   const parseUserLookingFor = (
     lookingForStr: string,
     t?: (key: string) => string
@@ -622,9 +627,9 @@ export default function useGetUsers(filters: UserFilters = {}) {
     try {
       if (!lookingForStr) return [];
 
-      // Use the same utility function that works in profile
-      const parsedLookingFor = parseLookingForWithLabels(lookingForStr, t);
-      return Array.isArray(parsedLookingFor) ? parsedLookingFor : [];
+      // Parse to get raw IDs, not formatted strings
+      const rawIds = parseJsonString(lookingForStr);
+      return Array.isArray(rawIds) ? rawIds : [];
     } catch (error) {
       console.warn("Error parsing user looking_for:", error);
       return [];

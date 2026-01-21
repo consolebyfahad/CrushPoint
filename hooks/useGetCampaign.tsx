@@ -21,7 +21,6 @@ const useGetCampaign = () => {
   const [error, setError] = useState<string | null>(null);
 
   const loadCampaign = async () => {
-    console.log("📡 [useGetCampaign] Starting to load campaign");
     setLoading(true);
     setError(null);
 
@@ -33,74 +32,46 @@ const useGetCampaign = () => {
       formData.append("rand", "1");
 
       const response = await apiCall(formData);
-      console.log("📥 [useGetCampaign] API response received", {
-        hasData: !!response?.data,
-        dataLength: response?.data?.length || 0,
-        data: response?.data,
-      });
 
       if (
         response?.data &&
         Array.isArray(response.data) &&
         response.data.length > 0
       ) {
-        const campaignData = response.data[0];
-        console.log("📋 [useGetCampaign] Campaign data:", {
-          id: campaignData.id,
-          ad_type: campaignData.ad_type,
-          status: campaignData.status,
-          start_date: campaignData.start_date,
-          end_date: campaignData.end_date,
-          image: campaignData.image,
-          thumb: campaignData.thumb,
-        });
+        // Filter active campaigns (status === "1")
+        const activeCampaigns = response.data.filter(
+          (item: any) => item.status === "1" || item.status === 1
+        );
 
-        // Check if campaign is active - simplified to just check status
-        // Date validation removed to avoid parsing errors
-        const statusValid =
-          campaignData.status === "1" || campaignData.status === 1;
-
-        console.log("📋 [useGetCampaign] Campaign validation:", {
-          id: campaignData.id,
-          ad_type: campaignData.ad_type,
-          status: campaignData.status,
-          statusType: typeof campaignData.status,
-          statusValid,
-          start_date: campaignData.start_date,
-          end_date: campaignData.end_date,
-        });
-
-        if (statusValid) {
-          console.log(
-            "✅ [useGetCampaign] Campaign is valid (status check passed), setting campaign"
-          );
-          setCampaign(campaignData);
-        } else {
-          console.log(
-            "❌ [useGetCampaign] Campaign validation failed - status not valid",
-            {
-              status: campaignData.status,
-              statusType: typeof campaignData.status,
-            }
-          );
+        if (activeCampaigns.length === 0) {
           setCampaign(null);
+          return;
         }
+
+        // If multiple campaigns, prioritize video over image
+        // If only one campaign, use it (whether image or video)
+        let selectedCampaign = activeCampaigns[0];
+        
+        if (activeCampaigns.length > 1) {
+          // Find video campaign first, otherwise use first one
+          const videoCampaign = activeCampaigns.find(
+            (item: any) => item.ad_type === "video"
+          );
+          if (videoCampaign) {
+            selectedCampaign = videoCampaign;
+          }
+        }
+
+        setCampaign(selectedCampaign);
       } else {
-        console.log("❌ [useGetCampaign] No campaign data in response");
         setCampaign(null);
       }
       setError(null);
     } catch (err: any) {
-      const errorMessage = err.message || "Failed to load campaign";
-      setError(errorMessage);
-      console.error("❌ [useGetCampaign] Error getting campaign:", err);
+      setError(err.message || "Failed to load campaign");
       setCampaign(null);
     } finally {
       setLoading(false);
-      console.log("🏁 [useGetCampaign] Loading complete", {
-        hasCampaign: !!campaign,
-        loading: false,
-      });
     }
   };
 

@@ -23,7 +23,7 @@ type VerificationState =
 
 export default function FaceVerification() {
   const { t } = useTranslation();
-  const { userData, user, userImages, updateUserData } = useAppContext();
+  const { userData, user, userImages, updateUserData, addUserImage, removeUserImage } = useAppContext();
   const routeParams = useLocalSearchParams();
   // Optional refs passed in as comma-separated URLs
   const refsParam =
@@ -34,6 +34,10 @@ export default function FaceVerification() {
     typeof routeParams.returnTo === "string" ? routeParams.returnTo : undefined;
   const photosParam =
     typeof routeParams.photos === "string" ? routeParams.photos : undefined;
+  const photoFileNamesParam =
+    typeof routeParams.photoFileNames === "string" ? routeParams.photoFileNames : undefined;
+  const oldPhotosParam =
+    typeof routeParams.oldPhotos === "string" ? routeParams.oldPhotos : undefined;
 
   const referenceImages: string[] = (
     refsParam
@@ -57,6 +61,55 @@ export default function FaceVerification() {
   // Centralized state check
   const isProcessing = verificationState !== "idle";
 
+  // Save photos to user profile after successful verification (for edit mode)
+  const savePhotosAfterVerification = useCallback(async () => {
+    if (!user?.user_id || !photoFileNamesParam) {
+      return;
+    }
+
+    try {
+      setVerificationState("submitting");
+      
+      // Parse photo file names from params
+      const photoFileNames: string[] = JSON.parse(decodeURIComponent(photoFileNamesParam));
+      
+      // Remove old photos from context if provided
+      if (oldPhotosParam) {
+        const oldPhotos = oldPhotosParam.split(",").filter((url) => url.trim().length > 0);
+        oldPhotos.forEach((photoUrl) => {
+          const urlParts = photoUrl.split("/");
+          const fileName = urlParts[urlParts.length - 1];
+          removeUserImage(fileName);
+        });
+      }
+
+      // Save new photos to server
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("id", user.user_id);
+      formData.append("table_name", "users");
+      formData.append("images", JSON.stringify(photoFileNames));
+      
+      const response = await apiCall(formData);
+      
+      if (response.result) {
+        // Add new photos to context
+        photoFileNames.forEach((fileName) => addUserImage(fileName));
+        showToast(t("profile.photosUpdatedSuccess"), "success");
+        
+        // Navigate back to profile
+        setTimeout(() => {
+          router.replace("/(tabs)/profile");
+        }, 100);
+      } else {
+        throw new Error(response.message || t("profile.failedToUpdatePhotos"));
+      }
+    } catch (error: any) {
+      showToast(error.message || t("profile.failedToUpdatePhotos"), "error");
+      setVerificationState("idle");
+    }
+  }, [user?.user_id, photoFileNamesParam, oldPhotosParam, addUserImage, removeUserImage, t, showToast]);
+
   // Process verified photo upload
   const processVerifiedPhoto = useCallback(async (photoUri: string) => {
     try {
@@ -69,7 +122,6 @@ export default function FaceVerification() {
         submitAllData(fileName);
       }, 100);
     } catch (error) {
-      console.error("Upload error:", error);
       showToast(t("common.failedToUploadSelfie"), "error");
       // Continue with submission without selfie
       setTimeout(() => {
@@ -93,7 +145,8 @@ export default function FaceVerification() {
             onPress: () => {
               if (isVerified) {
                 if (mode === "verify_only" && returnTo === "add_photos") {
-                  router.replace("/(tabs)/profile");
+                  // Save photos after successful verification
+                  savePhotosAfterVerification();
                 } else {
                   processVerifiedPhoto(photoUri);
                 }
@@ -104,7 +157,7 @@ export default function FaceVerification() {
         ]);
       });
     },
-    [t, processVerifiedPhoto, mode, returnTo, photosParam, referenceImages]
+    [t, processVerifiedPhoto, mode, returnTo, photosParam, referenceImages, savePhotosAfterVerification]
   );
 
   // Remove skip verification function - verification is now mandatory
@@ -181,7 +234,6 @@ export default function FaceVerification() {
         throw new Error(response.message || t("common.uploadFailed"));
       }
     } catch (error) {
-      console.error("Image upload error:", error);
       throw error;
     }
   };
@@ -226,7 +278,6 @@ export default function FaceVerification() {
         );
       }, 100);
     } catch (error: any) {
-      console.error("Camera/Verification error:", error);
       setVerificationState("idle");
 
       showToast(t("common.errorInFaceVerification"), "error");
@@ -300,7 +351,6 @@ export default function FaceVerification() {
         throw new Error(response.message || t("common.failedToCreateProfile"));
       }
     } catch (error: any) {
-      console.error("Submission error:", error);
       showToast(error.message || t("auth.somethingWentWrong"), "error");
     } finally {
       setVerificationState("idle");

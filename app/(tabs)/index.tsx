@@ -16,8 +16,8 @@ import {
   formatReligion,
   formatZodiac,
   parseInterestsWithNames,
-  parseLookingForWithLabels,
-  parseNationalityWithLabels,
+  parseJsonString,
+  parseNationalityWithLabels
 } from "@/utils/helper";
 import { requestUserLocation } from "@/utils/location";
 import {
@@ -574,16 +574,21 @@ export default function Index() {
         // Parse and translate user data
         const parseUserData = (data: any) => {
           try {
+            // Parse looking_for to get raw IDs for dynamic formatting
+            let lookingForIds: string[] = [];
+            try {
+              const rawIds = parseJsonString(data?.looking_for || "[]");
+              lookingForIds = Array.isArray(rawIds) ? rawIds : [];
+            } catch (error) {
+              console.warn("Error parsing looking_for:", error);
+            }
+
             return {
               interests: parseInterestsWithNames(
                 data?.interests || "[]",
-                t,
-                apiInterests
+                apiInterests,
               ),
-              lookingFor: parseLookingForWithLabels(
-                data?.looking_for || "[]",
-                t
-              ),
+              lookingFor: lookingForIds, // Store raw IDs for dynamic formatting
               nationality: parseNationalityWithLabels(
                 data?.nationality || "[]",
                 t

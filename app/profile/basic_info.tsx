@@ -4,9 +4,10 @@ import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import { LOOKING_FOR_OPTIONS as baseLookingForOptions, nationalityOptions as baseNationalityOptions, religionOptions as baseReligionOptions, zodiacOptions as baseZodiacOptions } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -27,11 +28,17 @@ export default function BasicInfo() {
   const params = useLocalSearchParams();
 
   // Initialize state properly from params
+  // Normalize religion value to lowercase for consistency
+  const normalizeReligionValue = (religion: string): string => {
+    if (!religion) return "";
+    return religion.toLowerCase().trim();
+  };
+
   const [basicInfo, setBasicInfo] = useState({
     interestedIn: userData.gender_interest || "",
     height: userData.height || "",
     nationality: userData.originalNationalityValues || [],
-    religion: userData.religion || "",
+    religion: normalizeReligionValue(userData.religion || ""),
     zodiacSign: userData.zodiac || "",
     about: userData.about || "",
   });
@@ -49,265 +56,63 @@ export default function BasicInfo() {
     { label: t("basicInfo.interestedIn.both"), value: "other" },
   ];
 
-  const relationshipGoalOptions = [
-    {
-      label: `🩵 ${t("basicInfo.relationshipGoals.serious")}`,
-      value: "serious",
-    },
-    { label: `😘 ${t("basicInfo.relationshipGoals.casual")}`, value: "casual" },
-    {
-      label: `🤝 ${t("basicInfo.relationshipGoals.friendship")}`,
-      value: "friendship",
-    },
-    { label: `🔥 ${t("basicInfo.relationshipGoals.open")}`, value: "open" },
-    {
-      label: `🤫 ${t("basicInfo.relationshipGoals.preferNot")}`,
-      value: "prefer-not",
-    },
-  ];
+  // Relationship goals options - use base options from helper and translate labels
+  const relationshipGoalOptions = useMemo(() => {
+    return baseLookingForOptions.map((option) => {
+      // Get translated name based on translation key
+      const translatedName = t(option.translationKey);
+      return {
+        label: `${option.emoji} ${translatedName}`,
+        value: option.id,
+      };
+    });
+  }, [t]);
 
-  // Nationality options
-  const nationalityOptions = [
-    { label: `🇦🇫 ${t("nationalities.afghan")}`, value: "afghan" },
-    { label: `🇦🇱 ${t("nationalities.albanian")}`, value: "albanian" },
-    { label: `🇩🇿 ${t("nationalities.algerian")}`, value: "algerian" },
-    { label: `🇺🇸 ${t("nationalities.american")}`, value: "american" },
-    { label: `🇦🇩 ${t("nationalities.andorran")}`, value: "andorran" },
-    { label: `🇦🇴 ${t("nationalities.angolan")}`, value: "angolan" },
-    { label: `🇦🇬 ${t("nationalities.antiguan")}`, value: "antiguan" },
-    { label: `🇦🇷 ${t("nationalities.argentine")}`, value: "argentine" },
-    { label: `🇦🇲 ${t("nationalities.armenian")}`, value: "armenian" },
-    { label: `🇦🇺 ${t("nationalities.australian")}`, value: "australian" },
-    { label: `🇦🇹 ${t("nationalities.austrian")}`, value: "austrian" },
-    { label: `🇦🇿 ${t("nationalities.azerbaijani")}`, value: "azerbaijani" },
-    { label: `🇧🇸 ${t("nationalities.bahamian")}`, value: "bahamian" },
-    { label: `🇧🇭 ${t("nationalities.bahraini")}`, value: "bahraini" },
-    { label: `🇧🇩 ${t("nationalities.bangladeshi")}`, value: "bangladeshi" },
-    { label: `🇧🇧 ${t("nationalities.barbadian")}`, value: "barbadian" },
-    { label: `🇧🇾 ${t("nationalities.belarusian")}`, value: "belarusian" },
-    { label: `🇧🇪 ${t("nationalities.belgian")}`, value: "belgian" },
-    { label: `🇧🇿 ${t("nationalities.belizean")}`, value: "belizean" },
-    { label: `🇧🇯 ${t("nationalities.beninese")}`, value: "beninese" },
-    { label: `🇧🇹 ${t("nationalities.bhutanese")}`, value: "bhutanese" },
-    { label: `🇧🇴 ${t("nationalities.bolivian")}`, value: "bolivian" },
-    { label: `🇧🇦 ${t("nationalities.bosnian")}`, value: "bosnian" },
-    { label: `🇧🇼 ${t("nationalities.botswanan")}`, value: "botswanan" },
-    { label: `🇧🇷 ${t("nationalities.brazilian")}`, value: "brazilian" },
-    { label: `🇬🇧 ${t("nationalities.british")}`, value: "british" },
-    { label: `🇧🇳 ${t("nationalities.bruneian")}`, value: "bruneian" },
-    { label: `🇧🇬 ${t("nationalities.bulgarian")}`, value: "bulgarian" },
-    { label: `🇧🇫 ${t("nationalities.burkinabe")}`, value: "burkinabe" },
-    { label: `🇲🇲 ${t("nationalities.burmese")}`, value: "burmese" },
-    { label: `🇧🇮 ${t("nationalities.burundian")}`, value: "burundian" },
-    { label: `🇰🇭 ${t("nationalities.cambodian")}`, value: "cambodian" },
-    { label: `🇨🇲 ${t("nationalities.cameroonian")}`, value: "cameroonian" },
-    { label: `🇨🇦 ${t("nationalities.canadian")}`, value: "canadian" },
-    { label: `🇨🇻 ${t("nationalities.cape_verdean")}`, value: "cape_verdean" },
-    {
-      label: `🇨🇫 ${t("nationalities.central_african")}`,
-      value: "central_african",
-    },
-    { label: `🇹🇩 ${t("nationalities.chadian")}`, value: "chadian" },
-    { label: `🇨🇱 ${t("nationalities.chilean")}`, value: "chilean" },
-    { label: `🇨🇳 ${t("nationalities.chinese")}`, value: "chinese" },
-    { label: `🇨🇴 ${t("nationalities.colombian")}`, value: "colombian" },
-    { label: `🇰🇲 ${t("nationalities.comoran")}`, value: "comoran" },
-    { label: `🇨🇩 ${t("nationalities.congolese")}`, value: "congolese" },
-    { label: `🇨🇷 ${t("nationalities.costa_rican")}`, value: "costa_rican" },
-    { label: `🇭🇷 ${t("nationalities.croatian")}`, value: "croatian" },
-    { label: `🇨🇺 ${t("nationalities.cuban")}`, value: "cuban" },
-    { label: `🇨🇾 ${t("nationalities.cypriot")}`, value: "cypriot" },
-    { label: `🇨🇿 ${t("nationalities.czech")}`, value: "czech" },
-    { label: `🇩🇰 ${t("nationalities.danish")}`, value: "danish" },
-    { label: `🇩🇯 ${t("nationalities.djiboutian")}`, value: "djiboutian" },
-    { label: `🇩🇲 ${t("nationalities.dominican")}`, value: "dominican" },
-    { label: `🇳🇱 ${t("nationalities.dutch")}`, value: "dutch" },
-    { label: `🇪🇨 ${t("nationalities.ecuadorian")}`, value: "ecuadorian" },
-    { label: `🇪🇬 ${t("nationalities.egyptian")}`, value: "egyptian" },
-    { label: `🇦🇪 ${t("nationalities.emirati")}`, value: "emirati" },
-    {
-      label: `🇬🇶 ${t("nationalities.equatorial_guinean")}`,
-      value: "equatorial_guinean",
-    },
-    { label: `🇪🇷 ${t("nationalities.eritrean")}`, value: "eritrean" },
-    { label: `🇪🇪 ${t("nationalities.estonian")}`, value: "estonian" },
-    { label: `🇪🇹 ${t("nationalities.ethiopian")}`, value: "ethiopian" },
-    { label: `🇫🇯 ${t("nationalities.fijian")}`, value: "fijian" },
-    { label: `🇵🇭 ${t("nationalities.filipino")}`, value: "filipino" },
-    { label: `🇫🇮 ${t("nationalities.finnish")}`, value: "finnish" },
-    { label: `🇫🇷 ${t("nationalities.french")}`, value: "french" },
-    { label: `🇬🇦 ${t("nationalities.gabonese")}`, value: "gabonese" },
-    { label: `🇬🇲 ${t("nationalities.gambian")}`, value: "gambian" },
-    { label: `🇬🇪 ${t("nationalities.georgian")}`, value: "georgian" },
-    { label: `🇩🇪 ${t("nationalities.german")}`, value: "german" },
-    { label: `🇬🇭 ${t("nationalities.ghanaian")}`, value: "ghanaian" },
-    { label: `🇬🇷 ${t("nationalities.greek")}`, value: "greek" },
-    { label: `🇬🇩 ${t("nationalities.grenadian")}`, value: "grenadian" },
-    { label: `🇬🇹 ${t("nationalities.guatemalan")}`, value: "guatemalan" },
-    { label: `🇬🇳 ${t("nationalities.guinean")}`, value: "guinean" },
-    { label: `🇬🇾 ${t("nationalities.guyanese")}`, value: "guyanese" },
-    { label: `🇭🇹 ${t("nationalities.haitian")}`, value: "haitian" },
-    { label: `🇭🇳 ${t("nationalities.honduran")}`, value: "honduran" },
-    { label: `🇭🇺 ${t("nationalities.hungarian")}`, value: "hungarian" },
-    { label: `🇮🇸 ${t("nationalities.icelandic")}`, value: "icelandic" },
-    { label: `🇮🇳 ${t("nationalities.indian")}`, value: "indian" },
-    { label: `🇮🇩 ${t("nationalities.indonesian")}`, value: "indonesian" },
-    { label: `🇮🇷 ${t("nationalities.iranian")}`, value: "iranian" },
-    { label: `🇮🇶 ${t("nationalities.iraqi")}`, value: "iraqi" },
-    { label: `🇮🇪 ${t("nationalities.irish")}`, value: "irish" },
-    { label: `🇮🇱 ${t("nationalities.israeli")}`, value: "israeli" },
-    { label: `🇮🇹 ${t("nationalities.italian")}`, value: "italian" },
-    { label: `🇨🇮 ${t("nationalities.ivorian")}`, value: "ivorian" },
-    { label: `🇯🇲 ${t("nationalities.jamaican")}`, value: "jamaican" },
-    { label: `🇯🇵 ${t("nationalities.japanese")}`, value: "japanese" },
-    { label: `🇯🇴 ${t("nationalities.jordanian")}`, value: "jordanian" },
-    { label: `🇰🇿 ${t("nationalities.kazakhstani")}`, value: "kazakhstani" },
-    { label: `🇰🇪 ${t("nationalities.kenyan")}`, value: "kenyan" },
-    { label: `🇰🇮 ${t("nationalities.kiribati")}`, value: "kiribati" },
-    { label: `🇰🇷 ${t("nationalities.korean")}`, value: "korean" },
-    { label: `🇰🇼 ${t("nationalities.kuwaiti")}`, value: "kuwaiti" },
-    { label: `🇰🇬 ${t("nationalities.kyrgyzstani")}`, value: "kyrgyzstani" },
-    { label: `🇱🇦 ${t("nationalities.laotian")}`, value: "laotian" },
-    { label: `🇱🇻 ${t("nationalities.latvian")}`, value: "latvian" },
-    { label: `🇱🇧 ${t("nationalities.lebanese")}`, value: "lebanese" },
-    { label: `🇱🇷 ${t("nationalities.liberian")}`, value: "liberian" },
-    { label: `🇱🇾 ${t("nationalities.libyan")}`, value: "libyan" },
-    { label: `🇱🇮 ${t("nationalities.liechtenstein")}`, value: "liechtenstein" },
-    { label: `🇱🇹 ${t("nationalities.lithuanian")}`, value: "lithuanian" },
-    { label: `🇱🇺 ${t("nationalities.luxembourgish")}`, value: "luxembourgish" },
-    { label: `🇲🇰 ${t("nationalities.macedonian")}`, value: "macedonian" },
-    { label: `🇲🇬 ${t("nationalities.malagasy")}`, value: "malagasy" },
-    { label: `🇲🇼 ${t("nationalities.malawian")}`, value: "malawian" },
-    { label: `🇲🇾 ${t("nationalities.malaysian")}`, value: "malaysian" },
-    { label: `🇲🇻 ${t("nationalities.maldivian")}`, value: "maldivian" },
-    { label: `🇲🇱 ${t("nationalities.malian")}`, value: "malian" },
-    { label: `🇲🇹 ${t("nationalities.maltese")}`, value: "maltese" },
-    { label: `🇲🇭 ${t("nationalities.marshallese")}`, value: "marshallese" },
-    { label: `🇲🇷 ${t("nationalities.mauritanian")}`, value: "mauritanian" },
-    { label: `🇲🇺 ${t("nationalities.mauritian")}`, value: "mauritian" },
-    { label: `🇲🇽 ${t("nationalities.mexican")}`, value: "mexican" },
-    { label: `🇫🇲 ${t("nationalities.micronesian")}`, value: "micronesian" },
-    { label: `🇲🇩 ${t("nationalities.moldovan")}`, value: "moldovan" },
-    { label: `🇲🇨 ${t("nationalities.monacan")}`, value: "monacan" },
-    { label: `🇲🇳 ${t("nationalities.mongolian")}`, value: "mongolian" },
-    { label: `🇲🇪 ${t("nationalities.montenegrin")}`, value: "montenegrin" },
-    { label: `🇲🇦 ${t("nationalities.moroccan")}`, value: "moroccan" },
-    { label: `🇲🇿 ${t("nationalities.mozambican")}`, value: "mozambican" },
-    { label: `🇳🇦 ${t("nationalities.namibian")}`, value: "namibian" },
-    { label: `🇳🇷 ${t("nationalities.nauruan")}`, value: "nauruan" },
-    { label: `🇳🇵 ${t("nationalities.nepalese")}`, value: "nepalese" },
-    { label: `🇳🇿 ${t("nationalities.new_zealand")}`, value: "new_zealand" },
-    { label: `🇳🇮 ${t("nationalities.nicaraguan")}`, value: "nicaraguan" },
-    { label: `🇳🇬 ${t("nationalities.nigerian")}`, value: "nigerian" },
-    { label: `🇳🇪 ${t("nationalities.nigerien")}`, value: "nigerien" },
-    { label: `🇰🇵 ${t("nationalities.north_korean")}`, value: "north_korean" },
-    { label: `🇳🇴 ${t("nationalities.norwegian")}`, value: "norwegian" },
-    { label: `🇴🇲 ${t("nationalities.omani")}`, value: "omani" },
-    { label: `🇵🇰 ${t("nationalities.pakistani")}`, value: "pakistani" },
-    { label: `🇵🇼 ${t("nationalities.palauan")}`, value: "palauan" },
-    { label: `🇵🇸 ${t("nationalities.palestinian")}`, value: "palestinian" },
-    { label: `🇵🇦 ${t("nationalities.panamanian")}`, value: "panamanian" },
-    {
-      label: `🇵🇬 ${t("nationalities.papua_new_guinean")}`,
-      value: "papua_new_guinean",
-    },
-    { label: `🇵🇾 ${t("nationalities.paraguayan")}`, value: "paraguayan" },
-    { label: `🇵🇪 ${t("nationalities.peruvian")}`, value: "peruvian" },
-    { label: `🇵🇱 ${t("nationalities.polish")}`, value: "polish" },
-    { label: `🇵🇹 ${t("nationalities.portuguese")}`, value: "portuguese" },
-    { label: `🇶🇦 ${t("nationalities.qatari")}`, value: "qatari" },
-    { label: `🇷🇴 ${t("nationalities.romanian")}`, value: "romanian" },
-    { label: `🇷🇺 ${t("nationalities.russian")}`, value: "russian" },
-    { label: `🇷🇼 ${t("nationalities.rwandan")}`, value: "rwandan" },
-    { label: `🇰🇳 ${t("nationalities.saint_kitts")}`, value: "saint_kitts" },
-    { label: `🇱🇨 ${t("nationalities.saint_lucian")}`, value: "saint_lucian" },
-    {
-      label: `🇻🇨 ${t("nationalities.saint_vincentian")}`,
-      value: "saint_vincentian",
-    },
-    { label: `🇼🇸 ${t("nationalities.samoan")}`, value: "samoan" },
-    { label: `🇸🇲 ${t("nationalities.san_marinese")}`, value: "san_marinese" },
-    { label: `🇸🇹 ${t("nationalities.sao_tomean")}`, value: "sao_tomean" },
-    { label: `🇸🇦 ${t("nationalities.saudi_arabian")}`, value: "saudi_arabian" },
-    { label: `🇸🇳 ${t("nationalities.senegalese")}`, value: "senegalese" },
-    { label: `🇷🇸 ${t("nationalities.serbian")}`, value: "serbian" },
-    { label: `🇸🇨 ${t("nationalities.seychellois")}`, value: "seychellois" },
-    {
-      label: `🇸🇱 ${t("nationalities.sierra_leonean")}`,
-      value: "sierra_leonean",
-    },
-    { label: `🇸🇬 ${t("nationalities.singaporean")}`, value: "singaporean" },
-    { label: `🇸🇰 ${t("nationalities.slovak")}`, value: "slovak" },
-    { label: `🇸🇮 ${t("nationalities.slovenian")}`, value: "slovenian" },
-    {
-      label: `🇸🇧 ${t("nationalities.solomon_islander")}`,
-      value: "solomon_islander",
-    },
-    { label: `🇸🇴 ${t("nationalities.somali")}`, value: "somali" },
-    { label: `🇿🇦 ${t("nationalities.south_african")}`, value: "south_african" },
-    { label: `🇰🇷 ${t("nationalities.south_korean")}`, value: "south_korean" },
-    {
-      label: `🇸🇸 ${t("nationalities.south_sudanese")}`,
-      value: "south_sudanese",
-    },
-    { label: `🇪🇸 ${t("nationalities.spanish")}`, value: "spanish" },
-    { label: `🇱🇰 ${t("nationalities.sri_lankan")}`, value: "sri_lankan" },
-    { label: `🇸🇩 ${t("nationalities.sudanese")}`, value: "sudanese" },
-    { label: `🇸🇷 ${t("nationalities.surinamese")}`, value: "surinamese" },
-    { label: `🇸🇿 ${t("nationalities.swazi")}`, value: "swazi" },
-    { label: `🇸🇪 ${t("nationalities.swedish")}`, value: "swedish" },
-    { label: `🇨🇭 ${t("nationalities.swiss")}`, value: "swiss" },
-    { label: `🇸🇾 ${t("nationalities.syrian")}`, value: "syrian" },
-    { label: `🇹🇼 ${t("nationalities.taiwanese")}`, value: "taiwanese" },
-    { label: `🇹🇯 ${t("nationalities.tajikistani")}`, value: "tajikistani" },
-    { label: `🇹🇿 ${t("nationalities.tanzanian")}`, value: "tanzanian" },
-    { label: `🇹🇭 ${t("nationalities.thai")}`, value: "thai" },
-    { label: `🇹🇱 ${t("nationalities.timorese")}`, value: "timorese" },
-    { label: `🇹🇬 ${t("nationalities.togolese")}`, value: "togolese" },
-    { label: `🇹🇴 ${t("nationalities.tongan")}`, value: "tongan" },
-    { label: `🇹🇹 ${t("nationalities.trinidadian")}`, value: "trinidadian" },
-    { label: `🇹🇳 ${t("nationalities.tunisian")}`, value: "tunisian" },
-    { label: `🇹🇷 ${t("nationalities.turkish")}`, value: "turkish" },
-    { label: `🇹🇲 ${t("nationalities.turkmenistani")}`, value: "turkmenistani" },
-    { label: `🇹🇻 ${t("nationalities.tuvaluan")}`, value: "tuvaluan" },
-    { label: `🇺🇬 ${t("nationalities.ugandan")}`, value: "ugandan" },
-    { label: `🇺🇦 ${t("nationalities.ukrainian")}`, value: "ukrainian" },
-    { label: `🇺🇾 ${t("nationalities.uruguayan")}`, value: "uruguayan" },
-    { label: `🇺🇿 ${t("nationalities.uzbekistani")}`, value: "uzbekistani" },
-    { label: `🇻🇺 ${t("nationalities.vanuatuan")}`, value: "vanuatuan" },
-    { label: `🇻🇦 ${t("nationalities.vatican")}`, value: "vatican" },
-    { label: `🇻🇪 ${t("nationalities.venezuelan")}`, value: "venezuelan" },
-    { label: `🇻🇳 ${t("nationalities.vietnamese")}`, value: "vietnamese" },
-    { label: `🇾🇪 ${t("nationalities.yemeni")}`, value: "yemeni" },
-    { label: `🇿🇲 ${t("nationalities.zambian")}`, value: "zambian" },
-    { label: `🇿🇼 ${t("nationalities.zimbabwean")}`, value: "zimbabwean" },
-  ];
+  // Nationality options - use base options from helper and translate labels
+  const nationalityOptions = useMemo(() => {
+    return baseNationalityOptions.map((option) => {
+      // Extract flag from label (e.g., "🇺🇸 American" -> "🇺🇸")
+      const flag = option.label.split(" ")[0];
+      // Get translated name based on value
+      const translationKey = `nationalities.${option.value}`;
+      const translatedName = t(translationKey);
+      return {
+        label: `${flag} ${translatedName}`,
+        value: option.value,
+      };
+    });
+  }, [t]);
 
-  // Religion options
-  const religionOptions = [
-    { label: `✝️ ${t("religions.christianity")}`, value: "christianity" },
-    { label: `☪️ ${t("religions.islam")}`, value: "islam" },
-    { label: `✡️ ${t("religions.judaism")}`, value: "judaism" },
-    { label: `🕉️ ${t("religions.hinduism")}`, value: "hinduism" },
-    { label: `☸️ ${t("religions.buddhism")}`, value: "buddhism" },
-    { label: `🌍 ${t("religions.others")}`, value: "others" },
-  ];
 
-  // Zodiac options
-  const zodiacOptions = [
-    { label: `♈ ${t("zodiac.aries")}`, value: "aries" },
-    { label: `♉ ${t("zodiac.taurus")}`, value: "taurus" },
-    { label: `♊ ${t("zodiac.gemini")}`, value: "gemini" },
-    { label: `♋ ${t("zodiac.cancer")}`, value: "cancer" },
-    { label: `♌ ${t("zodiac.leo")}`, value: "leo" },
-    { label: `♍ ${t("zodiac.virgo")}`, value: "virgo" },
-    { label: `♎ ${t("zodiac.libra")}`, value: "libra" },
-    { label: `♏ ${t("zodiac.scorpio")}`, value: "scorpio" },
-    { label: `♐ ${t("zodiac.sagittarius")}`, value: "sagittarius" },
-    { label: `♑ ${t("zodiac.capricorn")}`, value: "capricorn" },
-    { label: `♒ ${t("zodiac.aquarius")}`, value: "aquarius" },
-    { label: `♓ ${t("zodiac.pisces")}`, value: "pisces" },
-  ];
+  // Religion options - use base options from helper and translate labels
+  const religionOptions = useMemo(() => {
+    return baseReligionOptions.map((option) => {
+      // Extract emoji from label (e.g., "✝️ Christianity" -> "✝️")
+      const emoji = option.label.split(" ")[0];
+      // Get translated name based on value
+      const translationKey = `religions.${option.value}`;
+      const translatedName = t(translationKey);
+      return {
+        label: `${emoji} ${translatedName}`,
+        value: option.value,
+      };
+    });
+  }, [t]);
+
+  // Zodiac options - use base options from helper and translate labels
+  const zodiacOptions = useMemo(() => {
+    return baseZodiacOptions.map((option) => {
+      // Extract symbol from label (e.g., "♈ Aries" -> "♈")
+      const symbol = option.label.split(" ")[0];
+      // Get translated name based on value
+      const translationKey = `zodiac.${option.value}`;
+      const translatedName = t(translationKey);
+      return {
+        label: `${symbol} ${translatedName}`,
+        value: option.value,
+      };
+    });
+  }, [t]);
 
   const handleSave = async () => {
     if (!user?.user_id) {

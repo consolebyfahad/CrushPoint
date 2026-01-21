@@ -57,7 +57,6 @@ export default function PrivateSpot() {
       try {
         return JSON.parse(params.spotData) as PrivateSpotData;
       } catch (error) {
-        console.error("Error parsing spot data:", error);
         return null;
       }
     }
@@ -189,7 +188,6 @@ export default function PrivateSpot() {
         setLocationPermissionGranted(false);
       }
     } catch (error) {
-      console.error("Error getting user location:", error);
       setLocationPermissionGranted(false);
     } finally {
       setIsLoadingLocation(false);
@@ -231,7 +229,6 @@ export default function PrivateSpot() {
       setSearchResults(results);
       setShowSearchResults(true);
     } catch (error) {
-      console.error("Search error:", error);
       setSearchResults([]);
       setShowSearchResults(false);
     } finally {

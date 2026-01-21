@@ -118,9 +118,7 @@ export default function AddPhotos() {
         type: "image/jpeg",
         name: "image.jpg",
       } as any);
-      console.log("formData", JSON.stringify(formData));
       const response = await apiCall(formData);
-      console.log("response uploadImageToServer", response);
 
       if (response.result && response.file_name) {
         // Only add to context if not in edit mode (edit mode handles this in save)
@@ -193,7 +191,6 @@ export default function AddPhotos() {
       }
     } catch (error) {
       Alert.alert(t("common.error"), t("profile.failedToPickImages"));
-      console.error("Image picker error:", error);
     }
   };
 
@@ -240,9 +237,7 @@ export default function AddPhotos() {
     formData.append("id", user.user_id);
     formData.append("table_name", "users");
     formData.append("images", JSON.stringify(imageFileNames));
-    console.log("formData savePhotosToServer", formData);
     const response = await apiCall(formData);
-    console.log("response savePhotosToServer", response);
 
     if (response.result) {
       // Remove old photos and add new ones to context
@@ -305,36 +300,42 @@ export default function AddPhotos() {
         (p) => p.fileName && !p.isExisting
       );
       if (hasNewPhotos) {
-        // First, save the photos to server
-        setIsLoading(true);
-        try {
-          await savePhotosToServer();
-          // If save successful, proceed to verification
-          const refs: string[] = selectedPhotos
-            .filter((p) => p.fileName)
-            .slice(0, 3)
-            .map((p) =>
-              p.serverUrl
-                ? p.serverUrl
-                : `https://api.andra-dating.com/images/${p.fileName}`
-            );
+        // Don't save photos yet - wait for verification success
+        // Prepare photo file names to pass to verification screen
+        const newPhotoFileNames = selectedPhotos
+          .filter((p) => p.fileName && !p.isExisting)
+          .map((p) => p.fileName!);
+        
+        const existingPhotoFileNames = selectedPhotos
+          .filter((p) => p.isExisting && p.fileName)
+          .map((p) => p.fileName!);
 
-          const refsParam = encodeURIComponent(refs.join(","));
-          router.push({
-            pathname: "/auth/verification",
-            params: {
-              mode: "verify_only",
-              returnTo: "add_photos",
-              refs: refsParam,
-              photos: Array.isArray(photos) ? photos.join(",") : photos,
-            },
-          });
-        } catch (error) {
-          console.error("Save error:", error);
-          Alert.alert(t("common.error"), t("profile.failedToSavePhotos"));
-        } finally {
-          setIsLoading(false);
-        }
+        // Combine all photo file names (existing + new)
+        const allPhotoFileNames = [...existingPhotoFileNames, ...newPhotoFileNames];
+
+        // Prepare refs for verification (use first 3 photos)
+        const refs: string[] = selectedPhotos
+          .filter((p) => p.fileName)
+          .slice(0, 3)
+          .map((p) =>
+            p.serverUrl
+              ? p.serverUrl
+              : `https://api.andra-dating.com/images/${p.fileName}`
+          );
+
+        const refsParam = encodeURIComponent(refs.join(","));
+        const photoFileNamesParam = encodeURIComponent(JSON.stringify(allPhotoFileNames));
+        
+        router.push({
+          pathname: "/auth/verification",
+          params: {
+            mode: "verify_only",
+            returnTo: "add_photos",
+            refs: refsParam,
+            photoFileNames: photoFileNamesParam,
+            oldPhotos: Array.isArray(photos) ? photos.join(",") : photos || "",
+          },
+        });
         return;
       }
     }
@@ -350,7 +351,6 @@ export default function AddPhotos() {
         },
       ]);
     } catch (error) {
-      console.error("Save error:", error);
       Alert.alert(t("common.error"), t("profile.failedToSavePhotos"));
     } finally {
       setIsLoading(false);

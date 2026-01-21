@@ -34,7 +34,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Interests() {
   const { t } = useTranslation();
   const { interests, loading, error, refetch } = useGetInterests();
-  console.log("interests", interests);
   const { updateUserData, user, userData } = useAppContext();
   const { showToast } = useToast();
   const params = useLocalSearchParams();
@@ -60,7 +59,6 @@ export default function Interests() {
           : [interestIds];
         setSelectedInterests(finalInterests);
       } catch (error) {
-        console.error("Error loading existing interests:", error);
         setSelectedInterests([]);
       }
     }
@@ -109,7 +107,12 @@ export default function Interests() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        updateUserData({ interests: selectedInterests });
+        // Update user data with new interests and trigger profile refetch
+        updateUserData({ 
+          interests: selectedInterests,
+          originalInterestIds: selectedInterests,
+          parsedInterests: [] // Clear parsedInterests so they get re-parsed with correct data
+        });
         setTimeout(() => {
           router.back();
         }, 1000);

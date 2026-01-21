@@ -7,6 +7,7 @@ import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
 import {
   capitalizeFirstLetter,
+  formatLookingFor,
   formatNationality,
   formatReligion,
   formatZodiac,
@@ -603,11 +604,15 @@ export default function UserProfile() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("profile.lookingFor")}</Text>
             <View style={styles.lookingForContainer}>
-              {userInfo.lookingFor.map((item: any, index: number) => (
-                <View key={index} style={styles.lookingForTag}>
-                  <Text style={styles.lookingForText}>{item}</Text>
-                </View>
-              ))}
+              {userInfo.lookingFor.map((lookingForId: string, index: number) => {
+                // Format dynamically using current language
+                const formatted = formatLookingFor(lookingForId, t);
+                return (
+                  <View key={index} style={styles.lookingForTag}>
+                    <Text style={styles.lookingForText}>{formatted}</Text>
+                  </View>
+                );
+              })}
             </View>
           </View>
 
@@ -667,13 +672,18 @@ export default function UserProfile() {
                 <Text style={styles.infoLabel}>{t("profile.nationality")}</Text>
                 <View style={styles.nationalityContainer}>
                   {userInfo.nationality.map(
-                    (nationality: string, index: number) => (
-                      <View key={index} style={styles.nationalityTag}>
-                        <Text style={styles.nationalityText}>
-                          {formatNationality(nationality, t)}
-                        </Text>
-                      </View>
-                    )
+                    (nationality: string, index: number) => {
+                      // Check if already formatted (contains flag emoji - Unicode range for regional indicator symbols)
+                      // Flag emojis are made of two regional indicator symbols, so check for the pattern
+                      const isAlreadyFormatted = /[\u{1F1E6}-\u{1F1FF}]{2}/u.test(nationality);
+                      return (
+                        <View key={index} style={styles.nationalityTag}>
+                          <Text style={styles.nationalityText}>
+                            {isAlreadyFormatted ? nationality : formatNationality(nationality, t)}
+                          </Text>
+                        </View>
+                      );
+                    }
                   )}
                 </View>
               </View>

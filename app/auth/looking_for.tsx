@@ -3,9 +3,10 @@ import CustomButton from "@/components/custom_button";
 import Header from "@/components/header";
 import { useAppContext } from "@/context/app_context";
 import { color, font } from "@/utils/constants";
+import { LOOKING_FOR_OPTIONS } from "@/utils/helper";
 import Octicons from "@expo/vector-icons/Octicons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,13 +16,13 @@ export default function LookingFor() {
   const { updateUserData } = useAppContext();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  const options = [
-    { id: "serious", label: `🩵 ${t("lookingFor.seriousRelationship")}` },
-    { id: "casual", label: `😘 ${t("lookingFor.casualDating")}` },
-    { id: "friendship", label: `🤝 ${t("lookingFor.friendship")}` },
-    { id: "open", label: `🔥 ${t("lookingFor.openToPossibilities")}` },
-    { id: "prefer-not", label: `🤫 ${t("lookingFor.preferNotToSay")}` },
-  ];
+  // Use base options from helper and translate labels
+  const options = useMemo(() => {
+    return LOOKING_FOR_OPTIONS.map((option) => ({
+      id: option.id,
+      label: `${option.emoji} ${t(option.translationKey)}`,
+    }));
+  }, [t]);
 
   const handleSelectionChange = (newSelection: string[]) => {
     if (newSelection.includes("prefer-not")) {

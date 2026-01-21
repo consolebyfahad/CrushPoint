@@ -14,7 +14,8 @@ interface Interest {
 }
 
 interface UseGetInterestsReturn {
-  interests: Interest[];
+  interests: Interest[]; // Localized interests for display
+  rawInterests: Interest[]; // Raw interests with name_languages for conversion
   loading: boolean;
   error: string | null;
   refetch: () => void;
@@ -72,12 +73,9 @@ export default function useGetInterests(): UseGetInterestsReturn {
       const result = await response;
 
       if (result.data && Array.isArray(result.data)) {
-        // Transform interests to use localized names
-        const localizedInterests = result.data.map((interest: Interest) => ({
-          ...interest,
-          name: getLocalizedName(interest),
-        }));
-        setInterests(localizedInterests);
+        // Keep raw interests with name_languages for dynamic localization
+        // Don't transform here - let components get localized names when needed
+        setInterests(result.data);
       } else {
         throw new Error(t("hooks.invalidResponseFormat"));
       }
@@ -99,8 +97,17 @@ export default function useGetInterests(): UseGetInterestsReturn {
     fetchInterests();
   }, [fetchInterests]);
 
+  // Get localized interests for display (used by components)
+  const getLocalizedInterests = useCallback((): Interest[] => {
+    return interests.map((interest) => ({
+      ...interest,
+      name: getLocalizedName(interest),
+    }));
+  }, [interests, i18n.language]);
+
   return {
-    interests,
+    interests: getLocalizedInterests(), // Return localized interests for display
+    rawInterests: interests, // Return raw interests with name_languages for conversion
     loading,
     error,
     refetch,

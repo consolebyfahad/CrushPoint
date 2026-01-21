@@ -28,6 +28,9 @@
     "title4": "Discover Events",
     "subtitle4": "Find your significant other at interesting events."
   },
+  "campaign": {
+    "downloadNow": "Download Now"
+  },
   "language": {
     "selectLanguage": "Select Language",
     "chooseLanguage": "Choose your preferred language",
@@ -654,17 +657,19 @@
   },
   "religion": {
     "christian": "Christian",
+    "christianity": "Christianity",
     "islam": "Islam",
     "muslim": "Muslim",
     "hindu": "Hindu",
+    "hinduism": "Hinduism",
     "buddhist": "Buddhist",
+    "buddhism": "Buddhism",
     "jewish": "Jewish",
     "judaism": "Judaism",
     "sikh": "Sikh",
-    "atheist": "Atheist",
-    "agnostic": "Agnostic",
-    "spiritual": "Spiritual",
-    "other": "Other"
+    "sikhism": "Sikhism",
+    "other": "Other",
+    "others": "Other"
   },
   "about": {
     "about": "About",
@@ -940,8 +945,8 @@
     "hinduism": "Hinduism",
     "buddhism": "Buddhism",
     "judaism": "Judaism",
-    "others": "Others",
-    "any": "Any"
+    "sikhism": "Sikhism",
+    "others": "Other"
   },
   "contactSupport": {
     "title": "Contact Support",

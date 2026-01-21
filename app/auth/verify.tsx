@@ -87,7 +87,6 @@ export default function Verify() {
               photos = [defaultPhoto];
             }
           } catch (error) {
-            console.error("Error parsing images:", error);
             photos = [defaultPhoto];
           }
         } else {
@@ -108,7 +107,7 @@ export default function Verify() {
             );
             originalInterestIds = parseJsonString(userData.interests);
           } catch (error) {
-            console.warn("Error parsing interests:", error);
+            // Error parsing interests
           }
         }
 
@@ -120,7 +119,7 @@ export default function Verify() {
             parsedLookingFor = parseLookingForWithLabels(userData.looking_for);
             originalLookingForIds = parseJsonString(userData.looking_for);
           } catch (error) {
-            console.warn("Error parsing looking_for:", error);
+            // Error parsing looking_for
           }
         }
 
@@ -141,7 +140,7 @@ export default function Verify() {
                 );
               }
             } catch (error) {
-              console.warn("Error parsing nationality:", error);
+              // Error parsing nationality
             }
           } else if (
             userData.nationality !== "Not Specified" &&
@@ -195,7 +194,7 @@ export default function Verify() {
         updateUserData(contextUserData);
       }
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      // Error fetching user profile
     }
   };
 
@@ -213,7 +212,6 @@ export default function Verify() {
       formData.append("type", "verify_otp");
       formData.append("user_id", user?.user_id);
       formData.append("code", fullCode);
-      console.log("formData", formData);
       const response = await apiCall(formData);
 
       if (response.result) {
@@ -233,12 +231,10 @@ export default function Verify() {
         }
       } else {
         showToast(response.message || t("auth.invalidCode"), "error");
-        console.error("Verification Error:", response.message);
         setCode("");
       }
     } catch (error) {
       showToast(t("api.errors.somethingWentWrong"), "error");
-      console.error("Verification Error:", error);
       setCode("");
     } finally {
       setIsVerifying(false);
@@ -254,7 +250,6 @@ export default function Verify() {
       formData.append("user_id", user.user_id);
 
       // formData.append("contact_type", contactType);
-      console.log("formData", formData);
       const response = await apiCall(formData);
 
       if (response.success) {
@@ -279,10 +274,9 @@ export default function Verify() {
       }
     } catch (error) {
       showToast(t("auth.failedToResendCode"), "error");
-      console.error("Resend Error:", error);
     }
   };
-  console.log("contactType", contactType);
+
   return (
     <SafeAreaView style={styles.container}>
       <Header />

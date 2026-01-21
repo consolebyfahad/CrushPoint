@@ -22,7 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Login() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
-  const { setUser, checkVerificationStatus } = useAppContext();
+  const { setUser } = useAppContext();
 
   const [activeTab, setActiveTab] = useState("phone");
   const [phoneNumber, setPhoneNumber] = useState("+1");
@@ -73,7 +73,7 @@ export default function Login() {
       setPhoneNumber("+");
       setEmail("");
     } catch (error) {
-      console.error("❌ API Error:", error);
+      // Error handled by UI
     } finally {
       setLoginLoading(false);
     }
@@ -101,14 +101,8 @@ export default function Login() {
       // New user - go to profile setup
       router.replace("/auth/gender");
     } else {
-      // Existing user - check verification status
-      const isVerified = await checkVerificationStatus();
-      
-      if (isVerified) {
-        router.replace("/(tabs)");
-      } else {
-        router.replace("/auth/gender");
-      }
+      // Existing user - go to tabs
+      router.replace("/(tabs)");
     }
     
     setOtherMethodsLoading(false);

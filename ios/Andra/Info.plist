@@ -95,6 +95,10 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>push-to-talk</string>
+		<string>bluetooth-central</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>

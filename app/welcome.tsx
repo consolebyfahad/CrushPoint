@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Welcome() {
   const { t } = useTranslation();
-  const { setUser, checkVerificationStatus } = useAppContext();
+  const { setUser } = useAppContext();
   const { showToast } = useToast();
   const [otherMethodsLoading, setOtherMethodsLoading] = useState(false);
   const { ensurePermissions } = useCombinedPermissions();
@@ -49,14 +49,8 @@ export default function Welcome() {
       // New user - go to profile setup
       router.replace("/auth/gender");
     } else {
-      // Existing user - check verification status
-      const isVerified = await checkVerificationStatus();
-
-      if (isVerified) {
-        router.replace("/(tabs)");
-      } else {
-        router.replace("/auth/gender");
-      }
+      // Existing user - go to tabs
+      router.replace("/(tabs)");
     }
   };
 

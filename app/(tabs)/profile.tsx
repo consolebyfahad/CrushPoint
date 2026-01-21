@@ -4,6 +4,7 @@ import useGetProfile from "@/hooks/useGetProfile";
 import { color, font } from "@/utils/constants";
 import {
   formatGenderInterest,
+  formatLookingFor,
   formatNationality,
   formatReligion,
   formatZodiac,
@@ -32,6 +33,7 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 export default function ProfileTab() {
   const { t } = useTranslation();
   const { userData, user } = useAppContext();
+  console.log("userData", JSON.stringify(userData));
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -352,14 +354,30 @@ export default function ProfileTab() {
                 {t("profile.relationshipGoals")}
               </Text>
               <View style={styles.infoRow}>
-                <Text style={styles.infoValue}>
-                  {userData.parsedLookingFor?.[0] ?? ""}
-                </Text>
-                {(userData.parsedLookingFor?.length ?? 0) > 1 && (
-                  <Text style={styles.additionalGoals}>
-                    , +{userData.parsedLookingFor!.length - 1}
-                  </Text>
-                )}
+                {userData.originalLookingForIds && userData.originalLookingForIds.length > 0 ? (
+                  <>
+                    <Text style={styles.infoValue}>
+                      {formatLookingFor(userData.originalLookingForIds[0], t)}
+                    </Text>
+                    {userData.originalLookingForIds.length > 1 && (
+                      <Text style={styles.additionalGoals}>
+                        , +{userData.originalLookingForIds.length - 1}
+                      </Text>
+                    )}
+                  </>
+                ) : userData.parsedLookingFor && userData.parsedLookingFor.length > 0 ? (
+                  <>
+                    {/* Fallback: format the first parsed item if it's a raw ID */}
+                    <Text style={styles.infoValue}>
+                      {formatLookingFor(userData.parsedLookingFor[0], t)}
+                    </Text>
+                    {userData.parsedLookingFor.length > 1 && (
+                      <Text style={styles.additionalGoals}>
+                        , +{userData.parsedLookingFor.length - 1}
+                      </Text>
+                    )}
+                  </>
+                ) : null}
               </View>
             </View>
 
@@ -369,21 +387,21 @@ export default function ProfileTab() {
             </View> */}
 
             {/* Nationality - only show if specified */}
-            {userData.parsedNationality &&
-              userData.parsedNationality.length > 0 &&
-              userData.parsedNationality[0] &&
-              userData.parsedNationality[0].trim() !== "" && (
+            {userData.originalNationalityValues &&
+              userData.originalNationalityValues.length > 0 &&
+              userData.originalNationalityValues[0] &&
+              userData.originalNationalityValues[0].trim() !== "" && (
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>
                     {t("profile.nationality")}
                   </Text>
                   <View style={styles.infoRow}>
                     <Text style={styles.infoValue}>
-                      {formatNationality(userData.parsedNationality[0], t)}
+                      {formatNationality(userData.originalNationalityValues[0], t)}
                     </Text>
-                    {userData.parsedNationality.length > 1 && (
+                    {userData.originalNationalityValues.length > 1 && (
                       <Text style={styles.additionalGoals}>
-                        , +{userData.parsedNationality.length - 1}
+                        , +{userData.originalNationalityValues.length - 1}
                       </Text>
                     )}
                   </View>
@@ -405,7 +423,7 @@ export default function ProfileTab() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.zodiac")}</Text>
                 <Text style={styles.infoValue}>
-                  {formatZodiac(userData.zodiac)}
+                  {formatZodiac(userData.zodiac, t)}
                 </Text>
               </View>
             )}
@@ -422,7 +440,7 @@ export default function ProfileTab() {
           </View>
 
           <View style={styles.interestsContainer}>
-            {(userData.parsedInterests ?? []).map((interest, index) => (
+            {((userData.parsedInterests && userData.parsedInterests.length > 0) ? userData.parsedInterests : []).map((interest, index) => (
               <View key={index} style={styles.interestTag}>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>
