@@ -429,7 +429,7 @@ const getLocalizedNameFromApi = (
       ""
     );
   } catch (error) {
-    console.warn("Error parsing name_languages:", error);
+
     return interest.name || "";
   }
 };
@@ -442,7 +442,7 @@ const convertInterestIdsToNames = (
   currentLanguage: string = "en"
 ): string[] => {
   if (!apiInterests || apiInterests.length === 0) {
-    console.warn("No API interests provided for conversion");
+
     return [];
   }
 
@@ -501,7 +501,7 @@ export const parseJsonString = (jsonString: string): string[] => {
       if (Array.isArray(parsed)) {
         return parsed;
       } else {
-        console.warn("JSON data is not an array:", parsed);
+
         return [];
       }
     } else {
@@ -509,7 +509,7 @@ export const parseJsonString = (jsonString: string): string[] => {
       return [jsonString];
     }
   } catch (error) {
-    console.warn("Error parsing JSON string:", error);
+
     // Fallback: try to extract values manually if JSON parsing fails
     try {
       // Extract values between quotes
@@ -519,7 +519,7 @@ export const parseJsonString = (jsonString: string): string[] => {
         return values;
       }
     } catch (fallbackError) {
-      console.warn("Fallback parsing also failed:", fallbackError);
+
     }
     // Final fallback: return as single string
     return [jsonString];
@@ -550,12 +550,11 @@ export const parseInterestsWithNames = (
       if (Array.isArray(interestIds)) {
         return convertInterestIdsToNames(interestIds, apiInterests, currentLanguage);
       } else {
-        console.warn("Interests data is not an array:", interestIds);
+
         return [];
       }
     } else {
       // It's not a JSON array, might be a single interest ID or comma-separated values
-      console.warn("Interests data is not JSON array format:", jsonString);
 
       // Try to parse as comma-separated values
       if (jsonString.includes(',')) {
@@ -567,7 +566,7 @@ export const parseInterestsWithNames = (
       }
     }
   } catch (error) {
-    console.warn("Error parsing interests:", error);
+
     // Fallback: try to extract values manually if JSON parsing fails
     try {
       // Extract values between quotes
@@ -586,7 +585,7 @@ export const parseInterestsWithNames = (
         return convertInterestIdsToNames([jsonString.trim()], apiInterests, currentLanguage);
       }
     } catch (fallbackError) {
-      console.warn("Fallback parsing also failed:", fallbackError);
+
     }
     return [];
   }
@@ -663,11 +662,11 @@ export const parseLookingForWithLabels = (jsonString: string, t?: (key: string) 
     if (Array.isArray(lookingForIds)) {
       return convertLookingForIdsToLabels(lookingForIds, t);
     } else {
-      console.warn("Looking for data is not an array:", lookingForIds);
+
       return [];
     }
   } catch (error) {
-    console.error("Error parsing looking_for:", error);
+
     // Fallback: try to extract values manually if JSON parsing fails
     try {
       // Extract values between quotes
@@ -677,7 +676,7 @@ export const parseLookingForWithLabels = (jsonString: string, t?: (key: string) 
         return convertLookingForIdsToLabels(values, t);
       }
     } catch (fallbackError) {
-      console.error("Fallback parsing also failed:", fallbackError);
+
     }
     return [];
   }
@@ -724,12 +723,10 @@ export const parseNationalityWithLabels = (jsonString: string, t?: (key: string)
 
     return [];
   } catch (error) {
-    console.warn("Error parsing nationality JSON:", error);
+
     return [];
   }
 };
-
-
 
 export const religionOptions = [
   { label: "✝️ Christianity", value: "christianity" },
@@ -783,7 +780,7 @@ export const formatTimeForDisplay = (time: string, locale?: string) => {
       return `${displayHours}:${displayMinutes} ${ampm}`;
     }
   } catch (error) {
-    console.warn("Error formatting time for display:", error);
+
     return time;
   }
 };
@@ -861,7 +858,7 @@ export const formatTimeAgo = (date: string, time: string, t?: (key: string, opti
       return t ? t("helper.time.daysAgo", { count: diffInDays }) : `${diffInDays} days ago`;
     }
   } catch (error) {
-    console.warn("Error formatting time ago:", error);
+
     return t ? t("helper.time.recently") : "Recently";
   }
 };
@@ -904,7 +901,7 @@ export const parseCreatedAtWithOffset = (
 
     return date;
   } catch (error) {
-    console.warn("Error parsing created_at:", error);
+
     return new Date();
   }
 };
@@ -972,7 +969,7 @@ export const parseUserImages = (imagesStr: string, gender: string = "unknown"): 
 
     return [getDefaultImage(gender)];
   } catch (error) {
-    console.warn("Error parsing user images:", error);
+
     return [getDefaultImage(gender)];
   }
 };
@@ -1007,7 +1004,7 @@ export const parseEventImage = (imageStr: string): string => {
     // Otherwise, construct URL with base path
     return `${IMAGE_BASE_URL}${imageStr}`;
   } catch (error) {
-    console.warn("Error parsing event image:", error);
+
     return "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
   }
 };
@@ -1091,7 +1088,7 @@ export const formatMeetupDate = (dateString: string): string => {
     };
     return date.toLocaleDateString('en-US', options);
   } catch (error) {
-    console.warn('Error formatting meetup date:', error);
+
     return dateString;
   }
 };
@@ -1114,7 +1111,7 @@ export const formatCardDate = (dateString: string, locale?: string): string => {
     };
     return date.toLocaleDateString(localeToUse, options);
   } catch (error) {
-    console.warn('Error formatting card date:', error);
+
     return dateString;
   }
 };
@@ -1131,7 +1128,7 @@ export const isDateInPast = (dateString: string): boolean => {
 
     return date < today;
   } catch (error) {
-    console.warn('Error checking if date is in past:', error);
+
     return false;
   }
 };
@@ -1146,7 +1143,7 @@ export const sortRequestsByDate = (requests: any[]): any[] => {
       const dateB = new Date(b.date);
       return dateB.getTime() - dateA.getTime(); // Newest first
     } catch (error) {
-      console.warn('Error sorting requests by date:', error);
+
       return 0;
     }
   });

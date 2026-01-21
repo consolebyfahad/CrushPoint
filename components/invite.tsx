@@ -57,7 +57,7 @@ export default function InviteMatches({
 
   const handleSendInvites = async () => {
     if (!user?.user_id) {
-      console.error("User ID not available");
+
       return;
     }
     setIsSubmitting(true);

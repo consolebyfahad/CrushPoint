@@ -93,7 +93,7 @@ export default function useGetBlockedUsers() {
         }
       }
     } catch (error) {
-      console.error("Error fetching blocked users:", error);
+
       showToast(t("hooks.failedToLoadBlockedUsers"), "error");
       setBlockedUsers([]);
     } finally {
@@ -125,7 +125,7 @@ export default function useGetBlockedUsers() {
         return false;
       }
     } catch (error) {
-      console.error("Error unblocking user:", error);
+
       showToast(t("hooks.failedToUnblockUser"), "error");
       return false;
     }

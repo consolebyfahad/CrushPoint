@@ -191,9 +191,7 @@ export default function Map({
       );
 
       if (isInPrivateSpot) {
-        console.log(
-          `🔒 User ${user.id || user.name} is in private spot, hiding from map`
-        );
+
         return false; // Hide user from map
       }
     }

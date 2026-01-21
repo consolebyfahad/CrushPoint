@@ -113,7 +113,7 @@ export default function Onboarding() {
     try {
       await AsyncStorage.setItem("@onboarding_completed", "true");
     } catch (error) {
-      console.error("Error marking onboarding as completed:", error);
+      // Error marking onboarding as completed
     }
   };
 

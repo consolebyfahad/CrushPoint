@@ -126,7 +126,7 @@ export default function UserCard({
     try {
       onViewProfile(user);
     } catch (error) {
-      console.error("Error in onViewProfile:", error);
+
       Alert.alert(t("common.error"), t("common.unableToViewProfile"));
     }
   };
@@ -155,7 +155,7 @@ export default function UserCard({
 
       setIsLoadingLocation(false);
     } catch (error) {
-      console.error("Error in handleShowOnMap:", error);
+
       setIsLoadingLocation(false);
       Alert.alert(t("common.error"), t("common.unableToShowLocation"), [
         { text: t("common.ok"), style: "default" },

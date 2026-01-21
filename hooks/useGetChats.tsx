@@ -56,7 +56,7 @@ const useGetChats = () => {
         return getDefaultImage(gender);
       }
     } catch (error) {
-      console.warn("Error parsing images:", error);
+
       return getDefaultImage(gender);
     }
   };
@@ -235,10 +235,7 @@ const useGetChats = () => {
                 isOnline: matchUser.status === "1",
               });
             } catch (chatError) {
-              console.warn(
-                `Failed to get chat for match ${matchId}:`,
-                chatError
-              );
+
               const gender = matchUser.gender || "unknown";
               const userImage = parseImages(matchUser.images || "", gender);
 
@@ -276,7 +273,7 @@ const useGetChats = () => {
       const errorMessage =
         err.message || t("hooks.networkErrorCheckConnection");
       setError(errorMessage);
-      console.error("Fetch chats error:", err);
+
       setChats([]);
     } finally {
       setLoading(false);

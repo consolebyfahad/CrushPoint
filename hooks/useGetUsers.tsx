@@ -544,7 +544,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
     } catch (err: any) {
       const errorMessage = err.message || t("users.networkError");
       setError(errorMessage);
-      console.error("Fetch Users Error:", err);
+
     } finally {
       setLoading(false);
     }
@@ -614,7 +614,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
       );
       return Array.isArray(parsedInterests) ? parsedInterests : [];
     } catch (error) {
-      console.warn("Error parsing user interests:", error);
+
       return [];
     }
   };
@@ -631,7 +631,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
       const rawIds = parseJsonString(lookingForStr);
       return Array.isArray(rawIds) ? rawIds : [];
     } catch (error) {
-      console.warn("Error parsing user looking_for:", error);
+
       return [];
     }
   };
@@ -648,7 +648,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
       const parsedNationality = parseNationalityWithLabels(nationalityStr, t);
       return Array.isArray(parsedNationality) ? parsedNationality : [];
     } catch (error) {
-      console.warn("Error parsing user nationality:", error);
+
       return [];
     }
   };

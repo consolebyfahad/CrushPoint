@@ -98,7 +98,6 @@ export default function RequestMeetup({
       return;
     }
 
-    console.log("🔍 Searching for:", input);
     setIsSearching(true);
 
     try {
@@ -106,8 +105,6 @@ export default function RequestMeetup({
       const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
         input
       )}&key=${GOOGLE_MAPS_API_KEY}`;
-
-      console.log("📤 Fetching from Google Places API...");
 
       const response = await fetch(url, {
         method: "GET",
@@ -119,24 +116,20 @@ export default function RequestMeetup({
 
       const data = await response.json();
 
-      console.log("📥 Google Places Response status:", data.status);
-      console.log("📥 Predictions count:", data.predictions?.length || 0);
-
       if (
         data.status === "OK" &&
         data.predictions &&
         data.predictions.length > 0
       ) {
-        console.log("✅ Found suggestions:", data.predictions.length);
-        console.log("📍 First suggestion:", data.predictions[0].description);
+
         setPlaceSuggestions(data.predictions);
         setShowSuggestions(true);
       } else if (data.status === "ZERO_RESULTS") {
-        console.log("⚠️ No results found for:", input);
+
         setPlaceSuggestions([]);
         setShowSuggestions(false);
       } else if (data.status === "REQUEST_DENIED") {
-        console.log("❌ API Key Error:", data.error_message);
+
         // Fallback: Use mock suggestions for testing
         const mockSuggestions = [
           {
@@ -151,12 +144,12 @@ export default function RequestMeetup({
         setPlaceSuggestions(mockSuggestions);
         setShowSuggestions(true);
       } else {
-        console.log("❌ API Error:", data.status, data.error_message);
+
         setPlaceSuggestions([]);
         setShowSuggestions(false);
       }
     } catch (error) {
-      console.error("❌ Error fetching place suggestions:", error);
+
       setPlaceSuggestions([]);
       setShowSuggestions(false);
     } finally {
@@ -294,7 +287,7 @@ export default function RequestMeetup({
       formData.append("message", message.trim());
       console.log("formData for request meetup", JSON.stringify(formData));
       const response = await apiCall(formData);
-      console.log("response for request meetup", response);
+
       if (response.result) {
         onClose();
         // Alert.alert(
@@ -323,7 +316,7 @@ export default function RequestMeetup({
         );
       }
     } catch (error) {
-      console.error("❌ Meetup request error:", error);
+
       Alert.alert(t("common.error"), t("meetups.networkError"));
     } finally {
       setIsLoading(false);

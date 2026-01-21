@@ -65,7 +65,7 @@ export default function PrivateSpots() {
         setPrivateSpots([]);
       }
     } catch (error) {
-      console.error("Error fetching private spots:", error);
+
       showToast(t("privateSpot.failedToLoadPrivateSpots"));
       setPrivateSpots([]);
     } finally {
@@ -142,7 +142,7 @@ export default function PrivateSpots() {
         );
       }
     } catch (error) {
-      console.error("Error deleting private spot:", error);
+
       showToast(t("privateSpot.failedToDeletePrivateSpot"));
     }
   };

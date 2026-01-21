@@ -65,7 +65,7 @@ export default function useGetProfile() {
               photos = [defaultPhoto];
             }
           } catch (error) {
-            console.error("Error parsing images:", error);
+
             photos = [defaultPhoto];
           }
         } else {
@@ -120,7 +120,7 @@ export default function useGetProfile() {
               }
             }
           } catch (error) {
-            console.warn("Error parsing interests in profile:", error);
+
             // On error, preserve previous parsedInterests if IDs haven't changed
             const previousIds = currentContextData?.originalInterestIds || userProfile?.originalInterestIds || [];
             const previousParsedInterests = currentContextData?.parsedInterests || userProfile?.parsedInterests || [];
@@ -152,7 +152,7 @@ export default function useGetProfile() {
             );
             originalLookingForIds = parseJsonString(userData.looking_for);
           } catch (error) {
-            console.warn("Error parsing looking_for in profile:", error);
+
             parsedLookingFor = [];
             originalLookingForIds = [];
           }
@@ -194,7 +194,7 @@ export default function useGetProfile() {
                 }
               }
             } catch (error) {
-              console.warn("Error parsing nationality JSON:", error);
+
               // Fallback to simple string handling
               if (
                 typeof userData.nationality === "string" &&
@@ -301,7 +301,7 @@ export default function useGetProfile() {
         setError(t("hooks.noUserDataFound"));
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+
       setError(t("hooks.failedToFetchUserData"));
     } finally {
       setLoading(false);
@@ -324,7 +324,7 @@ export default function useGetProfile() {
       (!contextUserData?.parsedInterests || contextUserData.parsedInterests.length === 0);
     
     if (needsReparse && !hasReparsedRef.current) {
-      console.log("Re-parsing interests now that API interests are loaded");
+
       hasReparsedRef.current = true; // Mark as re-parsed to prevent loop
       // Use a timeout to avoid calling during render
       setTimeout(() => {

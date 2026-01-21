@@ -33,7 +33,6 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 export default function ProfileTab() {
   const { t } = useTranslation();
   const { userData, user } = useAppContext();
-  console.log("userData", JSON.stringify(userData));
   const { loading, error, refetch } = useGetProfile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -132,7 +131,7 @@ export default function ProfileTab() {
     try {
       await refetch();
     } catch (error) {
-      console.error("Error during manual refresh:", error);
+      // Error during manual refresh
     } finally {
       setIsRefreshing(false);
     }

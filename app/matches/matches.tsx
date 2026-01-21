@@ -62,7 +62,7 @@ export default function Matches() {
   // Use the useGetMatches hook
   const { matches, loading, error, refetch, removeMatch, updateMatchStatus } =
     useGetMatches();
-  console.log("matches", matches);
+
   // Use the useGetChats hook
   const {
     chats,
@@ -153,18 +153,18 @@ export default function Matches() {
         formData.append("table_name", "matches");
         formData.append("user_id", user?.user_id || "");
         formData.append("id", selectedMatch.id);
-        console.log("formData", formData);
+
         const response = await apiCall(formData);
-        console.log("response for remove match", response);
+
         if (response.result) {
           // Remove from local state using the hook function
           removeMatch(selectedMatch.match_id);
         } else {
-          console.error("Failed to remove match:", response.message);
+
         }
       }
     } catch (error) {
-      console.error("Remove match error:", error);
+
     } finally {
       setShowRemoveMatch(false);
       setSelectedMatch(null);
@@ -182,7 +182,7 @@ export default function Matches() {
         blockFormData.append("block_id", selectedMatch.match_id);
         // blockFormData.append("id", blockFormData);
         const blockResponse = await apiCall(blockFormData);
-        console.log("blockResponse", blockResponse);
+
         // if (blockResponse.result) {
         //   // Remove match from matches table
         //   const removeFormData = new FormData();
@@ -197,11 +197,11 @@ export default function Matches() {
         //     removeMatch(selectedMatch.match_id);
         //   }
         // } else {
-        //   console.error("Block failed:", blockResponse.message);
+        //   
         // }
       }
     } catch (error) {
-      console.error("Block Error:", error);
+
     } finally {
       setShowBlockConfirmation(false);
       setSelectedMatch(null);
@@ -225,11 +225,11 @@ export default function Matches() {
             // Optionally remove the match after reporting
             removeMatch(selectedMatch.match_id);
           } else {
-            console.error("Report submission failed:", response.message);
+
           }
         }
       } catch (error) {
-        console.error("Report submission error:", error);
+
       } finally {
         setShowReportUser(false);
         setSelectedMatch(null);
@@ -324,7 +324,7 @@ export default function Matches() {
               }
             } catch (error: any) {
               showToast(error?.message || t("chat.failedToDelete"), "error");
-              console.error("Failed to delete chat:", error);
+
             }
           },
         },

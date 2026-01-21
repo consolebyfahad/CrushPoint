@@ -79,12 +79,7 @@ const useGetRequests = () => {
         return getDefaultImage(gender);
       }
     } catch (error) {
-      console.warn(
-        "Error parsing images:",
-        error,
-        "Original string:",
-        imagesStr
-      );
+
       return getDefaultImage(gender);
     }
   };
@@ -134,7 +129,7 @@ const useGetRequests = () => {
       formData.append("user_id", user.user_id);
 
       const response = await apiCall(formData);
-      console.log("response for get requests", response.data);
+
       if (response?.data && Array.isArray(response.data)) {
         const incomingList: MeetupRequest[] = [];
         const outgoingList: MeetupRequest[] = [];
@@ -147,15 +142,8 @@ const useGetRequests = () => {
             const dateId = String(request.date_id || "");
             const requestUserId = String(request.user_id || "");
 
-            console.log("🔍 Request processing:", {
-              currentUserId,
-              dateId,
-              requestUserId,
-              requestId: request.id,
-            });
-
             const isIncoming = dateId === currentUserId;
-            console.log("📥 isIncoming:", isIncoming);
+
             // Get the other user's information
             let otherUser;
             if (isIncoming) {
@@ -224,41 +212,22 @@ const useGetRequests = () => {
             // Add to appropriate list
             if (isIncoming) {
               incomingList.push(formattedRequest);
-              console.log("✅ Added to incomingList:", formattedRequest.id);
+
             } else {
               outgoingList.push(formattedRequest);
-              console.log("✅ Added to outgoingList:", formattedRequest.id);
+
             }
           } catch (itemError) {
-            console.warn(
-              "❌ Error processing request item:",
-              itemError,
-              request
-            );
-          }
-        });
 
-        console.log("📊 Before filtering:", {
-          incomingCount: incomingList.length,
-          outgoingCount: outgoingList.length,
+          }
         });
 
         // Filter out past dates and sort by date
         const filteredIncomingList = filterOutPastDates(incomingList);
         const filteredOutgoingList = filterOutPastDates(outgoingList);
 
-        console.log("📊 After filtering:", {
-          incomingCount: filteredIncomingList.length,
-          outgoingCount: filteredOutgoingList.length,
-        });
-
         const sortedIncomingList = sortRequestsByDate(filteredIncomingList);
         const sortedOutgoingList = sortRequestsByDate(filteredOutgoingList);
-
-        console.log("📊 Final counts:", {
-          incomingCount: sortedIncomingList.length,
-          outgoingCount: sortedOutgoingList.length,
-        });
 
         setIncomingRequests(sortedIncomingList);
         setOutgoingRequests(sortedOutgoingList);
@@ -274,7 +243,7 @@ const useGetRequests = () => {
       const errorMessage =
         error.message || t("hooks.networkErrorCheckConnection");
       setError(errorMessage);
-      console.error("Fetch requests error:", error);
+
       setIncomingRequests([]);
       setOutgoingRequests([]);
     } finally {

@@ -64,10 +64,10 @@ export default function OutgoingMeetup({
         if (response?.result === true) {
           onRemoveRequest?.(requestId);
         } else {
-          console.error("Failed to cancel request:", response?.message);
+
         }
       } catch (error: any) {
-        console.error("Error cancelling request:", error);
+
       } finally {
         setIsLoading(false);
       }
@@ -80,7 +80,7 @@ export default function OutgoingMeetup({
     try {
       // Feature coming soon - no alert needed
     } catch (error) {
-      console.error("Error editing request:", error);
+
     }
   }, []);
   const renderMeetupCard: ListRenderItem<any> = useCallback(

@@ -83,7 +83,6 @@ export default function BasicInfo() {
     });
   }, [t]);
 
-
   // Religion options - use base options from helper and translate labels
   const religionOptions = useMemo(() => {
     return baseReligionOptions.map((option) => {
@@ -172,7 +171,7 @@ export default function BasicInfo() {
         );
       }
     } catch (error) {
-      console.error("Update error:", error);
+
       showToast(t("profile.failedToUpdateBasicInfoRetry"), "error");
     } finally {
       setIsLoading(false);
@@ -476,7 +475,6 @@ const styles = StyleSheet.create({
     color: color.gray55,
     textAlign: "right",
   },
-
 
   fieldLabel: {
     fontSize: 16,

@@ -39,7 +39,7 @@ const LanguageSettings: React.FC = () => {
     try {
       await saveLanguagePreference(languageCode);
     } catch (error) {
-      console.error("Failed to change language:", error);
+
     }
   };
 

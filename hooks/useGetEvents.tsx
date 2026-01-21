@@ -87,7 +87,7 @@ const useGetEvents = () => {
         ""
       );
     } catch (error) {
-      console.warn(`Error parsing ${languagesField}:`, error);
+
       return event[fieldName] || fallbackValue || "";
     }
   };
@@ -99,25 +99,25 @@ const useGetEvents = () => {
 
   // Parse event image
   const parseEventImage = (imageStr: string): string => {
-    console.log("Parsing event image:", imageStr);
+
     if (!imageStr) {
-      console.log("No image string, using default");
+
       return getDefaultEventImage();
     }
 
     try {
       // If it's already a full URL, return as is
       if (imageStr.startsWith("http")) {
-        console.log("Image is already a URL:", imageStr);
+
         return imageStr;
       }
 
       // Otherwise, construct URL with base path
       const finalUrl = `${IMAGE_BASE_URL}${imageStr}`;
-      console.log("Constructed image URL:", finalUrl);
+
       return finalUrl;
     } catch (error) {
-      console.warn("Error parsing event image:", error);
+
       return getDefaultEventImage();
     }
   };
@@ -137,7 +137,7 @@ const useGetEvents = () => {
       // Otherwise, construct URL with base path
       return `${IMAGE_BASE_URL}${imageStr}`;
     } catch (error) {
-      console.warn("Error parsing organizer image:", error);
+
       return "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face";
     }
   };
@@ -158,7 +158,7 @@ const useGetEvents = () => {
             imageUrl = `https://api.andra-dating.com/images/${images[0]}`;
           }
         } catch (error) {
-          console.error("Error parsing user images:", error);
+
         }
       }
 
@@ -191,22 +191,18 @@ const useGetEvents = () => {
           userData.lat !== 0 && userData.lng !== 0) {
         formData.append("lat", userData.lat.toString());
         formData.append("lng", userData.lng.toString());
-        console.log("📍 [useGetEvents] Added user location to payload:", {
-          lat: userData.lat,
-          lng: userData.lng,
-        });
+
       } else {
-        console.log("⚠️ [useGetEvents] User location not available, skipping lat/lng");
+
       }
       
       console.log("formData loadData", JSON.stringify(formData));
       const response = await apiCall(formData);
       console.log("response loadData", JSON.stringify(response));
       if (Array.isArray(response?.data)) {
-        console.log("Raw event data:", response.data[0]);
+
         const formattedEvents = response.data.map((event: any) => {
           const goingUsers = parseGoingUsers(event.going || []);
-          console.log("Going users parsed:", goingUsers);
 
           // Get localized values
           const localizedTitle = getLocalizedValue(
@@ -249,7 +245,7 @@ const useGetEvents = () => {
                 orgLanguages["en"] ||
                 localizedOrganizer;
             } catch (error) {
-              console.warn("Error parsing org_by_languages:", error);
+
             }
           }
 
@@ -287,7 +283,7 @@ const useGetEvents = () => {
                 }
                 return t("events.recently");
               } catch (error) {
-                console.warn("Error formatting time ago:", error);
+
                 return t("events.recently");
               }
             })(),
@@ -304,7 +300,7 @@ const useGetEvents = () => {
             org_image: event.org_image || undefined,
             timestamp: event.timestamp || undefined,
           };
-          console.log("Formatted event:", formattedEvent);
+
           return formattedEvent;
         });
 
@@ -323,7 +319,7 @@ const useGetEvents = () => {
     } catch (error: any) {
       const errorMessage = error.message || t("events.networkError");
       setError(errorMessage);
-      console.error("Fetch events error:", error);
+
     } finally {
       setLoading(false);
     }
@@ -398,7 +394,7 @@ const useGetEvents = () => {
             : e
         )
       );
-      console.error("Toggle attendance error:", error);
+
       setError(t("events.failedToUpdateAttendance"));
     }
   };

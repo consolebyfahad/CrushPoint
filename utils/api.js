@@ -6,7 +6,7 @@ const logout = async () => {
     await AsyncStorage.removeItem("@AppContext");
     return true;
   } catch (error) {
-    console.error("❌ Logout error:", error);
+
     return false;
   }
 };
@@ -24,16 +24,12 @@ export const apiCall = async (payload, method = "POST") => {
       body: payload,
       signal: controller.signal,
     });
-    // console.log("response", response);
+    // 
     const data = await response.json();
-    // console.log("data", data);
+    // 
 
     return data;
   } catch (error) {
-    console.error(`❌ [${requestId}] API Error:`, {
-      message: error.message,
-      name: error.name,
-    });
 
     if (error.message.includes("Network request failed")) {
       await logout();

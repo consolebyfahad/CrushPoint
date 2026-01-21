@@ -148,7 +148,7 @@ console.log("submissionData", submissionData)
         );
       }
     } catch (error) {
-      console.error("Contact support error:", error);
+
       showToast(t("contactSupport.validation.somethingWrong"), "error");
     } finally {
       setIsSubmitting(false);

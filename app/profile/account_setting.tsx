@@ -72,7 +72,7 @@ export default function AccountSettings() {
       // Check if less than 60 days
       return diffDays >= 60;
     } catch (error) {
-      console.error(`Error checking ${fieldType} edit permission:`, error);
+
       return true; // On error, allow editing
     }
   };
@@ -83,7 +83,7 @@ export default function AccountSettings() {
   // Load existing user data when component mounts
   useEffect(() => {
     if (userData) {
-      console.log("userData", userData);
+
       try {
         const userProfile = userData;
 
@@ -106,11 +106,11 @@ export default function AccountSettings() {
             );
             setDate(dateObj);
           } catch (error) {
-            console.error("Error parsing date:", error);
+
           }
         }
       } catch (error) {
-        console.error("Error parsing userProfile:", error);
+
       }
     }
   }, [userData]);
@@ -263,9 +263,9 @@ export default function AccountSettings() {
       if (canEditField("email")) {
         formData.append("email", accountData.email.trim().toLowerCase());
       }
-      console.log("formData", formData);
+
       const response = await apiCall(formData);
-      console.log("response", response);
+
       if (response.result) {
         // Update context with new data (only editable fields)
         const updatedData: any = {
@@ -342,7 +342,7 @@ export default function AccountSettings() {
                 );
               }
             } catch (error) {
-              console.error("Delete account error:", error);
+
               showToast(t("account.failedToDeleteAccount"), "error");
             } finally {
               setIsLoading(false);

@@ -26,7 +26,7 @@ export default function MatchScreen({ route, navigation }: any) {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { user, userData } = useAppContext();
-  console.log("params", userData);
+
   // Parse matchData from params
   let matchData;
   try {
@@ -53,7 +53,6 @@ export default function MatchScreen({ route, navigation }: any) {
         !matchData.currentUser?.image ||
         matchData.currentUser.image.trim() === ""
       ) {
-        console.log("🖼️ Current user image empty, getting from userData");
 
         // Get image from userData.photos (already parsed URLs)
         if (
@@ -62,10 +61,7 @@ export default function MatchScreen({ route, navigation }: any) {
           userData.photos.length > 0
         ) {
           matchData.currentUser.image = userData.photos[0];
-          console.log(
-            "✅ Using image from userData.photos:",
-            matchData.currentUser.image
-          );
+
         }
         // Fallback to images array
         else if (
@@ -77,10 +73,7 @@ export default function MatchScreen({ route, navigation }: any) {
             ? userData.images[0]
             : `https://api.andra-dating.com/images/${userData.images[0]}`;
           matchData.currentUser.image = imageUrl;
-          console.log(
-            "✅ Using image from userData.images:",
-            matchData.currentUser.image
-          );
+
         }
         // Final fallback to default image
         else {
@@ -89,7 +82,7 @@ export default function MatchScreen({ route, navigation }: any) {
               ? "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg"
               : "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
           matchData.currentUser.image = defaultImage;
-          console.log("⚠️ Using default image:", matchData.currentUser.image);
+
         }
       }
 
@@ -151,7 +144,7 @@ export default function MatchScreen({ route, navigation }: any) {
       };
     }
   } catch (error) {
-    console.error("❌ Error parsing matchData:", error);
+
     matchData = {
       currentUser: {
         name: "You",
@@ -347,7 +340,7 @@ export default function MatchScreen({ route, navigation }: any) {
           }
       }
       } catch (error) {
-        console.warn("Failed to find match record:", error);
+
       }
     }
 

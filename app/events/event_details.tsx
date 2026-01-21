@@ -110,11 +110,11 @@ export default function EventDetails() {
           eventData.user_going === "1" || eventData.user_going === 1
         );
       } catch (error) {
-        console.error("Error parsing event data:", error);
+
         router.back();
       }
     } else {
-      console.error("No event data provided");
+
       router.back();
     }
   }, [params.event]);
@@ -149,10 +149,10 @@ export default function EventDetails() {
         showToast(t("events.eventShared"), "success");
       } else if (result.action === Share.dismissedAction) {
         // User dismissed the share sheet
-        console.log("Share dismissed");
+
       }
     } catch (error) {
-      console.error("Error sharing event:", error);
+
       showToast(t("events.failedToShare"), "error");
     }
   };
@@ -212,7 +212,7 @@ export default function EventDetails() {
         await Linking.openURL(fallbackUrl);
       }
     } catch (error) {
-      console.error("Error opening maps:", error);
+
       showToast(t("events.failedToOpenMaps"), "error");
     }
   };
@@ -287,11 +287,7 @@ export default function EventDetails() {
           // Check for DD-MM-YYYY format first (e.g., "25-01-2026")
           // IMPORTANT: This must be checked BEFORE new Date() because new Date() misinterprets DD-MM-YYYY
           const ddMmYyyyMatch = dateStr.match(/^\d{2}-\d{2}-\d{4}$/);
-          console.log("🔍 [Calendar] Checking date format:", {
-            dateStr,
-            ddMmYyyyMatch: !!ddMmYyyyMatch,
-          });
-          
+
           if (ddMmYyyyMatch) {
             const [day, month, year] = dateStr.split("-").map(Number);
             eventDate = new Date(year, month - 1, day); // month is 0-indexed
@@ -455,7 +451,7 @@ export default function EventDetails() {
           parsedEndDate: endDate.toISOString(),
         });
       } catch (error) {
-        console.error("❌ [Calendar] Error parsing date/time:", error);
+
         showToast(
           t("events.invalidDateTimeFormat") || "Invalid date/time format",
           "error"
@@ -542,7 +538,7 @@ export default function EventDetails() {
       });
       
       if (finalStartYear < 2000 || finalStartYear > 2100) {
-        console.error("❌ [Calendar] BLOCKED: Invalid start year detected:", finalStartYear);
+
         showToast(
           t("events.cannotAddEventContactSupport", { year: finalStartYear }),
           "error"
@@ -551,7 +547,7 @@ export default function EventDetails() {
       }
       
       if (finalEndYear < 2000 || finalEndYear > 2100) {
-        console.error("❌ [Calendar] BLOCKED: Invalid end year detected:", finalEndYear);
+
         showToast(
           t("events.cannotAddEventContactSupport", { year: finalEndYear }),
           "error"
@@ -574,19 +570,14 @@ export default function EventDetails() {
         eventDetails
       );
 
-      console.log("📅 [Calendar] Event creation result:", {
-        eventId,
-        success: !!eventId,
-      });
-
       if (eventId) {
         showToast(t("events.addedToCalendar"), "success");
       } else {
-        console.error("❌ [Calendar] Failed to create event - no eventId returned");
+
         showToast(t("events.failedToAddToCalendar"), "error");
       }
     } catch (error) {
-      console.error("Calendar error:", error);
+
       showToast(t("events.calendarError"), "error");
     }
   };
@@ -614,7 +605,7 @@ export default function EventDetails() {
           showToast(t("events.websiteNotAvailable"), "error");
         }
       } catch (error) {
-        console.error("Error opening website:", error);
+
         showToast(t("events.websiteError"), "error");
       }
     } else {
@@ -636,9 +627,8 @@ export default function EventDetails() {
       formData.append("user_id", user.user_id);
       formData.append("table_name", "event_rsvp");
       formData.append("event_id", event.id.toString());
-      console.log("formData", formData);
+
       const response = await apiCall(formData);
-      console.log("response for RSVP", response);
 
       if (response.result) {
         setIsAttending(!isAttending);
@@ -659,11 +649,10 @@ export default function EventDetails() {
   // Parse going users data
   const parseGoingUsers = () => {
     if (!event?.going || !Array.isArray(event.going)) {
-      console.log("No going data found:", event?.going);
+
       return [];
     }
 
-    console.log("Parsing going users:", event.going);
     const parsedUsers = event.going.map((user: any) => {
       // Check if user already has a complete image URL
       let imageUrl = user.image;
@@ -676,7 +665,7 @@ export default function EventDetails() {
             imageUrl = `https://api.andra-dating.com/images/${images[0]}`;
           }
         } catch (error) {
-          console.error("Error parsing user images:", error);
+
         }
       }
 
@@ -691,14 +680,13 @@ export default function EventDetails() {
         name: user.name,
         image: imageUrl,
       };
-      console.log("Parsed user:", result);
+
       return result;
     });
 
-    console.log("Final parsed users:", parsedUsers);
     return parsedUsers;
   };
-  console.log("event", event);
+
   return (
     <View style={styles.container}>
       {/* Header Image */}

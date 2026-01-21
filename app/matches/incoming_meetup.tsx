@@ -67,10 +67,10 @@ export default function IncomingMeetup({
         if (response?.result === true) {
           onUpdateStatus?.(requestId, "accepted");
         } else {
-          console.error("Failed to accept request:", response?.message);
+
         }
       } catch (error: any) {
-        console.error("Error accepting request:", error);
+
       } finally {
         setIsLoading(false);
       }
@@ -95,10 +95,10 @@ export default function IncomingMeetup({
         if (response?.result === true) {
           onUpdateStatus?.(requestId, "accepted");
         } else {
-          console.error("Failed to accept changes:", response?.message);
+
         }
       } catch (error: any) {
-        console.error("Error accepting changes:", error);
+
       } finally {
         setIsLoading(false);
       }
@@ -115,7 +115,7 @@ export default function IncomingMeetup({
           setShowSuggestChanges(true);
         }
       } catch (error) {
-        console.error("Error opening suggest changes:", error);
+
       }
     },
     [requests]
@@ -147,10 +147,10 @@ export default function IncomingMeetup({
   //         setShowSuggestChanges(false);
   //         setSelectedRequest(null);
   //       } else {
-  //         console.error("Failed to suggest changes:", response?.message);
+  //         
   //       }
   //     } catch (error: any) {
-  //       console.error("Error submitting suggested changes:", error);
+  //       
   //     } finally {
   //       setIsLoading(false);
   //     }
@@ -175,10 +175,10 @@ export default function IncomingMeetup({
         if (response?.result === true) {
           onRemoveRequest?.(requestId);
         } else {
-          console.error("Failed to decline request:", response?.message);
+
         }
       } catch (error: any) {
-        console.error("Error declining request:", error);
+
       } finally {
         setIsLoading(false);
       }

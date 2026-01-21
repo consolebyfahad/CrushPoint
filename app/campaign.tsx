@@ -99,20 +99,16 @@ export default function CampaignScreen() {
     // Check if onboarding is completed
     const onboardingCompleted = await AsyncStorage.getItem("@onboarding_completed");
     
-    if (isLoggedIn) {
-      console.log("isLoggedIn", isLoggedIn);
-      // User is logged in, check verification status
-      const isVerified = await checkVerificationStatus();
-      console.log("isVerified", isVerified);
-      if (isVerified) {
-        console.log("redirecting to tabs");
-        router.replace("/(tabs)");
+      if (isLoggedIn) {
+        // User is logged in, check verification status
+        const isVerified = await checkVerificationStatus();
+        if (isVerified) {
+          router.replace("/(tabs)");
+        } else {
+          router.replace("/auth/gender");
+        }
       } else {
-        router.replace("/auth/gender");
-      }
-    } else {
-      console.log("onboardingCompleted", onboardingCompleted);
-      // User not logged in
+        // User not logged in
       if (onboardingCompleted === "true") {
         // Onboarding completed, go to login screen
         router.replace("/welcome");

@@ -228,7 +228,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           setUserImages(parsed.userImages ?? []);
         }
       } catch (error) {
-        console.warn("Failed to parse context state:", error);
+
       } finally {
         setIsHydrated(true);
       }
@@ -251,7 +251,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       } catch (error) {
-        console.warn("Failed to save context state:", error);
+
       }
     };
 
@@ -307,7 +307,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         // For existing users, we might want to fetch their profile data
       }
     } catch (error) {
-      console.error("❌ Login error:", error);
+
       throw error;
     }
   };
@@ -318,7 +318,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       updateUserData(profileData);
     } catch (error) {
-      console.error("❌ Profile update error:", error);
+
       throw error;
     }
   };
@@ -358,7 +358,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
     } catch (error) {
-      console.error("❌ Error checking verification status:", error);
+
       setIsUserVerified(false);
       return false;
     }
@@ -374,7 +374,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       await AsyncStorage.removeItem(STORAGE_KEY);
       return true;
     } catch (error) {
-      console.error("❌ Logout error:", error);
+
       return false;
     }
   };

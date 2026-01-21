@@ -32,7 +32,7 @@ export default function ChatConversation() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { user, userData } = useAppContext();
-  console.log("user", userData);
+
   const { showToast } = useToast();
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
@@ -50,7 +50,7 @@ export default function ChatConversation() {
     userImage,
     currentUserId: userData?.id,
   });
-  console.log("currentUserId", user?.user_id);
+
   // Validate required params
   useEffect(() => {
     if (!matchId || !otherUserId || !user?.user_id) {
@@ -116,18 +116,13 @@ export default function ChatConversation() {
       formData.append("to_chat_id", toChatId); // Should be otherUserId (matched user's ID)
 
       // Log FormData contents (FormData doesn't serialize well, so we log the values)
-      console.log("📋 [Chat] FormData contents:", {
-        type: "getchat",
-        user_id: userIdParam,
-        to_chat_id: toChatId,
-      });
 
       try {
         const response = await apiCall(formData);
         console.log("response for getchat", JSON.stringify(response));
         if (response && response.chat) {
           const fromId = currentUserId;
-          console.log("fromId", fromId);
+
           const formattedMessages = response.chat.map((msg: any) => ({
             id: msg.id,
             text: msg.msg,
@@ -153,7 +148,7 @@ export default function ChatConversation() {
           setMessages([]);
         }
       } catch (error) {
-        console.error("Failed to fetch chat history", error);
+
         setMessages([]);
       } finally {
         if (showLoading) {
@@ -222,7 +217,7 @@ export default function ChatConversation() {
           }
         }
       } catch (error) {
-        console.error("Failed to check new messages", error);
+
       }
     },
     []
@@ -236,10 +231,7 @@ export default function ChatConversation() {
 
       // Initial fetch - get full chat history
       // Use otherUserId (matched user's ID) as to_chat_id, not matchId (match record ID)
-      console.log(
-        "🔄 [Chat] useFocusEffect - using otherUserId as to_chat_id:",
-        otherUserId
-      );
+
       fetchChatHistory(userData?.id, otherUserId, user.user_id);
 
       // Set up interval to check for new messages every 10 seconds
@@ -307,12 +299,12 @@ export default function ChatConversation() {
       } else {
         const errorMsg = response?.message || t("chat.failedToSend");
         showToast(errorMsg, "error");
-        console.error("Failed to send message:", errorMsg);
+
       }
     } catch (error: any) {
       const errorMsg = error?.message || t("chat.failedToSend");
       showToast(errorMsg, "error");
-      console.error("Failed to send message", error);
+
     } finally {
       setIsLoading(false);
     }

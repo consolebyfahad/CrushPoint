@@ -62,7 +62,7 @@ export default function NotificationSettings({ navigation }: any) {
           setNotificationSettings((prev) => ({ ...prev, ...settings }));
         }
       } catch (error) {
-        console.error("Error parsing notification settings:", error);
+
       }
     }
   }, [userData?.notification_settings]);
@@ -127,7 +127,7 @@ export default function NotificationSettings({ navigation }: any) {
         );
       }
     } catch (error) {
-      console.error("Update error:", error);
+
       Alert.alert(t("common.error"), t("common.failedToUpdateNotifications"));
     } finally {
       setIsLoading(false);

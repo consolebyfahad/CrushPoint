@@ -297,7 +297,6 @@ export default function Notifications({ navigation }: any) {
         setError(null);
       }
     } catch (error) {
-      console.error("❌ Error fetching notifications:", error);
 
       setError(t("notifications.failedToLoad"));
       setNotifications([]);
@@ -306,7 +305,6 @@ export default function Notifications({ navigation }: any) {
       setIsRefreshing(false);
     }
   };
-
 
   const getNotificationEmoji = (emoji: string) => {
     switch (emoji.toLowerCase()) {
@@ -407,7 +405,7 @@ export default function Notifications({ navigation }: any) {
                 matchRecordId = matchRecord?.id || null;
               }
             } catch (error) {
-              console.warn("Failed to find match record:", error);
+
             }
           }
 
@@ -431,7 +429,7 @@ export default function Notifications({ navigation }: any) {
           });
           return;
         } catch (error) {
-          console.error("Error navigating to chat:", error);
+
           // Fallback to chat list
           router.push("/(tabs)/matches");
           return;
@@ -547,7 +545,7 @@ export default function Notifications({ navigation }: any) {
           });
           return;
         } catch (error) {
-          console.error("Error navigating to match2 from notification:", error);
+
           // Fallback to matches screen
           router.push("/(tabs)/matches");
           return;
@@ -575,7 +573,7 @@ export default function Notifications({ navigation }: any) {
         try {
           parsedLookingFor = parseJsonString(lookingForString);
         } catch (error) {
-          console.warn("Error parsing lookingFor:", error);
+
           parsedLookingFor = [];
         }
 
@@ -585,7 +583,7 @@ export default function Notifications({ navigation }: any) {
         try {
           parsedInterests = parseJsonString(interestsString);
         } catch (error) {
-          console.warn("Error parsing interests:", error);
+
           parsedInterests = [];
         }
 
@@ -604,7 +602,7 @@ export default function Notifications({ navigation }: any) {
             }
           }
         } catch (error) {
-          console.warn("Error parsing nationality:", error);
+
           parsedNationality = [];
         }
 
@@ -642,7 +640,7 @@ export default function Notifications({ navigation }: any) {
           },
         });
       } catch (error) {
-        console.error("Error navigating to user profile:", error);
+
       }
     } else {
       // Fallback navigation based on notification type if no user data

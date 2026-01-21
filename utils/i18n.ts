@@ -37,7 +37,7 @@ const loadSavedLanguage = async () => {
       await i18n.changeLanguage(savedLanguage);
     }
   } catch (e) {
-    console.error("Failed to load saved language:", e);
+
   }
 };
 
@@ -50,7 +50,7 @@ export const saveLanguagePreference = async (language: string) => {
     await AsyncStorage.setItem(LANGUAGE_PREFERENCE, language);
     await i18n.changeLanguage(language);
   } catch (e) {
-    console.error("Failed to save language:", e);
+
   }
 };
 

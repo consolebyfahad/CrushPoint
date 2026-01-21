@@ -41,7 +41,7 @@ class SimpleFaceVerification {
 
       return manipulatorResult.uri;
     } catch (error: any) {
-      console.error("Error resizing image:", error);
+
       throw new Error(`Failed to resize image: ${error.message}`);
     }
   }
@@ -56,7 +56,6 @@ class SimpleFaceVerification {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-
       if (base64.length > 10485760) {
         // 10MB limit
         throw new Error("Image too large even after compression");
@@ -64,7 +63,7 @@ class SimpleFaceVerification {
 
       return base64;
     } catch (error: any) {
-      console.error("Error converting to base64:", error);
+
       throw new Error(`Failed to process image: ${error.message}`);
     }
   }
@@ -87,7 +86,7 @@ class SimpleFaceVerification {
 
       return localUri;
     } catch (error: any) {
-      console.error("Error downloading image:", error);
+
       throw new Error(`Failed to download image: ${error.message}`);
     }
   }
@@ -106,12 +105,10 @@ class SimpleFaceVerification {
       formData.append("api_secret", FACE_API_CONFIG.API_SECRET);
       formData.append("image_base64", base64Image);
 
-
       const response = await fetch(`${FACE_API_CONFIG.BASE_URL}/detect`, {
         method: "POST",
         body: formData,
       });
-
 
       const responseText = await response.text();
 
@@ -131,7 +128,7 @@ class SimpleFaceVerification {
 
       return result.faces[0].face_token;
     } catch (error: any) {
-      console.error("Face detection error:", error);
+
       throw error;
     }
   }
@@ -179,7 +176,7 @@ class SimpleFaceVerification {
 
       return result.confidence;
     } catch (error: any) {
-      console.error("Face comparison error:", error);
+
       throw error;
     }
   }
@@ -223,14 +220,12 @@ class SimpleFaceVerification {
         )}% (Required: ${FACE_API_CONFIG.CONFIDENCE_THRESHOLD}%). Please try again with better lighting and ensure your face is clearly visible.`;
       }
 
-
       return {
         verified,
         confidence,
         message,
       };
     } catch (error: any) {
-      console.error("❌ Verification failed:", error);
 
       let userMessage = "Verification failed. Please try again.";
 

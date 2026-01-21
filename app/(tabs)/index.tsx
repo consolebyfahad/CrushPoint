@@ -102,10 +102,7 @@ export default function Index() {
   useEffect(() => {
     if (userData?.gender_interest) {
       const updatedGender = formatGenderInterest(userData.gender_interest, t);
-      console.log("🔄 Updating filter gender from userData:", {
-        gender_interest: userData.gender_interest,
-        formatted: updatedGender,
-      });
+
       setFilterData((prev) => ({
         ...prev,
         gender: updatedGender,
@@ -174,7 +171,7 @@ export default function Index() {
             setShowLocationModal(true);
           }
         } catch (error) {
-          console.error("Error updating location:", error);
+
         }
       };
 
@@ -202,7 +199,7 @@ export default function Index() {
         JSON.stringify(formData)
       );
       const response = await apiCall(formData);
-      console.log("response updateLocationInDatabase", response);
+
       if (response.result || response.success) {
         updateUserData({
           lat: location.latitude,
@@ -210,7 +207,7 @@ export default function Index() {
         });
       }
     } catch (error) {
-      console.error("❌ Failed to update location in database:", error);
+
     }
   };
 
@@ -249,17 +246,12 @@ export default function Index() {
         );
 
         if (alreadyHandled) {
-          console.log(
-            "🚫 Notification already handled recently:",
-            matchId || userId
-          );
+
           return;
         }
 
         // Mark as handled
         notificationHandledRef.current.add(notificationKey);
-
-        console.log("🔔 Handling chat notification for match_id:", matchId);
 
         try {
           // Navigate directly to chat conversation
@@ -273,7 +265,7 @@ export default function Index() {
             },
           });
         } catch (error) {
-          console.error("❌ Failed to navigate to chat:", error);
+
           console.error("❌ Error details:", {
             message: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
@@ -308,21 +300,16 @@ export default function Index() {
         );
 
         if (alreadyHandled) {
-          console.log(
-            "🚫 Notification already handled recently:",
-            data.date_id
-          );
+
           return;
         }
 
         // Mark as handled
         notificationHandledRef.current.add(notificationKey);
 
-        console.log("🔔 Handling notification for date_id:", data.date_id);
-
         try {
           const matchData = await fetchMatchData(data.date_id);
-          console.log("matchData", matchData);
+
           if (matchData) {
             router.push({
               pathname: "/profile/match2",
@@ -332,7 +319,7 @@ export default function Index() {
             });
           }
         } catch (error) {
-          console.error("❌ Failed to fetch match data:", error);
+
           console.error("❌ Error details:", {
             message: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
@@ -392,7 +379,7 @@ export default function Index() {
           }, 10000);
         }, 500); // Increased from 100ms to 500ms to ensure map is ready
       } catch (error) {
-        console.error("Error parsing selected user location:", error);
+
       }
     }
 
@@ -432,8 +419,7 @@ export default function Index() {
             parsedImages = JSON.parse(cleanedImagesString);
           }
         } catch (error) {
-          console.warn("Failed to parse images array:", error);
-          console.warn("Raw images string:", matchedUserData?.images);
+
         }
 
         // Calculate age from date of birth
@@ -469,7 +455,7 @@ export default function Index() {
             }
 
             if (isNaN(birthDate.getTime())) {
-              console.warn("Invalid date format:", dob);
+
               return 0;
             }
 
@@ -484,7 +470,7 @@ export default function Index() {
             }
             return age;
           } catch (error) {
-            console.warn("Error calculating age:", error);
+
             return 0;
           }
         };
@@ -558,8 +544,7 @@ export default function Index() {
           } else {
           }
         } catch (error) {
-          console.warn("Failed to parse current user images:", error);
-          console.warn("Raw current user images string:", userData.images);
+
         }
 
         // Get current user image
@@ -580,7 +565,7 @@ export default function Index() {
               const rawIds = parseJsonString(data?.looking_for || "[]");
               lookingForIds = Array.isArray(rawIds) ? rawIds : [];
             } catch (error) {
-              console.warn("Error parsing looking_for:", error);
+
             }
 
             return {
@@ -597,7 +582,7 @@ export default function Index() {
               zodiac: formatZodiac(data?.zodiac || "", t),
             };
           } catch (error) {
-            console.warn("Error parsing user data:", error);
+
             return {
               interests: [],
               lookingFor: [],
@@ -651,7 +636,7 @@ export default function Index() {
 
       return null;
     } catch (error) {
-      console.error("❌ Error fetching match data:", error);
+
       console.error("❌ Error details:", {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
@@ -668,7 +653,7 @@ export default function Index() {
         model: Device.modelName || "unknown",
       };
     } catch (error) {
-      console.error("Error getting device info:", error);
+
       return {
         platform: Platform.OS || "",
         model: "unknown",
@@ -689,7 +674,7 @@ export default function Index() {
       } else {
       }
     } catch (error) {
-      console.error("❌ Error requesting notification permissions:", error);
+
       console.error("❌ Error details:", {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
@@ -713,11 +698,11 @@ export default function Index() {
       formData.append("devicePlatform", deviceInfo.platform);
       formData.append("deviceRid", token);
       formData.append("deviceModel", deviceInfo.model);
-      console.log("formData for FCM registration", formData);
+
       const response = await apiCall(formData);
-      console.log("response for FCM registration", response);
+
     } catch (error) {
-      console.error("❌ FCM registration failed:", error);
+
       console.error("❌ Error details:", {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
@@ -751,7 +736,7 @@ export default function Index() {
           setShowLocationModal(false);
         }
       } catch (error) {
-        console.error("❌ Failed to save location:", error);
+
       }
     }
   };

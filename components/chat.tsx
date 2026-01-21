@@ -94,7 +94,7 @@ export default function ChatList() {
               }
             } catch (error: any) {
               showToast(error?.message || t("chat.failedToDelete"), "error");
-              console.error("Failed to delete chat:", error);
+
             }
           },
         },

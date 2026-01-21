@@ -41,7 +41,7 @@ export async function requestUserLocation() {
       longitude: location.coords.longitude,
     };
   } catch (err) {
-    console.error("Error requesting location:", err);
+
     return null;
   }
 }
@@ -97,7 +97,7 @@ export async function searchLocations(
             longitude: location.longitude,
           };
         } catch (reverseError) {
-          console.error("Error getting reverse geocode:", reverseError);
+
           // Fallback to basic result
           return {
             id: `location_${index}`,
@@ -112,7 +112,7 @@ export async function searchLocations(
 
     return enhancedResults;
   } catch (error) {
-    console.error("Error searching locations:", error);
+
     return [];
   }
 }
@@ -138,7 +138,7 @@ export async function reverseGeocodeLocation(
 
     return "Unknown Location";
   } catch (error) {
-    console.error("Error reverse geocoding:", error);
+
     return "Unknown Location";
   }
 }
@@ -207,7 +207,7 @@ export async function getCurrentLocationSuggestion(): Promise<LocationSuggestion
       type: 'recent'
     };
   } catch (error) {
-    console.error("Error getting current location suggestion:", error);
+
     return null;
   }
 }

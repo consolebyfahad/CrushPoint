@@ -89,7 +89,7 @@ const useGetMatches = () => {
         return [getDefaultImage(gender)];
       }
     } catch (error) {
-      console.warn("Error parsing images:", error);
+
       return [getDefaultImage(gender)];
     }
   };
@@ -118,7 +118,7 @@ const useGetMatches = () => {
       );
       return Array.isArray(parsedInterests) ? parsedInterests : [];
     } catch (error) {
-      console.warn("Error parsing user interests:", error);
+
       return [];
     }
   };
@@ -130,7 +130,7 @@ const useGetMatches = () => {
       const parsedLookingFor = parseLookingForWithLabels(lookingForStr);
       return Array.isArray(parsedLookingFor) ? parsedLookingFor : [];
     } catch (error) {
-      console.warn("Error parsing user looking_for:", error);
+
       return [];
     }
   };
@@ -254,12 +254,7 @@ const useGetMatches = () => {
     } catch (error: any) {
       const errorMessage =
         error.message || t("hooks.networkErrorCheckConnection");
-      console.error("❌ Fetch matches error:", error);
-      console.error("❌ Error details:", {
-        message: error.message,
-        stack: error.stack,
-        userId: user?.user_id,
-      });
+
       setError(errorMessage);
     } finally {
       setLoading(false);

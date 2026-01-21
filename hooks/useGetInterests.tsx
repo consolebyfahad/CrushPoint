@@ -50,7 +50,7 @@ export default function useGetInterests(): UseGetInterestsReturn {
         nameLanguages[langCode] || nameLanguages["en"] || interest.name || ""
       );
     } catch (error) {
-      console.warn("Error parsing name_languages:", error);
+
       return interest.name || "";
     }
   };
@@ -83,7 +83,7 @@ export default function useGetInterests(): UseGetInterestsReturn {
       const errorMessage =
         err instanceof Error ? err.message : t("hooks.failedToFetchInterests");
       setError(errorMessage);
-      console.error("Error fetching interests:", err);
+
     } finally {
       setLoading(false);
     }

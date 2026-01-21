@@ -54,7 +54,6 @@ export default function Filters({
     t("filters.women"),
     t("filters.both"),
   ];
-  console.log("first", filterData);
 
   // Helper function to format multiple selection display
   const formatMultipleSelectionDisplay = (selection: any, type?: "religion" | "zodiac" | "nationality" | "lookingFor") => {

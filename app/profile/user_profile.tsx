@@ -432,7 +432,7 @@ export default function UserProfile() {
 
       setIsLoadingLocation(false);
     } catch (error) {
-      console.error("Error in handleShowOnMap:", error);
+
       setIsLoadingLocation(false);
       Alert.alert(t("common.error"), t("errors.unableToShowLocation") || "Unable to show location", [
         { text: t("errors.ok") || "OK", style: "default" },

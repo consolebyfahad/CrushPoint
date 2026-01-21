@@ -195,7 +195,7 @@ export default function SuggestChanges({
         );
       }
     } catch (error) {
-      console.error("❌ Suggest changes error:", error);
+
       Alert.alert(
         t("suggestChanges.error"),
         t("suggestChanges.failedToSuggestChangesNetwork")

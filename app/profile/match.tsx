@@ -28,7 +28,7 @@ export default function MatchScreen({ route, navigation }: any) {
       ? JSON.parse(params.matchData as string)
       : route?.params?.matchData;
   } catch (error) {
-    console.error("Error parsing matchData:", error);
+
     matchData = null;
   }
 

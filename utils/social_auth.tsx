@@ -65,7 +65,6 @@ export default function SocialAuth({
       }
 
       const response = await GoogleSignin.signIn();
-console.log("response for google sign in", JSON.stringify(response));
       if (isSuccessResponse(response)) {
         const { user } = response.data;
 
@@ -96,13 +95,11 @@ console.log("response for google sign in", JSON.stringify(response));
           await onAuthSuccess(userData, "google");
         } else {
           onAuthError(apiResponse.message || t("auth.googleSignInFailed"));
-          console.error("Google Sign-In API Error:", apiResponse.message);
         }
       } else {
         onAuthError(t("auth.googleSignInCancelled"));
       }
     } catch (error) {
-      console.error("Google Sign-In Error:", error);
 
       if (isErrorWithCode(error)) {
         switch (error.code) {
@@ -117,9 +114,6 @@ console.log("response for google sign in", JSON.stringify(response));
             break;
           case "DEVELOPER_ERROR":
             onAuthError(t("auth.googleSignInConfigError"));
-            console.error(
-              "DEVELOPER_ERROR - Check configuration files and client IDs"
-            );
             break;
           default:
             onAuthError(
@@ -147,7 +141,6 @@ console.log("response for google sign in", JSON.stringify(response));
       );
       return JSON.parse(jsonPayload);
     } catch (error) {
-      console.error("Error decoding JWT:", error);
       return null;
     }
   };
@@ -168,7 +161,6 @@ console.log("response for google sign in", JSON.stringify(response));
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
       });
-      console.log("credential for apple sign in", JSON.stringify(credential));
       
       if (!credential.identityToken) {
         onAuthError(t("auth.appleSignInNoToken"));
@@ -182,7 +174,6 @@ console.log("response for google sign in", JSON.stringify(response));
         const decodedToken = decodeJWT(credential.identityToken);
         if (decodedToken?.email) {
           email = decodedToken.email;
-          console.log("Extracted email from JWT:", email);
         }
       }
 
@@ -202,7 +193,6 @@ console.log("response for google sign in", JSON.stringify(response));
         const storedName = await AsyncStorage.getItem(`apple_name_${credential.user}`);
         if (storedName) {
           name = storedName;
-          console.log("Retrieved name from storage:", name);
         }
       }
 
@@ -212,10 +202,8 @@ console.log("response for google sign in", JSON.stringify(response));
       formData.append("token", credential.user);
       formData.append("email", email);
       formData.append("name", name);
-      console.log("formData for apple sign in", formData);
       
       const apiResponse = await apiCall(formData);
-      console.log("apiResponse for apple sign in", JSON.stringify(apiResponse));
 
       if (apiResponse.success) {
         // Store name in AsyncStorage if we got it (for future logins)
@@ -223,7 +211,6 @@ console.log("response for google sign in", JSON.stringify(response));
         const finalName = apiResponse.name || name;
         if (finalName && credential.user) {
           await AsyncStorage.setItem(`apple_name_${credential.user}`, finalName);
-          console.log("Stored name for future logins:", finalName);
         }
 
         const userInfo: UserData = {
@@ -238,10 +225,8 @@ console.log("response for google sign in", JSON.stringify(response));
         await onAuthSuccess(userInfo, "apple");
       } else {
         onAuthError(apiResponse.message || t("auth.appleSignInFailed"));
-        console.error("Apple Sign-In API Error:", apiResponse.message);
       }
     } catch (error: any) {
-      console.error("Apple Sign-In Error:", error);
 
       if (error.code === "ERR_CANCELED") {
         onAuthError(t("auth.appleSignInCancelled"));

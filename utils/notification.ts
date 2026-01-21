@@ -40,7 +40,7 @@ export const requestFCMPermission = async (): Promise<boolean> => {
 
     return false;
   } catch (error) {
-    console.error("❌ FCM permission request failed:", error);
+
     return false;
   }
 };
@@ -49,33 +49,31 @@ export const getFCMToken = async (): Promise<string | null> => {
   try {
     // iOS requires explicit device registration for remote notifications
     if (Platform.OS === "ios") {
-      console.log("🍎 iOS: Checking device registration...");
+
       const isRegistered = messaging().isDeviceRegisteredForRemoteMessages;
-      console.log("🍎 iOS: Device registered for remote messages:", isRegistered);
-      
+
       if (!isRegistered) {
-        console.log("🍎 iOS: Registering device for remote messages...");
+
         await messaging().registerDeviceForRemoteMessages();
-        console.log("🍎 iOS: Device registration completed");
+
       }
       
       // Check authorization status
       const authStatus = await messaging().hasPermission();
-      console.log("🍎 iOS: Current authorization status:", authStatus);
-      
+
       // Add a small delay for iOS to ensure APNs registration is complete
-      console.log("🍎 iOS: Waiting for APNs registration...");
+
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
     const token = await messaging().getToken();
-    console.log("📱 FCM Token retrieved:", token ? "SUCCESS" : "FAILED");
+
     if (token) {
       console.log("📱 Token preview:", token.substring(0, 20) + "...");
     }
     return token;
   } catch (error) {
-    console.error("❌ FCM token retrieval failed:", error);
+
     console.error("❌ Error details:", {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -95,9 +93,7 @@ export const setupNotificationListeners = (
     if (remoteMessage?.data) {
       // Create unique key from notification data
       const notificationId = remoteMessage.messageId || remoteMessage.data.match_id || remoteMessage.data.to_id || remoteMessage.data.date_id || JSON.stringify(remoteMessage.data);
-      
-      console.log(`🔔 Notification received from ${source}:`, notificationId);
-      
+
       // Check if already handled
       if (handledNotifications.has(notificationId)) {
         console.log(`🚫 Duplicate notification ignored (${source}):`, notificationId);
@@ -142,7 +138,7 @@ export const setupNotificationListeners = (
     });
 
   return () => {
-    console.log("🧹 Cleaning up notification listeners");
+
     unsubscribeOnMessage();
     unsubscribeOnOpenedApp();
   };

@@ -57,7 +57,7 @@ export default function MatchCard({
     const matchedUserId = match?.match_id;
 
     if (!matchRecordId || !matchedUserId) {
-      console.error("Missing match data for chat");
+
       return;
     }
 
