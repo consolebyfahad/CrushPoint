@@ -1,8 +1,10 @@
 import Header from "@/components/header";
 import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
+import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
+import { parseInterestsWithNames } from "@/utils/helper";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,9 +31,10 @@ interface Message {
 }
 
 export default function ChatConversation() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const params = useLocalSearchParams();
   const { user, userData } = useAppContext();
+  const { rawInterests: apiInterests } = useGetInterests();
 
   const { showToast } = useToast();
   const router = useRouter();
@@ -124,11 +127,11 @@ export default function ChatConversation() {
           const fromId = currentUserId;
 
           const formattedMessages = response.chat.map((msg: any) => ({
-            id: msg.id,
+            id: msg.id || `${msg.timestamp || msg.datetime}_${msg.sender_id}`,
             text: msg.msg,
             sender: msg.sender_id === fromId ? "user" : "other",
-            timestamp: Number(msg.datetime) || Date.now(),
-            userId: msg.from_id,
+            timestamp: Number(msg.timestamp || msg.datetime) || Date.now(),
+            userId: msg.sender_id,
           }));
 
           // Update last message timestamp
@@ -168,28 +171,18 @@ export default function ChatConversation() {
         formData.append("user_id", userIdParam);
         formData.append("to_chat_id", toChatId);
 
-        // Send UTC timestamp from last message (in seconds)
-        const lastTimestamp = lastMessageTimestampRef.current || 0;
-        // If timestamp is in milliseconds (> 1000000000), convert to seconds
-        const utcTimestamp =
-          lastTimestamp > 1000000000
-            ? Math.floor(lastTimestamp / 1000)
-            : lastTimestamp > 0
-            ? lastTimestamp
-            : Math.floor(Date.now() / 1000);
-
-        formData.append("mysqli_query", utcTimestamp.toString());
         console.log("formData for checkmsg", JSON.stringify(formData));
         const response = await apiCall(formData);
+        console.log("response for checkmsg", JSON.stringify(response));
         if (response && response.chat && Array.isArray(response.chat)) {
           if (response.chat.length > 0) {
-            const fromId = response.user?.id || userIdParam;
+            const currentUserId = userData?.id || userIdParam;
             const newMessages = response.chat.map((msg: any) => ({
-              id: msg.id,
+              id: msg.id || `${msg.timestamp}_${msg.sender_id}`,
               text: msg.msg,
-              sender: msg.from_id === fromId ? "user" : "other",
-              timestamp: Number(msg.datetime) || Date.now(),
-              userId: msg.from_id,
+              sender: msg.sender_id === currentUserId ? "user" : "other",
+              timestamp: Number(msg.timestamp) || Date.now(),
+              userId: msg.sender_id,
             }));
 
             // Update last message timestamp
@@ -220,7 +213,7 @@ export default function ChatConversation() {
 
       }
     },
-    []
+    [userData?.id]
   );
 
   useFocusEffect(
@@ -356,12 +349,198 @@ export default function ChatConversation() {
     }
   };
 
+  const handleBack = () => {
+    router.push({
+      pathname: "/(tabs)/matches",
+    });
+  };
+
+  const handleViewProfile = useCallback(async () => {
+    if (!otherUserId || !user?.user_id) {
+      return;
+    }
+
+    try {
+      // Fetch user profile data
+      const formData = new FormData();
+      formData.append("type", "get_data");
+      formData.append("table_name", "users");
+      formData.append("id", otherUserId);
+
+      const response = await apiCall(formData);
+      if (response?.data && response.data.length > 0) {
+        const userProfileData = response.data[0];
+        
+        // Parse images
+        let images: string[] = [];
+        if (userProfileData.images) {
+          try {
+            const cleanedImagesString = userProfileData.images
+              .replace(/\\\\/g, "\\")
+              .replace(/\\\"/g, '"');
+            const imageFilenames = JSON.parse(cleanedImagesString);
+            const baseImageUrl = userProfileData.image_url || "https://api.andra-dating.com/images/";
+
+            if (Array.isArray(imageFilenames) && imageFilenames.length > 0) {
+              images = imageFilenames.map((filename: string) => {
+                const cleanFilename = filename.replace(/\\/g, "");
+                return `${baseImageUrl}${cleanFilename}`;
+              });
+            }
+          } catch (error) {
+            // Error parsing images
+          }
+        }
+
+        // Calculate age
+        const calculateAge = (dob: string) => {
+          if (!dob) return 0;
+          try {
+            const birthDate = new Date(dob);
+            if (isNaN(birthDate.getTime())) return 0;
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (
+              monthDiff < 0 ||
+              (monthDiff === 0 && today.getDate() < birthDate.getDate())
+            ) {
+              age--;
+            }
+            return age;
+          } catch (error) {
+            return 0;
+          }
+        };
+
+        const age = calculateAge(userProfileData.dob);
+
+        // Parse interests and convert IDs to names
+        let parsedInterests: string[] = [];
+        if (userProfileData.interests) {
+          try {
+            const currentLanguage = i18n.language || "en";
+            // Use parseInterestsWithNames to convert IDs to names
+            if (typeof userProfileData.interests === "string") {
+              parsedInterests = parseInterestsWithNames(
+                userProfileData.interests,
+                apiInterests,
+                currentLanguage
+              );
+            } else if (Array.isArray(userProfileData.interests)) {
+              // If already an array, check if they're IDs or names
+              // If first element is a number or numeric string, they're IDs
+              const firstItem = userProfileData.interests[0];
+              const areIds = firstItem && /^\d+$/.test(String(firstItem));
+              if (areIds && apiInterests && apiInterests.length > 0) {
+                // Convert IDs to names
+                parsedInterests = parseInterestsWithNames(
+                  JSON.stringify(userProfileData.interests),
+                  apiInterests,
+                  currentLanguage
+                );
+              } else {
+                // Already names, use as is
+                parsedInterests = userProfileData.interests;
+              }
+            }
+          } catch (error) {
+            // If parsing fails, keep as empty array
+            parsedInterests = [];
+          }
+        }
+
+        // Parse looking_for if it's a string
+        let parsedLookingFor: string[] = [];
+        if (userProfileData.looking_for) {
+          try {
+            if (typeof userProfileData.looking_for === "string") {
+              const cleaned = userProfileData.looking_for.replace(/\\\\/g, "\\").replace(/\\\"/g, '"');
+              parsedLookingFor = JSON.parse(cleaned);
+            } else if (Array.isArray(userProfileData.looking_for)) {
+              parsedLookingFor = userProfileData.looking_for;
+            }
+          } catch (error) {
+            // If parsing fails, keep as empty array
+            parsedLookingFor = [];
+          }
+        }
+
+        // Parse languages if it's a string
+        let parsedLanguages: string[] = [];
+        if (userProfileData.languages) {
+          try {
+            if (typeof userProfileData.languages === "string") {
+              // Languages might be comma-separated or JSON
+              if (userProfileData.languages.startsWith("[")) {
+                const cleaned = userProfileData.languages.replace(/\\\\/g, "\\").replace(/\\\"/g, '"');
+                parsedLanguages = JSON.parse(cleaned);
+              } else {
+                parsedLanguages = userProfileData.languages.split(",").map((l: string) => l.trim()).filter(Boolean);
+              }
+            } else if (Array.isArray(userProfileData.languages)) {
+              parsedLanguages = userProfileData.languages;
+            }
+          } catch (error) {
+            // If parsing fails, try as comma-separated string
+            if (typeof userProfileData.languages === "string") {
+              parsedLanguages = userProfileData.languages.split(",").map((l: string) => l.trim()).filter(Boolean);
+            }
+          }
+        }
+
+        // Prepare user profile data for navigation - matching structure from matches.tsx
+        const profileData = {
+          id: userProfileData.id || otherUserId,
+          name: userProfileData.name || userName,
+          age: age,
+          images: images,
+          about: userProfileData.about || "",
+          height: userProfileData.height || "",
+          nationality: userProfileData.nationality || "",
+          religion: userProfileData.religion || "",
+          zodiac: userProfileData.zodiac || "",
+          gender: userProfileData.gender || "",
+          country: userProfileData.country || "",
+          state: userProfileData.state || "",
+          city: userProfileData.city || "",
+          languages: parsedLanguages,
+          interests: parsedInterests,
+          lookingFor: parsedLookingFor,
+          isOnline: userProfileData.status === "1",
+          phone: userProfileData.phone || "",
+          dob: userProfileData.dob || "",
+          actualLocation: userProfileData.lat && userProfileData.lng
+            ? {
+                lat: parseFloat(userProfileData.lat),
+                lng: parseFloat(userProfileData.lng),
+              }
+            : null,
+          email: userProfileData.email || "",
+        };
+
+        router.push({
+          pathname: "/profile/user_profile",
+          params: { user: JSON.stringify(profileData) },
+        });
+      }
+    } catch (error) {
+      showToast(t("chat.errorLoading") || "Failed to load profile", "error");
+    }
+  }, [otherUserId, user?.user_id, userName, showToast, t]);
+
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={userName} />
+      <Header
+        title={userName}
+        onPress={handleBack}
+        userImage={userImage}
+        onImagePress={handleViewProfile}
+      />
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 2 : 0}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -371,7 +550,7 @@ export default function ChatConversation() {
           }
           contentContainerStyle={[
             styles.scrollViewContent,
-            { paddingBottom: Platform.OS === "android" ? keyboardHeight : 0 },
+            // { paddingBottom: Platform.OS === "android" ? keyboardHeight + 80 : 10 },
           ]}
           keyboardShouldPersistTaps="handled"
         >
@@ -422,16 +601,7 @@ export default function ChatConversation() {
 
         {/* Chat input */}
         <View
-          style={[
-            styles.chatInputWrapper,
-            Platform.OS === "android" &&
-              keyboardHeight > 0 && {
-                position: "absolute",
-                bottom: keyboardHeight,
-                left: 0,
-                right: 0,
-              },
-          ]}
+          style={styles.chatInputWrapper}
         >
           <View style={styles.chatInputContainer}>
             <TextInput

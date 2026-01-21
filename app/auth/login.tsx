@@ -22,7 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Login() {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
-  const { setUser } = useAppContext();
+  const { setUser, loginUser } = useAppContext();
 
   const [activeTab, setActiveTab] = useState("phone");
   const [phoneNumber, setPhoneNumber] = useState("+1");
@@ -94,7 +94,10 @@ export default function Login() {
     provider: "apple" | "google"
   ) => {
     setOtherMethodsLoading(true);
-    setUser(userData);
+    
+    // Use loginUser to properly set both user and isLoggedIn state
+    // This ensures the session persists when the app is closed and reopened
+    await loginUser(userData);
 
     // Skip OTP for social auth - go directly to appropriate screen
     if (userData.new) {
@@ -216,7 +219,25 @@ export default function Login() {
         />
         <Text style={styles.orText}>{t("auth.orText")}</Text>
         <SocialAuth
-          onAuthSuccess={handleSocialAuthSuccess}
+          onAuthSuccess={async (userData, provider) => {
+            console.log(`[LOGIN] ========== SocialAuth onAuthSuccess callback START ==========`);
+            console.log(`[LOGIN] SocialAuth onAuthSuccess callback called directly:`, {
+              provider,
+              userId: userData?.user_id,
+              email: userData?.email,
+              name: userData?.name,
+              hasFunction: typeof handleSocialAuthSuccess,
+              handleSocialAuthSuccessExists: !!handleSocialAuthSuccess,
+            });
+            try {
+              const result = await handleSocialAuthSuccess(userData, provider);
+              console.log(`[LOGIN] SocialAuth onAuthSuccess callback completed, result:`, result);
+              return result;
+            } catch (error) {
+              console.error(`[LOGIN] SocialAuth onAuthSuccess callback error:`, error);
+              throw error;
+            }
+          }}
           onAuthError={handleSocialAuthError}
           isDisabled={otherMethodsLoading}
         />

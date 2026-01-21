@@ -3,13 +3,15 @@ import Feather from "@expo/vector-icons/Feather";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { router } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface header {
   onPress?: () => void;
   title?: any;
   closeButton?: any;
   divider?: any;
+  userImage?: string;
+  onImagePress?: () => void;
 }
 
 const handleBack = () => {
@@ -23,6 +25,8 @@ export default function Header({
   title,
   closeButton,
   divider,
+  userImage,
+  onImagePress,
 }: header) {
   return (
     <View
@@ -31,7 +35,7 @@ export default function Header({
         divider && { borderBottomWidth: 1, borderColor: color.gray94 },
       ]}
     >
-      <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+      <TouchableOpacity onPress={onPress || handleBack} style={styles.backButton}>
         <Feather name="arrow-left" size={24} color="black" />
       </TouchableOpacity>
 
@@ -41,7 +45,18 @@ export default function Header({
           closeButton ? { alignItems: "center" } : { marginLeft: 8 },
         ]}
       >
-        {title && <Text style={styles.title}>{title}</Text>}
+        {userImage && onImagePress ? (
+          <TouchableOpacity
+            onPress={onImagePress}
+            style={styles.titleWithImage}
+            activeOpacity={0.7}
+          >
+            <Image source={{ uri: userImage }} style={styles.userImage} />
+            {title && <Text style={styles.title}>{title}</Text>}
+          </TouchableOpacity>
+        ) : (
+          title && <Text style={styles.title}>{title}</Text>
+        )}
       </View>
 
       {closeButton && (
@@ -67,6 +82,18 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
+  },
+  titleWithImage: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  userImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: color.gray94,
   },
   title: {
     fontSize: 20,

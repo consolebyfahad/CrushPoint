@@ -1,6 +1,7 @@
 import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
+import { calculateAge, formatTimeAgo, parseJsonString } from "@/utils/helper";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -35,38 +36,51 @@ export default function useGetBlockedUsers() {
 
   const formatTimestamp = (timestamp: string): string => {
     try {
-      const date = new Date(timestamp);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - date.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) {
-        return "1 day ago";
-      } else if (diffDays < 7) {
-        return `${diffDays} days ago`;
-      } else if (diffDays < 30) {
-        const weeks = Math.floor(diffDays / 7);
-        return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
-      } else {
-        const months = Math.floor(diffDays / 30);
-        return months === 1 ? "1 month ago" : `${months} months ago`;
+      // Parse timestamp format "Jan 21, 2026 07:26 PM"
+      // Split into date and time parts
+      const parts = timestamp.split(" ");
+      if (parts.length >= 4) {
+        // Extract date part (e.g., "Jan 21, 2026")
+        const datePart = `${parts[0]} ${parts[1]} ${parts[2]}`;
+        // Extract time part (e.g., "07:26 PM")
+        const timePart = `${parts[3]} ${parts[4] || ""}`;
+        
+        return formatTimeAgo(datePart, timePart, t);
       }
+      return formatTimeAgo(timestamp, "", t);
     } catch (error) {
-      return "recently";
+      return t("helper.time.recently") || "Recently";
     }
   };
 
   const transformApiData = (apiData: ApiBlockedUser[]): BlockedUser[] => {
-    return apiData.map((item) => ({
-      id: item.id,
-      name: item.block_user?.name || `User ${item.block_id}`,
-      age: item.block_user?.age || 25,
-      image: item.block_user?.image
-        ? `${item.image_url}${item.block_user.image}`
-        : `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face`,
-      blockedDate: formatTimestamp(item.timestamp),
-      block_id: item.block_id,
-    }));
+    return apiData.map((item) => {
+      // Calculate age from DOB
+      const age = item.block_user?.dob ? calculateAge(item.block_user.dob) : 25;
+
+      // Get first image from images array
+      let imageUrl = `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face`;
+      if (item.block_user?.images) {
+        try {
+          const images = parseJsonString(item.block_user.images);
+          if (images && images.length > 0) {
+            const firstImage = images[0];
+            imageUrl = `${item.image_url}${firstImage}`;
+          }
+        } catch (error) {
+          // Use default image
+        }
+      }
+
+      return {
+        id: item.id,
+        name: item.block_user?.name || `User ${item.block_id}`,
+        age: age,
+        image: imageUrl,
+        blockedDate: formatTimestamp(item.timestamp),
+        block_id: item.block_id,
+      };
+    });
   };
 
   const fetchBlockedUsers = async () => {

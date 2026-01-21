@@ -218,68 +218,14 @@ export default function Index() {
   useEffect(() => {
     requestNotificationPermissions();
 
-    const handleNotificationPress = async (data: any) => {
-      // Handle chat/message notifications with match_id
-      if (data?.match_id || data?.to_id) {
-        const matchId = data.match_id;
-        const userId = data.to_id || data.user_id;
-        const userName = data.user_name || "User";
-        const userImage = data.user_image || "";
-
-        // Create unique key for this notification
-        const notificationKey = `${matchId || userId}_${Date.now()}`;
-
-        // Check if this notification was already handled recently (within 2 seconds)
-        const recentKeys = Array.from(notificationHandledRef.current).filter(
-          (key) => {
-            const timestamp = parseInt(key.split("_")[1]);
-            return Date.now() - timestamp < 2000; // 2 seconds
-          }
-        );
-
-        // Clean up old keys
-        notificationHandledRef.current = new Set(recentKeys);
-
-        // Check if we already have a recent notification for this match/user
-        const alreadyHandled = recentKeys.some((key) =>
-          key.startsWith(`${matchId || userId}_`)
-        );
-
-        if (alreadyHandled) {
-
-          return;
-        }
-
-        // Mark as handled
-        notificationHandledRef.current.add(notificationKey);
-
-        try {
-          // Navigate directly to chat conversation
-          router.push({
-            pathname: "/chat/conversation",
-            params: {
-              matchId: matchId || userId,
-              userId: userId,
-              userName: userName,
-              userImage: userImage,
-            },
-          });
-        } catch (error) {
-
-          console.error("❌ Error details:", {
-            message: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined,
-            matchId: matchId,
-            userId: userId,
-          });
-          // Fallback to chat list
-          router.push("/(tabs)/matches");
-        }
-        return;
-      }
-
-      // Handle match notifications with date_id (for backward compatibility)
-      if (data?.date_id) {
+    const handleNotificationPress = async (data: any, notificationBody?: string) => {
+      // Check if this is a match notification by checking the notification body
+      const isMatchNotification = notificationBody?.toLowerCase().includes("match") || 
+                                   notificationBody?.toLowerCase().includes("new match");
+      
+      // Only handle match notifications - navigate to match2 screen
+      // For all other notifications (chat, message, etc.), just show the push notification without navigation
+      if (data?.date_id && isMatchNotification) {
         // Create unique key for this notification
         const notificationKey = `${data.date_id}_${Date.now()}`;
 
@@ -309,7 +255,6 @@ export default function Index() {
 
         try {
           const matchData = await fetchMatchData(data.date_id);
-
           if (matchData) {
             router.push({
               pathname: "/profile/match2",

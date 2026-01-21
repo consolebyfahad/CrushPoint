@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Welcome() {
   const { t } = useTranslation();
-  const { setUser } = useAppContext();
+  const { loginUser } = useAppContext();
   const { showToast } = useToast();
   const [otherMethodsLoading, setOtherMethodsLoading] = useState(false);
   const { ensurePermissions } = useCombinedPermissions();
@@ -42,7 +42,7 @@ export default function Welcome() {
     userData: any,
     provider: "apple" | "google"
   ) => {
-    setUser(userData);
+    await loginUser(userData);
 
     // Skip OTP for social auth - go directly to appropriate screen
     if (userData.new) {

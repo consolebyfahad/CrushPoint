@@ -6,6 +6,7 @@ import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
 import {
+  calculateAge,
   capitalizeFirstLetter,
   formatLookingFor,
   formatNationality,
@@ -171,17 +172,39 @@ export default function UserProfile() {
         )
       : "N/A";
 
+    // Calculate age from DOB if age is not provided or is 0
+    let userAge = userData.age;
+    if (!userAge || userAge === 0) {
+      if (userData.dob) {
+        try {
+          userAge = calculateAge(userData.dob);
+        } catch (error) {
+          userAge = 0;
+        }
+      } else {
+        userAge = 0;
+      }
+    }
+
+    // Filter out "0" or empty height values
+    const userHeight =
+      userData.height &&
+      userData.height !== "0" &&
+      userData.height.toString().trim() !== ""
+        ? userData.height
+        : "";
+
     return {
       id: userData.id || "unknown",
       name: userData.name || "Unknown User",
-      age: userData.age || 0,
+      age: userAge,
       distance: realDistance,
       isOnline: userData.isOnline || true,
       match_status: userData.match_status || "",
       match_emoji: userData.match_emoji || "",
       lookingFor: userData.lookingFor || [],
       interests: userData.interests || [],
-      height: userData.height || "",
+      height: userHeight,
       nationality: parseNationality(userData.nationality),
       religion: userData.religion || "",
       zodiac: userData.zodiac || "",
@@ -339,7 +362,9 @@ export default function UserProfile() {
       formData.append("table_name", "blocked_users");
       formData.append("block_id", userInfo.id);
       formData.append("user_id", user?.user_id || "");
+      console.log("formData", JSON.stringify(formData));
       const response = await apiCall(formData);
+      console.log("response for block user", JSON.stringify(response));
       if (response.result) {
         setShowBlockConfirmation(false);
         // router.back();

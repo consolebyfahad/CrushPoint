@@ -71,6 +71,22 @@ export default function Matches() {
     refetch: refetchChats,
   } = useGetChats();
 
+  // Log chat list data
+  React.useEffect(() => {
+    console.log("💬 [Matches] Chat list data:", {
+      chatsCount: chats.length,
+      chats: chats.map((chat) => ({
+        id: chat.id,
+        matchId: chat.matchId,
+        userId: chat.userId,
+        name: chat.name,
+        lastMessage: chat.lastMessage,
+      })),
+      loading: chatsLoading,
+      error: chatsError,
+    });
+  }, [chats, chatsLoading, chatsError]);
+
   // Filter matches based on search text
   const filteredMatches = matches.filter((match) =>
     match.name.toLowerCase().includes(searchText.toLowerCase())
@@ -82,6 +98,18 @@ export default function Matches() {
       chat.name.toLowerCase().includes(searchText.toLowerCase()) ||
       chat.lastMessage.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  // Log filtered chats
+  React.useEffect(() => {
+    console.log("🔍 [Matches] Filtered chats:", {
+      searchText,
+      filteredChatsCount: filteredChats.length,
+      filteredChats: filteredChats.map((chat) => ({
+        id: chat.id,
+        name: chat.name,
+      })),
+    });
+  }, [filteredChats, searchText]);
 
   const handleViewProfile = useCallback((match: any) => {
     const userProfileData = {
@@ -113,6 +141,31 @@ export default function Matches() {
       params: { user: JSON.stringify(userProfileData) },
     });
   }, []);
+
+  // Navigate to conversation from match card
+  // This ensures the same conversation opens whether clicked from matches or chat list
+  const handleOpenConversation = useCallback((match: any) => {
+    // match.match_id is the matched user's ID (the person we're chatting with)
+    // match.user_id is the current user's ID (not what we want)
+    const matchedUserId = String(match.match_id || match.id);
+    const userName = match.name || "";
+    const userImage = match.image || (match.images && match.images.length > 0 ? match.images[0] : "");
+
+    // Check if there's already a chat for this matched user
+    // If yes, use the same matchId from the chat to ensure same conversation opens
+    const existingChat = chats.find((chat) => String(chat.userId) === matchedUserId);
+    const matchId = existingChat ? existingChat.matchId : matchedUserId;
+
+    router.push({
+      pathname: "/chat/conversation",
+      params: {
+        matchId: matchId,
+        userId: matchedUserId, // This is the matched user's ID (the person we're chatting with)
+        userName: userName,
+        userImage: userImage,
+      },
+    });
+  }, [chats]);
 
   const handleMatchOptions = useCallback((match: any) => {
     setSelectedMatch(match);
@@ -250,7 +303,7 @@ export default function Matches() {
       return (
         <TouchableOpacity
           style={styles.horizontalMatchCard}
-          onPress={() => handleViewProfile(item)}
+          onPress={() => handleOpenConversation(item)}
           activeOpacity={0.8}
         >
           <View style={styles.horizontalMatchImageContainer}>
@@ -275,7 +328,7 @@ export default function Matches() {
         </TouchableOpacity>
       );
     },
-    [handleViewProfile, t]
+    [handleOpenConversation, t]
   );
 
   const handleDeleteChat = (chat: ChatItem) => {
@@ -441,6 +494,15 @@ export default function Matches() {
       )}
 
       {/* Vertical Chats List */}
+      {(() => {
+        console.log("📋 [Matches] Rendering chat list:", {
+          chatsLength: chats.length,
+          filteredChatsLength: filteredChats.length,
+          showChatList: chats.length > 0,
+          showSectionHeader: filteredChats.length > 0,
+        });
+        return null;
+      })()}
       <FlatList
         data={filteredChats}
         renderItem={renderChatItem}

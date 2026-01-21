@@ -15,10 +15,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Svg, { Path } from "react-native-svg";
 
 export default function CampaignScreen() {
   const { campaign, loading } = useGetCampaign();
-  const { isLoggedIn, checkVerificationStatus } = useAppContext();
+  const { isLoggedIn, isHydrated, checkVerificationStatus } = useAppContext();
   const videoRef = useRef<Video>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -26,6 +27,7 @@ export default function CampaignScreen() {
   const [countdown, setCountdown] = useState(15);
   const [skipEnabled, setSkipEnabled] = useState(false);
   const [mediaLoaded, setMediaLoaded] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   // Get media URL helper function
   const getMediaUrl = (campaignData: typeof campaign) => {
@@ -45,9 +47,9 @@ export default function CampaignScreen() {
 
   const mediaUrl = campaign ? getMediaUrl(campaign) : null;
 
-  // Handle countdown and navigation - only start after media is loaded
+  // Handle countdown and navigation - only start after media is loaded and context is hydrated
   useEffect(() => {
-    if (!loading && campaign && mediaUrl && mediaLoaded && !navigationPerformedRef.current) {
+    if (!loading && campaign && mediaUrl && mediaLoaded && isHydrated && !navigationPerformedRef.current) {
       // Start countdown from 15 to 1
       setCountdown(15);
       setSkipEnabled(false);
@@ -82,10 +84,20 @@ export default function CampaignScreen() {
         }
       };
     }
-  }, [loading, campaign, mediaUrl, mediaLoaded]);
+  }, [loading, campaign, mediaUrl, mediaLoaded, isHydrated]);
 
   const navigateAfterCampaign = async () => {
     if (navigationPerformedRef.current) return;
+    
+    // Wait for context to be hydrated before checking login status
+    if (!isHydrated) {
+      // If not hydrated yet, wait a bit and try again
+      setTimeout(() => {
+        navigateAfterCampaign();
+      }, 100);
+      return;
+    }
+    
     navigationPerformedRef.current = true;
     
     // Clear timers
@@ -99,16 +111,16 @@ export default function CampaignScreen() {
     // Check if onboarding is completed
     const onboardingCompleted = await AsyncStorage.getItem("@onboarding_completed");
     
-      if (isLoggedIn) {
-        // User is logged in, check verification status
-        const isVerified = await checkVerificationStatus();
-        if (isVerified) {
-          router.replace("/(tabs)");
-        } else {
-          router.replace("/auth/gender");
-        }
+    if (isLoggedIn) {
+      // User is logged in, check verification status
+      const isVerified = await checkVerificationStatus();
+      if (isVerified) {
+        router.replace("/(tabs)");
       } else {
-        // User not logged in
+        router.replace("/auth/gender");
+      }
+    } else {
+      // User not logged in
       if (onboardingCompleted === "true") {
         // Onboarding completed, go to login screen
         router.replace("/welcome");
@@ -165,6 +177,30 @@ export default function CampaignScreen() {
     }
   };
 
+  const handleToggleMute = () => {
+    setIsMuted((prev) => !prev);
+  };
+
+  // Mute Icon Component
+  const MuteIcon = () => (
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M16.5 12C16.5 10.23 15.48 8.71 14 7.97V10.18L16.45 12.63C16.48 12.43 16.5 12.22 16.5 12ZM19 12C19 12.94 18.8 13.82 18.46 14.64L19.97 16.15C20.63 14.91 21 13.5 21 12C21 7.72 18.01 4.14 14 3.23V5.29C16.89 6.15 19 8.83 19 12ZM4.27 3L3 4.27L7.73 9H3V15H7L12 20V13.27L16.25 17.53C15.58 18.04 14.83 18.46 14 18.7V20.77C15.38 20.45 16.63 19.82 17.68 18.96L19.73 21L21 19.73L12 10.73L4.27 3ZM12 4L9.91 6.09L12 8.18V4Z"
+        fill="white"
+      />
+    </Svg>
+  );
+
+  // Unmute/Volume Icon Component
+  const VolumeIcon = () => (
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M3 9V15H7L12 20V4L7 9H3ZM16.5 12C16.5 10.23 15.48 8.71 14 7.97V16.03C15.48 15.29 16.5 13.77 16.5 12ZM14 3.23V5.29C16.89 6.15 19 8.83 19 12C19 15.17 16.89 17.85 14 18.71V20.77C18.01 19.86 21 16.28 21 12C21 7.72 18.01 4.14 14 3.23Z"
+        fill="white"
+      />
+    </Svg>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
@@ -181,7 +217,7 @@ export default function CampaignScreen() {
             resizeMode={ResizeMode.COVER}
             shouldPlay
             isLooping
-            isMuted={false}
+            isMuted={isMuted}
             onLoad={handleMediaLoad}
             onError={() => {
               // If video fails to load, treat as loaded to continue flow
@@ -202,6 +238,17 @@ export default function CampaignScreen() {
         )}
       </TouchableOpacity>
       
+      {/* Mute Button - Only show for videos */}
+      {isVideo && (
+        <TouchableOpacity
+          style={styles.muteButton}
+          onPress={handleToggleMute}
+          activeOpacity={0.7}
+        >
+          {isMuted ? <MuteIcon /> : <VolumeIcon />}
+        </TouchableOpacity>
+      )}
+
       {/* Skip Button */}
       <TouchableOpacity
         style={[
@@ -251,6 +298,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: color.black,
+  },
+  muteButton: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    width: 44,
+    height: 44,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: color.white,
   },
   skipButton: {
     position: "absolute",

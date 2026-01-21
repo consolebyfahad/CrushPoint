@@ -1,9 +1,15 @@
 import NotificationCard from "@/components/notification_card";
 import { NotificationsTabsHeader } from "@/components/tabs_header";
 import { useAppContext } from "@/context/app_context";
+import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
 import { color, font, image } from "@/utils/constants";
-import { parseJsonString, parseUserImages } from "@/utils/helper";
+import {
+  calculateAge,
+  parseInterestsWithNames,
+  parseJsonString,
+  parseUserImages,
+} from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -35,8 +41,9 @@ interface Notification {
 }
 
 export default function Notifications({ navigation }: any) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, userData } = useAppContext();
+  const { rawInterests } = useGetInterests(); // Get API interests for converting IDs to names
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -577,14 +584,23 @@ export default function Notifications({ navigation }: any) {
           parsedLookingFor = [];
         }
 
-        // Parse interests from JSON string to array
+        // Parse interests from JSON string to array and convert IDs to names
         const interestsString = notification.from.interests || "[]";
         let parsedInterests: string[] = [];
         try {
-          parsedInterests = parseJsonString(interestsString);
+          // Use parseInterestsWithNames to convert IDs to display names
+          parsedInterests = parseInterestsWithNames(
+            interestsString,
+            rawInterests || [],
+            i18n.language || "en"
+          );
         } catch (error) {
-
-          parsedInterests = [];
+          // Fallback to parsing as regular JSON if conversion fails
+          try {
+            parsedInterests = parseJsonString(interestsString);
+          } catch (fallbackError) {
+            parsedInterests = [];
+          }
         }
 
         // Parse nationality from JSON string to array
@@ -606,13 +622,27 @@ export default function Notifications({ navigation }: any) {
           parsedNationality = [];
         }
 
+        // Calculate age from DOB
+        const userAge = notification.from.dob
+          ? calculateAge(notification.from.dob)
+          : 0;
+
+        // Filter out "0" or empty height values
+        const userHeight =
+          notification.from.height &&
+          notification.from.height !== "0" &&
+          notification.from.height.trim() !== ""
+            ? notification.from.height
+            : "";
+
         // Format user data for profile navigation
         const userProfileData = {
           id: notification.from.id || notification.from_id,
           name: notification.from.name || notification.user_name || "User",
+          age: userAge, // Include calculated age
           images: parsedImages, // Use parsed array instead of string
           about: notification.from.about || "",
-          height: notification.from.height || "",
+          height: userHeight, // Filter out "0" values
           nationality: parsedNationality, // Use parsed array
           religion: notification.from.religion || "",
           zodiac: notification.from.zodiac || "",
@@ -621,7 +651,7 @@ export default function Notifications({ navigation }: any) {
           state: notification.from.state || "",
           city: notification.from.city || "",
           languages: notification.from.languages || "",
-          interests: parsedInterests, // Use parsed array
+          interests: parsedInterests, // Use parsed array with names instead of IDs
           lookingFor: parsedLookingFor, // Use parsed array
           phone: notification.from.phone || "",
           dob: notification.from.dob || "",

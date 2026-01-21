@@ -297,7 +297,7 @@
   },
   "chat": {
     "chats": "Chats",
-    "letsChat": "Lass uns chatten",
+    "letsChat": "Nachricht senden",
     "noConversations": "Noch keine Unterhaltungen",
     "startChatting": "Beginne mit deinen Matches zu chatten!",
     "errorLoading": "Fehler beim Laden der Unterhaltungen",
@@ -1037,9 +1037,9 @@
     }
   },
   "match": {
-    "title": "Es ist ein Match",
-    "subtitle": "Es ist ein Match",
-    "description": "Vergiss das Chatten, geh und rede mit",
+    "title": "It's a Match",
+    "subtitle": "It's a Match",
+    "description": "Starte ein Gespräch mit",
     "viewProfile": "{{name}}'s Profil ansehen",
     "keepExploring": "Weiter erkunden"
   },

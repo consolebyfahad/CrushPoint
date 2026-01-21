@@ -57,7 +57,7 @@ export const getFCMToken = async (): Promise<string | null> => {
         await messaging().registerDeviceForRemoteMessages();
 
       }
-      
+
       // Check authorization status
       const authStatus = await messaging().hasPermission();
 
@@ -65,7 +65,7 @@ export const getFCMToken = async (): Promise<string | null> => {
 
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
-    
+
     const token = await messaging().getToken();
 
     if (token) {
@@ -86,7 +86,7 @@ export const getFCMToken = async (): Promise<string | null> => {
 const handledNotifications = new Set<string>();
 
 export const setupNotificationListeners = (
-  handleNotificationPress: (data: any) => void
+  handleNotificationPress: (data: any, notificationBody?: string) => void
 ) => {
   // Helper to prevent duplicate handling
   const handleWithDuplicateCheck = (remoteMessage: any, source: string) => {
@@ -99,30 +99,32 @@ export const setupNotificationListeners = (
         console.log(`🚫 Duplicate notification ignored (${source}):`, notificationId);
         return;
       }
-      
+
       // Mark as handled
       handledNotifications.add(notificationId);
-      
+
       // Clean up old entries after 5 seconds
       setTimeout(() => {
         handledNotifications.delete(notificationId);
       }, 5000);
-      
+
       console.log(`✅ Processing notification (${source}):`, notificationId);
-      handleNotificationPress(remoteMessage.data);
+      // Pass notification body to help identify message vs match notifications
+      const notificationBody = remoteMessage?.notification?.body || "";
+      handleNotificationPress(remoteMessage.data, notificationBody);
     }
   };
 
   // 1. Foreground notification handler
   const unsubscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
-    console.log("📨 onMessage triggered (foreground)");
+    console.log("📨 [Notification] First response - onMessage (foreground):", JSON.stringify(remoteMessage, null, 2));
     handleWithDuplicateCheck(remoteMessage, "foreground");
   });
 
   // 2. Background tap handler
   const unsubscribeOnOpenedApp = messaging().onNotificationOpenedApp(
     (remoteMessage) => {
-      console.log("📨 onNotificationOpenedApp triggered (background tap)");
+      console.log("📨 [Notification] First response - onNotificationOpenedApp (background tap):", JSON.stringify(remoteMessage, null, 2));
       handleWithDuplicateCheck(remoteMessage, "background");
     }
   );
@@ -132,7 +134,7 @@ export const setupNotificationListeners = (
     .getInitialNotification()
     .then((remoteMessage) => {
       if (remoteMessage) {
-        console.log("📨 getInitialNotification triggered (cold start)");
+        console.log("📨 [Notification] First response - getInitialNotification (cold start):", JSON.stringify(remoteMessage, null, 2));
         handleWithDuplicateCheck(remoteMessage, "initial");
       }
     });

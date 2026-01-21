@@ -102,7 +102,6 @@ export default function Verify() {
           try {
             parsedInterests = parseInterestsWithNames(
               userData.interests,
-              undefined,
               apiInterests
             );
             originalInterestIds = parseJsonString(userData.interests);

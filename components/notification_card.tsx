@@ -1,6 +1,7 @@
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import React from "react";
 import {
   ImageBackground,
@@ -16,39 +17,56 @@ export default function NotificationCard({
   onDelete,
 }: any) {
   const getNotificationIcon = (type: string) => {
-    switch (type) {
+    const normalizedType = type?.toLowerCase() || "";
+    
+    switch (normalizedType) {
       case "reaction":
+      case "new_reaction":
         return {
-          library: "Ionicons",
-          name: "chatbubble-outline",
+          library: "SimpleLineIcons",
+          name: "emotsmile",
           color: "#49adbe",
           backgroundColor: "#dbeff2",
         };
       case "match":
+      case "new_match":
         return {
-          library: "Ionicons",
-          name: "heart-outline",
+          library: "SimpleLineIcons",
+          name: "heart",
           color: "#e04134",
           backgroundColor: "#f9d9d6",
         };
       case "profile_view":
+      case "profile_viewed":
+      case "profile_like":
+      case "like":
         return {
-          library: "Feather",
-          name: "user",
+          library: "SimpleLineIcons",
+          
+          name: "like",
           color: "#A78BFA",
-          backgroundColor: "#F3F4F6",
+          backgroundColor: "#F3F4F9",
         };
       case "event":
+      case "event_reminder":
         return {
-          library: "Feather",
+          library: "SimpleLineIcons",
           name: "calendar",
           color: "#40AF53",
           backgroundColor: "#d9efdd",
         };
+      case "message":
+      case "new_message":
+        return {
+          library: "Feather",
+          name: "message-circle",
+          color: "#3B82F6",
+          backgroundColor: "#DBEAFE",
+        };
       default:
         return {
-          library: "Ionicons",
-          name: "notifications",
+          library: "SimpleLineIcons",
+          name: "bell",
           color: "#40AF53",
           backgroundColor: "#F9FAFB",
         };
@@ -97,6 +115,12 @@ export default function NotificationCard({
         >
           {iconConfig.library === "Feather" ? (
             <Feather
+              name={iconConfig.name as any}
+              size={20}
+              color={iconConfig.color}
+            />
+          ) : iconConfig.library === "SimpleLineIcons" ? (
+            <SimpleLineIcons
               name={iconConfig.name as any}
               size={20}
               color={iconConfig.color}
