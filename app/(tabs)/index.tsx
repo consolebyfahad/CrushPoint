@@ -428,61 +428,37 @@ export default function Index() {
           );
         };
 
-        // Parse current user images from context userData
-        let currentUserImages: string[] = [];
-
-        try {
-          if (userData.images && typeof userData.images === "string") {
-            // Clean up the escaped quotes in the JSON string
-            const imagesString = userData.images as string;
-            const cleanedImagesString = imagesString.replace(/\\"/g, '"');
-            currentUserImages = JSON.parse(cleanedImagesString);
-          } else if (Array.isArray(userData.images)) {
-            // Check if the array contains strings or nested arrays/objects
-            if (
-              userData.images.length > 0 &&
-              typeof userData.images[0] === "string"
-            ) {
-              // Check if the string is a JSON array or just a filename
-              const firstElement = userData.images[0] as string;
-              if (firstElement.includes("[") && firstElement.includes("]")) {
-                // It's a stringified array, parse it
-                const cleanedString = firstElement.replace(/\\"/g, '"');
-                currentUserImages = JSON.parse(cleanedString);
-              } else {
-                // It's a direct filename, use the array as is
-                currentUserImages = userData.images as string[];
-              }
-            } else if (
-              userData.images.length > 0 &&
-              typeof userData.images[0] === "object"
-            ) {
-              // If it's an array containing objects/arrays, try to parse the first element
-              const firstElement = userData.images[0] as any;
-              if (
-                typeof firstElement === "string" &&
-                firstElement.includes("[")
-              ) {
-                // It's a stringified array, parse it
-                const cleanedString = firstElement.replace(/\\"/g, '"');
-                currentUserImages = JSON.parse(cleanedString);
-              } else {
-                currentUserImages = [];
-              }
-            } else {
-              currentUserImages = [];
-            }
-          } else {
+        // Get current user image: prefer userData.photos (full URLs), then userData.images (filenames)
+        const getCurrentUserImage = (): string => {
+          if (
+            userData?.photos &&
+            Array.isArray(userData.photos) &&
+            userData.photos.length > 0
+          ) {
+            return userData.photos[0];
           }
-        } catch (error) {
-
-        }
-
-        // Get current user image
-        const getCurrentUserImage = () => {
-          if (currentUserImages && currentUserImages.length > 0) {
-            const imageUrl = `https://api.andra-dating.com/images/${currentUserImages[0]}`;
-            return imageUrl;
+          let currentUserImages: string[] = [];
+          try {
+            if (userData?.images && typeof userData.images === "string") {
+              const imagesString = userData.images as string;
+              const cleaned = imagesString.replace(/\\"/g, '"');
+              currentUserImages = JSON.parse(cleaned);
+            } else if (Array.isArray(userData?.images) && userData.images.length > 0) {
+              const first = userData.images[0];
+              if (typeof first === "string") {
+                if (first.includes("[") && first.includes("]")) {
+                  currentUserImages = JSON.parse(first.replace(/\\"/g, '"'));
+                } else {
+                  currentUserImages = userData.images as string[];
+                }
+              }
+            }
+          } catch (error) {}
+          if (currentUserImages.length > 0) {
+            const first = currentUserImages[0].replace(/\\/g, "");
+            return first.startsWith("http")
+              ? first
+              : `https://api.andra-dating.com/images/${first}`;
           }
           return "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
         };

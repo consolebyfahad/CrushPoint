@@ -277,6 +277,8 @@ export default function Map({
           if (!userCoords) return null;
 
           const isSelected = selectedUser?.id === mapUser.id;
+          // Android: custom marker views need tracksViewChanges=true to render; iOS can use false for performance
+          const tracksChanges = Platform.OS === "android";
 
           return (
             <Marker
@@ -284,9 +286,10 @@ export default function Map({
               coordinate={userCoords}
               onPress={() => onUserPress(mapUser)}
               identifier={`user-${mapUser.id}`}
-              tracksViewChanges={false} // UPDATED: Better performance
+              tracksViewChanges={tracksChanges}
               anchor={{ x: 0.5, y: 1 }}
               centerOffset={{ x: 0, y: -5 }}
+              zIndex={isSelected ? 1 : 0}
               title={
                 mapUser.name
                   ? `${mapUser.name}, ${mapUser.age || "N/A"}`
@@ -300,6 +303,7 @@ export default function Map({
                   isSelected && styles.selectedUserMarker,
                 ]}
                 pointerEvents="box-none"
+                collapsable={false}
               >
                 <Image
                   source={{
@@ -311,9 +315,7 @@ export default function Map({
                     styles.userImage,
                     isSelected && styles.selectedUserImage,
                   ]}
-                  defaultSource={{
-                    uri: "https://via.placeholder.com/60x60.png?text=User",
-                  }}
+                  resizeMode="cover"
                 />
                 {/* ENHANCED: Better selection indicator */}
                 {isSelected && (

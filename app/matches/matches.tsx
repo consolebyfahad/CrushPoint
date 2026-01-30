@@ -101,13 +101,6 @@ export default function Matches() {
         (chat) => String(chat.userId) === matchedUserId,
       );
       const matchId = existingChat ? existingChat.matchId : matchedUserId;
-      console.log("match", match);
-      console.log("match_status", match.match_status);
-      console.log("match_emoji", match.match_emoji);
-      console.log("matchId", matchId);
-      console.log("matchedUserId", matchedUserId);
-      console.log("userName", userName);
-      console.log("userImage1", userImage);
       router.push({
         pathname: "/chat/conversation",
         params: {
@@ -115,6 +108,8 @@ export default function Matches() {
           userId: matchedUserId, // This is the matched user's ID (the person we're chatting with)
           userName: userName,
           userImage: userImage,
+          userAge: match.age != null ? String(match.age) : undefined,
+          userTimeAgo: match.timeAgo ?? undefined,
           match_status: match.match_status,
           match_emoji: match.match_emoji,
         },
@@ -335,6 +330,8 @@ export default function Matches() {
               userId: item.userId,
               userName: item.name,
               userImage: item.image,
+              userAge: (item as any).age != null ? String((item as any).age) : undefined,
+              userTimeAgo: (item as any).matchTimeAgo ?? undefined,
             },
           });
         }}

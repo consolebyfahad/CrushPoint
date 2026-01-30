@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Image,
-    Modal,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function ProfileOptions({
@@ -19,38 +19,58 @@ export default function ProfileOptions({
   onRemoveMatch,
   userData,
   isMatch = false,
+  targetUserName,
+  targetUserImage,
+  targetUserAge,
+  targetUserTimeAgo,
 }: any) {
   const { t } = useTranslation();
   const handleBlock = () => {
-    if (onBlock) {
-      onBlock();
-    } else {
-    }
+    if (onBlock) onBlock();
   };
-
   const handleReport = () => {
-    if (onReport) {
-      onReport();
-    } else {
-    }
+    if (onReport) onReport();
   };
-
   const handleRemoveMatch = () => {
-    if (onRemoveMatch) {
-      onRemoveMatch();
-    } else {
-    }
+    if (onRemoveMatch) onRemoveMatch();
   };
-  // Default user data if not provided
-  const defaultUser = {
-    name: t("common.defaultUser"),
-    age: 25,
+  // When opened from conversation, target* are the other user; otherwise use userData (profile being viewed)
+  const fromConversation = targetUserName != null || targetUserImage != null;
+  const rawAge = fromConversation
+    ? targetUserAge
+    : targetUserAge ?? userData?.age;
+  const parsedAge =
+    rawAge == null
+      ? null
+      : typeof rawAge === "number"
+      ? Number.isNaN(rawAge)
+        ? null
+        : rawAge
+      : typeof rawAge === "string" && rawAge.trim() !== ""
+      ? parseInt(rawAge, 10)
+      : null;
+  const age =
+    parsedAge != null && parsedAge >= 0 && parsedAge <= 120
+      ? parsedAge
+      : fromConversation
+      ? 0
+      : userData?.age ?? 25;
+  const timeAgoFallback = t("common.dayAgo", { count: 1 });
+  const displayUser = {
+    name: targetUserName ?? userData?.name ?? t("common.defaultUser"),
+    age,
     image:
+      targetUserImage ??
+      userData?.photos?.[0] ??
+      userData?.image ??
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    timeAgo: t("common.dayAgo", { count: 1 }),
-    ...userData,
+    timeAgo: fromConversation
+      ? targetUserTimeAgo && String(targetUserTimeAgo).trim() !== ""
+        ? targetUserTimeAgo
+        : timeAgoFallback
+      : userData?.timeAgo ?? timeAgoFallback,
   };
-
+  console.log("age", displayUser.age);
   return (
     <Modal
       visible={visible}
@@ -69,18 +89,19 @@ export default function ProfileOptions({
           {/* Header */}
           <View style={styles.header}>
             {isMatch ? (
-              // Show user info for matches
+              // Show user info for matches (other user when from conversation)
               <View style={styles.userInfo}>
                 <Image
-                  source={{ uri: defaultUser.image }}
+                  source={{ uri: displayUser.image }}
                   style={styles.userImage}
                 />
                 <View style={styles.userDetails}>
                   <Text style={styles.userName}>
-                    {defaultUser.name}, {defaultUser.age}
+                    {displayUser.name}
+                    {displayUser.age > 0 ? `, ${displayUser.age}` : ""}
                   </Text>
                   <Text style={styles.matchInfo}>
-                    {t("profile.matched")} {defaultUser.timeAgo}
+                    {t("profile.matched")} {displayUser.timeAgo}
                   </Text>
                 </View>
               </View>

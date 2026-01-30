@@ -26,65 +26,55 @@ export default function MatchScreen({ route, navigation }: any) {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { user, userData } = useAppContext();
-
   // Parse matchData from params
   let matchData;
+  const PLACEHOLDER_IMAGE =
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
+  const getCurrentUserImageFromContext = (): string => {
+    if (
+      userData?.photos &&
+      Array.isArray(userData.photos) &&
+      userData.photos.length > 0
+    ) {
+      return userData.photos[0];
+    }
+    if (
+      userData?.images &&
+      Array.isArray(userData.images) &&
+      userData.images.length > 0
+    ) {
+      const first = userData.images[0];
+      const url =
+        typeof first === "string" && first.startsWith("http")
+          ? first
+          : `https://api.andra-dating.com/images/${typeof first === "string" ? first.replace(/\\/g, "") : first}`;
+      return url;
+    }
+    return userData?.gender === "female"
+      ? "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg"
+      : "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
+  };
+
   try {
     if (params?.matchData) {
       matchData = JSON.parse(params.matchData as string);
 
-      // Fix current user image if it's malformed
+      // Fix current user image if malformed (e.g. JSON array string)
       if (
         matchData.currentUser?.image &&
         matchData.currentUser.image.includes("[")
       ) {
-        // Extract the first image from the malformed URL
         const imageMatch = matchData.currentUser.image.match(/\["([^"]+)"\]/);
-        if (imageMatch && imageMatch[1]) {
+        if (imageMatch?.[1]) {
           matchData.currentUser.image = `https://api.andra-dating.com/images/${imageMatch[1]}`;
         } else {
-          matchData.currentUser.image =
-            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
+          matchData.currentUser.image = "";
         }
       }
 
-      // If current user image is still empty, get from userData
-      if (
-        !matchData.currentUser?.image ||
-        matchData.currentUser.image.trim() === ""
-      ) {
-
-        // Get image from userData.photos (already parsed URLs)
-        if (
-          userData?.photos &&
-          Array.isArray(userData.photos) &&
-          userData.photos.length > 0
-        ) {
-          matchData.currentUser.image = userData.photos[0];
-
-        }
-        // Fallback to images array
-        else if (
-          userData?.images &&
-          Array.isArray(userData.images) &&
-          userData.images.length > 0
-        ) {
-          const imageUrl = userData.images[0].startsWith("http")
-            ? userData.images[0]
-            : `https://api.andra-dating.com/images/${userData.images[0]}`;
-          matchData.currentUser.image = imageUrl;
-
-        }
-        // Final fallback to default image
-        else {
-          const defaultImage =
-            userData?.gender === "female"
-              ? "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg"
-              : "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
-          matchData.currentUser.image = defaultImage;
-
-        }
-      }
+      // Prefer context for current user image so we show the real profile photo, not a placeholder
+      matchData.currentUser = matchData.currentUser || {};
+      matchData.currentUser.image = getCurrentUserImageFromContext();
 
       // Update current user name if empty
       if (
@@ -118,7 +108,7 @@ export default function MatchScreen({ route, navigation }: any) {
 
         const calculatedDistance = calculateDistance(
           currentUserCoords,
-          matchedUserCoords
+          matchedUserCoords,
         );
         matchData.matchedUser.distance = `${calculatedDistance} away`;
       } else if (
@@ -130,9 +120,10 @@ export default function MatchScreen({ route, navigation }: any) {
     } else {
       matchData = {
         currentUser: {
-          name: "You",
-          image:
-            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
+          name: userData?.name || "You",
+          image: getCurrentUserImageFromContext(),
+          lat: userData?.lat ?? "",
+          lng: userData?.lng ?? "",
         },
         matchedUser: {
           name: "Julia",
@@ -144,7 +135,6 @@ export default function MatchScreen({ route, navigation }: any) {
       };
     }
   } catch (error) {
-
     matchData = {
       currentUser: {
         name: "You",
@@ -310,38 +300,28 @@ export default function MatchScreen({ route, navigation }: any) {
     }, 2000);
   };
 
-  const handleBack = () => {
-    if (navigation) {
-      navigation.goBack();
-    }
-  };
-
-  const handleOptions = () => {};
-
   const handleChat = async () => {
     // Try to find the match record ID by querying matches table
     let matchRecordId = "";
     if (user?.user_id && matchData?.matchedUser?.id) {
-    try {
-      const formData = new FormData();
+      try {
+        const formData = new FormData();
         formData.append("type", "get_data");
         formData.append("table_name", "matches");
-      formData.append("user_id", user.user_id);
+        formData.append("user_id", user.user_id);
 
-      const response = await apiCall(formData);
+        const response = await apiCall(formData);
         if (response?.data && Array.isArray(response.data)) {
           const matchRecord = response.data.find(
             (m: any) =>
               m.match_id === matchData.matchedUser.id ||
-              m.match?.id === matchData.matchedUser.id
+              m.match?.id === matchData.matchedUser.id,
           );
           if (matchRecord) {
             matchRecordId = matchRecord.id; // Use match record ID, not match_id (which is user ID)
           }
-      }
-      } catch (error) {
-
-      }
+        }
+      } catch (error) {}
     }
 
     router.push({
@@ -351,6 +331,11 @@ export default function MatchScreen({ route, navigation }: any) {
         userId: matchData?.matchedUser?.id || "",
         userName: matchData?.matchedUser?.name || "",
         userImage: matchData?.matchedUser?.image || "",
+        userAge:
+          matchData?.matchedUser?.age != null
+            ? String(matchData.matchedUser.age)
+            : undefined,
+        userTimeAgo: matchData?.matchedUser?.timeAgo ?? undefined,
       },
     });
   };

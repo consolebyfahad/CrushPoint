@@ -67,6 +67,10 @@ export default function MatchCard({
         userId: matchedUserId,
         userName: match?.name || t("matches.unknown"),
         userImage: match?.image || (match?.images && match.images[0]) || "",
+        userAge: match?.age != null ? String(match.age) : undefined,
+        userTimeAgo: match?.timeAgo ?? undefined,
+        match_status: match?.match_status,
+        match_emoji: match?.match_emoji,
       },
     });
   };

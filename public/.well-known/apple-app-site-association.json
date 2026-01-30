@@ -1,10 +1,23 @@
 {
-    "applinks": {
-        "details": [
-            {
-                "appID": "",
-                "paths": "/events/*"
-            }
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "RN3Y8MS69X.com.dating.Andra",
+        "paths": [
+          "/events/*",
+          "/events/event_details*",
+          "/profile/*",
+          "/chat/*",
+          "/matches/*",
+          "/"
         ]
-    }
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "RN3Y8MS69X.com.dating.Andra"
+    ]
+  }
 }

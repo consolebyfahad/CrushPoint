@@ -37,11 +37,8 @@ interface Message {
 export default function ChatConversation() {
   const { t, i18n } = useTranslation();
   const params = useLocalSearchParams();
-  console.log("params", params);
   const match_status = params.match_status as string;
   const match_emoji = params.match_emoji as string;
-  console.log("match_status", match_status);
-  console.log("match_emoji", match_emoji);
   const { user, userData } = useAppContext();
   const { rawInterests: apiInterests } = useGetInterests();
 
@@ -54,6 +51,15 @@ export default function ChatConversation() {
   const otherUserId = params.userId as string; // Matched user's ID (should be used as to_chat_id)
   const userName = params.userName as string;
   const userImage = params.userImage as string;
+  const userAge =
+    params.userAge != null && params.userAge !== ""
+      ? (typeof params.userAge === "string"
+          ? parseInt(params.userAge, 10)
+          : Number(params.userAge))
+      : undefined;
+  const userAgeValid =
+    userAge != null && !Number.isNaN(userAge) && userAge >= 0 && userAge <= 120;
+  const userTimeAgo = (params.userTimeAgo as string) ?? undefined;
 
   // Validate required params
   useEffect(() => {
@@ -696,8 +702,12 @@ export default function ChatConversation() {
         onBlock={handleBlock}
         onReport={handleReport}
         onRemoveMatch={() => setShowProfileOptions(false)}
-        userData={{ name: userName }}
+        userData={userData}
         isMatch={true}
+        targetUserName={userName}
+        targetUserImage={userImage}
+        targetUserAge={userAgeValid ? userAge : undefined}
+        targetUserTimeAgo={userTimeAgo}
       />
       <BlockConfirmation
         visible={showBlockConfirmation}
