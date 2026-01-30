@@ -167,10 +167,6 @@ export default function Filters({
       ageTo,
       distance,
     };
-    console.log(
-      "🎯 Applying filters:",
-      JSON.stringify(updatedFilterData, null, 2)
-    );
     setFilterData(updatedFilterData);
 
     // setTimeout(() => {

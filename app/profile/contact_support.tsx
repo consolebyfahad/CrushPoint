@@ -120,7 +120,6 @@ export default function ContactSupport() {
       submissionData.append("user_id", user.user_id);
       submissionData.append("subject", formData.subject);
       submissionData.append("message", formData.message.trim());
-console.log("submissionData", submissionData)
       const response = await apiCall(submissionData);
 
       if (response.result) {

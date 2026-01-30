@@ -1,7 +1,6 @@
 import { useAppContext } from "@/context/app_context";
 import useGetCampaign from "@/hooks/useGetCampaign";
 import { color, font } from "@/utils/constants";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ResizeMode, Video } from "expo-av";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -19,7 +18,7 @@ import Svg, { Path } from "react-native-svg";
 
 export default function CampaignScreen() {
   const { campaign, loading } = useGetCampaign();
-  const { isLoggedIn, isHydrated, checkVerificationStatus } = useAppContext();
+  const { isHydrated, checkVerificationStatus } = useAppContext();
   const videoRef = useRef<Video>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -28,10 +27,13 @@ export default function CampaignScreen() {
   const [skipEnabled, setSkipEnabled] = useState(false);
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-
   // Get media URL helper function
   const getMediaUrl = (campaignData: typeof campaign) => {
-    if (!campaignData?.image || campaignData.image.trim() === "" || campaignData.image === "null") {
+    if (
+      !campaignData?.image ||
+      campaignData.image.trim() === "" ||
+      campaignData.image === "null"
+    ) {
       return null;
     }
 
@@ -41,15 +43,36 @@ export default function CampaignScreen() {
     }
 
     // Construct full URL
-    const cleanPath = mediaPath.startsWith("/") ? mediaPath.slice(1) : mediaPath;
+    const cleanPath = mediaPath.startsWith("/")
+      ? mediaPath.slice(1)
+      : mediaPath;
     return `${campaignData.image_url}${cleanPath}`;
   };
 
   const mediaUrl = campaign ? getMediaUrl(campaign) : null;
 
+  // No campaign or no media: go straight to tabs (we only land here when logged in)
+  useEffect(() => {
+    if (
+      !loading &&
+      isHydrated &&
+      (!campaign || !mediaUrl) &&
+      !navigationPerformedRef.current
+    ) {
+      navigateAfterCampaign();
+    }
+  }, [loading, isHydrated, campaign, mediaUrl]);
+
   // Handle countdown and navigation - only start after media is loaded and context is hydrated
   useEffect(() => {
-    if (!loading && campaign && mediaUrl && mediaLoaded && isHydrated && !navigationPerformedRef.current) {
+    if (
+      !loading &&
+      campaign &&
+      mediaUrl &&
+      mediaLoaded &&
+      isHydrated &&
+      !navigationPerformedRef.current
+    ) {
       // Start countdown from 15 to 1
       setCountdown(15);
       setSkipEnabled(false);
@@ -88,46 +111,22 @@ export default function CampaignScreen() {
 
   const navigateAfterCampaign = async () => {
     if (navigationPerformedRef.current) return;
-    
-    // Wait for context to be hydrated before checking login status
+
     if (!isHydrated) {
-      // If not hydrated yet, wait a bit and try again
-      setTimeout(() => {
-        navigateAfterCampaign();
-      }, 100);
+      setTimeout(() => navigateAfterCampaign(), 100);
       return;
     }
-    
-    navigationPerformedRef.current = true;
-    
-    // Clear timers
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-    }
 
-    // Check if onboarding is completed
-    const onboardingCompleted = await AsyncStorage.getItem("@onboarding_completed");
-    
-    if (isLoggedIn) {
-      // User is logged in, check verification status
-      const isVerified = await checkVerificationStatus();
-      if (isVerified) {
-        router.replace("/(tabs)");
-      } else {
-        router.replace("/auth/gender");
-      }
+    navigationPerformedRef.current = true;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+
+    // We only reach campaign when logged in (from splash). Just go to tabs or verification.
+    const isVerified = await checkVerificationStatus();
+    if (isVerified) {
+      router.replace("/(tabs)");
     } else {
-      // User not logged in
-      if (onboardingCompleted === "true") {
-        // Onboarding completed, go to login screen
-        router.replace("/welcome");
-      } else {
-        // Onboarding not completed, show onboarding
-        router.replace("/onboarding");
-      }
+      router.push("/auth/gender");
     }
   };
 
@@ -154,7 +153,8 @@ export default function CampaignScreen() {
   }
 
   // Determine if we should show video (if ad_type is video, or if URL ends with video extension)
-  const isVideo = campaign.ad_type === "video" || 
+  const isVideo =
+    campaign.ad_type === "video" ||
     mediaUrl.match(/\.(mp4|mov|avi|webm)$/i) !== null;
 
   const handleMediaLoad = () => {
@@ -237,7 +237,7 @@ export default function CampaignScreen() {
           />
         )}
       </TouchableOpacity>
-      
+
       {/* Mute Button - Only show for videos */}
       {isVideo && (
         <TouchableOpacity
@@ -251,10 +251,7 @@ export default function CampaignScreen() {
 
       {/* Skip Button */}
       <TouchableOpacity
-        style={[
-          styles.skipButton,
-          !skipEnabled && styles.skipButtonDisabled,
-        ]}
+        style={[styles.skipButton, !skipEnabled && styles.skipButtonDisabled]}
         onPress={handleSkip}
         disabled={!skipEnabled}
         activeOpacity={0.7}
@@ -272,7 +269,7 @@ export default function CampaignScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.downloadButtonText}>
-            Download Now
+            {campaign?.button_text || "Download Now"}
           </Text>
         </TouchableOpacity>
       )}

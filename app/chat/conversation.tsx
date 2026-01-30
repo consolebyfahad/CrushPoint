@@ -1,10 +1,14 @@
+import BlockConfirmation from "@/components/block_option";
 import Header from "@/components/header";
+import ProfileOptions from "@/components/profile_options";
+import ReportUser from "@/components/report_user";
 import { useToast } from "@/components/toast_provider";
 import { useAppContext } from "@/context/app_context";
 import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { parseInterestsWithNames } from "@/utils/helper";
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,6 +37,11 @@ interface Message {
 export default function ChatConversation() {
   const { t, i18n } = useTranslation();
   const params = useLocalSearchParams();
+  console.log("params", params);
+  const match_status = params.match_status as string;
+  const match_emoji = params.match_emoji as string;
+  console.log("match_status", match_status);
+  console.log("match_emoji", match_emoji);
   const { user, userData } = useAppContext();
   const { rawInterests: apiInterests } = useGetInterests();
 
@@ -45,14 +54,6 @@ export default function ChatConversation() {
   const otherUserId = params.userId as string; // Matched user's ID (should be used as to_chat_id)
   const userName = params.userName as string;
   const userImage = params.userImage as string;
-
-  console.log("💬 [Chat] Conversation params:", {
-    matchId, // Match record ID (e.g., "26")
-    otherUserId, // Matched user ID (e.g., "1") - this should be used as to_chat_id
-    userName,
-    userImage,
-    currentUserId: userData?.id,
-  });
 
   // Validate required params
   useEffect(() => {
@@ -68,6 +69,9 @@ export default function ChatConversation() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [showProfileOptions, setShowProfileOptions] = useState(false);
+  const [showBlockConfirmation, setShowBlockConfirmation] = useState(false);
+  const [showReportUser, setShowReportUser] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastMessageTimestampRef = useRef<number>(0);
 
@@ -80,14 +84,14 @@ export default function ChatConversation() {
         setTimeout(() => {
           scrollViewRef.current?.scrollToEnd({ animated: true });
         }, 100);
-      }
+      },
     );
 
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
         setKeyboardHeight(0);
-      }
+      },
     );
 
     return () => {
@@ -103,16 +107,11 @@ export default function ChatConversation() {
       currentUserId: string,
       toChatId: string,
       userIdParam: string,
-      showLoading = true
+      showLoading = true,
     ) => {
       if (showLoading) {
         setIsLoading(true);
       }
-      console.log("📤 [Chat] Fetching chat history", {
-        toChatId, // This should be the matched user's ID (otherUserId)
-        userIdParam, // Current user's ID
-        matchId, // Match record ID (for reference only)
-      });
       const formData = new FormData();
       formData.append("type", "getchat");
       formData.append("user_id", userIdParam);
@@ -122,7 +121,6 @@ export default function ChatConversation() {
 
       try {
         const response = await apiCall(formData);
-        console.log("response for getchat", JSON.stringify(response));
         if (response && response.chat) {
           const fromId = currentUserId;
 
@@ -137,21 +135,20 @@ export default function ChatConversation() {
           // Update last message timestamp
           if (formattedMessages.length > 0) {
             const timestamps = formattedMessages.map(
-              (m: Message) => m.timestamp
+              (m: Message) => m.timestamp,
             );
             lastMessageTimestampRef.current = Math.max(...timestamps);
           }
 
           // Sort messages chronologically (oldest first, newest last) - don't reverse
           const sortedMessages = formattedMessages.sort(
-            (a: Message, b: Message) => a.timestamp - b.timestamp
+            (a: Message, b: Message) => a.timestamp - b.timestamp,
           );
           setMessages(sortedMessages);
         } else {
           setMessages([]);
         }
       } catch (error) {
-
         setMessages([]);
       } finally {
         if (showLoading) {
@@ -159,7 +156,7 @@ export default function ChatConversation() {
         }
       }
     },
-    []
+    [],
   );
 
   // Check for new messages (checkmsg API)
@@ -171,9 +168,7 @@ export default function ChatConversation() {
         formData.append("user_id", userIdParam);
         formData.append("to_chat_id", toChatId);
 
-        console.log("formData for checkmsg", JSON.stringify(formData));
         const response = await apiCall(formData);
-        console.log("response for checkmsg", JSON.stringify(response));
         if (response && response.chat && Array.isArray(response.chat)) {
           if (response.chat.length > 0) {
             const currentUserId = userData?.id || userIdParam;
@@ -189,31 +184,29 @@ export default function ChatConversation() {
             const timestamps = newMessages.map((m: Message) => m.timestamp);
             lastMessageTimestampRef.current = Math.max(
               lastMessageTimestampRef.current,
-              ...timestamps
+              ...timestamps,
             );
 
             // Append new messages to existing messages
             setMessages((prevMessages) => {
               const existingIds = new Set(
-                prevMessages.map((m: Message) => m.id)
+                prevMessages.map((m: Message) => m.id),
               );
               const uniqueNewMessages = newMessages.filter(
-                (m: Message) => !existingIds.has(m.id)
+                (m: Message) => !existingIds.has(m.id),
               );
               if (uniqueNewMessages.length > 0) {
                 return [...prevMessages, ...uniqueNewMessages].sort(
-                  (a: Message, b: Message) => a.timestamp - b.timestamp
+                  (a: Message, b: Message) => a.timestamp - b.timestamp,
                 );
               }
               return prevMessages;
             });
           }
         }
-      } catch (error) {
-
-      }
+      } catch (error) {}
     },
-    [userData?.id]
+    [userData?.id],
   );
 
   useFocusEffect(
@@ -247,7 +240,7 @@ export default function ChatConversation() {
         }
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [otherUserId, user?.user_id])
+    }, [otherUserId, user?.user_id]),
   );
 
   const sendMessage = async () => {
@@ -263,17 +256,7 @@ export default function ChatConversation() {
       formData.append("msg", inputMessage.trim());
       formData.append("msg_type", "msg");
 
-      console.log("📤 [Chat] Sending message - FormData contents:", {
-        type: "sendmsg",
-        user_id: user.user_id,
-        to_chat_id: otherUserId, // This should be the matched user's ID (e.g., "1")
-        msg: inputMessage.trim(),
-        msg_type: "msg",
-        matchId, // Match record ID (for reference only)
-      });
-
       const response = await apiCall(formData);
-      console.log("✅ [Chat] Send message response:", JSON.stringify(response));
 
       if (response && response.result) {
         setInputMessage("");
@@ -286,18 +269,16 @@ export default function ChatConversation() {
             userData?.id,
             otherUserId,
             user.user_id,
-            false
+            false,
           );
         }
       } else {
         const errorMsg = response?.message || t("chat.failedToSend");
         showToast(errorMsg, "error");
-
       }
     } catch (error: any) {
       const errorMsg = error?.message || t("chat.failedToSend");
       showToast(errorMsg, "error");
-
     } finally {
       setIsLoading(false);
     }
@@ -323,7 +304,7 @@ export default function ChatConversation() {
     const messageDate = new Date(
       date.getFullYear(),
       date.getMonth(),
-      date.getDate()
+      date.getDate(),
     );
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -368,9 +349,10 @@ export default function ChatConversation() {
       formData.append("id", otherUserId);
 
       const response = await apiCall(formData);
+      console.log("response", response);
       if (response?.data && response.data.length > 0) {
         const userProfileData = response.data[0];
-        
+
         // Parse images
         let images: string[] = [];
         if (userProfileData.images) {
@@ -379,7 +361,9 @@ export default function ChatConversation() {
               .replace(/\\\\/g, "\\")
               .replace(/\\\"/g, '"');
             const imageFilenames = JSON.parse(cleanedImagesString);
-            const baseImageUrl = userProfileData.image_url || "https://api.andra-dating.com/images/";
+            const baseImageUrl =
+              userProfileData.image_url ||
+              "https://api.andra-dating.com/images/";
 
             if (Array.isArray(imageFilenames) && imageFilenames.length > 0) {
               images = imageFilenames.map((filename: string) => {
@@ -425,7 +409,7 @@ export default function ChatConversation() {
               parsedInterests = parseInterestsWithNames(
                 userProfileData.interests,
                 apiInterests,
-                currentLanguage
+                currentLanguage,
               );
             } else if (Array.isArray(userProfileData.interests)) {
               // If already an array, check if they're IDs or names
@@ -437,7 +421,7 @@ export default function ChatConversation() {
                 parsedInterests = parseInterestsWithNames(
                   JSON.stringify(userProfileData.interests),
                   apiInterests,
-                  currentLanguage
+                  currentLanguage,
                 );
               } else {
                 // Already names, use as is
@@ -455,7 +439,9 @@ export default function ChatConversation() {
         if (userProfileData.looking_for) {
           try {
             if (typeof userProfileData.looking_for === "string") {
-              const cleaned = userProfileData.looking_for.replace(/\\\\/g, "\\").replace(/\\\"/g, '"');
+              const cleaned = userProfileData.looking_for
+                .replace(/\\\\/g, "\\")
+                .replace(/\\\"/g, '"');
               parsedLookingFor = JSON.parse(cleaned);
             } else if (Array.isArray(userProfileData.looking_for)) {
               parsedLookingFor = userProfileData.looking_for;
@@ -473,10 +459,15 @@ export default function ChatConversation() {
             if (typeof userProfileData.languages === "string") {
               // Languages might be comma-separated or JSON
               if (userProfileData.languages.startsWith("[")) {
-                const cleaned = userProfileData.languages.replace(/\\\\/g, "\\").replace(/\\\"/g, '"');
+                const cleaned = userProfileData.languages
+                  .replace(/\\\\/g, "\\")
+                  .replace(/\\\"/g, '"');
                 parsedLanguages = JSON.parse(cleaned);
               } else {
-                parsedLanguages = userProfileData.languages.split(",").map((l: string) => l.trim()).filter(Boolean);
+                parsedLanguages = userProfileData.languages
+                  .split(",")
+                  .map((l: string) => l.trim())
+                  .filter(Boolean);
               }
             } else if (Array.isArray(userProfileData.languages)) {
               parsedLanguages = userProfileData.languages;
@@ -484,7 +475,10 @@ export default function ChatConversation() {
           } catch (error) {
             // If parsing fails, try as comma-separated string
             if (typeof userProfileData.languages === "string") {
-              parsedLanguages = userProfileData.languages.split(",").map((l: string) => l.trim()).filter(Boolean);
+              parsedLanguages = userProfileData.languages
+                .split(",")
+                .map((l: string) => l.trim())
+                .filter(Boolean);
             }
           }
         }
@@ -502,6 +496,8 @@ export default function ChatConversation() {
           zodiac: userProfileData.zodiac || "",
           gender: userProfileData.gender || "",
           country: userProfileData.country || "",
+          match_status: params.match_status || "",
+          match_emoji: params.match_emoji || "",
           state: userProfileData.state || "",
           city: userProfileData.city || "",
           languages: parsedLanguages,
@@ -510,24 +506,75 @@ export default function ChatConversation() {
           isOnline: userProfileData.status === "1",
           phone: userProfileData.phone || "",
           dob: userProfileData.dob || "",
-          actualLocation: userProfileData.lat && userProfileData.lng
-            ? {
-                lat: parseFloat(userProfileData.lat),
-                lng: parseFloat(userProfileData.lng),
-              }
-            : null,
+          actualLocation:
+            userProfileData.lat && userProfileData.lng
+              ? {
+                  lat: parseFloat(userProfileData.lat),
+                  lng: parseFloat(userProfileData.lng),
+                }
+              : null,
           email: userProfileData.email || "",
         };
-
-        router.push({
-          pathname: "/profile/user_profile",
-          params: { user: JSON.stringify(profileData) },
-        });
+        console.log("profileData", profileData);
+        return;
       }
     } catch (error) {
       showToast(t("chat.errorLoading") || "Failed to load profile", "error");
     }
   }, [otherUserId, user?.user_id, userName, showToast, t]);
+
+  const handleOptions = () => setShowProfileOptions(true);
+  const handleBlock = () => {
+    setShowProfileOptions(false);
+    setShowBlockConfirmation(true);
+  };
+  const handleConfirmBlock = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data");
+      formData.append("table_name", "blocked_users");
+      formData.append("block_id", otherUserId);
+      formData.append("user_id", user?.user_id || "");
+      const response = await apiCall(formData);
+      if (response?.result) {
+        setShowBlockConfirmation(false);
+        showToast(t("profile.userBlocked") || "User blocked", "success");
+        router.back();
+      }
+    } catch (error) {
+      showToast(t("chat.errorLoading") || "Failed to block", "error");
+    }
+  };
+  const handleReport = () => {
+    setShowProfileOptions(false);
+    setShowReportUser(true);
+  };
+  const handleSubmitReport = async (reportData: {
+    reason: string;
+    additionalDetails: string;
+  }) => {
+    try {
+      const formData = new FormData();
+      formData.append("type", "add_data");
+      formData.append("table_name", "reported_users");
+      formData.append("block_id", otherUserId);
+      formData.append("additional_details", reportData.additionalDetails);
+      formData.append("reason", reportData.reason);
+      formData.append("user_id", user?.user_id || "");
+      const response = await apiCall(formData);
+      if (response?.result) {
+        setShowReportUser(false);
+        showToast(t("report.reportSubmitted") || "Report submitted", "success");
+      }
+    } catch (error) {
+      showToast(t("chat.errorLoading") || "Failed to report", "error");
+    }
+  };
+  const handleBackToProfileOptions = () => {
+    setShowBlockConfirmation(false);
+    setShowReportUser(false);
+    setShowProfileOptions(true);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -536,6 +583,15 @@ export default function ChatConversation() {
         onPress={handleBack}
         userImage={userImage}
         onImagePress={handleViewProfile}
+        rightElement={
+          <TouchableOpacity
+            style={styles.headerOptionsButton}
+            onPress={handleOptions}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="ellipsis-vertical" size={22} color={color.gray14} />
+          </TouchableOpacity>
+        }
       />
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
@@ -600,9 +656,7 @@ export default function ChatConversation() {
         </ScrollView>
 
         {/* Chat input */}
-        <View
-          style={styles.chatInputWrapper}
-        >
+        <View style={styles.chatInputWrapper}>
           <View style={styles.chatInputContainer}>
             <TextInput
               ref={textInputRef}
@@ -635,6 +689,30 @@ export default function ChatConversation() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      <ProfileOptions
+        visible={showProfileOptions}
+        onClose={() => setShowProfileOptions(false)}
+        onBlock={handleBlock}
+        onReport={handleReport}
+        onRemoveMatch={() => setShowProfileOptions(false)}
+        userData={{ name: userName }}
+        isMatch={true}
+      />
+      <BlockConfirmation
+        visible={showBlockConfirmation}
+        onClose={() => setShowBlockConfirmation(false)}
+        onBack={handleBackToProfileOptions}
+        onConfirm={handleConfirmBlock}
+        userName={userName}
+      />
+      <ReportUser
+        visible={showReportUser}
+        onClose={() => setShowReportUser(false)}
+        onBack={handleBackToProfileOptions}
+        onSubmit={handleSubmitReport}
+        userName={userName}
+      />
     </SafeAreaView>
   );
 }
@@ -643,6 +721,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
+  },
+  headerOptionsButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
   keyboardContainer: {
     flex: 1,

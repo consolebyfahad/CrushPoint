@@ -1,5 +1,4 @@
 import { useAppContext } from "@/context/app_context";
-import useGetCampaign from "@/hooks/useGetCampaign";
 import { color, font, image } from "@/utils/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -13,9 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function index() {
-  const { isLoggedIn, isHydrated, checkVerificationStatus, isUserVerified } =
-    useAppContext();
-  const { campaign, loading: campaignLoading } = useGetCampaign();
+  const { isLoggedIn, isHydrated } = useAppContext();
   const containerScale = useSharedValue(0);
   const imageScale = useSharedValue(0);
   const textOpacity = useSharedValue(0);
@@ -76,55 +73,36 @@ export default function index() {
       return;
     }
 
-    const checkUserStatus = async () => {
-      if (navigationPerformedRef.current) {
+    const routeAfterSplash = async () => {
+      if (navigationPerformedRef.current) return;
+
+      const onboardingCompleted = await AsyncStorage.getItem(
+        "@onboarding_completed",
+      );
+
+      // 1) Onboarding not completed → onboarding first
+      if (onboardingCompleted !== "true") {
+        navigationPerformedRef.current = true;
+        router.replace("/onboarding");
         return;
       }
 
-      if (campaignLoading) {
-        return;
-      }
-
-      if (campaign) {
+      // 2) Onboarding completed → check login
+      if (isLoggedIn) {
+        console.log("Logged in, redirecting to campaign");
         navigationPerformedRef.current = true;
         router.push("/campaign");
         return;
       }
 
-      // Check if onboarding has been completed first
-      const onboardingCompleted = await AsyncStorage.getItem("@onboarding_completed");
-      
-      if (isLoggedIn) {
-        const isVerified = await checkVerificationStatus();
-
-        if (isVerified) {
-          navigationPerformedRef.current = true;
-          router.replace("/(tabs)");
-        } else {
-          navigationPerformedRef.current = true;
-          router.replace("/auth/gender");
-        }
-      } else {
-        // User not logged in
-        if (onboardingCompleted === "true") {
-          // Onboarding completed, go to login screen
-          navigationPerformedRef.current = true;
-          router.replace("/welcome");
-        } else {
-          // Onboarding not completed, show onboarding
-          navigationPerformedRef.current = true;
-          router.replace("/onboarding");
-        }
-      }
+      // 3) Not logged in → login screen
+      navigationPerformedRef.current = true;
+      router.push("/welcome");
     };
 
-    // Small delay to ensure campaign check is complete
-    const timer = setTimeout(checkUserStatus, 100);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [isLoggedIn, isHydrated, showSplash, campaign, campaignLoading]);
+    const timer = setTimeout(routeAfterSplash, 100);
+    return () => clearTimeout(timer);
+  }, [isLoggedIn, isHydrated, showSplash]);
 
   // Show loading state while context is hydrating or splash is showing
   if (!isHydrated || showSplash) {

@@ -68,16 +68,8 @@ export const getFCMToken = async (): Promise<string | null> => {
 
     const token = await messaging().getToken();
 
-    if (token) {
-      console.log("📱 Token preview:", token.substring(0, 20) + "...");
-    }
     return token;
   } catch (error) {
-
-    console.error("❌ Error details:", {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
     return null;
   }
 };
@@ -96,7 +88,6 @@ export const setupNotificationListeners = (
 
       // Check if already handled
       if (handledNotifications.has(notificationId)) {
-        console.log(`🚫 Duplicate notification ignored (${source}):`, notificationId);
         return;
       }
 
@@ -107,8 +98,6 @@ export const setupNotificationListeners = (
       setTimeout(() => {
         handledNotifications.delete(notificationId);
       }, 5000);
-
-      console.log(`✅ Processing notification (${source}):`, notificationId);
       // Pass notification body to help identify message vs match notifications
       const notificationBody = remoteMessage?.notification?.body || "";
       handleNotificationPress(remoteMessage.data, notificationBody);
@@ -117,14 +106,12 @@ export const setupNotificationListeners = (
 
   // 1. Foreground notification handler
   const unsubscribeOnMessage = messaging().onMessage(async (remoteMessage) => {
-    console.log("📨 [Notification] First response - onMessage (foreground):", JSON.stringify(remoteMessage, null, 2));
     handleWithDuplicateCheck(remoteMessage, "foreground");
   });
 
   // 2. Background tap handler
   const unsubscribeOnOpenedApp = messaging().onNotificationOpenedApp(
     (remoteMessage) => {
-      console.log("📨 [Notification] First response - onNotificationOpenedApp (background tap):", JSON.stringify(remoteMessage, null, 2));
       handleWithDuplicateCheck(remoteMessage, "background");
     }
   );
@@ -134,7 +121,6 @@ export const setupNotificationListeners = (
     .getInitialNotification()
     .then((remoteMessage) => {
       if (remoteMessage) {
-        console.log("📨 [Notification] First response - getInitialNotification (cold start):", JSON.stringify(remoteMessage, null, 2));
         handleWithDuplicateCheck(remoteMessage, "initial");
       }
     });

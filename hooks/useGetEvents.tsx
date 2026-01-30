@@ -196,9 +196,7 @@ const useGetEvents = () => {
 
       }
       
-      console.log("formData loadData", JSON.stringify(formData));
       const response = await apiCall(formData);
-      console.log("response loadData", JSON.stringify(response));
       if (Array.isArray(response?.data)) {
 
         const formattedEvents = response.data.map((event: any) => {

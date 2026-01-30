@@ -38,7 +38,6 @@ export default function ChatList() {
   const { showToast } = useToast();
   const [searchText, setSearchText] = useState("");
   const { chats, loading, error, refetch } = useGetChats();
-console.log("chats", JSON.stringify(chats));
   // Filter chats based on search text
   const filteredChats = chats.filter(
     (chat) =>

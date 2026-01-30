@@ -7,11 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "andra",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/images/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#49ADBE"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dating.Andra",

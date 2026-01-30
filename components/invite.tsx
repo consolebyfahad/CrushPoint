@@ -39,10 +39,9 @@ export default function InviteMatches({
 
   // Use the useGetMatches hook to get real matches data
   const { matches, loading, error } = useGetMatches();
-
   // Filter matches based on search text
   const filteredMatches = matches.filter((match) =>
-    match.name.toLowerCase().includes(searchText.toLowerCase())
+    match.name.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   const handleMatchSelect = (matchId: string) => {
@@ -57,7 +56,6 @@ export default function InviteMatches({
 
   const handleSendInvites = async () => {
     if (!user?.user_id) {
-
       return;
     }
     setIsSubmitting(true);
@@ -69,11 +67,13 @@ export default function InviteMatches({
       formData.append("table_name", "event_invites");
       formData.append("event_id", eventId.toString());
       formData.append("invited_id", JSON.stringify(selectedMatches));
+      console.log("formData", formData);
       const response = await apiCall(formData);
+      console.log("response", response);
 
       if (response.result) {
         const selectedMatchesData = matches.filter((match) =>
-          selectedMatches.includes(match.user_id)
+          selectedMatches.includes(match.match_id),
         );
 
         if (onSendInvites) {
@@ -95,12 +95,12 @@ export default function InviteMatches({
   };
 
   const renderMatchItem = ({ item }: any) => {
-    const isSelected = selectedMatches.includes(item.user_id);
+    const isSelected = selectedMatches.includes(item.match_id);
 
     return (
       <TouchableOpacity
         style={styles.matchItem}
-        onPress={() => handleMatchSelect(item.user_id)}
+        onPress={() => handleMatchSelect(item.match_id)}
         activeOpacity={0.7}
       >
         <View style={styles.matchContent}>
@@ -198,7 +198,7 @@ export default function InviteMatches({
             <FlatList
               data={filteredMatches}
               renderItem={renderMatchItem}
-              keyExtractor={(item) => item.user_id}
+              keyExtractor={(item) => item.match_id}
               style={styles.matchesList}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.listContent}

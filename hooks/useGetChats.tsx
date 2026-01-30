@@ -86,25 +86,10 @@ const useGetChats = () => {
       const chatListFormData = new FormData();
       chatListFormData.append("type", "chat_list");
       chatListFormData.append("user_id", user.user_id);
-      console.log("💬 [useGetChats] Requesting chat list", {
-        user_id: user.user_id,
-      });
       const chatListResponse = await apiCall(chatListFormData);
-      console.log("💬 [useGetChats] Chat list API response:", {
-        hasChat: !!chatListResponse?.chat,
-        chatIsArray: Array.isArray(chatListResponse?.chat),
-        chatLength: chatListResponse?.chat?.length || 0,
-        hasData: !!chatListResponse?.data,
-        dataIsArray: Array.isArray(chatListResponse?.data),
-        dataLength: chatListResponse?.data?.length || 0,
-        fullResponse: JSON.stringify(chatListResponse),
-      });
       
       // Handle response with chat array (direct messages)
       if (chatListResponse?.chat && Array.isArray(chatListResponse.chat)) {
-        console.log("💬 [useGetChats] Processing chat array format", {
-          chatCount: chatListResponse.chat.length,
-        });
         const currentUserId = String(userData?.id || user.user_id);
         const chatList: ChatItem[] = chatListResponse.chat
           .filter((msg: any) => {
@@ -174,16 +159,9 @@ const useGetChats = () => {
           return b.timestampValue - a.timestampValue;
         });
 
-        console.log("💬 [useGetChats] Set chats from chat array:", {
-          chatCount: chatList.length,
-          chats: chatList.map((c) => ({ id: c.id, name: c.name, userId: c.userId })),
-        });
         setChats(chatList);
         setError(null);
       } else if (chatListResponse?.data && Array.isArray(chatListResponse.data)) {
-        console.log("💬 [useGetChats] Processing data array format", {
-          dataCount: chatListResponse.data.length,
-        });
         // Handle response with data array (chat items with last_message)
         const chatList: ChatItem[] = chatListResponse.data
           .filter((chat: any) => {
@@ -257,14 +235,9 @@ const useGetChats = () => {
           return b.timestampValue - a.timestampValue;
         });
 
-        console.log("💬 [useGetChats] Set chats from data array:", {
-          chatCount: chatList.length,
-          chats: chatList.map((c) => ({ id: c.id, name: c.name, userId: c.userId })),
-        });
         setChats(chatList);
         setError(null);
       } else {
-        console.log("💬 [useGetChats] No chat/data arrays found, using fallback matches approach");
         // Fallback: If chat_list doesn't return expected format, use matches approach
         const matchesFormData = new FormData();
         matchesFormData.append("type", "get_data");
@@ -272,22 +245,12 @@ const useGetChats = () => {
         matchesFormData.append("user_id", user.user_id);
 
         const matchesResponse = await apiCall(matchesFormData);
-        console.log("💬 [useGetChats] Matches response for fallback:", {
-          hasData: !!matchesResponse?.data,
-          dataIsArray: Array.isArray(matchesResponse?.data),
-          matchesCount: matchesResponse?.data?.length || 0,
-        });
 
         if (matchesResponse?.data && Array.isArray(matchesResponse.data)) {
           const chatList: ChatItem[] = [];
 
           // For each match, get the last message using getchat
           for (const match of matchesResponse.data) {
-            console.log("💬 [useGetChats] Processing match:", {
-              matchId: match.id,
-              matchUserId: match.match_id,
-              matchName: match.match?.name,
-            });
             if (match.match_id === "0" || !match.match) continue;
 
             const matchUser = match.match;
@@ -302,18 +265,9 @@ const useGetChats = () => {
 
               const chatResponse = await apiCall(chatFormData);
               const chatMessages = chatResponse?.chat || [];
-              console.log("💬 [useGetChats] Chat history for match:", {
-                matchId: match.id,
-                messageCount: chatMessages.length,
-                hasMessages: chatMessages.length > 0,
-              });
 
               // Only add chat if it has messages
               if (chatMessages.length === 0) {
-                console.log("💬 [useGetChats] Skipping match - no messages:", {
-                  matchId: match.id,
-                  matchName: matchUser.name,
-                });
                 continue;
               }
 
@@ -355,10 +309,6 @@ const useGetChats = () => {
               });
             } catch (chatError) {
               // Skip matches that error or have no messages
-              console.log("💬 [useGetChats] Skipping match due to error:", {
-                matchId: match.id,
-                error: chatError,
-              });
               continue;
             }
           }
@@ -371,14 +321,9 @@ const useGetChats = () => {
             return b.timestampValue - a.timestampValue;
           });
 
-          console.log("💬 [useGetChats] Set chats from fallback matches:", {
-            chatCount: chatList.length,
-            chats: chatList.map((c) => ({ id: c.id, name: c.name, userId: c.userId, matchId: c.matchId })),
-          });
           setChats(chatList);
           setError(null);
         } else {
-          console.log("💬 [useGetChats] No matches data found, setting empty chats");
           setChats([]);
           setError(null);
         }
@@ -386,10 +331,6 @@ const useGetChats = () => {
     } catch (err: any) {
       const errorMessage =
         err.message || t("hooks.networkErrorCheckConnection");
-      console.log("💬 [useGetChats] Error loading chats:", {
-        error: errorMessage,
-        fullError: err,
-      });
       setError(errorMessage);
 
       setChats([]);

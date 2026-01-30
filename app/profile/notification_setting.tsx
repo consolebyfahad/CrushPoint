@@ -20,19 +20,26 @@ export default function NotificationSettings({ navigation }: any) {
   const { t } = useTranslation();
   const { user, userData, updateUserData } = useAppContext();
 
-  const [notificationSettings, setNotificationSettings] = useState({
-    newMatches: true,
-    newMessageReceived: true,
-    eventInvitationReceived: true,
-    emojiReceived: true,
-    nearbyMatches: true,
-    nearbyUsers: true,
-    profileVisits: true,
-    newEventPosted: true,
-    eventInvitationAccepted: true,
-    eventReminder: true,
-    offersPromotions: true,
-  });
+  const NOTIFICATION_KEYS = [
+    "event_invite",
+    "event_invite_accepted",
+    "event_reminder",
+    "nearby_users",
+    "new_event",
+    "new_match",
+    "new_message",
+    "profile_like",
+    "profile_visit",
+  ] as const;
+
+  const defaultSettings = NOTIFICATION_KEYS.reduce(
+    (acc, key) => ({ ...acc, [key]: true }),
+    {} as Record<(typeof NOTIFICATION_KEYS)[number], boolean>,
+  );
+  const [notificationSettings, setNotificationSettings] =
+    useState<Record<(typeof NOTIFICATION_KEYS)[number], boolean>>(
+      defaultSettings,
+    );
 
   const [isChanged, setIsChanged] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,33 +48,34 @@ export default function NotificationSettings({ navigation }: any) {
   useEffect(() => {
     if (userData?.notification_settings) {
       try {
-        // If notification_settings is a string, parse it
         const settings =
           typeof userData.notification_settings === "string"
             ? JSON.parse(userData.notification_settings)
             : userData.notification_settings;
 
-        // Convert array format back to object format
         if (Array.isArray(settings)) {
-          const settingsObj = { ...notificationSettings };
-          settings.forEach((setting) => {
+          const settingsObj = { ...defaultSettings };
+          settings.forEach((setting: { key?: string; enabled?: boolean }) => {
             if (setting.key && typeof setting.enabled === "boolean") {
-              settingsObj[setting.key as keyof typeof settingsObj] =
-                setting.enabled;
+              const key = setting.key as (typeof NOTIFICATION_KEYS)[number];
+              if (NOTIFICATION_KEYS.includes(key)) {
+                settingsObj[key] = setting.enabled;
+              }
             }
           });
           setNotificationSettings(settingsObj);
         } else if (typeof settings === "object") {
-          // Direct object format
-          setNotificationSettings((prev) => ({ ...prev, ...settings }));
+          const merged = { ...defaultSettings };
+          NOTIFICATION_KEYS.forEach((key) => {
+            if (settings[key] !== undefined) merged[key] = !!settings[key];
+          });
+          setNotificationSettings(merged);
         }
-      } catch (error) {
-
-      }
+      } catch (error) {}
     }
   }, [userData?.notification_settings]);
 
-  const toggleNotification = (key: keyof typeof notificationSettings) => {
+  const toggleNotification = (key: (typeof NOTIFICATION_KEYS)[number]) => {
     setNotificationSettings((prev) => ({
       ...prev,
       [key]: !prev[key],
@@ -83,18 +91,13 @@ export default function NotificationSettings({ navigation }: any) {
 
     setIsLoading(true);
     try {
-      // Convert notification settings object to array format for API
-      const notificationArray = Object.entries(notificationSettings).map(
-        ([key, enabled]) => ({
-          key,
-          enabled,
-          title:
-            notificationOptions.find((opt) => opt.key === key)?.title || key,
-          description:
-            notificationOptions.find((opt) => opt.key === key)?.description ||
-            "",
-        })
-      );
+      // Convert to array format for API (keys match backend: event_invite, new_match, etc.)
+      const notificationArray = NOTIFICATION_KEYS.map((key) => ({
+        key,
+        enabled: notificationSettings[key],
+        title: t(`common.${key}`),
+        description: t(`common.${key}Desc`),
+      }));
 
       const formData = new FormData();
       formData.append("type", "update_data");
@@ -102,10 +105,11 @@ export default function NotificationSettings({ navigation }: any) {
       formData.append("table_name", "users");
       formData.append(
         "notification_settings",
-        JSON.stringify(notificationArray)
+        JSON.stringify(notificationArray),
       );
-
+      console.log("formData", formData);
       const response = await apiCall(formData);
+      console.log("response", response);
 
       if (response.result) {
         // Update context with new notification settings
@@ -123,85 +127,22 @@ export default function NotificationSettings({ navigation }: any) {
         }
       } else {
         throw new Error(
-          response.message || t("common.failedToUpdateNotifications")
+          response.message || t("common.failedToUpdateNotifications"),
         );
       }
     } catch (error) {
-
       Alert.alert(t("common.error"), t("common.failedToUpdateNotifications"));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const notificationOptions = [
-    {
-      key: "newMatches",
-      title: t("common.newMatches"),
-      description: t("common.newMatchesDesc"),
-      enabled: notificationSettings.newMatches,
-    },
-    {
-      key: "newMessageReceived",
-      title: t("common.newMessageReceived") || "New Message Received",
-      description: t("common.newMessageReceivedDesc") || "When you receive a message.",
-      enabled: notificationSettings.newMessageReceived,
-    },
-    {
-      key: "eventInvitationReceived",
-      title: t("common.eventInvitationReceived") || "Event Invitation Received",
-      description: t("common.eventInvitationReceivedDesc") || "When you receive an event invitation.",
-      enabled: notificationSettings.eventInvitationReceived,
-    },
-    {
-      key: "emojiReceived",
-      title: t("common.emojiReceived"),
-      description: t("common.emojiReceivedDesc"),
-      enabled: notificationSettings.emojiReceived,
-    },
-    {
-      key: "nearbyMatches",
-      title: t("common.nearbyMatches"),
-      description: t("common.nearbyMatchesDesc"),
-      enabled: notificationSettings.nearbyMatches,
-    },
-    {
-      key: "nearbyUsers",
-      title: t("common.nearbyUsers"),
-      description: t("common.nearbyUsersDesc"),
-      enabled: notificationSettings.nearbyUsers,
-    },
-    {
-      key: "profileVisits",
-      title: t("common.profileVisits"),
-      description: t("common.profileVisitsDesc"),
-      enabled: notificationSettings.profileVisits,
-    },
-    {
-      key: "newEventPosted",
-      title: t("common.newEventPosted"),
-      description: t("common.newEventPostedDesc"),
-      enabled: notificationSettings.newEventPosted,
-    },
-    {
-      key: "eventInvitationAccepted",
-      title: t("common.eventInvitationAccepted"),
-      description: t("common.eventInvitationAcceptedDesc"),
-      enabled: notificationSettings.eventInvitationAccepted,
-    },
-    {
-      key: "eventReminder",
-      title: t("common.eventReminder"),
-      description: t("common.eventReminderDesc"),
-      enabled: notificationSettings.eventReminder,
-    },
-    {
-      key: "offersPromotions",
-      title: t("common.offersPromotions"),
-      description: t("common.offersPromotionsDesc"),
-      enabled: notificationSettings.offersPromotions,
-    },
-  ];
+  const notificationOptions = NOTIFICATION_KEYS.map((key) => ({
+    key,
+    title: t(`common.${key}`),
+    description: t(`common.${key}Desc`),
+    enabled: notificationSettings[key],
+  }));
 
   const renderNotificationItem = (item: any) => (
     <View key={item.key} style={styles.notificationItem}>

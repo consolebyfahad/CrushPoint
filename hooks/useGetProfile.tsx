@@ -106,17 +106,14 @@ export default function useGetProfile() {
               if (!idsChanged && previousParsedInterests.length > 0) {
                 // IDs are the same, safe to keep previous parsedInterests
                 parsedInterests = previousParsedInterests;
-                console.log("Preserving parsedInterests from context (API interests not loaded yet)");
               } else if (idsChanged) {
                 // IDs changed, clear parsedInterests and reset flag to allow re-parsing when API interests load
                 parsedInterests = [];
                 hasReparsedRef.current = false;
-                console.log("IDs changed, clearing parsedInterests (will re-parse when API interests load)");
               } else {
                 // No previous data, clear parsedInterests
                 parsedInterests = [];
                 hasReparsedRef.current = false;
-                console.log("No previous parsedInterests, clearing (will re-parse when API interests load)");
               }
             }
           } catch (error) {

@@ -114,17 +114,24 @@ export default function Notifications({ navigation }: any) {
       case "new_match":
         return t("notifications.newMatch");
       case "profile_view":
+      case "profile_visit":
       case "view":
         return t("notifications.profileView");
       case "event":
+      case "event_invite":
+      case "event_invite_accepted":
+      case "event_reminder":
+      case "new_event":
         return t("notifications.eventNotification");
       case "message":
       case "chat":
       case "new_message":
         return t("notifications.newMessage");
       case "like":
+      case "profile_like":
         return t("notifications.someoneLikedYou");
       case "nearby":
+      case "nearby_users":
         return t("notifications.nearbyUser");
       case "super_like":
         return t("notifications.superLike");
@@ -137,19 +144,31 @@ export default function Notifications({ navigation }: any) {
     // If API title matches common patterns, translate it
     if (apiTitle) {
       const lowerTitle = apiTitle.toLowerCase();
-      if (lowerTitle.includes("new message") || lowerTitle.includes("neue nachricht")) {
+      if (
+        lowerTitle.includes("new message") ||
+        lowerTitle.includes("neue nachricht")
+      ) {
         return t("notifications.newMessage");
       }
-      if (lowerTitle.includes("new match") || lowerTitle.includes("neues match")) {
+      if (
+        lowerTitle.includes("new match") ||
+        lowerTitle.includes("neues match")
+      ) {
         return t("notifications.newMatch");
       }
       if (lowerTitle.includes("reaction") || lowerTitle.includes("reaktion")) {
         return t("notifications.newReaction");
       }
-      if (lowerTitle.includes("profile view") || lowerTitle.includes("profilansicht")) {
+      if (
+        lowerTitle.includes("profile view") ||
+        lowerTitle.includes("profilansicht")
+      ) {
         return t("notifications.profileView");
       }
-      if (lowerTitle.includes("event") || lowerTitle.includes("veranstaltung")) {
+      if (
+        lowerTitle.includes("event") ||
+        lowerTitle.includes("veranstaltung")
+      ) {
         return t("notifications.eventNotification");
       }
       if (lowerTitle.includes("like")) {
@@ -170,10 +189,9 @@ export default function Notifications({ navigation }: any) {
   const translateNotificationMessage = (
     apiMessage: string,
     type: string,
-    userName: string
+    userName: string,
   ) => {
     if (!apiMessage) return "";
-
     // Translate common notification message patterns
     const lowerMessage = apiMessage.toLowerCase();
 
@@ -194,6 +212,22 @@ export default function Notifications({ navigation }: any) {
       ) {
         return t("notifications.matchWithUserChat", { name: userName });
       }
+
+      // For liked profile: "{name} liked your profile!"
+      if (
+        lowerMessage.includes("liked") &&
+        lowerMessage.includes("your profile")
+      ) {
+        return t("notifications.likedYourProfile", { name: userName });
+      }
+    }
+
+    // Liked your profile (without name in message)
+    if (
+      lowerMessage.includes("liked") &&
+      lowerMessage.includes("your profile")
+    ) {
+      return t("notifications.likedYourProfile", { name: userName || "" });
     }
 
     // New message notifications
@@ -248,7 +282,6 @@ export default function Notifications({ navigation }: any) {
       formData.append("user_id", user.user_id);
 
       const response = await apiCall(formData);
-      console.log("response for get notifications", JSON.stringify(response));
       if (Array.isArray(response.data)) {
         // Process the notifications data
         const processedNotifications = response.data.map(
@@ -262,12 +295,12 @@ export default function Notifications({ navigation }: any) {
             // Translate notification title and message
             const translatedTitle = translateNotificationTitle(
               notif.title,
-              notificationType
+              notificationType,
             );
             const translatedMessage = translateNotificationMessage(
               notif.notification,
               notificationType,
-              notif.from?.name || notif.user_name || ""
+              notif.from?.name || notif.user_name || "",
             );
 
             const processed = {
@@ -293,7 +326,7 @@ export default function Notifications({ navigation }: any) {
             };
 
             return processed;
-          }
+          },
         );
 
         setNotifications(processedNotifications);
@@ -304,7 +337,6 @@ export default function Notifications({ navigation }: any) {
         setError(null);
       }
     } catch (error) {
-
       setError(t("notifications.failedToLoad"));
       setNotifications([]);
     } finally {
@@ -345,15 +377,22 @@ export default function Notifications({ navigation }: any) {
       case "new_match":
         return image.matchNotification;
       case "profile_view":
+      case "profile_visit":
+      case "profile_like":
       case "view":
         return image.profileNotification;
       case "event":
+      case "event_invite":
+      case "event_invite_accepted":
+      case "event_reminder":
+      case "new_event":
         return image.eventNotification;
       case "message":
+      case "new_message":
       case "chat":
         return image.chatNotification;
       default:
-        return null; // No background image for other types
+        return null;
     }
   };
 
@@ -376,7 +415,7 @@ export default function Notifications({ navigation }: any) {
     // Mark as read locally
     setNotifications((prevNotifications) => {
       const updated = prevNotifications.map((notif) =>
-        notif.id === notification.id ? { ...notif, isRead: true } : notif
+        notif.id === notification.id ? { ...notif, isRead: true } : notif,
       );
       return updated;
     });
@@ -407,13 +446,11 @@ export default function Notifications({ navigation }: any) {
               const response = await apiCall(formData);
               if (response?.data && Array.isArray(response.data)) {
                 const matchRecord = response.data.find(
-                  (m: any) => m.match_id === notification.from_id
+                  (m: any) => m.match_id === notification.from_id,
                 );
                 matchRecordId = matchRecord?.id || null;
               }
-            } catch (error) {
-
-            }
+            } catch (error) {}
           }
 
           // Navigate to chat conversation
@@ -429,14 +466,13 @@ export default function Notifications({ navigation }: any) {
                   ? notification.from.images[0]
                   : parseUserImages(
                       notification.from.images,
-                      notification.from.gender || "unknown"
+                      notification.from.gender || "unknown",
                     )[0]
                 : "",
             },
           });
           return;
         } catch (error) {
-
           // Fallback to chat list
           router.push("/(tabs)/matches");
           return;
@@ -456,7 +492,7 @@ export default function Notifications({ navigation }: any) {
           const imagesString = notification.from.images || "[]";
           const parsedImages = parseUserImages(
             imagesString,
-            notification.from.gender || "unknown"
+            notification.from.gender || "unknown",
           );
 
           // Calculate age from DOB
@@ -552,7 +588,6 @@ export default function Notifications({ navigation }: any) {
           });
           return;
         } catch (error) {
-
           // Fallback to matches screen
           router.push("/(tabs)/matches");
           return;
@@ -571,7 +606,7 @@ export default function Notifications({ navigation }: any) {
         const imagesString = notification.from.images || "[]";
         const parsedImages = parseUserImages(
           imagesString,
-          notification.from.gender || "unknown"
+          notification.from.gender || "unknown",
         );
 
         // Parse lookingFor from JSON string to array
@@ -580,7 +615,6 @@ export default function Notifications({ navigation }: any) {
         try {
           parsedLookingFor = parseJsonString(lookingForString);
         } catch (error) {
-
           parsedLookingFor = [];
         }
 
@@ -592,7 +626,7 @@ export default function Notifications({ navigation }: any) {
           parsedInterests = parseInterestsWithNames(
             interestsString,
             rawInterests || [],
-            i18n.language || "en"
+            i18n.language || "en",
           );
         } catch (error) {
           // Fallback to parsing as regular JSON if conversion fails
@@ -618,7 +652,6 @@ export default function Notifications({ navigation }: any) {
             }
           }
         } catch (error) {
-
           parsedNationality = [];
         }
 
@@ -669,9 +702,7 @@ export default function Notifications({ navigation }: any) {
             userId: userProfileData.id,
           },
         });
-      } catch (error) {
-
-      }
+      } catch (error) {}
     } else {
       // Fallback navigation based on notification type if no user data
       switch (notificationType) {
@@ -694,7 +725,7 @@ export default function Notifications({ navigation }: any) {
     // Remove locally
     setNotifications((prevNotifications) => {
       const filtered = prevNotifications.filter(
-        (notif) => notif.id !== notification.id
+        (notif) => notif.id !== notification.id,
       );
       return filtered;
     });

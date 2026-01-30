@@ -285,7 +285,6 @@ export default function RequestMeetup({
       formData.append("time", formattedTime);
       formData.append("location", location.trim());
       formData.append("message", message.trim());
-      console.log("formData for request meetup", JSON.stringify(formData));
       const response = await apiCall(formData);
 
       if (response.result) {

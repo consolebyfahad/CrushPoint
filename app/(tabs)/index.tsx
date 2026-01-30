@@ -110,10 +110,6 @@ export default function Index() {
     }
   }, [userData?.gender_interest, t]);
 
-  // Log filter data changes
-  useEffect(() => {
-    console.log("🔄 Filter data updated:", JSON.stringify(filterData, null, 2));
-  }, [filterData]);
 
   const { users, loading, error, refetch } = useGetUsers(filterData);
   const [viewType, setViewType] = useState(t("common.mapView"));
@@ -194,10 +190,6 @@ export default function Index() {
       formData.append("user_id", user.user_id);
       formData.append("lat", location.latitude.toString());
       formData.append("lng", location.longitude.toString());
-      console.log(
-        "formData updateLocationInDatabase",
-        JSON.stringify(formData)
-      );
       const response = await apiCall(formData);
 
       if (response.result || response.success) {
@@ -264,12 +256,6 @@ export default function Index() {
             });
           }
         } catch (error) {
-
-          console.error("❌ Error details:", {
-            message: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined,
-            dateId: data.date_id,
-          });
         }
       }
     };
@@ -581,12 +567,6 @@ export default function Index() {
 
       return null;
     } catch (error) {
-
-      console.error("❌ Error details:", {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        dateId: dateId,
-      });
       return null;
     }
   };
@@ -618,12 +598,7 @@ export default function Index() {
         await registerFCMToken();
       } else {
       }
-    } catch (error) {
-
-      console.error("❌ Error details:", {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+        } catch (error) {
     }
   };
 
@@ -647,12 +622,6 @@ export default function Index() {
       const response = await apiCall(formData);
 
     } catch (error) {
-
-      console.error("❌ Error details:", {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        userId: user?.user_id,
-      });
     }
   };
 

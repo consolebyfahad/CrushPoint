@@ -13,11 +13,12 @@ interface Campaign {
   status: string;
   distance: number;
   created_at: string;
+  button_text: string;
 }
 
 const useGetCampaign = () => {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadCampaign = async () => {
@@ -40,7 +41,7 @@ const useGetCampaign = () => {
       ) {
         // Filter active campaigns (status === "1")
         const activeCampaigns = response.data.filter(
-          (item: any) => item.status === "1" || item.status === 1
+          (item: any) => item.status === "1" || item.status === 1,
         );
 
         if (activeCampaigns.length === 0) {
@@ -51,11 +52,11 @@ const useGetCampaign = () => {
         // If multiple campaigns, prioritize video over image
         // If only one campaign, use it (whether image or video)
         let selectedCampaign = activeCampaigns[0];
-        
+
         if (activeCampaigns.length > 1) {
           // Find video campaign first, otherwise use first one
           const videoCampaign = activeCampaigns.find(
-            (item: any) => item.ad_type === "video"
+            (item: any) => item.ad_type === "video",
           );
           if (videoCampaign) {
             selectedCampaign = videoCampaign;

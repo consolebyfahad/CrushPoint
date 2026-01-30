@@ -18,7 +18,7 @@ import { svgIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -142,7 +142,7 @@ export default function UserProfile() {
         ],
       };
     }
-
+    console.log("userData", userData);
     // Parse nationality from JSON string or array
     const parseNationality = (nationalityData: any) => {
       if (!nationalityData) return [];
@@ -168,7 +168,7 @@ export default function UserProfile() {
             lat: parseFloat(currentUser?.lat?.toString() || "0"),
             lng: parseFloat(currentUser?.lng?.toString() || "0"),
           },
-          targetUserCoords
+          targetUserCoords,
         )
       : "N/A";
 
@@ -217,8 +217,8 @@ export default function UserProfile() {
       languages: Array.isArray(userData.languages)
         ? userData.languages
         : userData.languages
-        ? userData.languages.split(",").map((lang: any) => lang.trim())
-        : [],
+          ? userData.languages.split(",").map((lang: any) => lang.trim())
+          : [],
       images:
         userData.images && userData.images.length > 0
           ? userData.images
@@ -229,6 +229,33 @@ export default function UserProfile() {
   // Match status state for immediate updates
   const [matchStatus, setMatchStatus] = useState(userInfo?.match_status || "");
   const [matchEmoji, setMatchEmoji] = useState(userInfo?.match_emoji || "");
+
+  // Record profile visit when viewing another user's profile
+  useEffect(() => {
+    const visitorId = user?.user_id;
+    const profileUserId = userInfo?.id;
+    if (
+      !visitorId ||
+      !profileUserId ||
+      String(profileUserId) === String(visitorId)
+    ) {
+      return;
+    }
+    const recordVisit = async () => {
+      try {
+        const formData = new FormData();
+        formData.append("type", "add_data");
+        formData.append("table_name", "profile_visits");
+        formData.append("user_id", visitorId);
+        formData.append("date_id", profileUserId);
+        console.log("formData", formData);
+        const response = await apiCall(formData);
+        console.log("response", response);
+        console.log("profile visit recorded");
+      } catch (_) {}
+    };
+    recordVisit();
+  }, [user?.user_id, userInfo?.id]);
 
   const handleBack = () => {
     router.back();
@@ -362,9 +389,7 @@ export default function UserProfile() {
       formData.append("table_name", "blocked_users");
       formData.append("block_id", userInfo.id);
       formData.append("user_id", user?.user_id || "");
-      console.log("formData", JSON.stringify(formData));
       const response = await apiCall(formData);
-      console.log("response for block user", JSON.stringify(response));
       if (response.result) {
         setShowBlockConfirmation(false);
         // router.back();
@@ -414,7 +439,7 @@ export default function UserProfile() {
         Alert.alert(
           t("errors.locationUnavailable"),
           t("errors.locationNotAvailable"),
-          [{ text: t("common.ok"), style: "default" }]
+          [{ text: t("common.ok"), style: "default" }],
         );
         setIsLoadingLocation(false);
         return;
@@ -457,14 +482,16 @@ export default function UserProfile() {
 
       setIsLoadingLocation(false);
     } catch (error) {
-
       setIsLoadingLocation(false);
-      Alert.alert(t("common.error"), t("errors.unableToShowLocation") || "Unable to show location", [
-        { text: t("errors.ok") || "OK", style: "default" },
-      ]);
+      Alert.alert(
+        t("common.error"),
+        t("errors.unableToShowLocation") || "Unable to show location",
+        [{ text: t("errors.ok") || "OK", style: "default" }],
+      );
     }
   };
-
+  console.log("matchStatus", matchStatus);
+  console.log("matchEmoji", matchEmoji);
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -543,7 +570,7 @@ export default function UserProfile() {
           {!(matchStatus === "match_sent" || matchStatus === "matched") && (
             <View style={styles.actionEmojis}>
               {actionEmojis.map((item, index) =>
-                renderEmojiButton({ item, index })
+                renderEmojiButton({ item, index }),
               )}
             </View>
           )}
@@ -629,15 +656,17 @@ export default function UserProfile() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("profile.lookingFor")}</Text>
             <View style={styles.lookingForContainer}>
-              {userInfo.lookingFor.map((lookingForId: string, index: number) => {
-                // Format dynamically using current language
-                const formatted = formatLookingFor(lookingForId, t);
-                return (
-                  <View key={index} style={styles.lookingForTag}>
-                    <Text style={styles.lookingForText}>{formatted}</Text>
-                  </View>
-                );
-              })}
+              {userInfo.lookingFor.map(
+                (lookingForId: string, index: number) => {
+                  // Format dynamically using current language
+                  const formatted = formatLookingFor(lookingForId, t);
+                  return (
+                    <View key={index} style={styles.lookingForTag}>
+                      <Text style={styles.lookingForText}>{formatted}</Text>
+                    </View>
+                  );
+                },
+              )}
             </View>
           </View>
 
@@ -700,15 +729,18 @@ export default function UserProfile() {
                     (nationality: string, index: number) => {
                       // Check if already formatted (contains flag emoji - Unicode range for regional indicator symbols)
                       // Flag emojis are made of two regional indicator symbols, so check for the pattern
-                      const isAlreadyFormatted = /[\u{1F1E6}-\u{1F1FF}]{2}/u.test(nationality);
+                      const isAlreadyFormatted =
+                        /[\u{1F1E6}-\u{1F1FF}]{2}/u.test(nationality);
                       return (
                         <View key={index} style={styles.nationalityTag}>
                           <Text style={styles.nationalityText}>
-                            {isAlreadyFormatted ? nationality : formatNationality(nationality, t)}
+                            {isAlreadyFormatted
+                              ? nationality
+                              : formatNationality(nationality, t)}
                           </Text>
                         </View>
                       );
-                    }
+                    },
                   )}
                 </View>
               </View>

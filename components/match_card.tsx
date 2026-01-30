@@ -23,7 +23,6 @@ export default function MatchCard({
 }: MatchCardProps) {
   const { t } = useTranslation();
   const { user } = useAppContext();
-  console.log("match", JSON.stringify(match));
   // Map emoji actions to SVG icons and get the appropriate emoji
   const getMatchEmoji = (emoji: any) => {
     const emojiMap: { [key: string]: any } = {

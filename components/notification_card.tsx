@@ -38,17 +38,20 @@ export default function NotificationCard({
         };
       case "profile_view":
       case "profile_viewed":
+      case "profile_visit":
       case "profile_like":
       case "like":
         return {
           library: "SimpleLineIcons",
-          
           name: "like",
           color: "#A78BFA",
           backgroundColor: "#F3F4F9",
         };
       case "event":
+      case "event_invite":
+      case "event_invite_accepted":
       case "event_reminder":
+      case "new_event":
         return {
           library: "SimpleLineIcons",
           name: "calendar",
@@ -62,6 +65,14 @@ export default function NotificationCard({
           name: "message-circle",
           color: "#3B82F6",
           backgroundColor: "#DBEAFE",
+        };
+      case "nearby_users":
+      case "nearby":
+        return {
+          library: "Feather",
+          name: "map-pin",
+          color: "#10B981",
+          backgroundColor: "#D1FAE5",
         };
       default:
         return {

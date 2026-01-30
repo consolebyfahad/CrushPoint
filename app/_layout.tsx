@@ -8,7 +8,8 @@ import { StatusBar } from "react-native";
 import { ToastProvider } from "../components/toast_provider";
 import i18n from "../utils/i18n";
 
-SplashScreen.preventAutoHideAsync();
+// Hide the default native splash immediately so only the in-app splash (index) is shown
+SplashScreen.hideAsync().catch(() => {});
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -23,13 +24,10 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) {
       setIsReady(true);
-      // Hide splash screen only after fonts are loaded and app is ready
-      SplashScreen.hideAsync().catch(() => {});
     }
   }, [fontsLoaded, fontError]);
 
   if (!isReady) {
-    // Return null to keep native splash screen visible while loading
     return null;
   }
 
@@ -39,7 +37,11 @@ export default function RootLayout() {
         <ToastProvider>
           <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
           <Stack
-            screenOptions={{ headerShown: false, animation: "default", gestureEnabled: false }}
+            screenOptions={{
+              headerShown: false,
+              animation: "default",
+              gestureEnabled: false,
+            }}
             initialRouteName="index"
           />
         </ToastProvider>

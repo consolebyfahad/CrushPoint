@@ -510,11 +510,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
         }
       }
 
-      // Log the payload being sent to API
-      console.log("📤 API Payload:", JSON.stringify(payload, null, 2));
-
       const response: ApiResponse = await apiCall(formData);
-      console.log("📥 API Response:", JSON.stringify(response, null, 2));
 
       if (response.result && response.data && Array.isArray(response.data)) {
         const transformedUsers: TransformedUser[] = response.data

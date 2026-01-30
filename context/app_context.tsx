@@ -92,74 +92,25 @@ interface AppContextType {
   checkVerificationStatus: () => Promise<boolean>;
 }
 
-const defaultNotificationSettings: NotificationSetting[] = [
-  {
-    key: "newMatches",
+const NOTIFICATION_TYPE_KEYS = [
+  "event_invite",
+  "event_invite_accepted",
+  "event_reminder",
+  "nearby_users",
+  "new_event",
+  "new_match",
+  "new_message",
+  "profile_like",
+  "profile_visit",
+] as const;
+
+const defaultNotificationSettings: NotificationSetting[] =
+  NOTIFICATION_TYPE_KEYS.map((key) => ({
+    key,
     enabled: true,
-    title: "New Matches",
-    description: "When you get a new match",
-  },
-  {
-    key: "newMeetup",
-    enabled: true,
-    title: "Meetup Requests",
-    description: "When you get a new meetup request",
-  },
-  {
-    key: "meetupRespondReceived",
-    enabled: true,
-    title: "Meetup Respond Received",
-    description: "When someone responds to your meetup request",
-  },
-  {
-    key: "emojiReceived",
-    enabled: true,
-    title: "Emoji Received",
-    description: "When someone sends you an emoji",
-  },
-  {
-    key: "nearbyMatches",
-    enabled: true,
-    title: "Nearby Matches",
-    description: "When your matches are nearby",
-  },
-  {
-    key: "nearbyUsers",
-    enabled: false,
-    title: "Nearby Users",
-    description: "When new users are in your area",
-  },
-  {
-    key: "profileVisits",
-    enabled: false,
-    title: "Profile Visits",
-    description: "When someone views your profile",
-  },
-  {
-    key: "newEventPosted",
-    enabled: false,
-    title: "New Event Posted",
-    description: "When a new event is posted in your area",
-  },
-  {
-    key: "eventInvitationAccepted",
-    enabled: false,
-    title: "Event Invitation Accepted",
-    description: "When someone accepts event invitation",
-  },
-  {
-    key: "eventReminder",
-    enabled: true,
-    title: "Event Reminder",
-    description: "Reminders for upcoming events",
-  },
-  {
-    key: "offersPromotions",
-    enabled: false,
-    title: "Offers & Promotions",
-    description: "Special offers and promotions",
-  },
-];
+    title: key.replace(/_/g, " "),
+    description: "",
+  }));
 
 const defaultUserData: UserData = {
   id: "",

@@ -62,7 +62,7 @@ export default function Matches() {
   // Use the useGetMatches hook
   const { matches, loading, error, refetch, removeMatch, updateMatchStatus } =
     useGetMatches();
-
+  console.log("matches", matches);
   // Use the useGetChats hook
   const {
     chats,
@@ -71,106 +71,57 @@ export default function Matches() {
     refetch: refetchChats,
   } = useGetChats();
 
-  // Log chat list data
-  React.useEffect(() => {
-    console.log("💬 [Matches] Chat list data:", {
-      chatsCount: chats.length,
-      chats: chats.map((chat) => ({
-        id: chat.id,
-        matchId: chat.matchId,
-        userId: chat.userId,
-        name: chat.name,
-        lastMessage: chat.lastMessage,
-      })),
-      loading: chatsLoading,
-      error: chatsError,
-    });
-  }, [chats, chatsLoading, chatsError]);
-
   // Filter matches based on search text
   const filteredMatches = matches.filter((match) =>
-    match.name.toLowerCase().includes(searchText.toLowerCase())
+    match.name.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   // Filter chats based on search text
   const filteredChats = chats.filter(
     (chat) =>
       chat.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      chat.lastMessage.toLowerCase().includes(searchText.toLowerCase())
+      chat.lastMessage.toLowerCase().includes(searchText.toLowerCase()),
   );
-
-  // Log filtered chats
-  React.useEffect(() => {
-    console.log("🔍 [Matches] Filtered chats:", {
-      searchText,
-      filteredChatsCount: filteredChats.length,
-      filteredChats: filteredChats.map((chat) => ({
-        id: chat.id,
-        name: chat.name,
-      })),
-    });
-  }, [filteredChats, searchText]);
-
-  const handleViewProfile = useCallback((match: any) => {
-    const userProfileData = {
-      id: match.match_id || match.id,
-      name: match.name,
-      age: match.age,
-      images: match.images,
-      about: match.about,
-      height: match.height,
-      nationality: match.nationality,
-      religion: match.religion,
-      zodiac: match.zodiac,
-      gender: match.gender,
-      country: match.country,
-      state: match.state,
-      city: match.city,
-      languages: match.languages,
-      interests: match.interests,
-      lookingFor: match.lookingFor,
-      isOnline: match.isOnline,
-      phone: match.phone,
-      dob: match.dob,
-      actualLocation: match.actualLocation,
-      email: "",
-    };
-
-    router.push({
-      pathname: "/profile/user_profile",
-      params: { user: JSON.stringify(userProfileData) },
-    });
-  }, []);
 
   // Navigate to conversation from match card
   // This ensures the same conversation opens whether clicked from matches or chat list
-  const handleOpenConversation = useCallback((match: any) => {
-    // match.match_id is the matched user's ID (the person we're chatting with)
-    // match.user_id is the current user's ID (not what we want)
-    const matchedUserId = String(match.match_id || match.id);
-    const userName = match.name || "";
-    const userImage = match.image || (match.images && match.images.length > 0 ? match.images[0] : "");
+  const handleOpenConversation = useCallback(
+    (match: any) => {
+      // match.match_id is the matched user's ID (the person we're chatting with)
+      // match.user_id is the current user's ID (not what we want)
+      const matchedUserId = String(match.match_id || match.id);
+      const userName = match.name || "";
+      const userImage =
+        match.image ||
+        (match.images && match.images.length > 0 ? match.images[0] : "");
 
-    // Check if there's already a chat for this matched user
-    // If yes, use the same matchId from the chat to ensure same conversation opens
-    const existingChat = chats.find((chat) => String(chat.userId) === matchedUserId);
-    const matchId = existingChat ? existingChat.matchId : matchedUserId;
-
-    router.push({
-      pathname: "/chat/conversation",
-      params: {
-        matchId: matchId,
-        userId: matchedUserId, // This is the matched user's ID (the person we're chatting with)
-        userName: userName,
-        userImage: userImage,
-      },
-    });
-  }, [chats]);
-
-  const handleMatchOptions = useCallback((match: any) => {
-    setSelectedMatch(match);
-    setShowProfileOptions(true);
-  }, []);
+      // Check if there's already a chat for this matched user
+      // If yes, use the same matchId from the chat to ensure same conversation opens
+      const existingChat = chats.find(
+        (chat) => String(chat.userId) === matchedUserId,
+      );
+      const matchId = existingChat ? existingChat.matchId : matchedUserId;
+      console.log("match", match);
+      console.log("match_status", match.match_status);
+      console.log("match_emoji", match.match_emoji);
+      console.log("matchId", matchId);
+      console.log("matchedUserId", matchedUserId);
+      console.log("userName", userName);
+      console.log("userImage1", userImage);
+      router.push({
+        pathname: "/chat/conversation",
+        params: {
+          matchId: matchId,
+          userId: matchedUserId, // This is the matched user's ID (the person we're chatting with)
+          userName: userName,
+          userImage: userImage,
+          match_status: match.match_status,
+          match_emoji: match.match_emoji,
+        },
+      });
+    },
+    [chats],
+  );
 
   // Navigation handlers (same pattern as UserProfile)
   const handleNavigateToRemoveMatch = useCallback(() => {
@@ -213,11 +164,9 @@ export default function Matches() {
           // Remove from local state using the hook function
           removeMatch(selectedMatch.match_id);
         } else {
-
         }
       }
     } catch (error) {
-
     } finally {
       setShowRemoveMatch(false);
       setSelectedMatch(null);
@@ -250,11 +199,10 @@ export default function Matches() {
         //     removeMatch(selectedMatch.match_id);
         //   }
         // } else {
-        //   
+        //
         // }
       }
     } catch (error) {
-
     } finally {
       setShowBlockConfirmation(false);
       setSelectedMatch(null);
@@ -278,17 +226,15 @@ export default function Matches() {
             // Optionally remove the match after reporting
             removeMatch(selectedMatch.match_id);
           } else {
-
           }
         }
       } catch (error) {
-
       } finally {
         setShowReportUser(false);
         setSelectedMatch(null);
       }
     },
-    [selectedMatch, user?.user_id, removeMatch]
+    [selectedMatch, user?.user_id, removeMatch],
   );
 
   // Render horizontal match card (compact version)
@@ -297,8 +243,8 @@ export default function Matches() {
       const imageSource = item?.image
         ? { uri: item.image }
         : item?.images && item.images.length > 0
-        ? { uri: item.images[0] }
-        : undefined;
+          ? { uri: item.images[0] }
+          : undefined;
 
       return (
         <TouchableOpacity
@@ -328,7 +274,7 @@ export default function Matches() {
         </TouchableOpacity>
       );
     },
-    [handleOpenConversation, t]
+    [handleOpenConversation, t],
   );
 
   const handleDeleteChat = (chat: ChatItem) => {
@@ -356,15 +302,6 @@ export default function Matches() {
               // Use chat.userId (matched user's ID) as to_chat_id, not chat.matchId (match record ID)
               formData.append("to_chat_id", chat.userId);
 
-              // Log FormData contents (FormData doesn't serialize well, so we log the values)
-              console.log("🗑️ [Matches] Delete chat - FormData contents:", {
-                type: "chat_delete",
-                user_id: user.user_id,
-                to_chat_id: chat.userId, // Matched user's ID (e.g., "1")
-                matchId: chat.matchId, // Match record ID (for reference only, e.g., "26")
-                chatId: chat.id,
-              });
-
               const response = await apiCall(formData);
               if (response && response.result) {
                 showToast(t("chat.chatDeleted"), "success");
@@ -372,16 +309,15 @@ export default function Matches() {
               } else {
                 showToast(
                   response?.message || t("chat.failedToDelete"),
-                  "error"
+                  "error",
                 );
               }
             } catch (error: any) {
               showToast(error?.message || t("chat.failedToDelete"), "error");
-
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -432,17 +368,17 @@ export default function Matches() {
         </View>
       </TouchableOpacity>
     ),
-    []
+    [],
   );
 
   // Memoized key extractors
   const matchKeyExtractor = useCallback(
     (item: Match) => `match-${item.id}`,
-    []
+    [],
   );
   const chatKeyExtractor = useCallback(
     (item: ChatItem) => `chat-${item.id}`,
-    []
+    [],
   );
 
   const renderLoadingState = useCallback(
@@ -452,7 +388,7 @@ export default function Matches() {
         <Text style={styles.loadingText}>{t("matches.loadingMatches")}</Text>
       </View>
     ),
-    [t]
+    [t],
   );
 
   // Handle different states
@@ -494,15 +430,6 @@ export default function Matches() {
       )}
 
       {/* Vertical Chats List */}
-      {(() => {
-        console.log("📋 [Matches] Rendering chat list:", {
-          chatsLength: chats.length,
-          filteredChatsLength: filteredChats.length,
-          showChatList: chats.length > 0,
-          showSectionHeader: filteredChats.length > 0,
-        });
-        return null;
-      })()}
       <FlatList
         data={filteredChats}
         renderItem={renderChatItem}

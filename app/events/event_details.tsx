@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import * as Calendar from "expo-calendar";
+import * as ExpoLinking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,6 +33,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+// Store URLs for users who don't have the app (replace iOS app id when published)
+const APP_STORE_URL = "https://apps.apple.com/app/andra-dating/id000000000"; // TODO: Replace with real App Store ID
+const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=com.dating.Andra";
 
 // Attendees Modal Component
 interface AttendeesModalProps {
@@ -100,24 +106,88 @@ export default function EventDetails() {
   const { user } = useAppContext();
   const { showToast } = useToast();
   const [isRSVPing, setIsRSVPing] = useState(false);
+  // Fetch a single event by ID (for deep link opens)
+  const fetchEventById = React.useCallback(async (eventId: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("type", "get_data");
+      formData.append("table_name", "events");
+      formData.append("id", eventId);
+      const response = await apiCall(formData);
+      if (
+        response?.data &&
+        Array.isArray(response.data) &&
+        response.data.length > 0
+      ) {
+        const raw = response.data[0];
+        const imageUrl = raw.image?.startsWith("http")
+          ? raw.image
+          : raw.image
+          ? `https://api.andra-dating.com/images/${raw.image}`
+          : "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
+        const eventData = {
+          id: raw.id,
+          title: raw.title || raw.title_languages,
+          category: raw.category || "",
+          date: raw.date,
+          time: raw.time,
+          to_time: raw.to_time,
+          location: raw.address || raw.location || "",
+          address: raw.address || raw.location || "",
+          description: raw.detail || raw.description || raw.details || "",
+          image: imageUrl,
+          organizer: {
+            name: raw.organized_by || raw.org_by_languages || "Unknown",
+            image: raw.organizer_image?.startsWith("http")
+              ? raw.organizer_image
+              : raw.organizer_image
+              ? `https://api.andra-dating.com/images/${raw.organizer_image}`
+              : "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
+            verified: raw.organizer_verified === "1" || false,
+          },
+          going: [],
+          going_count: raw.going_count || 0,
+          isAttending: raw.user_going === "1" || raw.user_going === 1,
+          user_going: raw.user_going || "0",
+          web_link: raw.web_link,
+          lat: raw.lat,
+          lng: raw.lng,
+          distance: raw.distance,
+          attendees: [],
+          totalAttendees: raw.going_count || 0,
+        };
+        setEvent(eventData);
+        setIsAttending(
+          eventData.user_going === "1" || eventData.user_going === 1,
+        );
+        return true;
+      }
+    } catch (error) {
+      return false;
+    }
+    return false;
+  }, []);
+
   useEffect(() => {
     if (params.event) {
       try {
         const eventData = JSON.parse(params.event as string);
         setEvent(eventData);
-        // Set attending status based on user_going field
         setIsAttending(
-          eventData.user_going === "1" || eventData.user_going === 1
+          eventData.user_going === "1" || eventData.user_going === 1,
         );
       } catch (error) {
-
         router.back();
       }
+    } else if (params.eventId && typeof params.eventId === "string") {
+      // Opened via deep link (e.g. andra://events/event_details?eventId=12)
+      fetchEventById(params.eventId).then((ok) => {
+        if (!ok) router.back();
+      });
     } else {
-
       router.back();
     }
-  }, [params.event]);
+  }, [params.event, params.eventId, fetchEventById]);
 
   if (!event) {
     return (
@@ -133,42 +203,59 @@ export default function EventDetails() {
 
   const handleShare = async () => {
     try {
-      const shareContent = {
-        title: event.title,
-        message: `${event.title}\n\n📅 ${event.date} at ${event.time}${
-          event.to_time ? ` - ${event.to_time}` : ""
-        }\n📍 ${event.address}\n\n${event.description}\n\nOrganized by: ${
-          event.organizer?.name || "Unknown"
-        }\n\nJoin me at this event!`,
-        url: event.image, // Include event image if available
-      };
+      // Deep link: use expo-linking so URL format matches Expo Router (path = events/event_details, query = eventId).
+      // app.json must have "scheme": "andra". Test: npx uri-scheme open "andra:///events/event_details?eventId=12" --ios
+      const appDeepLink = ExpoLinking.createURL("events/event_details", {
+        queryParams: { eventId: String(event.id) },
+        isTripleSlashed: true,
+      });
+      const storeUrl = Platform.OS === "ios" ? APP_STORE_URL : PLAY_STORE_URL;
+      const storeLinks = t("events.getAppFromStore", { url: storeUrl });
 
-      const result = await Share.share(shareContent);
+      // Full text for the share; deep link in message so it's visible
+      const message = `${event.title}\n\n📅 ${event.date} at ${event.time}${
+        event.to_time ? ` - ${event.to_time}` : ""
+      }\n📍 ${event.address}\n\n${event.description}\n\nOrganized by: ${
+        event.organizer?.name || "Unknown"
+      }\n\n${t("events.joinMeAtEvent")}\n\n${t(
+        "events.openEventInApp",
+      )}: ${appDeepLink}\n\n${storeLinks}`;
+
+      // On Android, pass url so the share target gets a tappable link that opens the app when tapped.
+      // On iOS, passing url often makes apps show only the link and drop the message, so we omit url there.
+      const shareOptions: { title: string; message: string; url?: string } = {
+        title: event.title,
+        message,
+      };
+      if (Platform.OS === "android") {
+        shareOptions.url = appDeepLink;
+      }
+      const result = await Share.share(shareOptions);
 
       if (result.action === Share.sharedAction) {
         showToast(t("events.eventShared"), "success");
       } else if (result.action === Share.dismissedAction) {
         // User dismissed the share sheet
-
       }
     } catch (error) {
-
       showToast(t("events.failedToShare"), "error");
     }
   };
 
   const handleGetDirections = async () => {
     try {
-      // Prefer using lat/lng for more accurate directions
+      // Prefer lat/lng so maps open with directions (turn-by-turn) to the event
       if (event.lat && event.lng) {
+        const lat = String(event.lat).trim();
+        const lng = String(event.lng).trim();
         let mapsUrl: string;
 
         if (Platform.OS === "ios") {
-          // Use Apple Maps with coordinates for iOS
-          mapsUrl = `http://maps.apple.com/?ll=${event.lat},${event.lng}`;
+          // Apple Maps: daddr = destination → opens directions to this point (from current location)
+          mapsUrl = `http://maps.apple.com/?daddr=${lat},${lng}`;
         } else {
-          // Use Google Maps with coordinates for Android
-          mapsUrl = `https://www.google.com/maps/search/?api=1&query=${event.lat},${event.lng}`;
+          // Google Maps: /dir/ with destination → opens directions to this point
+          mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
         }
 
         const canOpen = await Linking.canOpenURL(mapsUrl);
@@ -180,39 +267,24 @@ export default function EventDetails() {
 
       // Fallback to address if coordinates not available
       const address = event.address || event.location;
-
       if (!address) {
         showToast(t("events.noLocationAvailable"), "error");
         return;
       }
 
-      // Create the maps URL based on platform
-      let mapsUrl: string;
-
       if (Platform.OS === "ios") {
-        // Use Apple Maps for iOS
-        mapsUrl = `http://maps.apple.com/?q=${encodeURIComponent(address)}`;
+        const mapsUrl = `http://maps.apple.com/?daddr=${encodeURIComponent(address)}`;
+        const canOpen = await Linking.canOpenURL(mapsUrl);
+        if (canOpen) {
+          await Linking.openURL(mapsUrl);
+        } else {
+          await Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`);
+        }
       } else {
-        // Use Google Maps for Android
-        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          address
-        )}`;
-      }
-
-      // Check if the URL can be opened
-      const canOpen = await Linking.canOpenURL(mapsUrl);
-
-      if (canOpen) {
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
         await Linking.openURL(mapsUrl);
-      } else {
-        // Fallback to generic maps URL
-        const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          address
-        )}`;
-        await Linking.openURL(fallbackUrl);
       }
     } catch (error) {
-
       showToast(t("events.failedToOpenMaps"), "error");
     }
   };
@@ -239,31 +311,20 @@ export default function EventDetails() {
                 }
               },
             },
-          ]
+          ],
         );
         return;
       }
 
       // Get writable calendars
       const calendars = await Calendar.getCalendarsAsync(
-        Calendar.EntityTypes.EVENT
-      );
-
-      console.log(
-        "Available calendars:",
-        calendars.map((cal) => ({
-          id: cal.id,
-          title: cal.title,
-          allowsModifications: cal.allowsModifications,
-          source: cal.source?.name,
-          isLocalAccount: cal.source?.isLocalAccount,
-        }))
+        Calendar.EntityTypes.EVENT,
       );
 
       // Find a writable calendar (not read-only)
       const writableCalendar =
         calendars.find(
-          (cal) => cal.allowsModifications && !cal.source?.isLocalAccount
+          (cal) => cal.allowsModifications && !cal.source?.isLocalAccount,
         ) || calendars.find((cal) => cal.allowsModifications);
 
       if (!writableCalendar) {
@@ -277,13 +338,13 @@ export default function EventDetails() {
 
       let startDate: Date;
       let endDate: Date;
-      
+
       try {
         // Try to parse the date
         let eventDate: Date;
         if (typeof event.date === "string") {
           const dateStr = event.date.trim();
-          
+
           // Check for DD-MM-YYYY format first (e.g., "25-01-2026")
           // IMPORTANT: This must be checked BEFORE new Date() because new Date() misinterprets DD-MM-YYYY
           const ddMmYyyyMatch = dateStr.match(/^\d{2}-\d{2}-\d{4}$/);
@@ -291,41 +352,35 @@ export default function EventDetails() {
           if (ddMmYyyyMatch) {
             const [day, month, year] = dateStr.split("-").map(Number);
             eventDate = new Date(year, month - 1, day); // month is 0-indexed
-            console.log("✅ [Calendar] Parsed DD-MM-YYYY format:", {
-              original: dateStr,
-              day,
-              month: month - 1,
-              year,
-              parsed: eventDate.toISOString(),
-              parsedYear: eventDate.getFullYear(),
-            });
           }
           // Check for YYYY-MM-DD format (e.g., "2026-01-25")
           else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
             const [year, month, day] = dateStr.split("-").map(Number);
             eventDate = new Date(year, month - 1, day);
-            console.log("📅 [Calendar] Parsed YYYY-MM-DD format:", {
-              original: dateStr,
-              parsed: eventDate.toISOString(),
-            });
           }
           // Check for MMM DD, YYYY format (e.g., "Jul 22, 2025")
           else if (dateStr.match(/^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}$/)) {
             const monthMap: { [key: string]: number } = {
-              Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-              Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+              Jan: 0,
+              Feb: 1,
+              Mar: 2,
+              Apr: 3,
+              May: 4,
+              Jun: 5,
+              Jul: 6,
+              Aug: 7,
+              Sep: 8,
+              Oct: 9,
+              Nov: 10,
+              Dec: 11,
             };
-            
+
             const parts = dateStr.split(" ");
             if (parts.length >= 3) {
               const month = monthMap[parts[0]];
               const day = parseInt(parts[1].replace(",", ""));
               const year = parseInt(parts[2]);
               eventDate = new Date(year, month, day);
-              console.log("📅 [Calendar] Parsed MMM DD, YYYY format:", {
-                original: dateStr,
-                parsed: eventDate.toISOString(),
-              });
             } else {
               throw new Error("Invalid date format");
             }
@@ -336,54 +391,42 @@ export default function EventDetails() {
             if (isNaN(eventDate.getTime())) {
               throw new Error(`Invalid date format: ${dateStr}`);
             }
-            console.log("📅 [Calendar] Parsed as ISO/standard format:", {
-              original: dateStr,
-              parsed: eventDate.toISOString(),
-            });
           }
         } else {
           eventDate = new Date(event.date);
         }
-        
+
         // Validate the parsed date
         if (isNaN(eventDate.getTime())) {
           throw new Error(`Failed to parse date: ${event.date}`);
         }
-        
+
         // Additional validation: check if year is reasonable (not year 30!)
         const parsedYear = eventDate.getFullYear();
-        console.log("🔍 [Calendar] Validating parsed date:", {
-          originalDate: event.date,
-          parsedYear,
-          parsedDate: eventDate.toISOString(),
-        });
-        
+
         if (parsedYear < 2000 || parsedYear > 2100) {
-          console.error("❌ [Calendar] Parsed year seems incorrect:", {
-            originalDate: event.date,
-            parsedYear,
-            parsedDate: eventDate.toISOString(),
-          });
           showToast(
             t("events.invalidDateCheck", { date: event.date }),
-            "error"
+            "error",
           );
-          throw new Error(`Invalid year in date: ${parsedYear}. Original: ${event.date}`);
+          throw new Error(
+            `Invalid year in date: ${parsedYear}. Original: ${event.date}`,
+          );
         }
 
         // Parse start time (event.time)
         startDate = new Date(eventDate);
-        
+
         if (event.time) {
           const timeStr = event.time.trim();
-          
+
           // Check if it's 12-hour format (contains AM/PM)
           if (timeStr.includes("AM") || timeStr.includes("PM")) {
             const timeParts = timeStr.split(" ");
             const timeValue = timeParts[0];
             const ampm = timeParts[1]?.toUpperCase();
             const [hours, minutes] = timeValue.split(":").map(Number);
-            
+
             // Convert to 24-hour format
             let hour24 = hours;
             if (ampm === "PM" && hours !== 12) {
@@ -391,7 +434,7 @@ export default function EventDetails() {
             } else if (ampm === "AM" && hours === 12) {
               hour24 = 0;
             }
-            
+
             startDate.setHours(hour24, minutes || 0, 0, 0);
           } else {
             // 24-hour format (e.g., "22:04" or "22:04:00")
@@ -403,23 +446,17 @@ export default function EventDetails() {
           startDate.setHours(12, 0, 0, 0);
         }
 
-        console.log("📅 [Calendar] Parsed start date:", {
-          originalDate: event.date,
-          originalTime: event.time,
-          parsedStartDate: startDate.toISOString(),
-        });
-
         // Calculate end date - use to_time if available, otherwise default to 2 hours
-      if (event.to_time) {
+        if (event.to_time) {
           const toTimeStr = event.to_time.trim();
-          
+
           // Check if it's 12-hour format
           if (toTimeStr.includes("AM") || toTimeStr.includes("PM")) {
             const timeParts = toTimeStr.split(" ");
             const timeValue = timeParts[0];
             const ampm = timeParts[1]?.toUpperCase();
             const [hours, minutes] = timeValue.split(":").map(Number);
-            
+
             // Convert to 24-hour format
             let hour24 = hours;
             if (ampm === "PM" && hours !== 12) {
@@ -427,8 +464,8 @@ export default function EventDetails() {
             } else if (ampm === "AM" && hours === 12) {
               hour24 = 0;
             }
-            
-        endDate = new Date(eventDate);
+
+            endDate = new Date(eventDate);
             endDate.setHours(hour24, minutes || 0, 0, 0);
           } else {
             // 24-hour format
@@ -436,38 +473,28 @@ export default function EventDetails() {
             endDate = new Date(eventDate);
             endDate.setHours(hours || 0, minutes || 0, 0, 0);
           }
-          
+
           // If end time is earlier than start time, assume it's next day
-        if (endDate < startDate) {
-          endDate.setDate(endDate.getDate() + 1);
-        }
-      } else {
-        // Default to 2 hours duration if to_time not available
+          if (endDate < startDate) {
+            endDate.setDate(endDate.getDate() + 1);
+          }
+        } else {
+          // Default to 2 hours duration if to_time not available
           endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
         }
-
-        console.log("📅 [Calendar] Parsed end date:", {
-          originalToTime: event.to_time,
-          parsedEndDate: endDate.toISOString(),
-        });
       } catch (error) {
-
         showToast(
           t("events.invalidDateTimeFormat") || "Invalid date/time format",
-          "error"
+          "error",
         );
         return;
       }
 
       // Validate dates
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        console.error("❌ [Calendar] Invalid dates:", {
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-        });
         showToast(
           t("events.invalidDateTimeFormat") || "Invalid date/time format",
-          "error"
+          "error",
         );
         return;
       }
@@ -475,30 +502,20 @@ export default function EventDetails() {
       // Validate year is reasonable (should have been caught earlier, but double-check)
       const startYear = startDate.getFullYear();
       const endYear = endDate.getFullYear();
-      if (startYear < 2000 || startYear > 2100 || endYear < 2000 || endYear > 2100) {
-        console.error("❌ [Calendar] Invalid year in dates:", {
-          startYear,
-          endYear,
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-          originalDate: event.date,
-          originalTime: event.time,
-        });
-        showToast(
-          t("events.invalidYearRange", { year: startYear }),
-          "error"
-        );
+      if (
+        startYear < 2000 ||
+        startYear > 2100 ||
+        endYear < 2000 ||
+        endYear > 2100
+      ) {
+        showToast(t("events.invalidYearRange", { year: startYear }), "error");
         return;
       }
 
       if (endDate <= startDate) {
-        console.error("❌ [Calendar] End date must be after start date:", {
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-        });
         showToast(
           t("events.invalidDateTimeFormat") || "Invalid date/time format",
-          "error"
+          "error",
         );
         return;
       }
@@ -527,57 +544,35 @@ export default function EventDetails() {
       // Final validation before creating event
       const finalStartYear = startDate.getFullYear();
       const finalEndYear = endDate.getFullYear();
-      
-      console.log("📅 [Calendar] Final validation before creating event:", {
-        startYear: finalStartYear,
-        endYear: finalEndYear,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        originalDate: event.date,
-        originalTime: event.time,
-      });
-      
-      if (finalStartYear < 2000 || finalStartYear > 2100) {
 
+      if (finalStartYear < 2000 || finalStartYear > 2100) {
         showToast(
           t("events.cannotAddEventContactSupport", { year: finalStartYear }),
-          "error"
+          "error",
         );
         return;
       }
-      
-      if (finalEndYear < 2000 || finalEndYear > 2100) {
 
+      if (finalEndYear < 2000 || finalEndYear > 2100) {
         showToast(
           t("events.cannotAddEventContactSupport", { year: finalEndYear }),
-          "error"
+          "error",
         );
         return;
       }
-
-      console.log("📅 [Calendar] Creating event with details:", {
-        title: eventDetails.title,
-        startDate: eventDetails.startDate.toISOString(),
-        endDate: eventDetails.endDate.toISOString(),
-        location: eventDetails.location,
-        calendarId: eventDetails.calendarId,
-        calendarName: writableCalendar.title,
-      });
 
       // Create the event
       const eventId = await Calendar.createEventAsync(
         writableCalendar.id,
-        eventDetails
+        eventDetails,
       );
 
       if (eventId) {
         showToast(t("events.addedToCalendar"), "success");
       } else {
-
         showToast(t("events.failedToAddToCalendar"), "error");
       }
     } catch (error) {
-
       showToast(t("events.calendarError"), "error");
     }
   };
@@ -605,7 +600,6 @@ export default function EventDetails() {
           showToast(t("events.websiteNotAvailable"), "error");
         }
       } catch (error) {
-
         showToast(t("events.websiteError"), "error");
       }
     } else {
@@ -649,7 +643,6 @@ export default function EventDetails() {
   // Parse going users data
   const parseGoingUsers = () => {
     if (!event?.going || !Array.isArray(event.going)) {
-
       return [];
     }
 
@@ -664,9 +657,7 @@ export default function EventDetails() {
           if (images.length > 0) {
             imageUrl = `https://api.andra-dating.com/images/${images[0]}`;
           }
-        } catch (error) {
-
-        }
+        } catch (error) {}
       }
 
       // Fallback to default image if no image found

@@ -53,7 +53,7 @@ export default function ListView({
         onShowUserOnMap={onShowUserOnMap}
       />
     ),
-    [onViewProfile, onShowUserOnMap]
+    [onViewProfile, onShowUserOnMap],
   );
 
   // Memoized key extractor
@@ -81,7 +81,7 @@ export default function ListView({
       "hardwareBackPress",
       () => {
         return true;
-      }
+      },
     );
 
     return () => backHandler.remove();
@@ -135,10 +135,10 @@ export default function ListView({
   );
 
   // Render error banner for when there are users but also an error
+  console.log("users", users);
   const renderErrorBanner = () => {
     // Only show error banner if there's an error AND no users
     if (!error || users.length > 0) return null;
-
     return (
       <View style={styles.errorBanner}>
         <View style={styles.errorBannerContent}>

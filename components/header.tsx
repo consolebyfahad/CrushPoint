@@ -12,6 +12,7 @@ interface header {
   divider?: any;
   userImage?: string;
   onImagePress?: () => void;
+  rightElement?: React.ReactNode;
 }
 
 const handleBack = () => {
@@ -27,6 +28,7 @@ export default function Header({
   divider,
   userImage,
   onImagePress,
+  rightElement,
 }: header) {
   return (
     <View
@@ -35,14 +37,19 @@ export default function Header({
         divider && { borderBottomWidth: 1, borderColor: color.gray94 },
       ]}
     >
-      <TouchableOpacity onPress={onPress || handleBack} style={styles.backButton}>
+      <TouchableOpacity
+        onPress={onPress || handleBack}
+        style={styles.backButton}
+      >
         <Feather name="arrow-left" size={24} color="black" />
       </TouchableOpacity>
 
       <View
         style={[
           styles.titleContainer,
-          closeButton ? { alignItems: "center" } : { marginLeft: 8 },
+          closeButton || rightElement
+            ? { alignItems: "center" }
+            : { marginLeft: 8 },
         ]}
       >
         {userImage && onImagePress ? (
@@ -59,10 +66,14 @@ export default function Header({
         )}
       </View>
 
-      {closeButton && (
+      {rightElement != null ? (
+        rightElement
+      ) : closeButton ? (
         <TouchableOpacity onPress={onPress} style={styles.close}>
           <MaterialCommunityIcons name="window-close" size={24} color="black" />
         </TouchableOpacity>
+      ) : (
+        <View style={styles.placeholder} />
       )}
     </View>
   );
@@ -104,5 +115,9 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     alignItems: "flex-end",
+  },
+  placeholder: {
+    width: 24,
+    height: 24,
   },
 });
