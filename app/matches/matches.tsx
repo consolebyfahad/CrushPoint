@@ -76,6 +76,14 @@ export default function Matches() {
     match.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  // Horizontal list: only show matches that don't have a conversation yet (hide users already in chat list)
+  const matchesWithoutChat = filteredMatches.filter(
+    (match) =>
+      !chats.some(
+        (chat) => String(chat.userId) === String(match.match_id || match.id)
+      )
+  );
+
   // Filter chats based on search text
   const filteredChats = chats.filter(
     (chat) =>
@@ -300,7 +308,8 @@ export default function Matches() {
               const response = await apiCall(formData);
               if (response && response.result) {
                 showToast(t("chat.chatDeleted"), "success");
-                refetch(); // Refresh chat list
+                refetch(); // Refresh matches (horizontal list)
+                refetchChats(); // Refresh chat list so deleted chat disappears
               } else {
                 showToast(
                   response?.message || t("chat.failedToDelete"),
@@ -405,11 +414,11 @@ export default function Matches() {
         placeholder={t("matches.searchMatches")}
       />
 
-      {/* Horizontal Matches List */}
-      {filteredMatches.length > 0 && (
+      {/* Horizontal Matches List - only matches not yet in chat list */}
+      {matchesWithoutChat.length > 0 && (
         <View style={styles.horizontalMatchesContainer}>
           <FlatList
-            data={filteredMatches}
+            data={matchesWithoutChat}
             renderItem={renderHorizontalMatchCard}
             keyExtractor={matchKeyExtractor}
             horizontal
