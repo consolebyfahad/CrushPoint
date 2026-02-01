@@ -16,17 +16,39 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
+// Parse skip_timer (e.g. "00:00:10" or "00:00:05") to total seconds
+function parseSkipTimerSeconds(skipTimer: string | undefined): number {
+  if (!skipTimer || typeof skipTimer !== "string") return 10;
+  const trimmed = skipTimer.trim();
+  if (!trimmed) return 10;
+  const parts = trimmed.split(":").map((p) => parseInt(p, 10) || 0);
+  if (parts.length === 3) {
+    const [h, m, s] = parts;
+    return Math.max(0, h * 3600 + m * 60 + s);
+  }
+  if (parts.length === 2) {
+    const [m, s] = parts;
+    return Math.max(0, m * 60 + s);
+  }
+  if (parts.length === 1) return Math.max(0, parts[0]);
+  return 10;
+}
+
+const DEFAULT_TIMER_SECONDS = 10;
+
 export default function CampaignScreen() {
   const { campaign, loading } = useGetCampaign();
   const { isHydrated, checkVerificationStatus } = useAppContext();
   const videoRef = useRef<Video>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigationPerformedRef = useRef(false);
-  const [countdown, setCountdown] = useState(15);
-  const [skipEnabled, setSkipEnabled] = useState(false);
+  const timerSeconds = campaign
+    ? parseSkipTimerSeconds((campaign as any).skip_timer)
+    : DEFAULT_TIMER_SECONDS;
+  const [countdown, setCountdown] = useState(timerSeconds);
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const countdownFinished = countdown <= 0;
   // Get media URL helper function
   const getMediaUrl = (campaignData: typeof campaign) => {
     if (
@@ -63,7 +85,7 @@ export default function CampaignScreen() {
     }
   }, [loading, isHydrated, campaign, mediaUrl]);
 
-  // Handle countdown and navigation - only start after media is loaded and context is hydrated
+  // Countdown from campaign skip_timer (e.g. 10) to 0; do not auto-navigate when 0
   useEffect(() => {
     if (
       !loading &&
@@ -73,37 +95,26 @@ export default function CampaignScreen() {
       isHydrated &&
       !navigationPerformedRef.current
     ) {
-      // Start countdown from 15 to 1
-      setCountdown(15);
-      setSkipEnabled(false);
+      const seconds = parseSkipTimerSeconds((campaign as any).skip_timer);
+      setCountdown(seconds);
 
       countdownRef.current = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
-            // Countdown finished, navigate based on onboarding and login status
-            if (!navigationPerformedRef.current) {
-              // Use setTimeout to avoid state update during render
-              setTimeout(() => {
-                navigateAfterCampaign();
-              }, 0);
+            if (countdownRef.current) {
+              clearInterval(countdownRef.current);
+              countdownRef.current = null;
             }
-            return 0;
+            return 0; // Stop at 0; user taps close icon to exit
           }
           return prev - 1;
         });
       }, 1000);
 
-      // Enable skip after 5 seconds (when countdown reaches 10)
-      timerRef.current = setTimeout(() => {
-        setSkipEnabled(true);
-      }, 5000);
-
       return () => {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-        }
         if (countdownRef.current) {
           clearInterval(countdownRef.current);
+          countdownRef.current = null;
         }
       };
     }
@@ -118,8 +129,10 @@ export default function CampaignScreen() {
     }
 
     navigationPerformedRef.current = true;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
 
     // We only reach campaign when logged in (from splash). Just go to tabs or verification.
     const isVerified = await checkVerificationStatus();
@@ -130,8 +143,8 @@ export default function CampaignScreen() {
     }
   };
 
-  const handleSkip = () => {
-    if (skipEnabled && !navigationPerformedRef.current) {
+  const handleClose = () => {
+    if (!navigationPerformedRef.current) {
       navigateAfterCampaign();
     }
   };
@@ -201,6 +214,16 @@ export default function CampaignScreen() {
     </Svg>
   );
 
+  // Close (X) Icon - shown when countdown reaches 0
+  const CloseIcon = () => (
+    <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+        fill="white"
+      />
+    </Svg>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
@@ -249,16 +272,20 @@ export default function CampaignScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Skip Button */}
+      {/* Timer / Close: countdown N to 0, then close icon (no auto-skip) */}
       <TouchableOpacity
-        style={[styles.skipButton, !skipEnabled && styles.skipButtonDisabled]}
-        onPress={handleSkip}
-        disabled={!skipEnabled}
+        style={[
+          styles.timerButton,
+          countdownFinished && styles.timerButtonClose,
+        ]}
+        onPress={countdownFinished ? handleClose : undefined}
         activeOpacity={0.7}
       >
-        <Text style={styles.skipButtonText}>
-          Skip {countdown > 0 ? countdown : ""}
-        </Text>
+        {countdownFinished ? (
+          <CloseIcon />
+        ) : (
+          <Text style={styles.timerButtonText}>{countdown}</Text>
+        )}
       </TouchableOpacity>
 
       {/* Download Now Button */}
@@ -309,24 +336,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.white,
   },
-  skipButton: {
+  timerButton: {
     position: "absolute",
-    top: 50,
-    right: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    top: 60,
+    right: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    padding: 12,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 99,
     borderWidth: 1,
     borderColor: color.white,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  skipButtonDisabled: {
-    opacity: 0.5,
+  timerButtonClose: {
+    height: 24,
+    width: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
   },
-  skipButtonText: {
+  timerButtonText: {
     color: color.white,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 16,
   },
   downloadButton: {
     position: "absolute",

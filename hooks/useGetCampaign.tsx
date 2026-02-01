@@ -14,6 +14,7 @@ interface Campaign {
   distance: number;
   created_at: string;
   button_text: string;
+  skip?: string;
 }
 
 const useGetCampaign = () => {
@@ -41,7 +42,7 @@ const useGetCampaign = () => {
       ) {
         // Filter active campaigns (status === "1")
         const activeCampaigns = response.data.filter(
-          (item: any) => item.status === "1" || item.status === 1,
+          (item: any) => item.status === "1" || item.status === 1
         );
 
         if (activeCampaigns.length === 0) {
@@ -56,7 +57,7 @@ const useGetCampaign = () => {
         if (activeCampaigns.length > 1) {
           // Find video campaign first, otherwise use first one
           const videoCampaign = activeCampaigns.find(
-            (item: any) => item.ad_type === "video",
+            (item: any) => item.ad_type === "video"
           );
           if (videoCampaign) {
             selectedCampaign = videoCampaign;
