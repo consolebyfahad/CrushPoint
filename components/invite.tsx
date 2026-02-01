@@ -55,23 +55,28 @@ export default function InviteMatches({
   };
 
   const handleSendInvites = async () => {
-    if (!user?.user_id) {
+    if (!user?.user_id || selectedMatches.length === 0) {
       return;
     }
     setIsSubmitting(true);
 
     try {
-      const formData = new FormData();
-      formData.append("type", "add_data");
-      formData.append("user_id", user.user_id);
-      formData.append("table_name", "event_invites");
-      formData.append("event_id", eventId.toString());
-      formData.append("invited_id", JSON.stringify(selectedMatches));
-      console.log("formData", formData);
-      const response = await apiCall(formData);
-      console.log("response", response);
+      // Send one invite per user so backend receives invited_id as a single id per row (not JSON array)
+      let allSucceeded = true;
+      for (const invitedId of selectedMatches) {
+        const formData = new FormData();
+        formData.append("type", "add_data");
+        formData.append("user_id", user.user_id);
+        formData.append("table_name", "event_invites");
+        formData.append("event_id", eventId.toString());
+        formData.append("invited_id", invitedId);
+        const response = await apiCall(formData);
+        if (!response?.result) {
+          allSucceeded = false;
+        }
+      }
 
-      if (response.result) {
+      if (allSucceeded) {
         const selectedMatchesData = matches.filter((match) =>
           selectedMatches.includes(match.match_id),
         );
@@ -85,7 +90,7 @@ export default function InviteMatches({
         setSearchText("");
         onClose();
       } else {
-        showToast(response.message || t("invite.failedToSendInvites"), "error");
+        showToast(t("invite.failedToSendInvites"), "error");
       }
     } catch (error) {
       showToast(t("invite.somethingWentWrong"), "error");

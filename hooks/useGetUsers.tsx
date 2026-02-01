@@ -121,7 +121,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
   const { rawInterests: apiInterests } = useGetInterests();
   const { user, userData } = useAppContext();
   const { t, i18n } = useTranslation();
-  const [users, setUsers] = useState<TransformedUser[]>([]);
+  const [rawUserData, setRawUserData] = useState<ApiUserData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -513,28 +513,12 @@ export default function useGetUsers(filters: UserFilters = {}) {
       const response: ApiResponse = await apiCall(formData);
 
       if (response.result && response.data && Array.isArray(response.data)) {
-        const transformedUsers: TransformedUser[] = response.data
-          .map((userData: ApiUserData) => {
-            try {
-              return transformUser(userData);
-            } catch (transformError) {
-              console.warn(
-                `${t("hooks.failedToTransformUser")} ${
-                  userData?.id || "unknown"
-                }:`,
-                transformError
-              );
-              return null;
-            }
-          })
-          .filter((user): user is TransformedUser => user !== null);
-
-        setUsers(transformedUsers);
+        setRawUserData(response.data);
         // Always clear error on successful response (even if empty)
         setError(null);
       } else {
         // API returned error or invalid response
-        setUsers([]); // Clear users on error
+        setRawUserData([]);
         setError(t("users.noUsersFoundOrServerError"));
       }
     } catch (err: any) {
@@ -721,6 +705,20 @@ export default function useGetUsers(filters: UserFilters = {}) {
   // Using calculateAge from helper.ts
 
   // Using getDefaultImage from helper.ts
+
+  // Derive users from raw data so interests resolve when apiInterests loads (fixes empty interests on first list view load)
+  const users = useMemo(() => {
+    if (!rawUserData || rawUserData.length === 0) return [];
+    return rawUserData
+      .map((userData: ApiUserData) => {
+        try {
+          return transformUser(userData);
+        } catch (transformError) {
+          return null;
+        }
+      })
+      .filter((user): user is TransformedUser => user !== null);
+  }, [rawUserData, apiInterests, i18n.language]);
 
   useEffect(() => {
     if (user?.user_id) {

@@ -38,6 +38,8 @@ interface Notification {
   backgroundImage?: any;
   from?: any; // User data from notification
   from_id?: string; // User ID from notification
+  event_id?: string; // Event ID for event_invite, event_reminder, etc.
+  event?: any; // Full event object if API sends it
 }
 
 export default function Notifications({ navigation }: any) {
@@ -189,7 +191,7 @@ export default function Notifications({ navigation }: any) {
   const translateNotificationMessage = (
     apiMessage: string,
     type: string,
-    userName: string,
+    userName: string
   ) => {
     if (!apiMessage) return "";
     // Translate common notification message patterns
@@ -295,12 +297,12 @@ export default function Notifications({ navigation }: any) {
             // Translate notification title and message
             const translatedTitle = translateNotificationTitle(
               notif.title,
-              notificationType,
+              notificationType
             );
             const translatedMessage = translateNotificationMessage(
               notif.notification,
               notificationType,
-              notif.from?.name || notif.user_name || "",
+              notif.from?.name || notif.user_name || ""
             );
 
             const processed = {
@@ -321,14 +323,16 @@ export default function Notifications({ navigation }: any) {
               user_name: notif.user_name || notif.from?.name || notif.from_user,
               emoji: getNotificationEmoji(notificationType),
               backgroundImage: backgroundImage,
-              from: notif.from || null, // Store full user object
-              from_id: notif.from_id || notif.from?.id || null, // Store user ID
+              from: notif.from || null,
+              from_id: notif.from_id || notif.from?.id || null,
+              event_id: notif.event_id || notif.eventId || null,
+              event: notif.event || null,
             };
 
             return processed;
-          },
+          }
         );
-
+        console.log("processedNotifications", processedNotifications);
         setNotifications(processedNotifications);
         setError(null);
       } else {
@@ -415,7 +419,7 @@ export default function Notifications({ navigation }: any) {
     // Mark as read locally
     setNotifications((prevNotifications) => {
       const updated = prevNotifications.map((notif) =>
-        notif.id === notification.id ? { ...notif, isRead: true } : notif,
+        notif.id === notification.id ? { ...notif, isRead: true } : notif
       );
       return updated;
     });
@@ -446,7 +450,7 @@ export default function Notifications({ navigation }: any) {
               const response = await apiCall(formData);
               if (response?.data && Array.isArray(response.data)) {
                 const matchRecord = response.data.find(
-                  (m: any) => m.match_id === notification.from_id,
+                  (m: any) => m.match_id === notification.from_id
                 );
                 matchRecordId = matchRecord?.id || null;
               }
@@ -466,7 +470,7 @@ export default function Notifications({ navigation }: any) {
                   ? notification.from.images[0]
                   : parseUserImages(
                       notification.from.images,
-                      notification.from.gender || "unknown",
+                      notification.from.gender || "unknown"
                     )[0]
                 : "",
             },
@@ -492,7 +496,7 @@ export default function Notifications({ navigation }: any) {
           const imagesString = notification.from.images || "[]";
           const parsedImages = parseUserImages(
             imagesString,
-            notification.from.gender || "unknown",
+            notification.from.gender || "unknown"
           );
 
           // Calculate age from DOB
@@ -599,6 +603,37 @@ export default function Notifications({ navigation }: any) {
       }
     }
 
+    // Handle event notifications - open event details
+    const eventTypes = [
+      "event_invite",
+      "event_invite_accepted",
+      "event_reminder",
+      "new_event",
+    ];
+    if (eventTypes.includes(notificationType)) {
+      const eventId =
+        (notification as Notification & { event_id?: string }).event_id;
+      const eventObj = (notification as Notification & { event?: any }).event;
+      if (eventId || eventObj) {
+        const params: Record<string, string> = {};
+        if (eventObj && typeof eventObj === "object") {
+          params.event = JSON.stringify(eventObj);
+        } else if (eventId) {
+          params.eventId = String(eventId);
+        }
+        if (Object.keys(params).length > 0) {
+          router.push({
+            pathname: "/events/event_details",
+            params,
+          });
+          return;
+        }
+      }
+      // No event_id/event: go to events list
+      router.push("/(tabs)/events");
+      return;
+    }
+
     // Navigate to user profile if user data is available (for other notifications)
     if (notification.from && notification.from_id) {
       try {
@@ -606,7 +641,7 @@ export default function Notifications({ navigation }: any) {
         const imagesString = notification.from.images || "[]";
         const parsedImages = parseUserImages(
           imagesString,
-          notification.from.gender || "unknown",
+          notification.from.gender || "unknown"
         );
 
         // Parse lookingFor from JSON string to array
@@ -626,7 +661,7 @@ export default function Notifications({ navigation }: any) {
           parsedInterests = parseInterestsWithNames(
             interestsString,
             rawInterests || [],
-            i18n.language || "en",
+            i18n.language || "en"
           );
         } catch (error) {
           // Fallback to parsing as regular JSON if conversion fails
@@ -725,7 +760,7 @@ export default function Notifications({ navigation }: any) {
     // Remove locally
     setNotifications((prevNotifications) => {
       const filtered = prevNotifications.filter(
-        (notif) => notif.id !== notification.id,
+        (notif) => notif.id !== notification.id
       );
       return filtered;
     });

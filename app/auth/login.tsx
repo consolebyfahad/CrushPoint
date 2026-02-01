@@ -51,7 +51,9 @@ export default function Login() {
     }
 
     try {
+      console.log("formData", formData);
       const response = await apiCall(formData);
+      console.log("response", response);
       const userData = {
         user_id: response?.user_id,
         email: response?.email,
@@ -94,7 +96,7 @@ export default function Login() {
     provider: "apple" | "google"
   ) => {
     setOtherMethodsLoading(true);
-    
+
     // Use loginUser to properly set both user and isLoggedIn state
     // This ensures the session persists when the app is closed and reopened
     await loginUser(userData);
@@ -107,7 +109,7 @@ export default function Login() {
       // Existing user - go to tabs
       router.replace("/(tabs)");
     }
-    
+
     setOtherMethodsLoading(false);
   };
 

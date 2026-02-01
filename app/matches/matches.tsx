@@ -73,14 +73,14 @@ export default function Matches() {
 
   // Filter matches based on search text
   const filteredMatches = matches.filter((match) =>
-    match.name.toLowerCase().includes(searchText.toLowerCase()),
+    match.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   // Filter chats based on search text
   const filteredChats = chats.filter(
     (chat) =>
       chat.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      chat.lastMessage.toLowerCase().includes(searchText.toLowerCase()),
+      chat.lastMessage.toLowerCase().includes(searchText.toLowerCase())
   );
 
   // Navigate to conversation from match card
@@ -98,7 +98,7 @@ export default function Matches() {
       // Check if there's already a chat for this matched user
       // If yes, use the same matchId from the chat to ensure same conversation opens
       const existingChat = chats.find(
-        (chat) => String(chat.userId) === matchedUserId,
+        (chat) => String(chat.userId) === matchedUserId
       );
       const matchId = existingChat ? existingChat.matchId : matchedUserId;
       router.push({
@@ -110,12 +110,12 @@ export default function Matches() {
           userImage: userImage,
           userAge: match.age != null ? String(match.age) : undefined,
           userTimeAgo: match.timeAgo ?? undefined,
-          match_status: match.match_status,
-          match_emoji: match.match_emoji,
+          match_status: match.match_status ?? match.status,
+          match_emoji: match.emoji ?? match.match_emoji,
         },
       });
     },
-    [chats],
+    [chats]
   );
 
   // Navigation handlers (same pattern as UserProfile)
@@ -229,7 +229,7 @@ export default function Matches() {
         setSelectedMatch(null);
       }
     },
-    [selectedMatch, user?.user_id, removeMatch],
+    [selectedMatch, user?.user_id, removeMatch]
   );
 
   // Render horizontal match card (compact version)
@@ -238,8 +238,8 @@ export default function Matches() {
       const imageSource = item?.image
         ? { uri: item.image }
         : item?.images && item.images.length > 0
-          ? { uri: item.images[0] }
-          : undefined;
+        ? { uri: item.images[0] }
+        : undefined;
 
       return (
         <TouchableOpacity
@@ -269,7 +269,7 @@ export default function Matches() {
         </TouchableOpacity>
       );
     },
-    [handleOpenConversation, t],
+    [handleOpenConversation, t]
   );
 
   const handleDeleteChat = (chat: ChatItem) => {
@@ -304,7 +304,7 @@ export default function Matches() {
               } else {
                 showToast(
                   response?.message || t("chat.failedToDelete"),
-                  "error",
+                  "error"
                 );
               }
             } catch (error: any) {
@@ -312,31 +312,33 @@ export default function Matches() {
             }
           },
         },
-      ],
+      ]
     );
   };
 
   // Render chat item
   const renderChatItem: ListRenderItem<ChatItem> = useCallback(
-    ({ item }) => (
-      <TouchableOpacity
-        style={styles.chatItem}
-        onLongPress={() => handleDeleteChat(item)}
-        onPress={() => {
-          router.push({
-            pathname: "/chat/conversation",
-            params: {
-              matchId: item.matchId,
-              userId: item.userId,
-              userName: item.name,
-              userImage: item.image,
-              userAge: (item as any).age != null ? String((item as any).age) : undefined,
-              userTimeAgo: (item as any).matchTimeAgo ?? undefined,
-            },
-          });
-        }}
-        activeOpacity={0.7}
-      >
+    ({ item }) => {
+      const matchForUser = matches.find(
+        (m) => String(m.match_id) === String(item.userId)
+      );
+      return (
+        <TouchableOpacity
+          style={styles.chatItem}
+          onLongPress={() => handleDeleteChat(item)}
+          onPress={() => {
+            handleOpenConversation({
+              ...item,
+              match_id: item.userId,
+              id: item.userId,
+              match_status: matchForUser?.status,
+              emoji: matchForUser?.emoji,
+              age: matchForUser?.age,
+              timeAgo: matchForUser?.timeAgo,
+            });
+          }}
+          activeOpacity={0.7}
+        >
         <View style={styles.avatarContainer}>
           <Image
             source={{ uri: item.image }}
@@ -364,18 +366,19 @@ export default function Matches() {
           </View>
         </View>
       </TouchableOpacity>
-    ),
-    [],
+      );
+    },
+    [matches, handleOpenConversation]
   );
 
   // Memoized key extractors
   const matchKeyExtractor = useCallback(
     (item: Match) => `match-${item.id}`,
-    [],
+    []
   );
   const chatKeyExtractor = useCallback(
     (item: ChatItem) => `chat-${item.id}`,
-    [],
+    []
   );
 
   const renderLoadingState = useCallback(
@@ -385,7 +388,7 @@ export default function Matches() {
         <Text style={styles.loadingText}>{t("matches.loadingMatches")}</Text>
       </View>
     ),
-    [t],
+    [t]
   );
 
   // Handle different states

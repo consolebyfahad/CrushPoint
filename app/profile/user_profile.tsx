@@ -5,6 +5,7 @@ import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
+import useGetInterests from "@/hooks/useGetInterests";
 import {
   calculateAge,
   capitalizeFirstLetter,
@@ -12,6 +13,7 @@ import {
   formatNationality,
   formatReligion,
   formatZodiac,
+  parseInterestsWithNames,
 } from "@/utils/helper";
 import { FloatingBubbleAnimation } from "@/utils/matchAnimation";
 import { svgIcon } from "@/utils/SvgIcons";
@@ -36,8 +38,9 @@ import PagerView from "react-native-pager-view";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function UserProfile() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, userData: currentUser } = useAppContext();
+  const { rawInterests: apiInterests } = useGetInterests();
   const params = useLocalSearchParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showProfileOptions, setShowProfileOptions] = useState(false);
@@ -168,7 +171,7 @@ export default function UserProfile() {
             lat: parseFloat(currentUser?.lat?.toString() || "0"),
             lng: parseFloat(currentUser?.lng?.toString() || "0"),
           },
-          targetUserCoords,
+          targetUserCoords
         )
       : "N/A";
 
@@ -203,7 +206,22 @@ export default function UserProfile() {
       match_status: userData.match_status || "",
       match_emoji: userData.match_emoji || "",
       lookingFor: userData.lookingFor || [],
-      interests: userData.interests || [],
+      interests: (() => {
+        const raw = userData.interests;
+        if (!raw || !Array.isArray(raw) || raw.length === 0)
+          return [];
+        const first = raw[0];
+        const areIds =
+          first != null && /^\d+$/.test(String(first).trim());
+        if (areIds && apiInterests && apiInterests.length > 0) {
+          return parseInterestsWithNames(
+            JSON.stringify(raw),
+            apiInterests,
+            i18n.language || "en"
+          );
+        }
+        return raw;
+      })(),
       height: userHeight,
       nationality: parseNationality(userData.nationality),
       religion: userData.religion || "",
@@ -217,18 +235,33 @@ export default function UserProfile() {
       languages: Array.isArray(userData.languages)
         ? userData.languages
         : userData.languages
-          ? userData.languages.split(",").map((lang: any) => lang.trim())
-          : [],
+        ? userData.languages.split(",").map((lang: any) => lang.trim())
+        : [],
       images:
         userData.images && userData.images.length > 0
           ? userData.images
           : ["https://via.placeholder.com/400x600/E5E5E5/999999?text=No+Photo"],
     };
-  }, [userData, currentUser]);
+  }, [userData, currentUser, apiInterests, i18n.language]);
 
-  // Match status state for immediate updates
-  const [matchStatus, setMatchStatus] = useState(userInfo?.match_status || "");
+  // Match status state for immediate updates (match_emoji "like" => treat as matched)
+  const resolvedMatchStatus =
+    userInfo?.match_emoji === "like" ? "matched" : userInfo?.match_status || "";
+  const [matchStatus, setMatchStatus] = useState(resolvedMatchStatus);
   const [matchEmoji, setMatchEmoji] = useState(userInfo?.match_emoji || "");
+
+  useEffect(() => {
+    const status =
+      userInfo?.match_emoji === "like" ||
+      userInfo?.match_emoji === "super_like" ||
+      userInfo?.match_emoji === "smile" ||
+      userInfo?.match_emoji === "message" ||
+      userInfo?.match_emoji === "friend"
+        ? "matched"
+        : userInfo?.match_status || "";
+    setMatchStatus(status);
+    setMatchEmoji(userInfo?.match_emoji || "");
+  }, [userInfo?.match_status, userInfo?.match_emoji]);
 
   // Record profile visit when viewing another user's profile
   useEffect(() => {
@@ -439,7 +472,7 @@ export default function UserProfile() {
         Alert.alert(
           t("errors.locationUnavailable"),
           t("errors.locationNotAvailable"),
-          [{ text: t("common.ok"), style: "default" }],
+          [{ text: t("common.ok"), style: "default" }]
         );
         setIsLoadingLocation(false);
         return;
@@ -486,7 +519,7 @@ export default function UserProfile() {
       Alert.alert(
         t("common.error"),
         t("errors.unableToShowLocation") || "Unable to show location",
-        [{ text: t("errors.ok") || "OK", style: "default" }],
+        [{ text: t("errors.ok") || "OK", style: "default" }]
       );
     }
   };
@@ -566,17 +599,23 @@ export default function UserProfile() {
             </>
           )}
 
-          {/* Action Emojis - Hide if user has match status */}
-          {!(matchStatus === "match_sent" || matchStatus === "matched") && (
+          {/* Action Emojis - Hide if user has match status (match_emoji "like" = matched) */}
+          {!(
+            matchStatus === "match_sent" ||
+            matchStatus === "matched" ||
+            matchEmoji === "like"
+          ) && (
             <View style={styles.actionEmojis}>
               {actionEmojis.map((item, index) =>
-                renderEmojiButton({ item, index }),
+                renderEmojiButton({ item, index })
               )}
             </View>
           )}
 
-          {/* Show match emoji if user has match status */}
-          {(matchStatus === "match_sent" || matchStatus === "matched") &&
+          {/* Show match emoji if user has match status (match_emoji "like" = matched) */}
+          {(matchStatus === "match_sent" ||
+            matchStatus === "matched" ||
+            matchEmoji === "like") &&
             matchEmoji && (
               <View style={styles.matchEmojiContainer}>
                 <View
@@ -665,7 +704,7 @@ export default function UserProfile() {
                       <Text style={styles.lookingForText}>{formatted}</Text>
                     </View>
                   );
-                },
+                }
               )}
             </View>
           </View>
@@ -679,7 +718,6 @@ export default function UserProfile() {
               </View>
             </View>
           )}
-
           {/* Interests */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("profile.interests")}</Text>
@@ -740,7 +778,7 @@ export default function UserProfile() {
                           </Text>
                         </View>
                       );
-                    },
+                    }
                   )}
                 </View>
               </View>

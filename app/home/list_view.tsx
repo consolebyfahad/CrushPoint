@@ -53,7 +53,7 @@ export default function ListView({
         onShowUserOnMap={onShowUserOnMap}
       />
     ),
-    [onViewProfile, onShowUserOnMap],
+    [onViewProfile, onShowUserOnMap]
   );
 
   // Memoized key extractor
@@ -81,7 +81,7 @@ export default function ListView({
       "hardwareBackPress",
       () => {
         return true;
-      },
+      }
     );
 
     return () => backHandler.remove();
