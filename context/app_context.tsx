@@ -179,7 +179,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           setUserImages(parsed.userImages ?? []);
         }
       } catch (error) {
-
       } finally {
         setIsHydrated(true);
       }
@@ -201,9 +200,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           userImages,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      } catch (error) {
-
-      }
+      } catch (error) {}
     };
 
     saveContext();
@@ -258,18 +255,16 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         // For existing users, we might want to fetch their profile data
       }
     } catch (error) {
-
       throw error;
     }
   };
 
   const updateUserProfile = async (
-    profileData: Partial<UserData>
+    profileData: Partial<UserData>,
   ): Promise<void> => {
     try {
       updateUserData(profileData);
     } catch (error) {
-
       throw error;
     }
   };
@@ -294,7 +289,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       formData.append("id", user.user_id);
 
       const response = await apiCall(formData);
-
       if (response.data && response.data.length > 0) {
         const userStatus = response.data[0].status;
         const isVerified = userStatus === "1";
@@ -309,7 +303,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
     } catch (error) {
-
       setIsUserVerified(false);
       return false;
     }
@@ -325,7 +318,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       await AsyncStorage.removeItem(STORAGE_KEY);
       return true;
     } catch (error) {
-
       return false;
     }
   };

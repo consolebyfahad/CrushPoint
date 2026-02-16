@@ -119,15 +119,13 @@ export default function ContactSupport() {
       submissionData.append("table_name", "contact_us");
       submissionData.append("user_id", user.user_id);
       submissionData.append("subject", formData.subject);
+      submissionData.append("name", formData.name.trim());
+      submissionData.append("email", formData.email.trim());
       submissionData.append("message", formData.message.trim());
       const response = await apiCall(submissionData);
-
       if (response.result) {
         // Show success confirmation message
-        showToast(
-          t("contactSupport.success.messageSent"),
-          "success"
-        );
+        showToast(t("contactSupport.success.messageSent"), "success");
 
         // Reset form (keep name and email)
         setFormData((prev) => ({
@@ -143,11 +141,10 @@ export default function ContactSupport() {
       } else {
         showToast(
           response.message || t("contactSupport.validation.sendFailed"),
-          "error"
+          "error",
         );
       }
     } catch (error) {
-
       showToast(t("contactSupport.validation.somethingWrong"), "error");
     } finally {
       setIsSubmitting(false);

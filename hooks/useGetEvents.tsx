@@ -58,7 +58,7 @@ const useGetEvents = () => {
   const getLocalizedValue = (
     event: any,
     fieldName: string,
-    fallbackValue: string
+    fallbackValue: string,
   ): string => {
     const languagesField = `${fieldName}_languages`;
     const languagesValue = event[languagesField];
@@ -87,7 +87,6 @@ const useGetEvents = () => {
         ""
       );
     } catch (error) {
-
       return event[fieldName] || fallbackValue || "";
     }
   };
@@ -99,16 +98,13 @@ const useGetEvents = () => {
 
   // Parse event image
   const parseEventImage = (imageStr: string): string => {
-
     if (!imageStr) {
-
       return getDefaultEventImage();
     }
 
     try {
       // If it's already a full URL, return as is
       if (imageStr.startsWith("http")) {
-
         return imageStr;
       }
 
@@ -117,7 +113,6 @@ const useGetEvents = () => {
 
       return finalUrl;
     } catch (error) {
-
       return getDefaultEventImage();
     }
   };
@@ -137,7 +132,6 @@ const useGetEvents = () => {
       // Otherwise, construct URL with base path
       return `${IMAGE_BASE_URL}${imageStr}`;
     } catch (error) {
-
       return "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face";
     }
   };
@@ -157,9 +151,7 @@ const useGetEvents = () => {
           if (images.length > 0) {
             imageUrl = `https://api.andra-dating.com/images/${images[0]}`;
           }
-        } catch (error) {
-
-        }
+        } catch (error) {}
       }
 
       // Fallback to default image if no image found
@@ -185,20 +177,21 @@ const useGetEvents = () => {
       formData.append("type", "get_data");
       formData.append("table_name", "events");
       formData.append("user_id", user?.user_id || "");
-      
+
       // Add user location if available
-      if (userData?.lat && userData?.lng && 
-          userData.lat !== 0 && userData.lng !== 0) {
+      if (
+        userData?.lat &&
+        userData?.lng &&
+        userData.lat !== 0 &&
+        userData.lng !== 0
+      ) {
         formData.append("lat", userData.lat.toString());
         formData.append("lng", userData.lng.toString());
-
       } else {
-
       }
-      
+
       const response = await apiCall(formData);
       if (Array.isArray(response?.data)) {
-
         const formattedEvents = response.data.map((event: any) => {
           const goingUsers = parseGoingUsers(event.going || []);
 
@@ -206,12 +199,12 @@ const useGetEvents = () => {
           const localizedTitle = getLocalizedValue(
             event,
             "title",
-            event.title || t("events.defaultTitle")
+            event.title || t("events.defaultTitle"),
           );
           const localizedCategory = getLocalizedValue(
             event,
             "category",
-            event.category || t("events.defaultCategory")
+            event.category || t("events.defaultCategory"),
           );
           const localizedDescription = getLocalizedValue(
             event,
@@ -219,12 +212,12 @@ const useGetEvents = () => {
             event.detail ||
               event.description ||
               event.details ||
-              t("events.defaultDescription")
+              t("events.defaultDescription"),
           );
           const localizedAddress = getLocalizedValue(
             event,
             "address",
-            event.address || event.location || t("events.defaultLocation")
+            event.address || event.location || t("events.defaultLocation"),
           );
 
           // Special handling for organizer - check org_by_languages field
@@ -242,9 +235,7 @@ const useGetEvents = () => {
                 orgLanguages[langCode] ||
                 orgLanguages["en"] ||
                 localizedOrganizer;
-            } catch (error) {
-
-            }
+            } catch (error) {}
           }
 
           const formattedEvent = {
@@ -261,7 +252,7 @@ const useGetEvents = () => {
             organizer: {
               name: localizedOrganizer,
               image: parseOrganizerImage(
-                event.organizer_image || event.org_image || ""
+                event.organizer_image || event.org_image || "",
               ),
               verified:
                 event.organizer_verified === "1" ||
@@ -281,7 +272,6 @@ const useGetEvents = () => {
                 }
                 return t("events.recently");
               } catch (error) {
-
                 return t("events.recently");
               }
             })(),
@@ -317,7 +307,6 @@ const useGetEvents = () => {
     } catch (error: any) {
       const errorMessage = error.message || t("events.networkError");
       setError(errorMessage);
-
     } finally {
       setLoading(false);
     }
@@ -348,8 +337,8 @@ const useGetEvents = () => {
                 : e.going_count + 1,
               user_going: e.isAttending ? "0" : "1",
             }
-          : e
-      )
+          : e,
+      ),
     );
 
     try {
@@ -372,8 +361,8 @@ const useGetEvents = () => {
                   going_count: event.going_count,
                   user_going: event.user_going,
                 }
-              : e
-          )
+              : e,
+          ),
         );
         setError(response.message || t("events.failedToUpdateAttendance"));
       }
@@ -389,8 +378,8 @@ const useGetEvents = () => {
                 going_count: event.going_count,
                 user_going: event.user_going,
               }
-            : e
-        )
+            : e,
+        ),
       );
 
       setError(t("events.failedToUpdateAttendance"));

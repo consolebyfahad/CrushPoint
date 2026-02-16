@@ -65,7 +65,6 @@ export default function useGetProfile() {
               photos = [defaultPhoto];
             }
           } catch (error) {
-
             photos = [defaultPhoto];
           }
         } else {
@@ -83,21 +82,29 @@ export default function useGetProfile() {
           try {
             originalInterestIds = parseJsonString(userData.interests);
             const currentLanguage = i18n.language || "en";
-            
+
             // Get previous data from context (most reliable source)
-            const previousIds = currentContextData?.originalInterestIds || userProfile?.originalInterestIds || [];
-            const previousParsedInterests = currentContextData?.parsedInterests || userProfile?.parsedInterests || [];
-            
+            const previousIds =
+              currentContextData?.originalInterestIds ||
+              userProfile?.originalInterestIds ||
+              [];
+            const previousParsedInterests =
+              currentContextData?.parsedInterests ||
+              userProfile?.parsedInterests ||
+              [];
+
             // Check if IDs changed
-            const idsChanged = JSON.stringify(previousIds.sort()) !== JSON.stringify(originalInterestIds.sort());
-            
+            const idsChanged =
+              JSON.stringify(previousIds.sort()) !==
+              JSON.stringify(originalInterestIds.sort());
+
             // Only parse if we have API interests loaded
             if (apiInterests && apiInterests.length > 0) {
               // Always parse when API interests are available
               parsedInterests = parseInterestsWithNames(
                 userData.interests,
                 apiInterests,
-                currentLanguage
+                currentLanguage,
               );
               // Reset re-parse flag when we successfully parse interests
               hasReparsedRef.current = false;
@@ -117,18 +124,28 @@ export default function useGetProfile() {
               }
             }
           } catch (error) {
-
             // On error, preserve previous parsedInterests if IDs haven't changed
-            const previousIds = currentContextData?.originalInterestIds || userProfile?.originalInterestIds || [];
-            const previousParsedInterests = currentContextData?.parsedInterests || userProfile?.parsedInterests || [];
-            const idsChanged = JSON.stringify(previousIds.sort()) !== JSON.stringify(originalInterestIds.sort());
-            
+            const previousIds =
+              currentContextData?.originalInterestIds ||
+              userProfile?.originalInterestIds ||
+              [];
+            const previousParsedInterests =
+              currentContextData?.parsedInterests ||
+              userProfile?.parsedInterests ||
+              [];
+            const idsChanged =
+              JSON.stringify(previousIds.sort()) !==
+              JSON.stringify(originalInterestIds.sort());
+
             if (!idsChanged && previousParsedInterests.length > 0) {
               parsedInterests = previousParsedInterests;
               originalInterestIds = previousIds;
             } else {
               parsedInterests = [];
-              originalInterestIds = originalInterestIds.length > 0 ? originalInterestIds : previousIds;
+              originalInterestIds =
+                originalInterestIds.length > 0
+                  ? originalInterestIds
+                  : previousIds;
             }
           }
         } else {
@@ -145,11 +162,10 @@ export default function useGetProfile() {
           try {
             parsedLookingFor = parseLookingForWithLabels(
               userData.looking_for,
-              t
+              t,
             );
             originalLookingForIds = parseJsonString(userData.looking_for);
           } catch (error) {
-
             parsedLookingFor = [];
             originalLookingForIds = [];
           }
@@ -172,26 +188,25 @@ export default function useGetProfile() {
                 originalNationalityValues = parsed;
                 parsedNationality = parseNationalityWithLabels(
                   userData.nationality,
-                  t
+                  t,
                 );
               } else {
                 // If parsing fails, try to extract values manually
                 const matches = userData.nationality.match(/"([^"]+)"/g);
                 if (matches) {
                   const values = matches.map((match: string) =>
-                    match.replace(/"/g, "")
+                    match.replace(/"/g, ""),
                   );
                   originalNationalityValues = values.filter(
-                    (v) => v && v !== "Not Specified" && v.trim() !== ""
+                    (v) => v && v !== "Not Specified" && v.trim() !== "",
                   );
                   parsedNationality = convertNationalityValuesToLabels(
                     originalNationalityValues,
-                    t
+                    t,
                   );
                 }
               }
             } catch (error) {
-
               // Fallback to simple string handling
               if (
                 typeof userData.nationality === "string" &&
@@ -201,7 +216,7 @@ export default function useGetProfile() {
                 originalNationalityValues = [userData.nationality];
                 parsedNationality = convertNationalityValuesToLabels(
                   [userData.nationality],
-                  t
+                  t,
                 );
               }
             }
@@ -214,7 +229,7 @@ export default function useGetProfile() {
               originalNationalityValues = [userData.nationality];
               parsedNationality = convertNationalityValuesToLabels(
                 [userData.nationality],
-                t
+                t,
               );
             }
           }
@@ -261,13 +276,16 @@ export default function useGetProfile() {
           radius: parseInt(userData.radius) || 100, // Convert string to number
           age,
           photos, // This now contains full URLs
-          parsedInterests: parsedInterests.length > 0 
-            ? parsedInterests 
-            : (currentContextData?.parsedInterests && 
-               currentContextData.originalInterestIds &&
-               JSON.stringify(currentContextData.originalInterestIds.sort()) === JSON.stringify(originalInterestIds.sort())
-               ? currentContextData.parsedInterests 
-               : []),
+          parsedInterests:
+            parsedInterests.length > 0
+              ? parsedInterests
+              : currentContextData?.parsedInterests &&
+                  currentContextData.originalInterestIds &&
+                  JSON.stringify(
+                    currentContextData.originalInterestIds.sort(),
+                  ) === JSON.stringify(originalInterestIds.sort())
+                ? currentContextData.parsedInterests
+                : [],
           parsedLookingFor,
           originalLookingForIds,
           originalInterestIds,
@@ -298,7 +316,6 @@ export default function useGetProfile() {
         setError(t("hooks.noUserDataFound"));
       }
     } catch (error) {
-
       setError(t("hooks.failedToFetchUserData"));
     } finally {
       setLoading(false);
@@ -313,15 +330,17 @@ export default function useGetProfile() {
   // Only trigger when apiInterests change from empty to non-empty AND we have unparsed interests
   useEffect(() => {
     // Check if we need to re-parse: API interests are loaded, we have interest IDs, but no parsed interests
-    const needsReparse = 
+    const needsReparse =
       apiInterests &&
       apiInterests.length > 0 &&
-      (userProfile?.originalInterestIds?.length > 0 || contextUserData?.originalInterestIds?.length > 0) &&
-      (!userProfile?.parsedInterests || userProfile.parsedInterests.length === 0) &&
-      (!contextUserData?.parsedInterests || contextUserData.parsedInterests.length === 0);
-    
-    if (needsReparse && !hasReparsedRef.current) {
+      (userProfile?.originalInterestIds?.length > 0 ||
+        contextUserData?.originalInterestIds?.length > 0) &&
+      (!userProfile?.parsedInterests ||
+        userProfile.parsedInterests.length === 0) &&
+      (!contextUserData?.parsedInterests ||
+        contextUserData.parsedInterests.length === 0);
 
+    if (needsReparse && !hasReparsedRef.current) {
       hasReparsedRef.current = true; // Mark as re-parsed to prevent loop
       // Use a timeout to avoid calling during render
       setTimeout(() => {
@@ -332,7 +351,12 @@ export default function useGetProfile() {
         }, 2000);
       }, 100);
     }
-  }, [apiInterests?.length, userProfile?.originalInterestIds?.length, contextUserData?.originalInterestIds?.length, getUserData]);
+  }, [
+    apiInterests?.length,
+    userProfile?.originalInterestIds?.length,
+    contextUserData?.originalInterestIds?.length,
+    getUserData,
+  ]);
 
   return {
     userProfile,

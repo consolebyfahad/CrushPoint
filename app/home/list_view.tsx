@@ -135,7 +135,6 @@ export default function ListView({
   );
 
   // Render error banner for when there are users but also an error
-  console.log("users", users);
   const renderErrorBanner = () => {
     // Only show error banner if there's an error AND no users
     if (!error || users.length > 0) return null;

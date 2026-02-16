@@ -45,6 +45,7 @@ interface AttendeesModalProps {
   onClose: () => void;
   attendees: any[];
   eventTitle: string;
+  onAttendeePress?: (attendee: any) => void;
 }
 
 const AttendeesModal: React.FC<AttendeesModalProps> = ({
@@ -52,6 +53,7 @@ const AttendeesModal: React.FC<AttendeesModalProps> = ({
   onClose,
   attendees,
   eventTitle,
+  onAttendeePress,
 }) => {
   const { t } = useTranslation();
 
@@ -81,13 +83,21 @@ const AttendeesModal: React.FC<AttendeesModalProps> = ({
             </View>
           ) : (
             attendees.map((attendee, index) => (
-              <View key={attendee.id || index} style={modalStyles.attendeeItem}>
+              <TouchableOpacity
+                key={attendee.id || index}
+                style={modalStyles.attendeeItem}
+                onPress={() => {
+                  onAttendeePress?.(attendee);
+                  onClose();
+                }}
+                activeOpacity={0.7}
+              >
                 <Image
                   source={{ uri: attendee.image }}
                   style={modalStyles.attendeeImage}
                 />
                 <Text style={modalStyles.attendeeName}>{attendee.name}</Text>
-              </View>
+              </TouchableOpacity>
             ))
           )}
         </ScrollView>
@@ -123,8 +133,8 @@ export default function EventDetails() {
         const imageUrl = raw.image?.startsWith("http")
           ? raw.image
           : raw.image
-          ? `https://api.andra-dating.com/images/${raw.image}`
-          : "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
+            ? `https://api.andra-dating.com/images/${raw.image}`
+            : "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
         const eventData = {
           id: raw.id,
           title: raw.title || raw.title_languages,
@@ -141,8 +151,8 @@ export default function EventDetails() {
             image: raw.organizer_image?.startsWith("http")
               ? raw.organizer_image
               : raw.organizer_image
-              ? `https://api.andra-dating.com/images/${raw.organizer_image}`
-              : "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
+                ? `https://api.andra-dating.com/images/${raw.organizer_image}`
+                : "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
             verified: raw.organizer_verified === "1" || false,
           },
           going: [],
@@ -278,7 +288,9 @@ export default function EventDetails() {
         if (canOpen) {
           await Linking.openURL(mapsUrl);
         } else {
-          await Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`);
+          await Linking.openURL(
+            `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`,
+          );
         }
       } else {
         const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
@@ -640,6 +652,22 @@ export default function EventDetails() {
     setShowAttendeesModal(true);
   };
 
+  const handleOpenAttendeeProfile = (attendee: any) => {
+    const userData = {
+      id: attendee.id,
+      name: attendee.name,
+      image: attendee.image,
+      images: attendee.image ? [attendee.image] : [],
+    };
+    router.push({
+      pathname: "/profile/user_profile",
+      params: {
+        user: JSON.stringify(userData),
+        userId: String(attendee.id),
+      },
+    });
+  };
+
   // Parse going users data
   const parseGoingUsers = () => {
     if (!event?.going || !Array.isArray(event.going)) {
@@ -812,14 +840,19 @@ export default function EventDetails() {
               {parseGoingUsers()
                 .slice(0, 5)
                 .map((attendee: any, index: number) => (
-                  <Image
+                  <TouchableOpacity
                     key={attendee.id}
-                    source={{ uri: attendee.image }}
-                    style={[
-                      styles.attendeeImage,
-                      { marginLeft: index > 0 ? -8 : 0 },
-                    ]}
-                  />
+                    onPress={() => handleOpenAttendeeProfile(attendee)}
+                    activeOpacity={0.8}
+                  >
+                    <Image
+                      source={{ uri: attendee.image }}
+                      style={[
+                        styles.attendeeImage,
+                        { marginLeft: index > 0 ? -8 : 0 },
+                      ]}
+                    />
+                  </TouchableOpacity>
                 ))}
             </View>
 
@@ -862,8 +895,8 @@ export default function EventDetails() {
             isRSVPing
               ? t("events.processing")
               : isAttending
-              ? t("events.going")
-              : t("events.rsvpNow")
+                ? t("events.going")
+                : t("events.rsvpNow")
           }
           icon={<Calender />}
           onPress={handleRSVP}
@@ -887,6 +920,7 @@ export default function EventDetails() {
         onClose={() => setShowAttendeesModal(false)}
         attendees={parseGoingUsers()}
         eventTitle={event.title}
+        onAttendeePress={handleOpenAttendeeProfile}
       />
     </View>
   );

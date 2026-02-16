@@ -205,7 +205,8 @@
     "enterPhoneNumber": "Enter your phone number",
     "email": "Email",
     "enterEmail": "Enter your email",
-    "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone."
+    "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone.",
+    "matchRemoved": "Match successfully removed"
   },
   "matches": {
     "matches": "Matches",
@@ -641,7 +642,8 @@
     "otherDesc": "Other concerns not listed above",
     "additionalDetails": "Additional Details",
     "placeholder": "Please provide more information...",
-    "submitReport": "Submit Report"
+    "submitReport": "Submit Report",
+    "reportSubmitted": "Report submitted"
   },
   "block": {
     "blockUser": "Block {{userName}}?",

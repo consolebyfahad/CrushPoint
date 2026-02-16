@@ -62,7 +62,6 @@ export default function Matches() {
   // Use the useGetMatches hook
   const { matches, loading, error, refetch, removeMatch, updateMatchStatus } =
     useGetMatches();
-  console.log("matches", matches);
   // Use the useGetChats hook
   const {
     chats,

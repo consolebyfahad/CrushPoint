@@ -89,7 +89,6 @@ export default function index() {
 
       // 2) Onboarding completed → check login
       if (isLoggedIn) {
-        console.log("Logged in, redirecting to campaign");
         navigationPerformedRef.current = true;
         router.push("/campaign");
         return;

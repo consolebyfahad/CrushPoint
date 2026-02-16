@@ -107,9 +107,7 @@ export default function NotificationSettings({ navigation }: any) {
         "notification_settings",
         JSON.stringify(notificationArray),
       );
-      console.log("formData", formData);
       const response = await apiCall(formData);
-      console.log("response", response);
 
       if (response.result) {
         // Update context with new notification settings

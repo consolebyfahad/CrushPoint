@@ -2,10 +2,11 @@ import BlockConfirmation from "@/components/block_option";
 import ProfileOptions from "@/components/profile_options";
 import ReportUser from "@/components/report_user";
 import { useAppContext } from "@/context/app_context";
+import useGetInterests from "@/hooks/useGetInterests";
+import useGetUserProfile from "@/hooks/useGetUserProfile";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
 import { calculateDistance } from "@/utils/distanceCalculator";
-import useGetInterests from "@/hooks/useGetInterests";
 import {
   calculateAge,
   capitalizeFirstLetter,
@@ -54,22 +55,99 @@ export default function UserProfile() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
-  // Ref for PagerView
   const pagerRef = useRef<PagerView>(null);
+  const initialMatchRef = useRef<{ match_emoji?: string; match_status?: string }>({});
 
-  const userData = useMemo(() => {
+  const paramsParsedOnce = useMemo(() => {
     try {
       if (params.user && typeof params.user === "string") {
-        const parsed = JSON.parse(params.user);
-        return parsed;
-      } else if (params.user && typeof params.user === "object") {
+        return JSON.parse(params.user);
+      }
+      if (params.user && typeof params.user === "object") {
         return params.user;
       }
-      return params;
-    } catch (error) {
-      return params;
+      return typeof params === "object" ? params : {};
+    } catch {
+      return {};
     }
-  }, [params, currentUser]);
+  }, [params.user]);
+
+  useEffect(() => {
+    if (
+      paramsParsedOnce &&
+      typeof paramsParsedOnce === "object" &&
+      (paramsParsedOnce.match_emoji || paramsParsedOnce.match_status) &&
+      !initialMatchRef.current.match_emoji &&
+      !initialMatchRef.current.match_status
+    ) {
+      initialMatchRef.current = {
+        match_emoji: paramsParsedOnce.match_emoji,
+        match_status: paramsParsedOnce.match_status,
+      };
+    }
+  }, [paramsParsedOnce]);
+
+  const profileUserId = params.userId ?? paramsParsedOnce?.id;
+  const isViewingOtherUser =
+    profileUserId && String(profileUserId) !== String(user?.user_id);
+  const {
+    userProfile: fetchedProfile,
+    loading: profileLoading,
+    refetch: refetchProfile,
+  } = useGetUserProfile(profileUserId ? String(profileUserId) : undefined);
+
+  const userData = useMemo(() => {
+    if (
+      fetchedProfile &&
+      profileUserId &&
+      String(fetchedProfile.id) === String(profileUserId)
+    ) {
+      const fromParams =
+        paramsParsedOnce && typeof paramsParsedOnce === "object"
+          ? paramsParsedOnce
+          : {};
+      const fp = fetchedProfile as Record<string, unknown>;
+      const initial = initialMatchRef.current;
+      const match_emoji =
+        (initial.match_emoji && initial.match_emoji.trim()) ||
+        (fromParams.match_emoji && String(fromParams.match_emoji).trim()) ||
+        (fp.match_emoji && String(fp.match_emoji).trim()) ||
+        "";
+      const match_status =
+        (initial.match_status && initial.match_status.trim()) ||
+        (fromParams.match_status && String(fromParams.match_status).trim()) ||
+        (fp.match_status && String(fp.match_status).trim()) ||
+        "";
+      return {
+        id: fetchedProfile.id,
+        name: fetchedProfile.name,
+        age: fetchedProfile.age,
+        dob: fetchedProfile.dob,
+        about: fetchedProfile.about ?? "",
+        height: fetchedProfile.height ?? "",
+        gender: fetchedProfile.gender ?? "",
+        country: fetchedProfile.country ?? "",
+        state: fetchedProfile.state ?? "",
+        city: fetchedProfile.city ?? "",
+        languages: fetchedProfile.languages ?? "",
+        email: fetchedProfile.email ?? "",
+        phone: fetchedProfile.phone ?? "",
+        religion: fetchedProfile.religion ?? "",
+        zodiac: fetchedProfile.zodiac ?? "",
+        lat: fetchedProfile.lat,
+        lng: fetchedProfile.lng,
+        loc: fetchedProfile.loc,
+        actualLocation: fetchedProfile.actualLocation,
+        images: fetchedProfile.photos ?? [],
+        interests: fetchedProfile.parsedInterests ?? [],
+        lookingFor: fetchedProfile.parsedLookingFor ?? [],
+        nationality: fetchedProfile.parsedNationality ?? [],
+        match_emoji,
+        match_status,
+      };
+    }
+    return paramsParsedOnce;
+  }, [fetchedProfile, profileUserId, paramsParsedOnce]);
 
   // Helper function to get user coordinates from multiple possible sources (same as user_card.tsx)
   const getUserCoordinates = (user: any) => {
@@ -145,24 +223,42 @@ export default function UserProfile() {
         ],
       };
     }
-    console.log("userData", userData);
-    // Parse nationality from JSON string or array
     const parseNationality = (nationalityData: any) => {
       if (!nationalityData) return [];
       if (Array.isArray(nationalityData)) return nationalityData;
       if (typeof nationalityData === "string") {
         try {
-          // Handle escaped JSON strings like "[\\\"Not Specified\\\",\\\"American\\\"]"
           const cleaned = nationalityData.replace(/\\"/g, '"');
           const parsed = JSON.parse(cleaned);
           return Array.isArray(parsed) ? parsed : [parsed];
-        } catch (error) {
-          // If parsing fails, treat as single string
+        } catch {
           return [nationalityData];
         }
       }
       return [nationalityData];
     };
+
+    const interestsDisplay =
+      Array.isArray(userData.interests) && userData.interests.length > 0
+        ? userData.interests
+        : (() => {
+            const raw = userData.interests;
+            if (!raw || !Array.isArray(raw) || raw.length === 0) return [];
+            const first = raw[0];
+            const areIds = first != null && /^\d+$/.test(String(first).trim());
+            if (areIds && apiInterests && apiInterests.length > 0) {
+              return parseInterestsWithNames(
+                JSON.stringify(raw),
+                apiInterests,
+                i18n.language || "en",
+              );
+            }
+            return raw;
+          })();
+
+    const nationalityDisplay = Array.isArray(userData.nationality)
+      ? userData.nationality
+      : parseNationality(userData.nationality);
 
     // Calculate real distance between current user and profile user
     const realDistance = targetUserCoords
@@ -171,7 +267,7 @@ export default function UserProfile() {
             lat: parseFloat(currentUser?.lat?.toString() || "0"),
             lng: parseFloat(currentUser?.lng?.toString() || "0"),
           },
-          targetUserCoords
+          targetUserCoords,
         )
       : "N/A";
 
@@ -202,28 +298,13 @@ export default function UserProfile() {
       name: userData.name || "Unknown User",
       age: userAge,
       distance: realDistance,
-      isOnline: userData.isOnline || true,
+      isOnline: userData.isOnline ?? true,
       match_status: userData.match_status || "",
       match_emoji: userData.match_emoji || "",
-      lookingFor: userData.lookingFor || [],
-      interests: (() => {
-        const raw = userData.interests;
-        if (!raw || !Array.isArray(raw) || raw.length === 0)
-          return [];
-        const first = raw[0];
-        const areIds =
-          first != null && /^\d+$/.test(String(first).trim());
-        if (areIds && apiInterests && apiInterests.length > 0) {
-          return parseInterestsWithNames(
-            JSON.stringify(raw),
-            apiInterests,
-            i18n.language || "en"
-          );
-        }
-        return raw;
-      })(),
+      lookingFor: Array.isArray(userData.lookingFor) ? userData.lookingFor : [],
+      interests: interestsDisplay,
       height: userHeight,
-      nationality: parseNationality(userData.nationality),
+      nationality: nationalityDisplay,
       religion: userData.religion || "",
       zodiac: userData.zodiac || "",
       about: userData.about || t("profile.defaultAbout") || "",
@@ -235,8 +316,10 @@ export default function UserProfile() {
       languages: Array.isArray(userData.languages)
         ? userData.languages
         : userData.languages
-        ? userData.languages.split(",").map((lang: any) => lang.trim())
-        : [],
+          ? String(userData.languages)
+              .split(",")
+              .map((lang: any) => lang.trim())
+          : [],
       images:
         userData.images && userData.images.length > 0
           ? userData.images
@@ -281,10 +364,7 @@ export default function UserProfile() {
         formData.append("table_name", "profile_visits");
         formData.append("user_id", visitorId);
         formData.append("date_id", profileUserId);
-        console.log("formData", formData);
         const response = await apiCall(formData);
-        console.log("response", response);
-        console.log("profile visit recorded");
       } catch (_) {}
     };
     recordVisit();
@@ -472,7 +552,7 @@ export default function UserProfile() {
         Alert.alert(
           t("errors.locationUnavailable"),
           t("errors.locationNotAvailable"),
-          [{ text: t("common.ok"), style: "default" }]
+          [{ text: t("common.ok"), style: "default" }],
         );
         setIsLoadingLocation(false);
         return;
@@ -519,12 +599,28 @@ export default function UserProfile() {
       Alert.alert(
         t("common.error"),
         t("errors.unableToShowLocation") || "Unable to show location",
-        [{ text: t("errors.ok") || "OK", style: "default" }]
+        [{ text: t("errors.ok") || "OK", style: "default" }],
       );
     }
   };
-  console.log("matchStatus", matchStatus);
-  console.log("matchEmoji", matchEmoji);
+  if (
+    profileUserId &&
+    profileLoading &&
+    !fetchedProfile &&
+    (!userData?.id || !userData?.images?.length)
+  ) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color={color.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -599,23 +695,17 @@ export default function UserProfile() {
             </>
           )}
 
-          {/* Action Emojis - Hide if user has match status (match_emoji "like" = matched) */}
-          {!(
-            matchStatus === "match_sent" ||
-            matchStatus === "matched" ||
-            matchEmoji === "like"
-          ) && (
+          {/* Action Emojis - Hide when user already has a match/reaction (show only one emoji UI) */}
+          {!(matchStatus === "match_sent" || matchStatus === "matched" || matchEmoji) && (
             <View style={styles.actionEmojis}>
               {actionEmojis.map((item, index) =>
-                renderEmojiButton({ item, index })
+                renderEmojiButton({ item, index }),
               )}
             </View>
           )}
 
-          {/* Show match emoji if user has match status (match_emoji "like" = matched) */}
-          {(matchStatus === "match_sent" ||
-            matchStatus === "matched" ||
-            matchEmoji === "like") &&
+          {/* Show single match emoji badge when user has a reaction (like, super_like, etc.) */}
+          {(matchStatus === "match_sent" || matchStatus === "matched" || matchEmoji) &&
             matchEmoji && (
               <View style={styles.matchEmojiContainer}>
                 <View
@@ -695,17 +785,24 @@ export default function UserProfile() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("profile.lookingFor")}</Text>
             <View style={styles.lookingForContainer}>
-              {userInfo.lookingFor.map(
-                (lookingForId: string, index: number) => {
-                  // Format dynamically using current language
-                  const formatted = formatLookingFor(lookingForId, t);
-                  return (
-                    <View key={index} style={styles.lookingForTag}>
-                      <Text style={styles.lookingForText}>{formatted}</Text>
-                    </View>
-                  );
-                }
-              )}
+              {userInfo.lookingFor.map((item: string, index: number) => {
+                const isKnownId = [
+                  "serious",
+                  "casual",
+                  "friendship",
+                  "open",
+                  "prefer-not",
+                ].includes(String(item).toLowerCase().trim());
+                const displayText = isKnownId
+                  ? formatLookingFor(item, t)
+                  : item;
+                if (!displayText || !displayText.trim()) return null;
+                return (
+                  <View key={index} style={styles.lookingForTag}>
+                    <Text style={styles.lookingForText}>{displayText}</Text>
+                  </View>
+                );
+              })}
             </View>
           </View>
 
@@ -778,7 +875,7 @@ export default function UserProfile() {
                           </Text>
                         </View>
                       );
-                    }
+                    },
                   )}
                 </View>
               </View>

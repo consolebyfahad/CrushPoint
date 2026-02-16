@@ -37,7 +37,6 @@ interface Message {
 export default function ChatConversation() {
   const { t, i18n } = useTranslation();
   const params = useLocalSearchParams();
-  console.log("params", params);
   const match_status = params.match_status as string;
   const match_emoji = params.match_emoji as string;
   const { user, userData } = useAppContext();
@@ -344,8 +343,6 @@ export default function ChatConversation() {
   };
 
   const handleViewProfile = useCallback(async () => {
-    console.log("otherUserId", otherUserId);
-    console.log("user?.user_id", user?.user_id);
     if (!otherUserId || !user?.user_id) {
       return;
     }
@@ -358,7 +355,6 @@ export default function ChatConversation() {
       formData.append("id", otherUserId);
 
       const response = await apiCall(formData);
-      console.log("response", response);
       if (response?.data && response.data.length > 0) {
         const userProfileData = response.data[0];
 
@@ -532,7 +528,6 @@ export default function ChatConversation() {
               : null,
           email: userProfileData.email || "",
         };
-        console.log("profileData", profileData);
         router.push({
           pathname: "/profile/user_profile",
           params: {
@@ -561,7 +556,7 @@ export default function ChatConversation() {
       if (response?.result) {
         setShowBlockConfirmation(false);
         showToast(t("profile.userBlocked") || "User blocked", "success");
-        router.back();
+        await deleteChatAndGoToMapView();
       }
     } catch (error) {
       showToast(t("chat.errorLoading") || "Failed to block", "error");
@@ -587,6 +582,7 @@ export default function ChatConversation() {
       if (response?.result) {
         setShowReportUser(false);
         showToast(t("report.reportSubmitted") || "Report submitted", "success");
+        await deleteChatAndGoToMapView();
       }
     } catch (error) {
       showToast(t("chat.errorLoading") || "Failed to report", "error");
@@ -597,6 +593,54 @@ export default function ChatConversation() {
     setShowReportUser(false);
     setShowProfileOptions(true);
   };
+
+  // Delete chat via API and redirect to map view (used after block, report, remove match)
+  const deleteChatAndGoToMapView = useCallback(async () => {
+    if (!user?.user_id || !otherUserId) {
+      router.replace("/(tabs)" as any);
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append("type", "chat_delete");
+      formData.append("user_id", user.user_id);
+      formData.append("to_chat_id", otherUserId);
+      await apiCall(formData);
+    } catch (_) {
+      // Continue to redirect even if delete fails
+    }
+    setShowProfileOptions(false);
+    setShowBlockConfirmation(false);
+    setShowReportUser(false);
+    (router.replace as any)({
+      pathname: "/(tabs)",
+      params: { viewType: t("common.mapView") },
+    });
+  }, [user?.user_id, otherUserId, t]);
+
+  const handleRemoveMatch = useCallback(async () => {
+    if (!user?.user_id || !matchId) return;
+    setShowProfileOptions(false);
+    try {
+      const formData = new FormData();
+      formData.append("type", "delete_data");
+      formData.append("table_name", "matches");
+      formData.append("user_id", user.user_id);
+      formData.append("id", matchId);
+      const response = await apiCall(formData);
+      if (response?.result) {
+        showToast(t("profile.matchRemoved") || "Match removed", "success");
+        await deleteChatAndGoToMapView();
+      } else {
+        showToast(
+          response?.message || t("chat.errorLoading"),
+          "error"
+        );
+      }
+    } catch (error) {
+      showToast(t("chat.errorLoading") || "Failed to remove match", "error");
+    }
+  }, [user?.user_id, matchId, deleteChatAndGoToMapView, showToast, t]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -717,7 +761,7 @@ export default function ChatConversation() {
         onClose={() => setShowProfileOptions(false)}
         onBlock={handleBlock}
         onReport={handleReport}
-        onRemoveMatch={() => setShowProfileOptions(false)}
+        onRemoveMatch={handleRemoveMatch}
         userData={userData}
         isMatch={true}
         targetUserName={userName}

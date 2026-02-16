@@ -102,7 +102,7 @@ export default function Verify() {
           try {
             parsedInterests = parseInterestsWithNames(
               userData.interests,
-              apiInterests
+              apiInterests,
             );
             originalInterestIds = parseJsonString(userData.interests);
           } catch (error) {
@@ -135,7 +135,7 @@ export default function Verify() {
               if (Array.isArray(parsed) && parsed.length > 0) {
                 originalNationalityValues = parsed;
                 parsedNationality = parseNationalityWithLabels(
-                  userData.nationality
+                  userData.nationality,
                 );
               }
             } catch (error) {

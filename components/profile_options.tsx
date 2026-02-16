@@ -70,7 +70,6 @@ export default function ProfileOptions({
         : timeAgoFallback
       : userData?.timeAgo ?? timeAgoFallback,
   };
-  console.log("age", displayUser.age);
   return (
     <Modal
       visible={visible}

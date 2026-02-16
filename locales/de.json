@@ -205,7 +205,8 @@
     "enterPhoneNumber": "Gib deine Telefonnummer ein",
     "email": "E-Mail",
     "enterEmail": "Gib deine E-Mail ein",
-    "deleteAccountConfirmation": "Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
+    "deleteAccountConfirmation": "Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "matchRemoved": "Match erfolgreich entfernt"
   },
   "matches": {
     "matches": "Matches",
@@ -639,7 +640,8 @@
     "otherDesc": "Andere Bedenken, die oben nicht aufgeführt sind",
     "additionalDetails": "Zusätzliche Details",
     "placeholder": "Bitte geben Sie weitere Informationen an...",
-    "submitReport": "Meldung absenden"
+    "submitReport": "Meldung absenden",
+    "reportSubmitted": "Meldung eingereicht"
   },
   "block": {
     "blockUser": "{{userName}} blockieren?",

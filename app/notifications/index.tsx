@@ -191,7 +191,7 @@ export default function Notifications({ navigation }: any) {
   const translateNotificationMessage = (
     apiMessage: string,
     type: string,
-    userName: string
+    userName: string,
   ) => {
     if (!apiMessage) return "";
     // Translate common notification message patterns
@@ -297,13 +297,27 @@ export default function Notifications({ navigation }: any) {
             // Translate notification title and message
             const translatedTitle = translateNotificationTitle(
               notif.title,
-              notificationType
+              notificationType,
             );
             const translatedMessage = translateNotificationMessage(
               notif.notification,
               notificationType,
-              notif.from?.name || notif.user_name || ""
+              notif.from?.name || notif.user_name || "",
             );
+
+            const fromWithEmoji =
+              notif.from &&
+              (notif.reaction ||
+                notif.emoji ||
+                (notif.from as any)?.match_emoji)
+                ? {
+                    ...notif.from,
+                    match_emoji:
+                      (notif.from as any)?.match_emoji ||
+                      notif.reaction ||
+                      notif.emoji,
+                  }
+                : notif.from;
 
             const processed = {
               id: notif.id || `notif_${index}`,
@@ -323,16 +337,15 @@ export default function Notifications({ navigation }: any) {
               user_name: notif.user_name || notif.from?.name || notif.from_user,
               emoji: getNotificationEmoji(notificationType),
               backgroundImage: backgroundImage,
-              from: notif.from || null,
+              from: fromWithEmoji || null,
               from_id: notif.from_id || notif.from?.id || null,
               event_id: notif.event_id || notif.eventId || null,
               event: notif.event || null,
             };
 
             return processed;
-          }
+          },
         );
-        console.log("processedNotifications", processedNotifications);
         setNotifications(processedNotifications);
         setError(null);
       } else {
@@ -419,7 +432,7 @@ export default function Notifications({ navigation }: any) {
     // Mark as read locally
     setNotifications((prevNotifications) => {
       const updated = prevNotifications.map((notif) =>
-        notif.id === notification.id ? { ...notif, isRead: true } : notif
+        notif.id === notification.id ? { ...notif, isRead: true } : notif,
       );
       return updated;
     });
@@ -450,7 +463,7 @@ export default function Notifications({ navigation }: any) {
               const response = await apiCall(formData);
               if (response?.data && Array.isArray(response.data)) {
                 const matchRecord = response.data.find(
-                  (m: any) => m.match_id === notification.from_id
+                  (m: any) => m.match_id === notification.from_id,
                 );
                 matchRecordId = matchRecord?.id || null;
               }
@@ -470,7 +483,7 @@ export default function Notifications({ navigation }: any) {
                   ? notification.from.images[0]
                   : parseUserImages(
                       notification.from.images,
-                      notification.from.gender || "unknown"
+                      notification.from.gender || "unknown",
                     )[0]
                 : "",
             },
@@ -496,7 +509,7 @@ export default function Notifications({ navigation }: any) {
           const imagesString = notification.from.images || "[]";
           const parsedImages = parseUserImages(
             imagesString,
-            notification.from.gender || "unknown"
+            notification.from.gender || "unknown",
           );
 
           // Calculate age from DOB
@@ -611,8 +624,8 @@ export default function Notifications({ navigation }: any) {
       "new_event",
     ];
     if (eventTypes.includes(notificationType)) {
-      const eventId =
-        (notification as Notification & { event_id?: string }).event_id;
+      const eventId = (notification as Notification & { event_id?: string })
+        .event_id;
       const eventObj = (notification as Notification & { event?: any }).event;
       if (eventId || eventObj) {
         const params: Record<string, string> = {};
@@ -641,7 +654,7 @@ export default function Notifications({ navigation }: any) {
         const imagesString = notification.from.images || "[]";
         const parsedImages = parseUserImages(
           imagesString,
-          notification.from.gender || "unknown"
+          notification.from.gender || "unknown",
         );
 
         // Parse lookingFor from JSON string to array
@@ -661,7 +674,7 @@ export default function Notifications({ navigation }: any) {
           parsedInterests = parseInterestsWithNames(
             interestsString,
             rawInterests || [],
-            i18n.language || "en"
+            i18n.language || "en",
           );
         } catch (error) {
           // Fallback to parsing as regular JSON if conversion fails
@@ -703,6 +716,25 @@ export default function Notifications({ navigation }: any) {
             ? notification.from.height
             : "";
 
+        // Derive match_emoji / match_status so profile shows emoji (same as map/list view)
+        const notificationType = (notification.type || "").toLowerCase();
+        const matchEmojiFromType =
+          notificationType === "like"
+            ? "like"
+            : notificationType === "super_like"
+              ? "super_like"
+              : notificationType === "match" || notificationType === "new_match"
+                ? "like"
+                : notificationType === "emoji" ||
+                    notificationType === "reaction"
+                  ? "like"
+                  : "";
+        const match_emoji =
+          (notification.from as any)?.match_emoji ?? matchEmojiFromType;
+        const match_status =
+          (notification.from as any)?.match_status ??
+          (match_emoji ? "matched" : "");
+
         // Format user data for profile navigation
         const userProfileData = {
           id: notification.from.id || notification.from_id,
@@ -728,8 +760,9 @@ export default function Notifications({ navigation }: any) {
           email: notification.from.email || "",
           radius: notification.from.radius || "",
           uploaded_selfie: notification.from.uploaded_selfie || "",
+          match_emoji,
+          match_status,
         };
-
         router.push({
           pathname: "/profile/user_profile",
           params: {
@@ -760,7 +793,7 @@ export default function Notifications({ navigation }: any) {
     // Remove locally
     setNotifications((prevNotifications) => {
       const filtered = prevNotifications.filter(
-        (notif) => notif.id !== notification.id
+        (notif) => notif.id !== notification.id,
       );
       return filtered;
     });

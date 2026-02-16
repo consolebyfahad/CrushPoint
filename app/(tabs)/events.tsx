@@ -29,7 +29,7 @@ export default function EventsTab() {
       event.title.toLowerCase().includes(searchText.toLowerCase()) ||
       event.category.toLowerCase().includes(searchText.toLowerCase()) ||
       event.location.toLowerCase().includes(searchText.toLowerCase()) ||
-      event.address.toLowerCase().includes(searchText.toLowerCase())
+      event.address.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   const handleEventPress = (event: any) => {
@@ -48,11 +48,13 @@ export default function EventsTab() {
   };
 
   const renderEventCard = ({ item }: any) => (
-    <EventCard
-      event={item}
-      onPress={handleEventPress}
-      onToggleAttending={handleToggleAttending}
-    />
+    (
+      <EventCard
+        event={item}
+        onPress={handleEventPress}
+        onToggleAttending={handleToggleAttending}
+      />
+    )
   );
 
   const renderEmptyState = () => (

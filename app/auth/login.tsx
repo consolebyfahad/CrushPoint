@@ -51,9 +51,7 @@ export default function Login() {
     }
 
     try {
-      console.log("formData", formData);
       const response = await apiCall(formData);
-      console.log("response", response);
       const userData = {
         user_id: response?.user_id,
         email: response?.email,

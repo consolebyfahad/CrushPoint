@@ -273,20 +273,18 @@ export default function CampaignScreen() {
       )}
 
       {/* Timer / Close: countdown N to 0, then close icon (no auto-skip) */}
-      <TouchableOpacity
-        style={[
-          styles.timerButton,
-          countdownFinished && styles.timerButtonClose,
-        ]}
-        onPress={countdownFinished ? handleClose : undefined}
-        activeOpacity={0.7}
-      >
-        {countdownFinished ? (
+      {countdownFinished && (
+        <TouchableOpacity
+          style={[
+            styles.timerButton,
+            countdownFinished && styles.timerButtonClose,
+          ]}
+          onPress={countdownFinished ? handleClose : undefined}
+          activeOpacity={0.7}
+        >
           <CloseIcon />
-        ) : (
-          <Text style={styles.timerButtonText}>{countdown}</Text>
-        )}
-      </TouchableOpacity>
+        </TouchableOpacity>
+      )}
 
       {/* Download Now Button */}
       {campaign.link && (
