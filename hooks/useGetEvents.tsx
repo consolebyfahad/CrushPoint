@@ -47,7 +47,7 @@ interface Event {
 
 const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 
-const useGetEvents = () => {
+const useGetEvents = (searchKey: string = "") => {
   const { user, userData } = useAppContext();
   const { t, i18n } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
@@ -178,6 +178,10 @@ const useGetEvents = () => {
       formData.append("table_name", "events");
       formData.append("user_id", user?.user_id || "");
 
+      if (searchKey && searchKey.trim()) {
+        formData.append("search_key", searchKey.trim());
+      }
+
       // Add user location if available
       if (
         userData?.lat &&
@@ -189,8 +193,9 @@ const useGetEvents = () => {
         formData.append("lng", userData.lng.toString());
       } else {
       }
-
+      console.log("formData events", formData);
       const response = await apiCall(formData);
+      console.log("response events", response);
       if (Array.isArray(response?.data)) {
         const formattedEvents = response.data.map((event: any) => {
           const goingUsers = parseGoingUsers(event.going || []);
@@ -310,7 +315,7 @@ const useGetEvents = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, userData?.lat, userData?.lng, i18n.language, t]);
+  }, [user, userData?.lat, userData?.lng, i18n.language, t, searchKey]);
 
   // Toggle event attendance
   const toggleAttendance = async (eventId: string) => {
@@ -388,7 +393,7 @@ const useGetEvents = () => {
 
   useEffect(() => {
     loadData();
-  }, [i18n.language]);
+  }, [loadData]);
 
   return {
     loading,

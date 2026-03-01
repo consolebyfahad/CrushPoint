@@ -5,7 +5,7 @@ import useGetEvents from "@/hooks/useGetEvents";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -18,19 +18,26 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const SEARCH_DEBOUNCE_MS = 2000;
+
 export default function EventsTab() {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const { loading, events, error, refetch, toggleAttendance } = useGetEvents();
+  const [searchKey, setSearchKey] = useState("");
 
-  // Filter events based on search text
-  const filteredEvents = events.filter(
-    (event) =>
-      event.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      event.category.toLowerCase().includes(searchText.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchText.toLowerCase()) ||
-      event.address.toLowerCase().includes(searchText.toLowerCase()),
-  );
+  useEffect(() => {
+    if (!searchText.trim()) {
+      setSearchKey("");
+      return;
+    }
+    const timer = setTimeout(() => {
+      setSearchKey(searchText.trim());
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const { loading, events, error, refetch, toggleAttendance } =
+    useGetEvents(searchKey);
 
   const handleEventPress = (event: any) => {
     router.push({
@@ -48,13 +55,11 @@ export default function EventsTab() {
   };
 
   const renderEventCard = ({ item }: any) => (
-    (
-      <EventCard
-        event={item}
-        onPress={handleEventPress}
-        onToggleAttending={handleToggleAttending}
-      />
-    )
+    <EventCard
+      event={item}
+      onPress={handleEventPress}
+      onToggleAttending={handleToggleAttending}
+    />
   );
 
   const renderEmptyState = () => (
@@ -62,11 +67,9 @@ export default function EventsTab() {
       <View style={styles.emptyIconContainer}>
         <Ionicons name="calendar-outline" size={64} color={color.gray14} />
       </View>
-      <Text style={styles.emptyTitle}>
-        {searchText ? t("events.noEvents") : t("events.noEvents")}
-      </Text>
+      <Text style={styles.emptyTitle}>{t("events.noEvents")}</Text>
       <Text style={styles.emptyText}>
-        {searchText ? t("common.tryAgain") : t("events.noEventsDesc")}
+        {searchKey ? t("common.tryAgain") : t("events.noEventsDesc")}
       </Text>
     </View>
   );
@@ -114,7 +117,7 @@ export default function EventsTab() {
       ) : (
         /* Events List */
         <FlatList
-          data={filteredEvents}
+          data={events}
           renderItem={renderEventCard}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}

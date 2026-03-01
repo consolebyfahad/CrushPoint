@@ -1,3 +1,4 @@
+import { useAppContext } from "@/context/app_context";
 import { apiCall } from "@/utils/api";
 import { useEffect, useState } from "react";
 
@@ -21,7 +22,11 @@ const useGetCampaign = () => {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const { userData } = useAppContext();
+  console.log("userData campaign", userData);
+  const contextUserData = userData as unknown as UserData;
+  const userLat = contextUserData?.lat;
+  const userLng = contextUserData?.lng;
   const loadCampaign = async () => {
     setLoading(true);
     setError(null);
@@ -32,8 +37,11 @@ const useGetCampaign = () => {
       formData.append("table_name", "campaign");
       formData.append("limit", "1");
       formData.append("rand", "1");
-
+      formData.append("lat", userLat?.toString() || "0");
+      formData.append("lng", userLng?.toString() || "0");
+      console.log("formData campaign", formData);
       const response = await apiCall(formData);
+      console.log("response campaign", response);
 
       if (
         response?.data &&
@@ -42,7 +50,7 @@ const useGetCampaign = () => {
       ) {
         // Filter active campaigns (status === "1")
         const activeCampaigns = response.data.filter(
-          (item: any) => item.status === "1" || item.status === 1
+          (item: any) => item.status === "1" || item.status === 1,
         );
 
         if (activeCampaigns.length === 0) {
@@ -57,7 +65,7 @@ const useGetCampaign = () => {
         if (activeCampaigns.length > 1) {
           // Find video campaign first, otherwise use first one
           const videoCampaign = activeCampaigns.find(
-            (item: any) => item.ad_type === "video"
+            (item: any) => item.ad_type === "video",
           );
           if (videoCampaign) {
             selectedCampaign = videoCampaign;
