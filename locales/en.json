@@ -324,6 +324,7 @@
   },
   "events": {
     "events": "Events",
+    "selectCity": "Select city",
     "upcoming": "Upcoming",
     "past": "Past",
     "createEvent": "Create Event",
@@ -456,6 +457,7 @@
     "matchWithUser": "You have a new match with {{name}}!",
     "matchWithUserChat": "You have a new match with {{name}}! Start chatting now.",
     "likedYourProfile": "{{name}} liked your profile!",
+    "visitedYourProfile": "{{name}} visited your profile",
     "startChatting": "Start chatting now.",
     "replyNow": "Reply now.",
     "allQuietHere": "All quiet here!",
@@ -1454,6 +1456,7 @@
     "failedToUnblockUser": "Failed to unblock user",
     "userNotAuthenticated": "User not authenticated",
     "invalidResponseFormat": "Invalid response format",
-    "failedToFetchInterests": "Failed to fetch interests"
+    "failedToFetchInterests": "Failed to fetch interests",
+    "failedToFetchCities": "Failed to fetch cities"
   }
 }

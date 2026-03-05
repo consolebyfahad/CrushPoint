@@ -1,11 +1,12 @@
-import CustomSearchBar from "@/components/custom_search";
+import CustomDropdown from "@/components/custom_dropdown";
 import EventCard from "@/components/event_card";
 import EventsTabsHeader from "@/components/tabs_header";
+import useGetCities from "@/hooks/useGetCities";
 import useGetEvents from "@/hooks/useGetEvents";
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -18,24 +19,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const SEARCH_DEBOUNCE_MS = 2000;
-
 export default function EventsTab() {
   const { t } = useTranslation();
-  const [searchText, setSearchText] = useState("");
-  const [searchKey, setSearchKey] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const searchKey = selectedCity.trim();
 
-  useEffect(() => {
-    if (!searchText.trim()) {
-      setSearchKey("");
-      return;
-    }
-    const timer = setTimeout(() => {
-      setSearchKey(searchText.trim());
-    }, SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [searchText]);
-
+  const { cities, loading: citiesLoading } = useGetCities();
   const { loading, events, error, refetch, toggleAttendance } =
     useGetEvents(searchKey);
 
@@ -102,11 +91,13 @@ export default function EventsTab() {
       {/* Header - Always shown */}
       <EventsTabsHeader title={t("events.events")} events={events} />
 
-      {/* Search Bar - Always shown */}
-      <CustomSearchBar
-        searchText={searchText}
-        onChangeText={setSearchText}
-        placeholder={t("common.search")}
+      {/* City filter - Always shown */}
+      <CustomDropdown
+        options={cities}
+        value={selectedCity}
+        onSelect={setSelectedCity}
+        placeholder={t("events.selectCity")}
+        loading={citiesLoading}
       />
 
       {/* Conditional Content */}

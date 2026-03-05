@@ -323,6 +323,7 @@
   },
   "events": {
     "events": "Events",
+    "selectCity": "Stadt auswählen",
     "upcoming": "Bevorstehend",
     "past": "Vergangen",
     "createEvent": "Veranstaltung erstellen",
@@ -455,6 +456,7 @@
     "matchWithUser": "Du hast ein neues Match mit {{name}}!",
     "matchWithUserChat": "Du hast ein neues Match mit {{name}}! Beginne jetzt zu chatten.",
     "likedYourProfile": "{{name}} gefällt dein Profil!",
+    "visitedYourProfile": "{{name}} hat dein Profil besucht",
     "startChatting": "Beginne jetzt zu chatten.",
     "replyNow": "Jetzt antworten.",
     "allQuietHere": "Alles ruhig hier!",
@@ -1458,6 +1460,7 @@
     "failedToUnblockUser": "Benutzer konnte nicht entblockiert werden",
     "userNotAuthenticated": "Benutzer nicht authentifiziert",
     "invalidResponseFormat": "Ungültiges Antwortformat",
-    "failedToFetchInterests": "Interessen konnten nicht abgerufen werden"
+    "failedToFetchInterests": "Interessen konnten nicht abgerufen werden",
+    "failedToFetchCities": "Städte konnten nicht abgerufen werden"
   }
 }

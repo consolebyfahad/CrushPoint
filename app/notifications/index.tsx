@@ -222,6 +222,16 @@ export default function Notifications({ navigation }: any) {
       ) {
         return t("notifications.likedYourProfile", { name: userName });
       }
+
+      // For profile view: "{name} visited your profile"
+      if (
+        lowerMessage.includes("visited") &&
+        (lowerMessage.includes("your profile") ||
+          lowerMessage.includes("dein profil") ||
+          lowerMessage.includes("dein profil besucht"))
+      ) {
+        return t("notifications.visitedYourProfile", { name: userName });
+      }
     }
 
     // Liked your profile (without name in message)
@@ -230,6 +240,16 @@ export default function Notifications({ navigation }: any) {
       lowerMessage.includes("your profile")
     ) {
       return t("notifications.likedYourProfile", { name: userName || "" });
+    }
+
+    // Visited your profile (without name in message or when message is generic)
+    if (
+      lowerMessage.includes("visited") &&
+      (lowerMessage.includes("your profile") ||
+        lowerMessage.includes("dein profil") ||
+        lowerMessage.includes("profil besucht"))
+    ) {
+      return t("notifications.visitedYourProfile", { name: userName || "" });
     }
 
     // New message notifications
@@ -395,9 +415,10 @@ export default function Notifications({ navigation }: any) {
         return image.matchNotification;
       case "profile_view":
       case "profile_visit":
-      case "profile_like":
       case "view":
         return image.profileNotification;
+      case "profile_like":
+        return image.likeNotification;
       case "event":
       case "event_invite":
       case "event_invite_accepted":
@@ -441,7 +462,7 @@ export default function Notifications({ navigation }: any) {
     // markNotificationAsRead(notification.id);
 
     const notificationType = notification.type.toLowerCase();
-
+    console.log("notificationType", notificationType);
     // Handle chat/message notifications - redirect to chat conversation
     if (
       notificationType === "message" ||
@@ -597,12 +618,14 @@ export default function Notifications({ navigation }: any) {
             },
           };
 
-          router.push({
-            pathname: "/profile/match2",
-            params: {
-              matchData: JSON.stringify(matchData),
-            },
-          });
+          // router.push({
+          //   pathname: "/profile/match2",
+          //   params: {
+          //     matchData: JSON.stringify(matchData),
+          //   },
+          // });
+
+          router.push("/(tabs)/matches");
           return;
         } catch (error) {
           // Fallback to matches screen

@@ -41,4 +41,5 @@ export const image = {
   profileNotification: require("@/assets/images/Background-2.png"),
   eventNotification: require("@/assets/images/Background-3.png"),
   chatNotification: require("@/assets/images/Background-4.png"),
+  likeNotification: require("@/assets/images/like.png"),
 };
