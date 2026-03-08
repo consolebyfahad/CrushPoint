@@ -657,6 +657,7 @@ export default function Notifications({ navigation }: any) {
         } else if (eventId) {
           params.eventId = String(eventId);
         }
+        console.log("params", params);
         if (Object.keys(params).length > 0) {
           router.push({
             pathname: "/events/event_details",

@@ -17,7 +17,7 @@ import {
   formatZodiac,
   parseInterestsWithNames,
   parseJsonString,
-  parseNationalityWithLabels
+  parseNationalityWithLabels,
 } from "@/utils/helper";
 import { requestUserLocation } from "@/utils/location";
 import {
@@ -29,6 +29,7 @@ import { BellIcon } from "@/utils/SvgIcons";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
@@ -50,6 +51,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const DISCOVER_FILTERS_KEY = "@DiscoverFilters";
 
 interface UserFilters {
   gender?: string;
@@ -93,12 +96,53 @@ export default function Index() {
       religion: undefined,
       zodiacSign: undefined,
     }),
-    [t, userData?.gender_interest]
+    [t, userData?.gender_interest],
   );
 
   const [filterData, setFilterData] = useState<UserFilters>(initialFilterData);
+  const filtersHydratedRef = useRef(false);
 
-  // Update filter data when userData changes
+  // Load persisted filters on mount
+  useEffect(() => {
+    let isMounted = true;
+    AsyncStorage.getItem(DISCOVER_FILTERS_KEY)
+      .then((raw) => {
+        if (!isMounted) return;
+        let saved: Partial<UserFilters> = {};
+        if (raw) {
+          try {
+            saved = JSON.parse(raw);
+          } catch {
+            saved = {};
+          }
+        }
+        const merged: UserFilters = {
+          ...initialFilterData,
+          ...saved,
+        };
+        if (userData?.gender_interest) {
+          merged.gender =
+            formatGenderInterest(userData.gender_interest, t) ||
+            t("filters.both");
+        }
+        setFilterData(merged);
+        filtersHydratedRef.current = true;
+      })
+      .catch(() => {
+        if (isMounted) filtersHydratedRef.current = true;
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Persist filters whenever they change (after initial load from storage)
+  useEffect(() => {
+    if (!filtersHydratedRef.current) return;
+    AsyncStorage.setItem(DISCOVER_FILTERS_KEY, JSON.stringify(filterData));
+  }, [filterData]);
+
+  // Update filter data when userData changes (gender from profile)
   useEffect(() => {
     if (userData?.gender_interest) {
       const updatedGender = formatGenderInterest(userData.gender_interest, t);
@@ -109,7 +153,6 @@ export default function Index() {
       }));
     }
   }, [userData?.gender_interest, t]);
-
 
   const { users, loading, error, refetch } = useGetUsers(filterData);
   const [viewType, setViewType] = useState(t("common.mapView"));
@@ -137,7 +180,7 @@ export default function Index() {
       "hardwareBackPress",
       () => {
         return true;
-      }
+      },
     );
 
     return () => backHandler.remove();
@@ -166,9 +209,7 @@ export default function Index() {
             setLocationPermissionGranted(false);
             setShowLocationModal(true);
           }
-        } catch (error) {
-
-        }
+        } catch (error) {}
       };
 
       updateCurrentLocation();
@@ -176,7 +217,7 @@ export default function Index() {
       return () => {
         isActive = false;
       };
-    }, [])
+    }, []),
   );
 
   // Update location in database
@@ -198,10 +239,18 @@ export default function Index() {
           lng: location.longitude,
         });
       }
-    } catch (error) {
-
-    }
+    } catch (error) {}
   };
+
+  const handleRetryLocation = useCallback(async () => {
+    try {
+      const location = await requestUserLocation();
+      if (location) {
+        setCurrentLocation(location);
+        await updateLocationInDatabase(location);
+      }
+    } catch (error) {}
+  }, [user?.user_id]);
 
   // Track if notification has been handled to prevent duplicates
   const notificationHandledRef = useRef<Set<string>>(new Set());
@@ -210,11 +259,15 @@ export default function Index() {
   useEffect(() => {
     requestNotificationPermissions();
 
-    const handleNotificationPress = async (data: any, notificationBody?: string) => {
+    const handleNotificationPress = async (
+      data: any,
+      notificationBody?: string,
+    ) => {
       // Check if this is a match notification by checking the notification body
-      const isMatchNotification = notificationBody?.toLowerCase().includes("match") || 
-                                   notificationBody?.toLowerCase().includes("new match");
-      
+      const isMatchNotification =
+        notificationBody?.toLowerCase().includes("match") ||
+        notificationBody?.toLowerCase().includes("new match");
+
       // Only handle match notifications - navigate to match2 screen
       // For all other notifications (chat, message, etc.), just show the push notification without navigation
       if (data?.date_id && isMatchNotification) {
@@ -226,7 +279,7 @@ export default function Index() {
           (key) => {
             const timestamp = parseInt(key.split("_")[1]);
             return Date.now() - timestamp < 2000; // 2 seconds
-          }
+          },
         );
 
         // Clean up old keys
@@ -234,11 +287,10 @@ export default function Index() {
 
         // Check if we already have a recent notification for this date_id
         const alreadyHandled = recentKeys.some((key) =>
-          key.startsWith(`${data.date_id}_`)
+          key.startsWith(`${data.date_id}_`),
         );
 
         if (alreadyHandled) {
-
           return;
         }
 
@@ -255,8 +307,7 @@ export default function Index() {
               },
             });
           }
-        } catch (error) {
-        }
+        } catch (error) {}
       }
     };
 
@@ -274,7 +325,7 @@ export default function Index() {
   useEffect(() => {
     // Create a unique key for these params
     const paramKey = `${params.selectedUserId}_${params._timestamp || ""}`;
-    
+
     // Skip if we've already processed these params
     if (processedParamsRef.current.has(paramKey)) {
       return;
@@ -309,9 +360,7 @@ export default function Index() {
             setSelectedUser(null);
           }, 10000);
         }, 500); // Increased from 100ms to 500ms to ensure map is ready
-      } catch (error) {
-
-      }
+      } catch (error) {}
     }
 
     // Clean up old param keys (keep only last 10)
@@ -345,13 +394,11 @@ export default function Index() {
             // Clean up the escaped quotes in the JSON string
             const cleanedImagesString = matchedUserData.images.replace(
               /\\"/g,
-              '"'
+              '"',
             );
             parsedImages = JSON.parse(cleanedImagesString);
           }
-        } catch (error) {
-
-        }
+        } catch (error) {}
 
         // Calculate age from date of birth
         const calculateAge = (dob: string) => {
@@ -366,16 +413,16 @@ export default function Index() {
                 birthDate = new Date(
                   `${parts[2]}-${parts[0].padStart(2, "0")}-${parts[1].padStart(
                     2,
-                    "0"
-                  )}`
+                    "0",
+                  )}`,
                 );
                 // If invalid, try DD/MM/YYYY format
                 if (isNaN(birthDate.getTime())) {
                   birthDate = new Date(
                     `${parts[2]}-${parts[1].padStart(
                       2,
-                      "0"
-                    )}-${parts[0].padStart(2, "0")}`
+                      "0",
+                    )}-${parts[0].padStart(2, "0")}`,
                   );
                 }
               } else {
@@ -386,7 +433,6 @@ export default function Index() {
             }
 
             if (isNaN(birthDate.getTime())) {
-
               return 0;
             }
 
@@ -401,7 +447,6 @@ export default function Index() {
             }
             return age;
           } catch (error) {
-
             return 0;
           }
         };
@@ -443,7 +488,10 @@ export default function Index() {
               const imagesString = userData.images as string;
               const cleaned = imagesString.replace(/\\"/g, '"');
               currentUserImages = JSON.parse(cleaned);
-            } else if (Array.isArray(userData?.images) && userData.images.length > 0) {
+            } else if (
+              Array.isArray(userData?.images) &&
+              userData.images.length > 0
+            ) {
               const first = userData.images[0];
               if (typeof first === "string") {
                 if (first.includes("[") && first.includes("]")) {
@@ -471,9 +519,7 @@ export default function Index() {
             try {
               const rawIds = parseJsonString(data?.looking_for || "[]");
               lookingForIds = Array.isArray(rawIds) ? rawIds : [];
-            } catch (error) {
-
-            }
+            } catch (error) {}
 
             return {
               interests: parseInterestsWithNames(
@@ -483,13 +529,12 @@ export default function Index() {
               lookingFor: lookingForIds, // Store raw IDs for dynamic formatting
               nationality: parseNationalityWithLabels(
                 data?.nationality || "[]",
-                t
+                t,
               ),
               religion: formatReligion(data?.religion || "", t),
               zodiac: formatZodiac(data?.zodiac || "", t),
             };
           } catch (error) {
-
             return {
               interests: [],
               lookingFor: [],
@@ -554,7 +599,6 @@ export default function Index() {
         model: Device.modelName || "unknown",
       };
     } catch (error) {
-
       return {
         platform: Platform.OS || "",
         model: "unknown",
@@ -574,8 +618,7 @@ export default function Index() {
         await registerFCMToken();
       } else {
       }
-        } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const registerFCMToken = async () => {
@@ -596,9 +639,7 @@ export default function Index() {
       formData.append("deviceModel", deviceInfo.model);
 
       const response = await apiCall(formData);
-
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const handleAllowLocation = async () => {
@@ -625,9 +666,7 @@ export default function Index() {
           setLocationPermissionGranted(true);
           setShowLocationModal(false);
         }
-      } catch (error) {
-
-      }
+      } catch (error) {}
     }
   };
 
@@ -751,6 +790,7 @@ export default function Index() {
           selectedUser={selectedUser}
           onUserDeselect={handleUserDeselect}
           onShowMyLocation={handleShowMyLocation}
+          onRetryLocation={handleRetryLocation}
         />
       )}
 

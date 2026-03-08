@@ -113,7 +113,7 @@ export default function EventDetails() {
   const [isAttending, setIsAttending] = useState(false);
   const [showInviteMatches, setShowInviteMatches] = useState(false);
   const [showAttendeesModal, setShowAttendeesModal] = useState(false);
-  const { user } = useAppContext();
+  const { user, userData } = useAppContext();
   const { showToast } = useToast();
   const [isRSVPing, setIsRSVPing] = useState(false);
   // Fetch a single event by ID (for deep link opens)
@@ -124,6 +124,7 @@ export default function EventDetails() {
       formData.append("table_name", "events");
       formData.append("id", eventId);
       const response = await apiCall(formData);
+      console.log("response event_details", JSON.stringify(response));
       if (
         response?.data &&
         Array.isArray(response.data) &&
@@ -135,6 +136,27 @@ export default function EventDetails() {
           : raw.image
             ? `https://api.andra-dating.com/images/${raw.image}`
             : "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
+        // Parse going/attendees from API (same shape as parseGoingUsers so attendees show when opened via notification or deep link)
+        const defaultAvatar =
+          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
+        const going = Array.isArray(raw.going)
+          ? raw.going.map((u: any) => {
+              let img = u.image;
+              if (!img && u.images) {
+                try {
+                  const arr = JSON.parse(String(u.images).replace(/\\"/g, '"'));
+                  if (Array.isArray(arr) && arr.length > 0) {
+                    img = `https://api.andra-dating.com/images/${arr[0]}`;
+                  }
+                } catch (_) {}
+              }
+              return {
+                id: u.id || u.name,
+                name: u.name || "Unknown",
+                image: img || defaultAvatar,
+              };
+            })
+          : [];
         const eventData = {
           id: raw.id,
           title: raw.title || raw.title_languages,
@@ -155,16 +177,16 @@ export default function EventDetails() {
                 : "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
             verified: raw.organizer_verified === "1" || false,
           },
-          going: [],
-          going_count: raw.going_count || 0,
+          going,
+          going_count: raw.going_count ?? going.length,
           isAttending: raw.user_going === "1" || raw.user_going === 1,
           user_going: raw.user_going || "0",
           web_link: raw.web_link,
           lat: raw.lat,
           lng: raw.lng,
           distance: raw.distance,
-          attendees: [],
-          totalAttendees: raw.going_count || 0,
+          attendees: going,
+          totalAttendees: raw.going_count ?? going.length,
         };
         setEvent(eventData);
         setIsAttending(
@@ -653,7 +675,14 @@ export default function EventDetails() {
   };
 
   const handleOpenAttendeeProfile = (attendee: any) => {
-    const userData = {
+    if (
+      attendee?.id != null &&
+      userData?.id != null &&
+      String(attendee.id) === String(userData.id)
+    ) {
+      return;
+    }
+    const profileUserData = {
       id: attendee.id,
       name: attendee.name,
       image: attendee.image,
@@ -662,7 +691,7 @@ export default function EventDetails() {
     router.push({
       pathname: "/profile/user_profile",
       params: {
-        user: JSON.stringify(userData),
+        user: JSON.stringify(profileUserData),
         userId: String(attendee.id),
       },
     });

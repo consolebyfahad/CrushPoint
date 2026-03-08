@@ -34,6 +34,7 @@ export default function ProfileTab() {
   const { t } = useTranslation();
   const { userData, user } = useAppContext();
   const { loading, error, refetch } = useGetProfile();
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const pagerRef = useRef<PagerView>(null);
@@ -63,7 +64,7 @@ export default function ProfileTab() {
       return () => {
         isActive = false;
       };
-    }, [user?.user_id]) // FIXED: Only depend on user_id, not refetch or loading
+    }, [user?.user_id]), // FIXED: Only depend on user_id, not refetch or loading
   );
 
   const handleSettings = () => {
@@ -353,7 +354,8 @@ export default function ProfileTab() {
                 {t("profile.relationshipGoals")}
               </Text>
               <View style={styles.infoRow}>
-                {userData.originalLookingForIds && userData.originalLookingForIds.length > 0 ? (
+                {userData.originalLookingForIds &&
+                userData.originalLookingForIds.length > 0 ? (
                   <>
                     <Text style={styles.infoValue}>
                       {formatLookingFor(userData.originalLookingForIds[0], t)}
@@ -364,7 +366,8 @@ export default function ProfileTab() {
                       </Text>
                     )}
                   </>
-                ) : userData.parsedLookingFor && userData.parsedLookingFor.length > 0 ? (
+                ) : userData.parsedLookingFor &&
+                  userData.parsedLookingFor.length > 0 ? (
                   <>
                     {/* Fallback: format the first parsed item if it's a raw ID */}
                     <Text style={styles.infoValue}>
@@ -396,7 +399,10 @@ export default function ProfileTab() {
                   </Text>
                   <View style={styles.infoRow}>
                     <Text style={styles.infoValue}>
-                      {formatNationality(userData.originalNationalityValues[0], t)}
+                      {formatNationality(
+                        userData.originalNationalityValues[0],
+                        t,
+                      )}
                     </Text>
                     {userData.originalNationalityValues.length > 1 && (
                       <Text style={styles.additionalGoals}>
@@ -439,7 +445,10 @@ export default function ProfileTab() {
           </View>
 
           <View style={styles.interestsContainer}>
-            {((userData.parsedInterests && userData.parsedInterests.length > 0) ? userData.parsedInterests : []).map((interest, index) => (
+            {(userData.parsedInterests && userData.parsedInterests.length > 0
+              ? userData.parsedInterests
+              : []
+            ).map((interest, index) => (
               <View key={index} style={styles.interestTag}>
                 <Text style={styles.interestText}>{interest}</Text>
               </View>

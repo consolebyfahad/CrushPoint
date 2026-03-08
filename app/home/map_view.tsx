@@ -33,7 +33,8 @@ interface MapViewProps {
   refetch?: any;
   selectedUser?: any;
   onUserDeselect?: () => void;
-  onShowMyLocation?: () => void; // NEW: Show my location handler
+  onShowMyLocation?: () => void;
+  onRetryLocation?: () => void;
 }
 
 interface UserLocation {
@@ -50,24 +51,28 @@ export default function Map({
   refetch,
   selectedUser,
   onUserDeselect,
-  onShowMyLocation, // NEW: Prop for showing current user location
+  onShowMyLocation,
+  onRetryLocation,
 }: MapViewProps) {
   const { t } = useTranslation();
   const { userData } = useAppContext();
   const [mapRegion, setMapRegion] = useState<Region | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
+  const [locationGaveUp, setLocationGaveUp] = useState(false);
   const mapRef = useRef<MapView>(null);
 
-  // Get user's current location
+  // Get user's current location (prefer currentLocation, fallback to userData for Android/slow GPS)
   useEffect(() => {
     const getLocationForMap = () => {
       if (currentLocation) {
         return currentLocation;
-      } else if (userData?.lat && userData?.lng) {
-        return {
-          latitude: parseFloat(userData.lat.toString()),
-          longitude: parseFloat(userData.lng.toString()),
-        };
+      }
+      if (userData?.lat != null && userData?.lng != null) {
+        const lat = parseFloat(userData.lat.toString());
+        const lng = parseFloat(userData.lng.toString());
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+          return { latitude: lat, longitude: lng };
+        }
       }
       return null;
     };
@@ -75,19 +80,27 @@ export default function Map({
     const locationForMap = getLocationForMap();
 
     if (locationForMap) {
-      const newRegion = {
+      setLocationGaveUp(false);
+      setMapRegion({
         latitude: locationForMap.latitude,
         longitude: locationForMap.longitude,
-        latitudeDelta: 0.01, // UPDATED: Slightly wider view for better context
+        latitudeDelta: 0.01,
         longitudeDelta: 0.01,
-      };
-
-      setMapRegion(newRegion);
+      });
       setLocationLoading(false);
     } else {
       setLocationLoading(true);
     }
   }, [currentLocation, userData?.lat, userData?.lng]);
+
+  // Android: if location never arrives, show error after a delay so user can retry
+  const hasLocation =
+    currentLocation || (userData?.lat != null && userData?.lng != null);
+  useEffect(() => {
+    if (Platform.OS !== "android" || hasLocation) return;
+    const timer = setTimeout(() => setLocationGaveUp(true), 4000);
+    return () => clearTimeout(timer);
+  }, [hasLocation]);
 
   // ENHANCED: Better animation to selected user location
   useEffect(() => {
@@ -109,22 +122,25 @@ export default function Map({
     }
   }, [selectedUser]);
 
-  // NEW: Handle showing current user location
+  // Handle showing current user location (use displayLocation so it works with userData fallback)
   const handleShowMyLocation = () => {
-    if (currentLocation && mapRef.current) {
+    const location =
+      currentLocation ||
+      (userData?.lat != null && userData?.lng != null
+        ? {
+            latitude: parseFloat(userData.lat.toString()),
+            longitude: parseFloat(userData.lng.toString()),
+          }
+        : null);
+    if (location && mapRef.current) {
       const currentUserRegion = {
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-        latitudeDelta: 0.01, // Slightly wider view for current location
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       };
-
       mapRef.current.animateToRegion(currentUserRegion, 1000);
-
-      // Call the parent handler if provided
-      if (onShowMyLocation) {
-        onShowMyLocation();
-      }
+      onShowMyLocation?.();
     }
   };
 
@@ -187,11 +203,10 @@ export default function Map({
       // Check if user is in any of their private spots
       const isInPrivateSpot = isUserInPrivateSpot(
         userLocation,
-        user.private_spots
+        user.private_spots,
       );
 
       if (isInPrivateSpot) {
-
         return false; // Hide user from map
       }
     }
@@ -199,7 +214,7 @@ export default function Map({
     return true;
   });
 
-  // Get the location to display
+  // Get the location to display (currentLocation or fallback to userData for Android/slow location)
   const displayLocation =
     currentLocation ||
     (userData?.lat && userData?.lng
@@ -209,8 +224,17 @@ export default function Map({
         }
       : null);
 
-  // Loading state
-  if (locationLoading || !mapRegion || !displayLocation) {
+  const handleRefresh = () => {
+    setLocationGaveUp(false);
+    setLocationLoading(true);
+    onRetryLocation?.();
+    refetch?.();
+  };
+
+  // Loading state (wait for location or userData; on Android stop after timeout)
+  const stillLoading =
+    !displayLocation && (locationLoading || !mapRegion) && !locationGaveUp;
+  if (stillLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={color.primary} />
@@ -219,8 +243,8 @@ export default function Map({
     );
   }
 
-  // Error state when no location available
-  if (!currentLocation) {
+  // Error state when no location (and we're not loading, or Android gave up)
+  if (!displayLocation) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorEmoji}>📍</Text>
@@ -228,6 +252,14 @@ export default function Map({
         <Text style={styles.errorMessage}>
           {t("errors.unableToAccessLocation")}
         </Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={handleRefresh}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons name="refresh" size={22} color={color.white} />
+          <Text style={styles.retryButtonText}>{t("common.retry")}</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -240,7 +272,7 @@ export default function Map({
           Platform.OS === "android" ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
         }
         style={styles.map}
-        region={mapRegion}
+        region={mapRegion ?? undefined}
         showsUserLocation={false}
         showsMyLocationButton={false} // UPDATED: We'll use custom button
         showsCompass={false}
@@ -260,9 +292,9 @@ export default function Map({
         showsIndoors={false}
         showsScale={false}
       >
-        {/* Current user location marker */}
+        {/* Current user location marker (use displayLocation so map works when only userData has coords) */}
         <Marker
-          coordinate={currentLocation}
+          coordinate={displayLocation}
           anchor={{ x: 0.5, y: 0.5 }}
           identifier="current-user"
           title="You are here"
@@ -277,7 +309,7 @@ export default function Map({
           if (!userCoords) return null;
 
           const isSelected = selectedUser?.id === mapUser.id;
-          // Android: custom marker views need tracksViewChanges=true to render; iOS can use false for performance
+          // Android: tracksViewChanges must be true for custom marker views (images) to render
           const tracksChanges = Platform.OS === "android";
 
           return (
@@ -305,18 +337,20 @@ export default function Map({
                 pointerEvents="box-none"
                 collapsable={false}
               >
-                <Image
-                  source={{
-                    uri:
-                      mapUser.images?.[0] ||
-                      "https://via.placeholder.com/60x60.png?text=User",
-                  }}
-                  style={[
-                    styles.userImage,
-                    isSelected && styles.selectedUserImage,
-                  ]}
-                  resizeMode="cover"
-                />
+                <View style={styles.userMarkerImageWrapper}>
+                  <Image
+                    source={{
+                      uri:
+                        mapUser.images?.[0] ||
+                        "https://via.placeholder.com/60x60.png?text=User",
+                    }}
+                    style={[
+                      styles.userImage,
+                      isSelected && styles.selectedUserImage,
+                    ]}
+                    resizeMode="cover"
+                  />
+                </View>
                 {/* ENHANCED: Better selection indicator */}
                 {isSelected && (
                   <>
@@ -438,6 +472,22 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
   },
+  retryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: color.primary,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.white,
+  },
   // User markers
   userMarker: {
     width: 60,
@@ -461,10 +511,15 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     transform: [{ scale: 1.2 }], // UPDATED: Scale up selected marker
   },
+  userMarkerImageWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: "hidden",
+  },
   userImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
+    width: 60,
+    height: 60,
   },
   selectedUserImage: {
     // Additional styling for selected user image if needed

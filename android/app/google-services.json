@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "323137189211",
+    "project_id": "andradating",
+    "storage_bucket": "andradating.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:323137189211:android:ad335e9aa8fc196209567e",
+        "android_client_info": {
+          "package_name": "com.dating.Andra"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "323137189211-1hk5s1aoo8a5orpsc4m3dtr8g53du5eo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dating.Andra",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "323137189211-bsva08l18ig45dvalqhcbs08mqrgsi4j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClLDinNc1VNpsbVseDac1bz7glqxBDQDM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "323137189211-bsva08l18ig45dvalqhcbs08mqrgsi4j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "323137189211-jqjki7ji9ap6hc4puj1ielaqjei9odut.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dating.Andra"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

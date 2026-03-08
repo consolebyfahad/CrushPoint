@@ -236,8 +236,11 @@ export default function useGetProfile() {
         }
 
         // Create data for local state (using types/userData.d.ts interface)
+        const profileId =
+          userData.id ?? (userData as any).user_id ?? user?.user_id ?? "";
         const localUserData: any = {
           ...userData,
+          id: profileId, // Ensure profile id is always stored
           images: userData.images, // Keep original format for local state
           age,
           photos, // This now contains full URLs
@@ -269,6 +272,7 @@ export default function useGetProfile() {
         // Create data for context (using context/app_context.tsx interface)
         const contextUserData = {
           ...userData,
+          id: profileId, // Ensure profile id is always stored in userData
           images: userData.images ? [userData.images] : [], // Convert to array format expected by context
           looking_for: userData.looking_for
             ? parseJsonString(userData.looking_for)

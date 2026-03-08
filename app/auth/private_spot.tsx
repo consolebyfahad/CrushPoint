@@ -572,13 +572,14 @@ export default function PrivateSpot() {
               strokeWidth={2}
             />
 
-            {/* Center Marker - always at map center */}
+            {/* Center Marker - always at map center (tracksViewChanges=false to prevent Android flicker) */}
             <Marker
               coordinate={{
                 latitude: parseFloat(mapRegion.latitude.toString()),
                 longitude: parseFloat(mapRegion.longitude.toString()),
               }}
               anchor={{ x: 0.5, y: 0.5 }}
+              tracksViewChanges={false}
             >
               <MarkerIcon />
             </Marker>
