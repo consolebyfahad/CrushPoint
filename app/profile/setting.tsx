@@ -84,7 +84,6 @@ export default function Settings() {
     router.push("/profile/language");
   };
 
-  // Settings sections data
   const visibilitySettings = [
     {
       id: "private_spot",
@@ -234,7 +233,7 @@ export default function Settings() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -248,21 +247,21 @@ export default function Settings() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Visibility Section */}
+        {}
         {renderSection(t("settings.visibility"), visibilitySettings)}
 
-        {/* Account Section */}
+        {}
         {renderSection(t("settings.account"), accountSettings)}
 
-        {/* Connect Section */}
+        {}
         {renderSection(t("settings.connect"), connectSettings)}
         {renderSection(undefined, otherSettings)}
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Log Out Button */}
+      {}
       <View style={styles.logoutContainer}>
         <CustomButton
           title={t("auth.logout")}

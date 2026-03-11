@@ -21,7 +21,7 @@ import { OtpInput } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Verify() {
-  // Get interests from API for interest name conversion
+  
   const { interests: apiInterests } = useGetInterests();
   const { t } = useTranslation();
   const params = useLocalSearchParams();
@@ -40,7 +40,7 @@ export default function Verify() {
     "https://img.freepik.com/vecteurs-libre/homme-affaires-caractere-avatar-isole_24877-60111.jpg?semt=ais_hybrid&w=740";
 
   useEffect(() => {
-    // Start countdown timer
+    
     const timer = setInterval(() => {
       setResendCountdown((prev) => {
         if (prev <= 1) {
@@ -69,7 +69,6 @@ export default function Verify() {
         const userData = response.data[0];
         let photos: string[] = [];
 
-        // Parse images
         if (userData.images) {
           try {
             const cleanedImagesString = userData.images

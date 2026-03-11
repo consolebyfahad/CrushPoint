@@ -30,7 +30,7 @@ interface User {
   age: number;
   match_status: string;
   match_emoji: string;
-  // Add other user properties as needed
+  
 }
 
 export default function ListView({
@@ -41,10 +41,10 @@ export default function ListView({
   error,
   refetch,
 }: ListViewProps) {
-  // State to track if refresh control is showing
+  
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { t } = useTranslation();
-  // Memoized render function for better performance
+  
   const renderUserCard: ListRenderItem<User> = useCallback(
     ({ item }) => (
       <UserCard
@@ -56,17 +56,14 @@ export default function ListView({
     [onViewProfile, onShowUserOnMap]
   );
 
-  // Memoized key extractor
   const keyExtractor = useCallback((item: User) => `user-${item.id}`, []);
 
-  // Handle retry with better UX
   const handleRetry = useCallback(() => {
     if (!loading) {
       refetch();
     }
   }, [loading, refetch]);
 
-  // Handle refresh control state changes
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
@@ -87,7 +84,6 @@ export default function ListView({
     return () => backHandler.remove();
   }, []);
 
-  // Render error state when no users and there's an error
   const renderErrorState = () => (
     <View style={styles.centerContainer}>
       <Ionicons
@@ -114,7 +110,6 @@ export default function ListView({
     </View>
   );
 
-  // Render loading state
   const renderLoadingState = () => (
     <View style={styles.centerContainer}>
       <ActivityIndicator size="large" color={color.primary} />
@@ -122,7 +117,6 @@ export default function ListView({
     </View>
   );
 
-  // Render empty state when no error but no users
   const renderEmptyState = () => (
     <View style={styles.centerContainer}>
       <Text style={styles.emptyEmoji}>🔍</Text>
@@ -134,9 +128,8 @@ export default function ListView({
     </View>
   );
 
-  // Render error banner for when there are users but also an error
   const renderErrorBanner = () => {
-    // Only show error banner if there's an error AND no users
+    
     if (!error || users.length > 0) return null;
     return (
       <View style={styles.errorBanner}>
@@ -158,7 +151,6 @@ export default function ListView({
     );
   };
 
-  // Main render logic
   if (loading && users.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
@@ -179,7 +171,6 @@ export default function ListView({
     );
   }
 
-  // Main content with users list
   return (
     <SafeAreaView
       style={[styles.container, { paddingTop: isRefreshing ? 70 : 0 }]}
@@ -197,19 +188,19 @@ export default function ListView({
             onRefresh={handleRefresh}
             colors={[color.primary]}
             tintColor={color.primary}
-            // title="Pull to refresh"
+            
             titleColor={color.gray55}
           />
         }
-        // Performance optimizations
+        
         removeClippedSubviews={true}
         maxToRenderPerBatch={5}
         updateCellsBatchingPeriod={30}
         initialNumToRender={3}
         windowSize={10}
-        // Better handling of empty list
+        
         ListEmptyComponent={renderEmptyState}
-        // Add some spacing at the bottom
+        
         ListFooterComponent={<View style={styles.listFooter} />}
       />
     </SafeAreaView>
@@ -242,7 +233,7 @@ const styles = StyleSheet.create({
     color: color.gray55,
     textAlign: "center",
   },
-  // Error states
+  
   errorIcon: {
     marginBottom: 16,
   },
@@ -262,7 +253,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     paddingHorizontal: 20,
   },
-  // Empty states
+  
   emptyEmoji: {
     fontSize: 64,
     marginBottom: 16,
@@ -283,7 +274,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     paddingHorizontal: 20,
   },
-  // Buttons
+  
   retryButton: {
     backgroundColor: color.primary,
     paddingHorizontal: 32,
@@ -301,7 +292,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: font.semiBold,
   },
-  // Error banner
+  
   errorBanner: {
     backgroundColor: "#FFF3CD",
     borderColor: "#FFEAA7",

@@ -3,17 +3,11 @@ interface UserLocation {
   lng: number;
 }
 
-/**
- * Calculate distance between two coordinates using Haversine formula
- * @param userLocation Current user's location
- * @param targetLocation Target user's location
- * @returns Distance in kilometers as formatted string
- */
 export const calculateDistance = (
   userLocation: UserLocation,
   targetLocation: UserLocation
 ): string => {
-  // Check if both locations are valid
+  
   if (
     !userLocation?.lat ||
     !userLocation?.lng ||
@@ -23,7 +17,7 @@ export const calculateDistance = (
     return "N/A";
   }
 
-  const R = 6371; // Earth's radius in kilometers
+  const R = 6371;  
   const dLat = toRadians(targetLocation.lat - userLocation.lat);
   const dLng = toRadians(targetLocation.lng - userLocation.lng);
 
@@ -37,7 +31,6 @@ export const calculateDistance = (
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
 
-  // Format distance
   if (distance < 1) {
     return `${Math.round(distance * 1000)}m`;
   } else {
@@ -45,21 +38,10 @@ export const calculateDistance = (
   }
 };
 
-/**
- * Convert degrees to radians
- * @param degrees Degrees to convert
- * @returns Radians
- */
 const toRadians = (degrees: number): number => {
   return degrees * (Math.PI / 180);
 };
 
-/**
- * Calculate distance between two coordinates in meters
- * @param location1 First location
- * @param location2 Second location
- * @returns Distance in meters
- */
 export const calculateDistanceInMeters = (
   location1: UserLocation,
   location2: UserLocation
@@ -73,7 +55,7 @@ export const calculateDistanceInMeters = (
     return Infinity;
   }
 
-  const R = 6371000; // Earth's radius in meters
+  const R = 6371000;  
   const dLat = toRadians(location2.lat - location1.lat);
   const dLng = toRadians(location2.lng - location1.lng);
 
@@ -88,12 +70,6 @@ export const calculateDistanceInMeters = (
   return R * c;
 };
 
-/**
- * Check if a location is within a private spot radius
- * @param userLocation User's current location
- * @param privateSpot Private spot with lat, lng, and radius
- * @returns True if user is within the private spot radius
- */
 export const isLocationInPrivateSpot = (
   userLocation: UserLocation,
   privateSpot: { lat: number; lng: number; radius: number }
@@ -111,7 +87,6 @@ export const isLocationInPrivateSpot = (
     lng: privateSpot.lng,
   });
 
-  // Convert radius from string/number to meters (assuming radius is in meters)
   const radiusInMeters =
     typeof privateSpot.radius === "string"
       ? parseInt(privateSpot.radius)
@@ -120,12 +95,6 @@ export const isLocationInPrivateSpot = (
   return distance <= radiusInMeters;
 };
 
-/**
- * Check if a user is in any of their private spots
- * @param userLocation User's current location
- * @param privateSpots Array of private spots
- * @returns True if user is within any private spot
- */
 export const isUserInPrivateSpot = (
   userLocation: UserLocation,
   privateSpots: Array<{ lat: number | string; lng: number | string; radius: number | string }>

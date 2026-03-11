@@ -33,7 +33,7 @@ interface Match {
   images?: string[];
   isOnline?: boolean;
   match_id?: string;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;  
 }
 
 interface ChatItem {
@@ -59,10 +59,9 @@ export default function Matches() {
   const [showRemoveMatch, setShowRemoveMatch] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
 
-  // Use the useGetMatches hook
   const { matches, loading, error, refetch, removeMatch, updateMatchStatus } =
     useGetMatches();
-  // Use the useGetChats hook
+  
   const {
     chats,
     loading: chatsLoading,
@@ -70,12 +69,10 @@ export default function Matches() {
     refetch: refetchChats,
   } = useGetChats();
 
-  // Filter matches based on search text
   const filteredMatches = matches.filter((match) =>
     match.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Horizontal list: only show matches that don't have a conversation yet (hide users already in chat list)
   const matchesWithoutChat = filteredMatches.filter(
     (match) =>
       !chats.some(
@@ -83,27 +80,21 @@ export default function Matches() {
       )
   );
 
-  // Filter chats based on search text
   const filteredChats = chats.filter(
     (chat) =>
       chat.name.toLowerCase().includes(searchText.toLowerCase()) ||
       chat.lastMessage.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Navigate to conversation from match card
-  // This ensures the same conversation opens whether clicked from matches or chat list
   const handleOpenConversation = useCallback(
     (match: any) => {
-      // match.match_id is the matched user's ID (the person we're chatting with)
-      // match.user_id is the current user's ID (not what we want)
+
       const matchedUserId = String(match.match_id || match.id);
       const userName = match.name || "";
       const userImage =
         match.image ||
         (match.images && match.images.length > 0 ? match.images[0] : "");
 
-      // Check if there's already a chat for this matched user
-      // If yes, use the same matchId from the chat to ensure same conversation opens
       const existingChat = chats.find(
         (chat) => String(chat.userId) === matchedUserId
       );
@@ -112,7 +103,7 @@ export default function Matches() {
         pathname: "/chat/conversation",
         params: {
           matchId: matchId,
-          userId: matchedUserId, // This is the matched user's ID (the person we're chatting with)
+          userId: matchedUserId,  
           userName: userName,
           userImage: userImage,
           userAge: match.age != null ? String(match.age) : undefined,
@@ -125,7 +116,6 @@ export default function Matches() {
     [chats]
   );
 
-  // Navigation handlers (same pattern as UserProfile)
   const handleNavigateToRemoveMatch = useCallback(() => {
     setShowProfileOptions(false);
     setShowRemoveMatch(true);
@@ -141,7 +131,6 @@ export default function Matches() {
     setShowReportUser(true);
   }, []);
 
-  // Back to profile options handler
   const handleBackToProfileOptions = useCallback(() => {
     setShowBlockConfirmation(false);
     setShowReportUser(false);
@@ -149,11 +138,10 @@ export default function Matches() {
     setShowProfileOptions(true);
   }, []);
 
-  // Action handlers
   const handleRemoveMatch = useCallback(async () => {
     try {
       if (selectedMatch) {
-        // Call API to remove match
+        
         const formData = new FormData();
         formData.append("type", "delete_data");
         formData.append("table_name", "matches");
@@ -163,7 +151,7 @@ export default function Matches() {
         const response = await apiCall(formData);
 
         if (response.result) {
-          // Remove from local state using the hook function
+          
           removeMatch(selectedMatch.match_id);
         } else {
         }
@@ -178,31 +166,15 @@ export default function Matches() {
   const handleConfirmBlock = useCallback(async () => {
     try {
       if (selectedMatch) {
-        // Add to blocked users
+        
         const blockFormData = new FormData();
         blockFormData.append("type", "add_data");
         blockFormData.append("user_id", user?.user_id || "");
         blockFormData.append("table_name", "blocked_users");
         blockFormData.append("block_id", selectedMatch.match_id);
-        // blockFormData.append("id", blockFormData);
+        
         const blockResponse = await apiCall(blockFormData);
 
-        // if (blockResponse.result) {
-        //   // Remove match from matches table
-        //   const removeFormData = new FormData();
-        //   removeFormData.append("type", "delete_data");
-        //   removeFormData.append("table_name", "matches");
-        //   removeFormData.append("id", selectedMatch.match_id);
-
-        //   const removeResponse = await apiCall(removeFormData);
-
-        //   if (removeResponse.result) {
-        //     // Remove from local state using the hook function
-        //     removeMatch(selectedMatch.match_id);
-        //   }
-        // } else {
-        //
-        // }
       }
     } catch (error) {
     } finally {
@@ -215,7 +187,7 @@ export default function Matches() {
     async (reportData: any) => {
       try {
         if (selectedMatch) {
-          // Submit report to API
+          
           const formData = new FormData();
           formData.append("type", "add_data");
           formData.append("table_name", "Reported_users");
@@ -225,7 +197,7 @@ export default function Matches() {
           formData.append("description", reportData.description || "");
           const response = await apiCall(formData);
           if (response.result) {
-            // Optionally remove the match after reporting
+            
             removeMatch(selectedMatch.match_id);
           } else {
           }
@@ -239,7 +211,6 @@ export default function Matches() {
     [selectedMatch, user?.user_id, removeMatch]
   );
 
-  // Render horizontal match card (compact version)
   const renderHorizontalMatchCard: ListRenderItem<Match> = useCallback(
     ({ item }) => {
       const imageSource = item?.image
@@ -301,14 +272,14 @@ export default function Matches() {
               const formData = new FormData();
               formData.append("type", "chat_delete");
               formData.append("user_id", user.user_id);
-              // Use chat.userId (matched user's ID) as to_chat_id, not chat.matchId (match record ID)
+              
               formData.append("to_chat_id", chat.userId);
 
               const response = await apiCall(formData);
               if (response && response.result) {
                 showToast(t("chat.chatDeleted"), "success");
-                refetch(); // Refresh matches (horizontal list)
-                refetchChats(); // Refresh chat list so deleted chat disappears
+                refetch();  
+                refetchChats();  
               } else {
                 showToast(
                   response?.message || t("chat.failedToDelete"),
@@ -324,7 +295,6 @@ export default function Matches() {
     );
   };
 
-  // Render chat item
   const renderChatItem: ListRenderItem<ChatItem> = useCallback(
     ({ item }) => {
       const matchForUser = matches.find(
@@ -352,7 +322,7 @@ export default function Matches() {
             source={{ uri: item.image }}
             style={styles.avatar}
             onError={() => {
-              // Image failed to load, will show placeholder
+              
             }}
           />
           {item.isOnline && <View style={styles.onlineIndicator} />}
@@ -379,7 +349,6 @@ export default function Matches() {
     [matches, handleOpenConversation]
   );
 
-  // Memoized key extractors
   const matchKeyExtractor = useCallback(
     (item: Match) => `match-${item.id}`,
     []
@@ -399,21 +368,20 @@ export default function Matches() {
     [t]
   );
 
-  // Handle different states
   if (loading && matches.length === 0) {
     return renderLoadingState();
   }
 
   return (
     <View style={styles.container}>
-      {/* Search Bar */}
+      {}
       <CustomSearchBar
         searchText={searchText}
         onChangeText={setSearchText}
         placeholder={t("matches.searchMatches")}
       />
 
-      {/* Horizontal Matches List - only matches not yet in chat list */}
+      {}
       {matchesWithoutChat.length > 0 && (
         <View style={styles.horizontalMatchesContainer}>
           <FlatList
@@ -430,14 +398,14 @@ export default function Matches() {
         </View>
       )}
 
-      {/* Chats Section Header */}
+      {}
       {filteredChats.length > 0 && (
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{t("chat.chats")}</Text>
         </View>
       )}
 
-      {/* Vertical Chats List */}
+      {}
       <FlatList
         data={filteredChats}
         renderItem={renderChatItem}
@@ -481,7 +449,7 @@ export default function Matches() {
             tintColor={color.primary}
           />
         }
-        // Performance optimizations
+        
         removeClippedSubviews={true}
         maxToRenderPerBatch={5}
         updateCellsBatchingPeriod={30}
@@ -489,7 +457,7 @@ export default function Matches() {
         windowSize={10}
       />
 
-      {/* Profile Options Modal */}
+      {}
       <ProfileOptions
         visible={showProfileOptions}
         onClose={() => {
@@ -503,7 +471,7 @@ export default function Matches() {
         isMatch={true}
       />
 
-      {/* Remove Match Modal */}
+      {}
       <RemoveMatch
         visible={showRemoveMatch}
         onClose={() => setShowRemoveMatch(false)}
@@ -512,7 +480,7 @@ export default function Matches() {
         userName={selectedMatch?.name}
       />
 
-      {/* Block Confirmation Modal */}
+      {}
       <BlockConfirmation
         visible={showBlockConfirmation}
         onClose={() => setShowBlockConfirmation(false)}
@@ -521,7 +489,7 @@ export default function Matches() {
         userName={selectedMatch?.name}
       />
 
-      {/* Report User Modal */}
+      {}
       <ReportUser
         visible={showReportUser}
         onClose={() => setShowReportUser(false)}
@@ -538,7 +506,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
   },
-  // Horizontal Matches Styles
+  
   horizontalMatchesContainer: {
     paddingVertical: 16,
     borderBottomWidth: 1,
@@ -590,7 +558,7 @@ const styles = StyleSheet.create({
     color: color.black,
     textAlign: "center",
   },
-  // Section Header
+  
   sectionHeader: {
     paddingHorizontal: 20,
     paddingTop: 16,
@@ -602,7 +570,7 @@ const styles = StyleSheet.create({
     fontFamily: font.bold,
     color: color.black,
   },
-  // Chats List Styles
+  
   chatsListContainer: {
     paddingTop: 8,
     paddingBottom: 100,
@@ -685,7 +653,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: font.semiBold,
   },
-  // Loading state
+  
   loadingText: {
     marginTop: 16,
     fontSize: 16,
@@ -693,7 +661,7 @@ const styles = StyleSheet.create({
     color: color.gray55,
     textAlign: "center",
   },
-  // Empty/Error states
+  
   emptyContainer: {
     flex: 1,
     alignItems: "center",

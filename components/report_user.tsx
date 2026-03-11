@@ -65,7 +65,7 @@ export default function ReportUser({
 
   const handleSubmitReport = () => {
     if (!selectedReason) {
-      // Show error or alert
+      
       return;
     }
 
@@ -80,7 +80,6 @@ export default function ReportUser({
     } else {
     }
 
-    // Reset form and close
     setSelectedReason("");
     setAdditionalDetails("");
     onClose();
@@ -109,7 +108,7 @@ export default function ReportUser({
         />
 
         <View style={styles.modalContainer}>
-          {/* Header */}
+          {}
           <View style={styles.header}>
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={color.black} />
@@ -128,10 +127,10 @@ export default function ReportUser({
             style={styles.content}
             showsVerticalScrollIndicator={false}
           >
-            {/* Question */}
+            {}
             <Text style={styles.questionText}>{t("report.whatsWrong")}</Text>
 
-            {/* Report Reasons */}
+            {}
             <View style={styles.reasonsContainer}>
               {reportReasons.map((reason, index) => (
                 <TouchableOpacity
@@ -163,7 +162,7 @@ export default function ReportUser({
               ))}
             </View>
 
-            {/* Additional Details */}
+            {}
             <View style={styles.additionalDetailsSection}>
               <Text style={styles.additionalDetailsLabel}>
                 {t("report.additionalDetails")}
@@ -181,7 +180,7 @@ export default function ReportUser({
             </View>
           </ScrollView>
 
-          {/* Submit Button */}
+          {}
           <View style={styles.submitContainer}>
             <TouchableOpacity
               style={[

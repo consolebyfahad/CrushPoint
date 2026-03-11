@@ -25,7 +25,7 @@ export default function FaceVerification() {
   const { t } = useTranslation();
   const { userData, user, userImages, updateUserData, addUserImage, removeUserImage } = useAppContext();
   const routeParams = useLocalSearchParams();
-  // Optional refs passed in as comma-separated URLs
+  
   const refsParam =
     typeof routeParams.refs === "string" ? routeParams.refs : undefined;
   const mode =
@@ -58,10 +58,8 @@ export default function FaceVerification() {
   >(null);
   const cameraRef = useRef<any>(null);
 
-  // Centralized state check
   const isProcessing = verificationState !== "idle";
 
-  // Save photos to user profile after successful verification (for edit mode)
   const savePhotosAfterVerification = useCallback(async () => {
     if (!user?.user_id || !photoFileNamesParam) {
       return;
@@ -69,11 +67,9 @@ export default function FaceVerification() {
 
     try {
       setVerificationState("submitting");
-      
-      // Parse photo file names from params
+
       const photoFileNames: string[] = JSON.parse(decodeURIComponent(photoFileNamesParam));
-      
-      // Remove old photos from context if provided
+
       if (oldPhotosParam) {
         const oldPhotos = oldPhotosParam.split(",").filter((url) => url.trim().length > 0);
         oldPhotos.forEach((photoUrl) => {
@@ -83,7 +79,6 @@ export default function FaceVerification() {
         });
       }
 
-      // Save new photos to server
       const formData = new FormData();
       formData.append("type", "update_data");
       formData.append("id", user.user_id);
@@ -93,11 +88,10 @@ export default function FaceVerification() {
       const response = await apiCall(formData);
       
       if (response.result) {
-        // Add new photos to context
+        
         photoFileNames.forEach((fileName) => addUserImage(fileName));
         showToast(t("profile.photosUpdatedSuccess"), "success");
-        
-        // Navigate back to profile
+
         setTimeout(() => {
           router.replace("/(tabs)/profile");
         }, 100);
@@ -110,27 +104,24 @@ export default function FaceVerification() {
     }
   }, [user?.user_id, photoFileNamesParam, oldPhotosParam, addUserImage, removeUserImage, t, showToast]);
 
-  // Process verified photo upload
   const processVerifiedPhoto = useCallback(async (photoUri: string) => {
     try {
       setVerificationState("uploading");
       const fileName = await uploadImageToServer(photoUri);
       setUploadedSelfieFileName(fileName);
 
-      // Small delay to ensure state is updated
       setTimeout(() => {
         submitAllData(fileName);
       }, 100);
     } catch (error) {
       showToast(t("common.failedToUploadSelfie"), "error");
-      // Continue with submission without selfie
+      
       setTimeout(() => {
         submitAllData(null);
       }, 100);
     }
   }, []);
 
-  // Handle verification result separately from UI
   const handleVerificationResult = useCallback(
     async (isVerified: boolean, message: string, photoUri: string) => {
       const title = isVerified
@@ -145,7 +136,7 @@ export default function FaceVerification() {
             onPress: () => {
               if (isVerified) {
                 if (mode === "verify_only" && returnTo === "add_photos") {
-                  // Save photos after successful verification
+                  
                   savePhotosAfterVerification();
                 } else {
                   processVerifiedPhoto(photoUri);
@@ -160,9 +151,6 @@ export default function FaceVerification() {
     [t, processVerifiedPhoto, mode, returnTo, photosParam, referenceImages, savePhotosAfterVerification]
   );
 
-  // Remove skip verification function - verification is now mandatory
-
-  // Simplified face comparison
   const compareAgainstAllReferences = async (
     capturedImageUri: string,
     references: string[]
@@ -206,7 +194,6 @@ export default function FaceVerification() {
     };
   };
 
-  // Fixed image upload for iOS
   const uploadImageToServer = async (imageUri: string): Promise<string> => {
     if (!user?.user_id) {
       throw new Error(t("common.userIdNotFound"));
@@ -217,7 +204,6 @@ export default function FaceVerification() {
       formData.append("type", "upload_data");
       formData.append("user_id", user.user_id);
 
-      // Handle iOS photo URI properly
       const photoData: any = {
         uri: Platform.OS === "ios" ? imageUri.replace("file://", "") : imageUri,
         type: "image/jpeg",
@@ -238,7 +224,6 @@ export default function FaceVerification() {
     }
   };
 
-  // Main photo capture function
   const takePicture = async () => {
     if (!cameraRef.current || isProcessing) return;
 
@@ -260,16 +245,13 @@ export default function FaceVerification() {
 
       let verificationResult;
 
-      // Perform verification against all reference images
       verificationResult = await compareAgainstAllReferences(
         photo.uri,
         referenceImages
       );
 
-      // Reset state before showing alert
       setVerificationState("idle");
 
-      // Handle result with delay to ensure UI is stable
       setTimeout(() => {
         handleVerificationResult(
           verificationResult.verified,
@@ -297,7 +279,6 @@ export default function FaceVerification() {
     }
   };
 
-  // Improved data submission with better error handling
   const submitAllData = async (selfieFileName?: string | null) => {
     if (!user?.user_id) {
       showToast(t("common.userSessionExpired"), "error");
@@ -305,7 +286,7 @@ export default function FaceVerification() {
     }
 
     if (verificationState === "submitting") {
-      return; // Prevent double submission
+      return;  
     }
 
     setVerificationState("submitting");
@@ -357,7 +338,6 @@ export default function FaceVerification() {
     }
   };
 
-  // Get appropriate button text
   const getButtonText = () => {
     switch (verificationState) {
       case "capturing":
@@ -387,13 +367,13 @@ export default function FaceVerification() {
       <View style={styles.content}>
         <View style={styles.cameraContainer}>
           <View style={styles.cameraFrame}>
-            {/* Camera without children */}
+            {}
             <CameraView ref={cameraRef} style={styles.camera} facing="front" />
 
-            {/* Face guide overlay - positioned absolutely */}
+            {}
             <View style={styles.faceGuide} />
 
-            {/* Processing overlay - positioned absolutely */}
+            {}
             {isProcessing && (
               <View style={styles.processingOverlay}>
                 <Text style={styles.processingOverlayText}>

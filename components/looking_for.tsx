@@ -21,28 +21,27 @@ export default function LookingFor({
   setFilterData,
 }: any) {
   const { t } = useTranslation();
-  // Changed to array to support multiple selections
+  
   const [selectedOptions, setSelectedOptions] = useState<string[]>(
     Array.isArray(filterData.lookingFor) ? filterData.lookingFor : []
   );
 
-  // Use base options from helper and translate labels
   const lookingForOptions = useMemo(() => {
     return LOOKING_FOR_OPTIONS.map((option) => ({
       id: option.id,
       title: t(option.translationKey),
       emoji: option.emoji,
-      color: "#3B82F6", // Default color, can be customized per option if needed
+      color: "#3B82F6",  
     }));
   }, [t]);
 
   const handleOptionSelect = (optionId: string) => {
     setSelectedOptions((prev) => {
       if (prev.includes(optionId)) {
-        // Remove option if already selected
+        
         return prev.filter((option) => option !== optionId);
       } else {
-        // Add option if not selected
+        
         return [...prev, optionId];
       }
     });
@@ -56,14 +55,13 @@ export default function LookingFor({
     onClose();
   };
 
-  // Check if option is selected
   const isSelected = (optionId: string) => {
     return selectedOptions.includes(optionId);
   };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
@@ -74,7 +72,7 @@ export default function LookingFor({
         </TouchableOpacity>
       </View>
 
-      {/* Looking For List */}
+      {}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {lookingForOptions.map((option, index) => (
           <TouchableOpacity
@@ -107,17 +105,10 @@ export default function LookingFor({
         ))}
       </ScrollView>
 
-      {/* Selected count */}
-      {/* {selectedOptions.length > 0 && (
-        <View style={styles.selectedCountContainer}>
-          <Text style={styles.selectedCountText}>
-            {selectedOptions.length} option
-            {selectedOptions.length !== 1 ? "s" : ""} selected
-          </Text>
-        </View>
-      )} */}
+      {}
+      {}
 
-      {/* Bottom Save Button */}
+      {}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={[

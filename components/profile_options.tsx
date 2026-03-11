@@ -34,7 +34,7 @@ export default function ProfileOptions({
   const handleRemoveMatch = () => {
     if (onRemoveMatch) onRemoveMatch();
   };
-  // When opened from conversation, target* are the other user; otherwise use userData (profile being viewed)
+  
   const fromConversation = targetUserName != null || targetUserImage != null;
   const rawAge = fromConversation
     ? targetUserAge
@@ -85,10 +85,10 @@ export default function ProfileOptions({
         />
 
         <View style={styles.modalContainer}>
-          {/* Header */}
+          {}
           <View style={styles.header}>
             {isMatch ? (
-              // Show user info for matches (other user when from conversation)
+              
               <View style={styles.userInfo}>
                 <Image
                   source={{ uri: displayUser.image }}
@@ -105,7 +105,7 @@ export default function ProfileOptions({
                 </View>
               </View>
             ) : (
-              // Show simple title for regular profiles
+              
               <Text style={styles.title}>{t("profile.profileOptions")}</Text>
             )}
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -113,9 +113,9 @@ export default function ProfileOptions({
             </TouchableOpacity>
           </View>
 
-          {/* Options */}
+          {}
           <View style={styles.optionsContainer}>
-            {/* Remove Match Option - Only show for matches */}
+            {}
             {isMatch && (
               <TouchableOpacity
                 style={styles.optionItem}
@@ -135,7 +135,7 @@ export default function ProfileOptions({
               </TouchableOpacity>
             )}
 
-            {/* Block Option */}
+            {}
             <TouchableOpacity
               style={styles.optionItem}
               onPress={handleBlock}
@@ -149,7 +149,7 @@ export default function ProfileOptions({
               </View>
             </TouchableOpacity>
 
-            {/* Report Option */}
+            {}
             <TouchableOpacity
               style={[styles.optionItem, styles.lastOptionItem]}
               onPress={handleReport}

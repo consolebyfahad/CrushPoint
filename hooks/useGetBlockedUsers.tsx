@@ -36,13 +36,12 @@ export default function useGetBlockedUsers() {
 
   const formatTimestamp = (timestamp: string): string => {
     try {
-      // Parse timestamp format "Jan 21, 2026 07:26 PM"
-      // Split into date and time parts
+
       const parts = timestamp.split(" ");
       if (parts.length >= 4) {
-        // Extract date part (e.g., "Jan 21, 2026")
+        
         const datePart = `${parts[0]} ${parts[1]} ${parts[2]}`;
-        // Extract time part (e.g., "07:26 PM")
+        
         const timePart = `${parts[3]} ${parts[4] || ""}`;
         
         return formatTimeAgo(datePart, timePart, t);
@@ -55,10 +54,9 @@ export default function useGetBlockedUsers() {
 
   const transformApiData = (apiData: ApiBlockedUser[]): BlockedUser[] => {
     return apiData.map((item) => {
-      // Calculate age from DOB
+      
       const age = item.block_user?.dob ? calculateAge(item.block_user.dob) : 25;
 
-      // Get first image from images array
       let imageUrl = `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face`;
       if (item.block_user?.images) {
         try {
@@ -68,7 +66,7 @@ export default function useGetBlockedUsers() {
             imageUrl = `${item.image_url}${firstImage}`;
           }
         } catch (error) {
-          // Use default image
+          
         }
       }
 
@@ -127,7 +125,7 @@ export default function useGetBlockedUsers() {
       formData.append("block_id", blockId);
       const response = await apiCall(formData);
       if (response.result) {
-        // Remove user from local state
+        
         setBlockedUsers((prev) =>
           prev.filter((user) => user.id !== blockedUserId)
         );

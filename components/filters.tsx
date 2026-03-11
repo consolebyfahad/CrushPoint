@@ -42,7 +42,6 @@ export default function Filters({
   const [ageTo, setAgeTo] = useState(filterData.ageTo || "35");
   const [distance, setDistance] = useState(filterData.distance || 50);
 
-  // Update selected gender when filterData changes
   useEffect(() => {
     if (filterData.gender) {
       setSelectedGender(filterData.gender);
@@ -55,7 +54,6 @@ export default function Filters({
     t("filters.both"),
   ];
 
-  // Helper function to format multiple selection display
   const formatMultipleSelectionDisplay = (selection: any, type?: "religion" | "zodiac" | "nationality" | "lookingFor") => {
     if (!selection || (Array.isArray(selection) && selection.length === 0)) {
       return null;
@@ -63,7 +61,7 @@ export default function Filters({
 
     if (Array.isArray(selection)) {
       if (selection.length === 1) {
-        // Format single selection based on type
+        
         if (type === "religion") {
           return formatReligion(selection[0], t);
         } else if (type === "zodiac") {
@@ -75,7 +73,7 @@ export default function Filters({
         }
         return selection[0];
       } else if (selection.length > 1) {
-        // Format first item based on type
+        
         let firstItem = selection[0];
         if (type === "religion") {
           firstItem = formatReligion(selection[0], t);
@@ -91,7 +89,6 @@ export default function Filters({
       }
     }
 
-    // If it's a string (backward compatibility)
     if (type === "religion") {
       return formatReligion(selection, t);
     } else if (type === "zodiac") {
@@ -111,14 +108,7 @@ export default function Filters({
       value: formatMultipleSelectionDisplay(filterData.lookingFor, "lookingFor"),
       onPress: onNavigateToLookingFor,
     },
-    // {
-    //   title: "Height",
-    //   hasNavigation: true,
-    //   value: filterData.height
-    //     ? `${filterData.height.from}-${filterData.height.to}cm`
-    //     : null,
-    //   onPress: onNavigateToHeight,
-    // },
+
     {
       title: t("filters.nationality"),
       hasNavigation: true,
@@ -145,14 +135,13 @@ export default function Filters({
     setAgeTo("35");
     setDistance(10);
 
-    // Reset all filter data
     setFilterData({
       gender: t("filters.both"),
       ageFrom: "18",
       ageTo: "99",
       distance: 10,
       lookingFor: [],
-      // height: null,
+      
       nationality: [],
       religion: [],
       zodiacSign: [],
@@ -169,10 +158,6 @@ export default function Filters({
     };
     setFilterData(updatedFilterData);
 
-    // setTimeout(() => {
-    //   refetch();
-    // }, 100);
-
     onClose();
   };
 
@@ -184,7 +169,7 @@ export default function Filters({
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <Text style={styles.title}>{t("filters.filters")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -193,7 +178,7 @@ export default function Filters({
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Show me section */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("filters.showMe")}</Text>
           <View style={styles.genderContainer}>
@@ -220,7 +205,7 @@ export default function Filters({
           </View>
         </View>
 
-        {/* Age Range section */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("filters.ageRange")}</Text>
           <View style={styles.ageContainer}>
@@ -301,7 +286,7 @@ export default function Filters({
           </View>
         </View>
 
-        {/* Distance section */}
+        {}
         <View style={styles.section}>
           <View style={styles.distanceHeader}>
             <Text style={styles.sectionTitle}>
@@ -327,7 +312,7 @@ export default function Filters({
           </View>
         </View>
 
-        {/* Expandable options */}
+        {}
         <View style={styles.section}>
           {expandableOptions.map((option, index) => (
             <TouchableOpacity
@@ -352,7 +337,7 @@ export default function Filters({
         </View>
       </ScrollView>
 
-      {/* Bottom buttons */}
+      {}
       <View style={styles.bottomButtons}>
         <TouchableOpacity
           style={styles.resetButton}

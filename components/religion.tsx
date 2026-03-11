@@ -62,10 +62,10 @@ export default function Religion({
   const handleReligionSelect = (religionId: string) => {
     setSelectedReligions((prev) => {
       if (prev.includes(religionId)) {
-        // Remove religion if already selected
+        
         return prev.filter((r) => r !== religionId);
       } else {
-        // Add religion if not selected
+        
         return [...prev, religionId];
       }
     });
@@ -79,14 +79,13 @@ export default function Religion({
     onClose();
   };
 
-  // Check if religion is selected
   const isSelected = (religionId: string) => {
     return selectedReligions.includes(religionId);
   };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
@@ -97,7 +96,7 @@ export default function Religion({
         </TouchableOpacity>
       </View>
 
-      {/* Religion List */}
+      {}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {religions.map((religion, index) => (
           <TouchableOpacity
@@ -135,7 +134,7 @@ export default function Religion({
         ))}
       </ScrollView>
 
-      {/* Bottom Save Button */}
+      {}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={[

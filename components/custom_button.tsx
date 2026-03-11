@@ -88,7 +88,7 @@ export default function CustomButton({
             </View>
           )}
 
-          {/* Count before text for secondary */}
+          {}
           {variant === "secondary" && count && (
             <Text style={styles.count}>{count}</Text>
           )}
@@ -103,7 +103,7 @@ export default function CustomButton({
             {title}
           </Text>
 
-          {/* Count after text for primary */}
+          {}
           {count && (
             <Text
               style={[

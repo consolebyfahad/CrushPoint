@@ -40,16 +40,14 @@ export default function ProfileTab() {
   const pagerRef = useRef<PagerView>(null);
   const photos = userData.photos || [];
   const hasMultiplePhotos = photos.length > 1;
-  // NEW: Auto refresh when screen comes into focus (returning from edit screens)
+  
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
 
-      // Only refresh if we have user data and we're not currently loading
       if (user?.user_id && !loading && isActive) {
         setIsRefreshing(true);
 
-        // Small delay to ensure smooth navigation
         setTimeout(() => {
           if (isActive) {
             refetch().finally(() => {
@@ -64,7 +62,7 @@ export default function ProfileTab() {
       return () => {
         isActive = false;
       };
-    }, [user?.user_id]), // FIXED: Only depend on user_id, not refetch or loading
+    }, [user?.user_id]),  
   );
 
   const handleSettings = () => {
@@ -105,26 +103,22 @@ export default function ProfileTab() {
     });
   };
 
-  // Handle page change from PagerView
   const handlePageSelected = (event: any) => {
     setCurrentImageIndex(event.nativeEvent.position);
   };
 
-  // Navigate to previous image programmatically
   const handlePreviousImage = () => {
     const prevIndex =
       currentImageIndex === 0 ? photos.length - 1 : currentImageIndex - 1;
     pagerRef.current?.setPage(prevIndex);
   };
 
-  // Navigate to next image programmatically
   const handleNextImage = () => {
     const nextIndex =
       currentImageIndex === photos.length - 1 ? 0 : currentImageIndex + 1;
     pagerRef.current?.setPage(nextIndex);
   };
 
-  // ENHANCED: Manual refresh handler
   const handleManualRefresh = useCallback(async () => {
     if (loading) return;
 
@@ -132,13 +126,12 @@ export default function ProfileTab() {
     try {
       await refetch();
     } catch (error) {
-      // Error during manual refresh
+      
     } finally {
       setIsRefreshing(false);
     }
   }, [refetch, loading]);
 
-  // Loading state
   if (loading && !userData?.name) {
     return (
       <View style={styles.loadingContainer}>
@@ -148,7 +141,6 @@ export default function ProfileTab() {
     );
   }
 
-  // Error state
   if (error || !userData) {
     return (
       <View style={styles.errorContainer}>
@@ -181,7 +173,7 @@ export default function ProfileTab() {
           />
         }
       >
-        {/* Header with Swipeable Image */}
+        {}
         <View style={styles.mainPhotoContainer}>
           {hasMultiplePhotos ? (
             <PagerView
@@ -208,11 +200,11 @@ export default function ProfileTab() {
             />
           )}
 
-          {/* Header Overlay */}
+          {}
           <View style={styles.header}>
             <View style={{ width: 44, height: 44 }} />
 
-            {/* Custom Image Indicators */}
+            {}
             {hasMultiplePhotos && (
               <View style={styles.imageIndicators}>
                 {photos.map((_, index) => (
@@ -236,7 +228,7 @@ export default function ProfileTab() {
             </TouchableOpacity>
           </View>
 
-          {/* Image Navigation Areas (like UserProfile) */}
+          {}
           {hasMultiplePhotos && (
             <>
               <TouchableOpacity
@@ -253,7 +245,7 @@ export default function ProfileTab() {
           )}
         </View>
 
-        {/* Name and Age */}
+        {}
         <View style={styles.nameSection}>
           <Text style={styles.userName}>
             {userData.name}, {userData.age}
@@ -273,7 +265,7 @@ export default function ProfileTab() {
           </TouchableOpacity>
         </View>
 
-        {/* Photos Section */}
+        {}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t("profile.photos")}</Text>
@@ -319,7 +311,7 @@ export default function ProfileTab() {
           </View>
         </View>
 
-        {/* About/Bio Section */}
+        {}
         {userData.about && userData.about.trim() !== "" && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -332,7 +324,7 @@ export default function ProfileTab() {
           </View>
         )}
 
-        {/* Basic Info Section */}
+        {}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t("profile.basicInfo")}</Text>
@@ -369,7 +361,7 @@ export default function ProfileTab() {
                 ) : userData.parsedLookingFor &&
                   userData.parsedLookingFor.length > 0 ? (
                   <>
-                    {/* Fallback: format the first parsed item if it's a raw ID */}
+                    {}
                     <Text style={styles.infoValue}>
                       {formatLookingFor(userData.parsedLookingFor[0], t)}
                     </Text>
@@ -383,12 +375,9 @@ export default function ProfileTab() {
               </View>
             </View>
 
-            {/* <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Height</Text>
-              <Text style={styles.infoValue}>{userData.height}</Text>
-            </View> */}
+            {}
 
-            {/* Nationality - only show if specified */}
+            {}
             {userData.originalNationalityValues &&
               userData.originalNationalityValues.length > 0 &&
               userData.originalNationalityValues[0] &&
@@ -413,7 +402,7 @@ export default function ProfileTab() {
                 </View>
               )}
 
-            {/* Religion - only show if specified */}
+            {}
             {userData.religion && userData.religion.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.religion")}</Text>
@@ -423,7 +412,7 @@ export default function ProfileTab() {
               </View>
             )}
 
-            {/* Zodiac - only show if specified */}
+            {}
             {userData.zodiac && userData.zodiac.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.zodiac")}</Text>
@@ -435,7 +424,7 @@ export default function ProfileTab() {
           </View>
         </View>
 
-        {/* Interests Section */}
+        {}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t("profile.interests")}</Text>
@@ -456,7 +445,7 @@ export default function ProfileTab() {
           </View>
         </View>
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
     </View>
@@ -622,7 +611,7 @@ const styles = StyleSheet.create({
     color: "#5FB3D4",
   },
   photosContainer: {
-    // flex: 1,
+    
     flexDirection: "row",
     gap: 12,
   },
@@ -705,7 +694,7 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     height: 110,
   },
-  // NEW: Refresh overlay styles
+  
   refreshOverlay: {
     position: "absolute",
     top: 100,

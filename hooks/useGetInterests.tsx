@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 interface Interest {
   id: string;
   name: string;
-  name_languages?: string; // JSON string with translations like {"en":"Science","de":"Wissenschaft"}
+  name_languages?: string;  
   distance: number;
   date: string;
   time: string;
@@ -14,8 +14,8 @@ interface Interest {
 }
 
 interface UseGetInterestsReturn {
-  interests: Interest[]; // Localized interests for display
-  rawInterests: Interest[]; // Raw interests with name_languages for conversion
+  interests: Interest[];  
+  rawInterests: Interest[];  
   loading: boolean;
   error: string | null;
   refetch: () => void;
@@ -28,24 +28,21 @@ export default function useGetInterests(): UseGetInterestsReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Helper function to get localized name from name_languages
   const getLocalizedName = (interest: any): string => {
     if (!interest.name_languages) {
       return interest.name || "";
     }
 
     try {
-      // Parse the JSON string from name_languages
+      
       const nameLanguages =
         typeof interest.name_languages === "string"
           ? JSON.parse(interest.name_languages)
           : interest.name_languages;
 
-      // Get current language (defaults to "en" if not found)
       const currentLang = i18n.language || "en";
-      const langCode = currentLang.split("-")[0]; // Get "en" from "en-US"
+      const langCode = currentLang.split("-")[0];  
 
-      // Try to get the name for current language, fallback to "en", then to original name
       return (
         nameLanguages[langCode] || nameLanguages["en"] || interest.name || ""
       );
@@ -73,8 +70,7 @@ export default function useGetInterests(): UseGetInterestsReturn {
       const result = await response;
 
       if (result.data && Array.isArray(result.data)) {
-        // Keep raw interests with name_languages for dynamic localization
-        // Don't transform here - let components get localized names when needed
+
         setInterests(result.data);
       } else {
         throw new Error(t("hooks.invalidResponseFormat"));
@@ -97,7 +93,6 @@ export default function useGetInterests(): UseGetInterestsReturn {
     fetchInterests();
   }, [fetchInterests]);
 
-  // Get localized interests for display (used by components)
   const getLocalizedInterests = useCallback((): Interest[] => {
     return interests.map((interest) => ({
       ...interest,
@@ -106,8 +101,8 @@ export default function useGetInterests(): UseGetInterestsReturn {
   }, [interests, i18n.language]);
 
   return {
-    interests: getLocalizedInterests(), // Return localized interests for display
-    rawInterests: interests, // Return raw interests with name_languages for conversion
+    interests: getLocalizedInterests(),  
+    rawInterests: interests,  
     loading,
     error,
     refetch,

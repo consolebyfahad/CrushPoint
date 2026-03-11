@@ -35,7 +35,6 @@ export default function Requests() {
   const incomingCount = incomingRequests.length;
   const outgoingCount = outgoingRequests.length;
 
-  // Filter requests based on search text
   const filterRequests = (requests: any[]) => {
     if (!searchText.trim()) return requests;
 
@@ -50,7 +49,6 @@ export default function Requests() {
   const filteredIncomingRequests = filterRequests(incomingRequests);
   const filteredOutgoingRequests = filterRequests(outgoingRequests);
 
-  // Handle refresh
   const onRefresh = () => {
     refetch();
   };
@@ -67,7 +65,7 @@ export default function Requests() {
         />
       }
     >
-      {/* Search Bar */}
+      {}
       <View style={styles.searchContainer}>
         <CustomSearchBar
           searchText={searchText}
@@ -76,7 +74,7 @@ export default function Requests() {
         />
       </View>
 
-      {/* Tabs */}
+      {}
       <View style={styles.tabContainer}>
         <CustomButton
           title={t("meetups.incoming")}
@@ -100,7 +98,7 @@ export default function Requests() {
         />
       </View>
 
-      {/* Tab Content */}
+      {}
       {error && totalRequests === 0 ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -144,7 +142,7 @@ export default function Requests() {
           )}
         </View>
       )}
-      {/* Show message when no requests found after search */}
+      {}
       {searchText.trim() &&
         ((activeTab === "incoming" && filteredIncomingRequests.length === 0) ||
           (activeTab === "outgoing" &&

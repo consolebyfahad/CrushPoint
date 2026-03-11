@@ -23,7 +23,7 @@ export default function MatchCard({
 }: MatchCardProps) {
   const { t } = useTranslation();
   const { user } = useAppContext();
-  // Map emoji actions to SVG icons and get the appropriate emoji
+  
   const getMatchEmoji = (emoji: any) => {
     const emojiMap: { [key: string]: any } = {
       like: svgIcon.Like,
@@ -36,7 +36,6 @@ export default function MatchCard({
     return emojiMap[emoji] || svgIcon.Hi;
   };
 
-  // Get emoji color based on type
   const getEmojiColor = (emoji: string) => {
     const colorMap: { [key: string]: string } = {
       like: "#3B82F6",
@@ -46,12 +45,11 @@ export default function MatchCard({
       friend: "#F97316",
     };
 
-    return colorMap[emoji] || "#F97316"; // Default color
+    return colorMap[emoji] || "#F97316";  
   };
 
   const handleChat = () => {
-    // match.id = match record ID (from matches table)
-    // match.match_id = matched user's ID
+
     const matchRecordId = match?.id;
     const matchedUserId = match?.match_id;
 
@@ -81,14 +79,13 @@ export default function MatchCard({
     }
   };
 
-  // Handle missing image
   const getImageSource = () => {
     if (match?.image) {
       return { uri: match.image };
     } else if (match?.images && match.images.length > 0) {
       return { uri: match.images[0] };
     }
-    // Return undefined to show placeholder
+    
     return undefined;
   };
 
@@ -109,7 +106,7 @@ export default function MatchCard({
         </View>
 
         <View style={styles.infoContainer}>
-          {/* Match Info */}
+          {}
           <View style={styles.matchInfo}>
             <View style={styles.matchHeader}>
               <View style={styles.nameRow}>
@@ -155,7 +152,7 @@ export default function MatchCard({
             </TouchableOpacity>
           </View>
 
-          {/* Action Buttons */}
+          {}
           <View style={styles.actionContainer}>
             <CustomButton
               title={t("chat.letsChat")}

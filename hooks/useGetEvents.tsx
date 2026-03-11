@@ -22,7 +22,7 @@ interface Event {
   category: string;
   date: string;
   time: string;
-  to_time?: string; // End time
+  to_time?: string;  
   location: string;
   address: string;
   description: string;
@@ -32,17 +32,17 @@ interface Event {
   totalAttendees: number;
   isAttending: boolean;
   timeAgo?: string;
-  // New fields from API
+  
   going: EventAttendee[];
   going_count: number;
   user_going: string;
-  // Additional fields from raw data
-  web_link?: string; // Website link
-  lat?: string; // Latitude for map
-  lng?: string; // Longitude for map
-  distance?: number; // Distance from user
-  org_image?: string; // Organization image
-  timestamp?: string; // Original timestamp from API
+  
+  web_link?: string;  
+  lat?: string;  
+  lng?: string;  
+  distance?: number;  
+  org_image?: string;  
+  timestamp?: string;  
 }
 
 const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
@@ -54,7 +54,6 @@ const useGetEvents = (searchKey: string = "") => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Helper function to get localized value from *_languages field
   const getLocalizedValue = (
     event: any,
     fieldName: string,
@@ -68,17 +67,15 @@ const useGetEvents = (searchKey: string = "") => {
     }
 
     try {
-      // Parse the JSON string from *_languages field
+      
       const languages =
         typeof languagesValue === "string"
           ? JSON.parse(languagesValue)
           : languagesValue;
 
-      // Get current language (defaults to "en" if not found)
       const currentLang = i18n.language || "en";
-      const langCode = currentLang.split("-")[0]; // Get "en" from "en-US"
+      const langCode = currentLang.split("-")[0];  
 
-      // Try to get the value for current language, fallback to "en", then to original value
       return (
         languages[langCode] ||
         languages["en"] ||
@@ -91,24 +88,21 @@ const useGetEvents = (searchKey: string = "") => {
     }
   };
 
-  // Get default event image
   const getDefaultEventImage = (): string => {
     return "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
   };
 
-  // Parse event image
   const parseEventImage = (imageStr: string): string => {
     if (!imageStr) {
       return getDefaultEventImage();
     }
 
     try {
-      // If it's already a full URL, return as is
+      
       if (imageStr.startsWith("http")) {
         return imageStr;
       }
 
-      // Otherwise, construct URL with base path
       const finalUrl = `${IMAGE_BASE_URL}${imageStr}`;
 
       return finalUrl;
@@ -117,34 +111,30 @@ const useGetEvents = (searchKey: string = "") => {
     }
   };
 
-  // Parse organizer image
   const parseOrganizerImage = (imageStr: string): string => {
     if (!imageStr) {
       return "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face";
     }
 
     try {
-      // If it's already a full URL, return as is
+      
       if (imageStr.startsWith("http")) {
         return imageStr;
       }
 
-      // Otherwise, construct URL with base path
       return `${IMAGE_BASE_URL}${imageStr}`;
     } catch (error) {
       return "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face";
     }
   };
 
-  // Parse attendees from going array
   const parseGoingUsers = (goingArray: any[]): EventAttendee[] => {
     if (!goingArray || !Array.isArray(goingArray)) return [];
 
     return goingArray.map((user: any) => {
-      // Check if user already has a complete image URL
+      
       let imageUrl = user.image;
 
-      // If no direct image URL, try to parse from images array
       if (!imageUrl && user.images) {
         try {
           const images = JSON.parse(user.images.replace(/\\"/g, '"'));
@@ -193,9 +183,7 @@ const useGetEvents = (searchKey: string = "") => {
         formData.append("lng", userData.lng.toString());
       } else {
       }
-      console.log("formData events", formData);
       const response = await apiCall(formData);
-      console.log("response events", response);
       if (Array.isArray(response?.data)) {
         const formattedEvents = response.data.map((event: any) => {
           const goingUsers = parseGoingUsers(event.going || []);
@@ -301,13 +289,13 @@ const useGetEvents = (searchKey: string = "") => {
         // Don't set error for empty data - let UI show empty state
         setError(null);
       } else if (response?.status === "Error") {
-        // Actual API error
+        
         setEvents([]);
         setError(response.message || t("events.failedToLoadEvents"));
       } else {
-        // No data returned but no error
+        
         setEvents([]);
-        setError(null); // Don't set error - just empty data
+        setError(null);  
       }
     } catch (error: any) {
       const errorMessage = error.message || t("events.networkError");
@@ -317,7 +305,6 @@ const useGetEvents = (searchKey: string = "") => {
     }
   }, [user, userData?.lat, userData?.lng, i18n.language, t, searchKey]);
 
-  // Toggle event attendance
   const toggleAttendance = async (eventId: string) => {
     if (!user?.user_id) {
       setError(t("events.userNotLoggedIn"));
@@ -327,7 +314,6 @@ const useGetEvents = (searchKey: string = "") => {
     const event = events.find((e) => e.id === eventId);
     if (!event) return;
 
-    // Optimistically update UI
     setEvents((prevEvents) =>
       prevEvents.map((e) =>
         e.id === eventId
@@ -355,7 +341,7 @@ const useGetEvents = (searchKey: string = "") => {
       const response = await apiCall(formData);
 
       if (response?.status === "Error") {
-        // Revert optimistic update on error
+        
         setEvents((prevEvents) =>
           prevEvents.map((e) =>
             e.id === eventId
@@ -372,7 +358,7 @@ const useGetEvents = (searchKey: string = "") => {
         setError(response.message || t("events.failedToUpdateAttendance"));
       }
     } catch (error: any) {
-      // Revert optimistic update on error
+      
       setEvents((prevEvents) =>
         prevEvents.map((e) =>
           e.id === eventId

@@ -21,7 +21,7 @@ export default function BlockConfirmation({
 
   const handleCancel = () => {
     if (onBack) {
-      onBack(); // Go back to profile options
+      onBack();  
     } else {
       onClose();
     }
@@ -42,7 +42,7 @@ export default function BlockConfirmation({
         />
 
         <View style={styles.modalContainer}>
-          {/* Header */}
+          {}
           <View style={styles.header}>
             <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={color.black} />
@@ -57,14 +57,14 @@ export default function BlockConfirmation({
             </TouchableOpacity>
           </View>
 
-          {/* Content */}
+          {}
           <View style={styles.content}>
-            {/* Block Icon */}
+            {}
             <View style={styles.iconContainer}>
               <Ionicons name="ban" size={48} color="#EF4444" />
             </View>
 
-            {/* Confirmation Text */}
+            {}
             <Text style={styles.confirmationTitle}>
               {t("block.areYouSure")}
             </Text>
@@ -73,7 +73,7 @@ export default function BlockConfirmation({
             </Text>
           </View>
 
-          {/* Action Buttons */}
+          {}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.cancelButton}

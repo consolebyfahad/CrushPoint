@@ -40,7 +40,6 @@ export default function PrivateSpots() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Check if coming from profile edit
   const fromEdit = params.fromEdit === "true";
 
   const fetchPrivateSpots = async (isRefresh = false) => {

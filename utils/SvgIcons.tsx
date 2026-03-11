@@ -29,7 +29,6 @@ export const svgIcon = {
   AppleIcon: <AppleIcon />,
 };
 
-// Email Icon SVG
 export const EmailIcon = () => (
   <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
     <Path
@@ -49,7 +48,6 @@ export const EmailIcon = () => (
   </Svg>
 );
 
-// Lock Icon SVG
 export const PhoneIcon = () => (
   <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
     <Path
@@ -61,8 +59,6 @@ export const PhoneIcon = () => (
     />
   </Svg>
 );
-
-// Dropdown Icon
 
 export const AngleDown = () => (
   <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">

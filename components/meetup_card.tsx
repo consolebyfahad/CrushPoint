@@ -91,7 +91,7 @@ export default function MeetupCard({
   };
 
   const renderIncomingButtons = () => {
-    // Don't show buttons if request is already processed or loading
+    
     if (
       request.status === "accept" ||
       request.status === "declined" ||
@@ -162,7 +162,7 @@ export default function MeetupCard({
   };
 
   const renderOutgoingButtons = () => {
-    // Only show cancel/edit buttons for pending requests
+    
     if (request.status !== "pending" || isLoading) {
       return null;
     }
@@ -195,14 +195,14 @@ export default function MeetupCard({
 
   return (
     <View style={[styles.card, isLoading && styles.cardLoading]}>
-      {/* Loading Overlay */}
+      {}
       {isLoading && (
         <View style={styles.cardLoadingOverlay}>
           <ActivityIndicator size="small" color={color.primary} />
         </View>
       )}
 
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <Image source={{ uri: request.user.image }} style={styles.userImage} />
         <View style={styles.headerContent}>
@@ -218,7 +218,7 @@ export default function MeetupCard({
         {getStatusBadge()}
       </View>
 
-      {/* Meeting Details */}
+      {}
       <View style={styles.detailsContainer}>
         <View style={styles.detailRow}>
           <Ionicons name="calendar-outline" size={16} color={color.gray55} />
@@ -239,36 +239,17 @@ export default function MeetupCard({
         ) }
       </View>
 
-      {/* Message */}
+      {}
 
-      {/* Response Message for Outgoing */}
-      {/* {type === "outgoing" && request.responseMessage && (
-        <View style={[styles.responseContainer]}>
-          <Text
-            style={[
-              styles.responseMessage,
-              request.status === "accept" && styles.responseMessageSuccess,
-              request.status === "declined" && styles.responseMessageError,
-              request.status === "change" && styles.responseMessageInfo,
-            ]}
-          >
-            {request.responseMessage}
-          </Text>
-        </View>
-      )} */}
+      {}
+      {}
 
-      {/* Confirmation Message for accept Incoming Requests */}
-      {/* {type === "incoming" && request.status === "accept" && (
-        <View style={[styles.responseContainer]}>
-          <Text style={[styles.responseMessage, styles.responseMessageSuccess]}>
-            {t("meetups.yourRequestAccepted")}
-          </Text>
-        </View>
-      )} */}
+      {}
+      {}
 
-      {/* Action Buttons */}
+      {}
       {type === "incoming" && renderIncomingButtons()}
-      {/* {type === "outgoing" && renderOutgoingButtons()} */}
+      {}
     </View>
   );
 }
@@ -409,14 +390,14 @@ const styles = StyleSheet.create({
     fontFamily: font.regular,
     color: color.gray55,
     fontStyle: "italic",
-    // marginBottom: 16,
+    
     lineHeight: 20,
   },
   responseContainer: {
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
-    // borderWidth: 1,
+    
   },
   responseMessage: {
     fontSize: 14,

@@ -37,24 +37,21 @@ export default function Welcome() {
     ensurePermissions();
   };
 
-  // Handle successful social authentication
   const handleSocialAuthSuccess = async (
     userData: any,
     provider: "apple" | "google"
   ) => {
     await loginUser(userData);
 
-    // Skip OTP for social auth - go directly to appropriate screen
     if (userData.new) {
-      // New user - go to profile setup
+      
       router.replace("/auth/gender");
     } else {
-      // Existing user - go to tabs
+      
       router.replace("/(tabs)");
     }
   };
 
-  // Handle social authentication errors
   const handleSocialAuthError = (message: string) => {
     showToast(message, "error");
   };
@@ -93,14 +90,14 @@ export default function Welcome() {
           <Text style={styles.subtitle}>{t("auth.chooseSignupMethod")}</Text>
 
           <View style={styles.buttonContainer}>
-            {/* Social Authentication Component */}
+            {}
             <SocialAuth
               onAuthSuccess={handleSocialAuthSuccess}
               onAuthError={handleSocialAuthError}
               isDisabled={otherMethodsLoading}
             />
 
-            {/* Other sign-up methods */}
+            {}
             <CustomButton
               title={t("auth.continueWithPhone")}
               onPress={handlePhoneSignUp}

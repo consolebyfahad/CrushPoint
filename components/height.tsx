@@ -22,7 +22,7 @@ export default function Height({
   const [toHeight, setToHeight] = useState(filterData.height?.to);
 
   const handleConfirm = () => {
-    // Save the height range logic here
+    
     setFilterData({
       ...filterData,
       height: {
@@ -35,7 +35,7 @@ export default function Height({
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
@@ -46,9 +46,9 @@ export default function Height({
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
+      {}
       <View style={styles.content}>
-        {/* From Height */}
+        {}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>From (cm)</Text>
           <View style={styles.inputContainer}>
@@ -64,7 +64,7 @@ export default function Height({
           </View>
         </View>
 
-        {/* To Height */}
+        {}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>To (cm)</Text>
           <View style={styles.inputContainer}>
@@ -81,7 +81,7 @@ export default function Height({
         </View>
       </View>
 
-      {/* Bottom Confirm Button */}
+      {}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={styles.confirmButton}
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
-    backgroundColor: "#5FB3D4", // Teal blue color from the image
+    backgroundColor: "#5FB3D4",  
   },
   confirmButtonText: {
     fontSize: 16,

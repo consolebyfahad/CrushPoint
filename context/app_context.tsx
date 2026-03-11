@@ -56,38 +56,31 @@ export interface UserData {
 }
 
 interface AppContextType {
-  // Authentication
+  
   isLoggedIn: boolean;
   setIsLoggedIn: (val: boolean) => void;
 
-  // User profile
   user: User | null;
   setUser: (user: User | null) => void;
 
-  // User data
   userData: UserData;
   updateUserData: (data: Partial<UserData>) => void;
   clearUserData: () => void;
 
-  // User images
   userImages: string[];
   addUserImage: (fileName: string) => void;
   removeUserImage: (fileName: string) => void;
   clearUserImages: () => void;
 
-  // Notification settings
   updateNotificationSettings: (settings: NotificationSetting[]) => void;
   getNotificationSetting: (key: string) => boolean;
 
-  // Utilities
   logout: () => Promise<boolean>;
   isHydrated: boolean;
 
-  // User management
   loginUser: (userData: User) => Promise<void>;
   updateUserProfile: (profileData: Partial<UserData>) => Promise<void>;
 
-  // Verification status
   isUserVerified: boolean;
   checkVerificationStatus: () => Promise<boolean>;
 }
@@ -157,7 +150,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isUserVerified, setIsUserVerified] = useState(false);
 
-  // Hydrate state from AsyncStorage on app start
   useEffect(() => {
     const hydrateContext = async () => {
       try {
@@ -167,7 +159,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           setIsLoggedIn(parsed.isLoggedIn ?? false);
           setUser(parsed.user ?? null);
 
-          // Merge with default notification settings if they don't exist
           const hydratedUserData = {
             ...defaultUserData,
             ...parsed.userData,
@@ -187,7 +178,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     hydrateContext();
   }, []);
 
-  // Save state to AsyncStorage whenever it changes (after hydration)
   useEffect(() => {
     if (!isHydrated) return;
 
@@ -249,10 +239,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(userData);
       setIsLoggedIn(true);
 
-      // If user is new, don't clear existing userData
-      // If user is existing, we'll fetch their profile data separately
       if (!userData.new) {
-        // For existing users, we might want to fetch their profile data
+        
       }
     } catch (error) {
       throw error;
@@ -276,13 +264,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // First check if we have status in userData (from state)
+      
       if (userData.status === "1") {
         setIsUserVerified(true);
         return true;
       }
 
-      // If not in state, fetch from API
       const formData = new FormData();
       formData.append("type", "get_data");
       formData.append("table_name", "users");
@@ -294,7 +281,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         const isVerified = userStatus === "1";
         setIsUserVerified(isVerified);
 
-        // Update userData with the fetched status
         updateUserData({ status: userStatus });
 
         return isVerified;

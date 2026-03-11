@@ -12,7 +12,7 @@ interface ChatItem {
   image: string;
   lastMessage: string;
   timestamp: string;
-  timestampValue: number; // Store actual timestamp for sorting
+  timestampValue: number;  
   unreadCount: number;
   isOnline: boolean;
 }
@@ -110,23 +110,18 @@ const useGetChats = () => {
             const isLastMessageFromUser = senderId === currentUserId;
             
             // The otherUserId is the person we're chatting with
-            // If sender is current user, we need to find the other user's ID from matches
-            // But since we only have sender_id, we use sender_id as the other user's ID
-            // (sender_id represents the other user in the conversation)
-            const otherUserId = senderId; // This is the matched user's ID
-            
-            // Format last message with "You:" prefix if sent by current user
+
+            const otherUserId = senderId;  
+
             const rawMessage = messageText || t("chat.noMessagesYet");
             let lastMessage = isLastMessageFromUser
               ? `${t("chat.you")} ${rawMessage}`
               : rawMessage;
 
-            // Truncate if too long
             if (lastMessage.length > 50) {
               lastMessage = lastMessage.substring(0, 50) + "...";
             }
 
-            // Parse user image - use sender's image (the other user's image)
             const userImage = senderImg && senderImg !== `${IMAGE_BASE_URL}`
               ? senderImg.startsWith("http")
                 ? senderImg
@@ -135,8 +130,8 @@ const useGetChats = () => {
 
             return {
               id: otherUserId,
-              matchId: otherUserId, // Use other user's ID as matchId for navigation
-              userId: otherUserId, // This is the matched user's ID (the person we're chatting with)
+              matchId: otherUserId,  
+              userId: otherUserId,  
               name: senderName,
               image: userImage,
               lastMessage: lastMessage,
@@ -145,33 +140,32 @@ const useGetChats = () => {
                 : msg.date || "",
               timestampValue: messageTimestamp || 0,
               unreadCount: unreadCount,
-              isOnline: false, // Status not available in this response
+              isOnline: false,  
             };
           });
 
-        // Sort by unread count first (unread chats first), then by timestamp (most recent first)
         chatList.sort((a, b) => {
-          // First sort by unread count (higher unread first)
+          
           if (a.unreadCount !== b.unreadCount) {
             return b.unreadCount - a.unreadCount;
           }
-          // Then sort by timestamp (most recent first)
+          
           return b.timestampValue - a.timestampValue;
         });
 
         setChats(chatList);
         setError(null);
       } else if (chatListResponse?.data && Array.isArray(chatListResponse.data)) {
-        // Handle response with data array (chat items with last_message)
+        
         const chatList: ChatItem[] = chatListResponse.data
           .filter((chat: any) => {
-            // Only include chats that have actual messages
+            
             if (!chat.last_message) return false;
             const messageText = chat.last_message.msg || chat.last_message.message || "";
             return messageText.trim() !== "";
           })
           .map((chat: any) => {
-            // Parse chat data from API response
+            
             const chatId = chat.id || chat.chat_id || chat.to_chat_id || "";
             const chatUserId = chat.user_id || chat.to_id || "";
             const chatUserName =
@@ -179,19 +173,16 @@ const useGetChats = () => {
             const chatUserImage = chat.image || chat.user_image || "";
             const chatUserGender = chat.gender || "unknown";
 
-            // Get last message (we know it exists because of filter)
             const lastMsg = chat.last_message;
             const fromId = chatListResponse.user?.id || userData?.id || user.user_id;
             const isLastMessageFromUser = lastMsg.from_id === fromId || lastMsg.sender_id === fromId;
 
-            // Format last message with "You:" prefix if sent by current user
             const rawMessage =
               lastMsg.msg || lastMsg.message || t("chat.noMessagesYet");
             const lastMessage = isLastMessageFromUser
               ? `${t("chat.you")} ${rawMessage}`
               : rawMessage;
 
-            // Truncate if too long
             const truncatedMessage = lastMessage.length > 50
               ? lastMessage.substring(0, 50) + "..."
               : lastMessage;
@@ -199,10 +190,8 @@ const useGetChats = () => {
             const lastTimestamp =
               Number(lastMsg.timestamp || lastMsg.datetime) || 0;
 
-            // Get unread count
             const unreadCount = Number(chat.unread_count) || 0;
 
-            // Parse user image
             const userImage = chatUserImage
               ? chatUserImage.startsWith("http")
                 ? chatUserImage
@@ -211,7 +200,7 @@ const useGetChats = () => {
 
             return {
               id: chatId,
-              matchId: chatId, // to_chat_id is used as matchId for navigation
+              matchId: chatId,  
               userId: chatUserId,
               name: chatUserName,
               image: userImage,
@@ -225,20 +214,19 @@ const useGetChats = () => {
             };
           });
 
-        // Sort by unread count first (unread chats first), then by timestamp (most recent first)
         chatList.sort((a, b) => {
-          // First sort by unread count (higher unread first)
+          
           if (a.unreadCount !== b.unreadCount) {
             return b.unreadCount - a.unreadCount;
           }
-          // Then sort by timestamp (most recent first)
+          
           return b.timestampValue - a.timestampValue;
         });
 
         setChats(chatList);
         setError(null);
       } else {
-        // Fallback: If chat_list doesn't return expected format, use matches approach
+        
         const matchesFormData = new FormData();
         matchesFormData.append("type", "get_data");
         matchesFormData.append("table_name", "matches");
@@ -249,14 +237,12 @@ const useGetChats = () => {
         if (matchesResponse?.data && Array.isArray(matchesResponse.data)) {
           const chatList: ChatItem[] = [];
 
-          // For each match, get the last message using getchat
           for (const match of matchesResponse.data) {
             if (match.match_id === "0" || !match.match) continue;
 
             const matchUser = match.match;
-            const matchId = match.id; // Use match record ID as to_chat_id
+            const matchId = match.id;  
 
-            // Get chat history for this match
             try {
               const chatFormData = new FormData();
               chatFormData.append("type", "getchat");
@@ -266,12 +252,10 @@ const useGetChats = () => {
               const chatResponse = await apiCall(chatFormData);
               const chatMessages = chatResponse?.chat || [];
 
-              // Only add chat if it has messages
               if (chatMessages.length === 0) {
                 continue;
               }
 
-              // Get last message
               const lastMsg = chatMessages[chatMessages.length - 1];
               const fromId = chatResponse.user?.id || user.user_id;
               const isLastMessageFromUser = lastMsg.from_id === fromId;
@@ -308,12 +292,11 @@ const useGetChats = () => {
                 isOnline: matchUser.status === "1",
               });
             } catch (chatError) {
-              // Skip matches that error or have no messages
+              
               continue;
             }
           }
 
-          // Sort by unread count first, then by timestamp
           chatList.sort((a, b) => {
             if (a.unreadCount !== b.unreadCount) {
               return b.unreadCount - a.unreadCount;

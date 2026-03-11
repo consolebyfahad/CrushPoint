@@ -26,7 +26,7 @@ export default function MatchScreen({ route, navigation }: any) {
   const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { user, userData } = useAppContext();
-  // Parse matchData from params
+  
   let matchData;
   const PLACEHOLDER_IMAGE =
     "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
@@ -59,7 +59,6 @@ export default function MatchScreen({ route, navigation }: any) {
     if (params?.matchData) {
       matchData = JSON.parse(params.matchData as string);
 
-      // Fix current user image if malformed (e.g. JSON array string)
       if (
         matchData.currentUser?.image &&
         matchData.currentUser.image.includes("[")
@@ -151,22 +150,18 @@ export default function MatchScreen({ route, navigation }: any) {
     };
   }
 
-  // Animation refs
   const confettiRef = useRef<LottieView>(null);
   const heartsRef = useRef<LottieView>(null);
   const sparklesRef = useRef<LottieView>(null);
   const celebrationRef = useRef<LottieView>(null);
   const heartBeatRef = useRef<LottieView>(null);
 
-  // Animation values - SEPARATED for iOS compatibility
   const blurOpacity = useRef(new Animated.Value(0)).current;
 
-  // Left image animations
   const leftImageX = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const leftImageRotate = useRef(new Animated.Value(0)).current;
   const leftImageScale = useRef(new Animated.Value(0.8)).current;
 
-  // Right image animations
   const rightImageX = useRef(new Animated.Value(SCREEN_WIDTH)).current;
   const rightImageRotate = useRef(new Animated.Value(0)).current;
   const rightImageScale = useRef(new Animated.Value(0.8)).current;
@@ -176,16 +171,14 @@ export default function MatchScreen({ route, navigation }: any) {
   const contentOpacity = useRef(new Animated.Value(0)).current;
   const heartContainerScale = useRef(new Animated.Value(0)).current;
 
-  // State for controlling animations
   const [showLottieAnimations, setShowLottieAnimations] = useState(false);
-  // State for meetup request modal
 
   useEffect(() => {
     startAnimationSequence();
   }, []);
 
   const startAnimationSequence = () => {
-    // 1. Blur layer appears
+    
     setTimeout(() => {
       Animated.timing(blurOpacity, {
         toValue: 1,
@@ -195,19 +188,17 @@ export default function MatchScreen({ route, navigation }: any) {
       }).start();
     }, 200);
 
-    // 2. Show Lottie animations
     setTimeout(() => {
       setShowLottieAnimations(true);
-      // Start confetti
+      
       confettiRef.current?.play();
-      // Start background hearts
+      
       heartsRef.current?.play();
     }, 500);
 
-    // 3. Images slide in with improved animations
     setTimeout(() => {
       Animated.parallel([
-        // Left image animations
+        
         Animated.spring(leftImageX, {
           toValue: SCREEN_WIDTH * 0.12,
           tension: 120,
@@ -226,7 +217,7 @@ export default function MatchScreen({ route, navigation }: any) {
           friction: 6,
           useNativeDriver: true,
         }),
-        // Right image animations
+        
         Animated.spring(rightImageX, {
           toValue: -SCREEN_WIDTH * 0.12,
           tension: 120,
@@ -248,7 +239,6 @@ export default function MatchScreen({ route, navigation }: any) {
       ]).start();
     }, 800);
 
-    // 4. Heart container appears
     setTimeout(() => {
       Animated.spring(heartContainerScale, {
         toValue: 1,
@@ -256,17 +246,15 @@ export default function MatchScreen({ route, navigation }: any) {
         friction: 6,
         useNativeDriver: true,
       }).start(() => {
-        // Start heart beat animation
+        
         heartBeatRef.current?.play();
       });
     }, 1200);
 
-    // 5. Start sparkles
     setTimeout(() => {
       sparklesRef.current?.play();
     }, 1400);
 
-    // 6. "It's a Match" text appears
     setTimeout(() => {
       Animated.parallel([
         Animated.spring(matchTextScale, {
@@ -284,7 +272,6 @@ export default function MatchScreen({ route, navigation }: any) {
       ]).start();
     }, 1600);
 
-    // 7. Content appears
     setTimeout(() => {
       Animated.timing(contentOpacity, {
         toValue: 1,
@@ -294,14 +281,13 @@ export default function MatchScreen({ route, navigation }: any) {
       }).start();
     }, 2200);
 
-    // 8. Start celebration animation
     setTimeout(() => {
       celebrationRef.current?.play();
     }, 2000);
   };
 
   const handleChat = async () => {
-    // Try to find the match record ID by querying matches table
+    
     let matchRecordId = "";
     if (user?.user_id && matchData?.matchedUser?.id) {
       try {
@@ -318,7 +304,7 @@ export default function MatchScreen({ route, navigation }: any) {
               m.match?.id === matchData.matchedUser.id,
           );
           if (matchRecord) {
-            matchRecordId = matchRecord.id; // Use match record ID, not match_id (which is user ID)
+            matchRecordId = matchRecord.id;  
           }
         }
       } catch (error) {}
@@ -349,7 +335,6 @@ export default function MatchScreen({ route, navigation }: any) {
     });
   };
 
-  // Interpolate rotation values
   const leftRotation = leftImageRotate.interpolate({
     inputRange: [-12, 0],
     outputRange: ["-12deg", "0deg"],
@@ -362,10 +347,10 @@ export default function MatchScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Lottie Background Animations */}
+      {}
       {showLottieAnimations && (
         <>
-          {/* Confetti Animation */}
+          {}
           <LottieView
             ref={confettiRef}
             style={styles.confettiAnimation}
@@ -375,7 +360,7 @@ export default function MatchScreen({ route, navigation }: any) {
             speed={1.2}
           />
 
-          {/* Background Hearts */}
+          {}
           <LottieView
             ref={heartsRef}
             style={styles.backgroundHeartsAnimation}
@@ -385,7 +370,7 @@ export default function MatchScreen({ route, navigation }: any) {
             speed={0.8}
           />
 
-          {/* Sparkles around images */}
+          {}
           <LottieView
             ref={sparklesRef}
             style={styles.sparklesAnimation}
@@ -395,7 +380,7 @@ export default function MatchScreen({ route, navigation }: any) {
             speed={1.5}
           />
 
-          {/* Celebration particles */}
+          {}
           <LottieView
             ref={celebrationRef}
             style={styles.celebrationAnimation}
@@ -407,7 +392,7 @@ export default function MatchScreen({ route, navigation }: any) {
         </>
       )}
 
-      {/* Blur Layer */}
+      {}
       <Animated.View
         style={[
           styles.blurLayer,
@@ -417,20 +402,16 @@ export default function MatchScreen({ route, navigation }: any) {
         ]}
       />
 
-      {/* Header */}
+      {}
       <View style={styles.header}>
-        {/* <TouchableOpacity style={styles.headerButton} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color={color.black} />
-        </TouchableOpacity> */}
-        {/* <Text style={styles.headerTitle}>{t("match.title")}</Text> */}
-        {/* <TouchableOpacity style={styles.headerButton} onPress={handleOptions}>
-          <Ionicons name="ellipsis-vertical" size={24} color={color.black} />
-        </TouchableOpacity> */}
+        {}
+        {}
+        {}
       </View>
 
-      {/* Match Animation Container */}
+      {}
       <View style={styles.matchContainer}>
-        {/* "It's a Match" Text */}
+        {}
         <Animated.View
           style={[
             styles.matchTextContainer,
@@ -447,9 +428,9 @@ export default function MatchScreen({ route, navigation }: any) {
           </View>
         </Animated.View>
 
-        {/* Images Container */}
+        {}
         <View style={styles.imagesContainer}>
-          {/* Left Image (Current User) - Using absolute positioning with transform */}
+          {}
           <Animated.View
             style={[
               styles.leftImageWrapper,
@@ -473,7 +454,7 @@ export default function MatchScreen({ route, navigation }: any) {
             <View style={styles.imageGlow} />
           </Animated.View>
 
-          {/* Center Heart with Lottie */}
+          {}
           <Animated.View
             style={[
               styles.centerHeartContainer,
@@ -495,7 +476,7 @@ export default function MatchScreen({ route, navigation }: any) {
             </View>
           </Animated.View>
 
-          {/* Right Image (Matched User) - Using absolute positioning with transform */}
+          {}
           <Animated.View
             style={[
               styles.rightImageWrapper,
@@ -521,7 +502,7 @@ export default function MatchScreen({ route, navigation }: any) {
         </View>
       </View>
 
-      {/* Content */}
+      {}
       <Animated.View
         style={[
           styles.content,
@@ -564,7 +545,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF8F0",
   },
-  // Lottie Animation Styles
+  
   confettiAnimation: {
     position: "absolute",
     top: 0,
@@ -677,7 +658,7 @@ const styles = StyleSheet.create({
     height: 220,
     zIndex: 10,
   },
-  // iOS-Compatible Image Wrappers with absolute positioning
+  
   leftImageWrapper: {
     position: "absolute",
     left: 0,
@@ -770,7 +751,7 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
     color: color.primary,
   },
-  // Modal styles
+  
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",

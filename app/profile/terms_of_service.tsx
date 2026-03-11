@@ -94,7 +94,7 @@ export default function TermsOfService() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -112,7 +112,7 @@ export default function TermsOfService() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Introduction */}
+        {}
         <View style={styles.introSection}>
           <View style={styles.introHeader}>
             <Ionicons name="document-text" size={32} color={color.primary} />
@@ -122,12 +122,12 @@ export default function TermsOfService() {
           <Text style={styles.introText}>{t("terms.intro")}</Text>
         </View>
 
-        {/* Terms Sections */}
+        {}
         <View style={styles.termsContainer}>
           {sections.map((section, index) => renderSection(section, index))}
         </View>
 
-        {/* Important Notice */}
+        {}
         <View style={styles.noticeSection}>
           <View style={styles.noticeHeader}>
             <Ionicons
@@ -140,7 +140,7 @@ export default function TermsOfService() {
           <Text style={styles.noticeText}>{t("terms.notice.content")}</Text>
         </View>
 
-        {/* Contact Section */}
+        {}
         <View style={styles.contactSection}>
           <View style={styles.contactHeader}>
             <Ionicons name="mail" size={24} color={color.primary} />
@@ -149,7 +149,7 @@ export default function TermsOfService() {
           <Text style={styles.contactText}>{t("terms.contact.content")}</Text>
         </View>
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
     </SafeAreaView>

@@ -31,7 +31,6 @@ interface UserData {
   new?: boolean;
 }
 
-// Configure Google Sign-In once
 GoogleSignin.configure({
   webClientId:
     "323137189211-bsva08l18ig45dvalqhcbs08mqrgsi4j.apps.googleusercontent.com",
@@ -54,28 +53,25 @@ export default function SocialAuth({
     setGoogleLoading(true);
 
     try {
-      // Check if Google Play Services are available
+      
       await GoogleSignin.hasPlayServices();
 
-      // Sign out any existing user before signing in
       try {
         await GoogleSignin.signOut();
       } catch (signOutError) {
-        // Ignore sign out errors (user might not be signed in)
+        
       }
 
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
         const { user } = response.data;
 
-        // Prepare data for your API
         const formData = new FormData();
         formData.append("type", "social_login");
         formData.append("token", response.data.idToken || "");
         formData.append("email", user?.email ?? "");
         formData.append("name", user?.name ?? "");
 
-        // Optional: add user photo
         if (user?.photo) {
           formData.append("image", user.photo);
         }
@@ -128,7 +124,6 @@ export default function SocialAuth({
     }
   };
 
-  // Helper function to decode JWT and extract email
   const decodeJWT = (token: string): any => {
     try {
       const base64Url = token.split(".")[1];
@@ -167,8 +162,6 @@ export default function SocialAuth({
         return;
       }
 
-      // Extract email from JWT token if credential.email is null
-      // Apple only provides email in credential on first sign-in, but it's always in the JWT
       let email = credential.email ?? "";
       if (!email && credential.identityToken) {
         const decodedToken = decodeJWT(credential.identityToken);
@@ -177,7 +170,6 @@ export default function SocialAuth({
         }
       }
 
-      // Get name from credential (only available on first sign-in)
       let name = "";
       if (credential.fullName) {
         name = [
@@ -188,7 +180,6 @@ export default function SocialAuth({
           .join(" ");
       }
 
-      // If name is not available, try to get it from AsyncStorage (stored from first login)
       if (!name && credential.user) {
         const storedName = await AsyncStorage.getItem(`apple_name_${credential.user}`);
         if (storedName) {
@@ -196,7 +187,6 @@ export default function SocialAuth({
         }
       }
 
-      // API call to your backend
       const formData = new FormData();
       formData.append("type", "social_login");
       formData.append("token", credential.user);
@@ -206,8 +196,7 @@ export default function SocialAuth({
       const apiResponse = await apiCall(formData);
 
       if (apiResponse.success) {
-        // Store name in AsyncStorage if we got it (for future logins)
-        // This persists even after logout since it uses a different key than @AppContext
+
         const finalName = apiResponse.name || name;
         if (finalName && credential.user) {
           await AsyncStorage.setItem(`apple_name_${credential.user}`, finalName);

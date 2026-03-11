@@ -64,7 +64,7 @@ export default function CommunityGuidelines() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -82,7 +82,7 @@ export default function CommunityGuidelines() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Introduction */}
+        {}
         <View style={styles.introSection}>
           <View style={styles.introHeader}>
             <Ionicons name="heart" size={32} color={color.primary} />
@@ -95,7 +95,7 @@ export default function CommunityGuidelines() {
           </Text>
         </View>
 
-        {/* Guidelines */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {t("communityGuidelines.title")}
@@ -105,7 +105,7 @@ export default function CommunityGuidelines() {
           )}
         </View>
 
-        {/* Safety Tips */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {t("communityGuidelines.safetyTips")}
@@ -126,7 +126,7 @@ export default function CommunityGuidelines() {
           </View>
         </View>
 
-        {/* Contact Info */}
+        {}
         <View style={styles.contactSection}>
           <View style={styles.contactHeader}>
             <Ionicons name="mail" size={24} color={color.primary} />
@@ -139,7 +139,7 @@ export default function CommunityGuidelines() {
           </Text>
         </View>
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
     </SafeAreaView>

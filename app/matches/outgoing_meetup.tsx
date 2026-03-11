@@ -35,7 +35,6 @@ export default function OutgoingMeetup({
   const { user } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Filter requests based on search text
   const filteredRequests = useMemo(() => {
     if (!searchText || !searchText.trim()) return requests;
     return requests.filter(
@@ -46,7 +45,6 @@ export default function OutgoingMeetup({
     );
   }, [requests, searchText]);
 
-  // Handle canceling outgoing request
   const handleCancel = useCallback(
     async (requestId: string) => {
       try {
@@ -75,10 +73,9 @@ export default function OutgoingMeetup({
     [user?.user_id, onRemoveRequest]
   );
 
-  // Handle editing/updating outgoing request (if pending)
   const handleEdit = useCallback(async (requestId: string) => {
     try {
-      // Feature coming soon - no alert needed
+      
     } catch (error) {
 
     }
@@ -149,7 +146,7 @@ export default function OutgoingMeetup({
         windowSize={10}
       />
 
-      {/* Loading Overlay */}
+      {}
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContainer}>

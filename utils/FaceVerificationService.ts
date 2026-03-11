@@ -1,4 +1,4 @@
-// SimpleFaceVerification.ts
+
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 import i18n from "i18next";
@@ -6,10 +6,9 @@ import i18n from "i18next";
 const FACE_API_CONFIG = {
   API_KEY: "wUMEkbH38iXACQKJsN8wZOAHTvtHMZgX",
   API_SECRET: "OOHILkIIpuLWKV8qZAurWirLquB0k8gG",
-  BASE_URL: "https://api-us.faceplusplus.com/facepp/v3", // US Region (current)
-  // BASE_URL: "https://api-ap.faceplusplus.com/facepp/v3", // Asia-Pacific Region
-  // BASE_URL: "https://api-cn.faceplusplus.com/facepp/v3", // China Region
-  CONFIDENCE_THRESHOLD: 80, // Increased threshold for better accuracy
+  BASE_URL: "https://api-us.faceplusplus.com/facepp/v3",  
+
+  CONFIDENCE_THRESHOLD: 80,  
 };
 
 interface SimpleVerificationResult {
@@ -19,20 +18,19 @@ interface SimpleVerificationResult {
 }
 
 class SimpleFaceVerification {
-  // Resize image to meet Face++ requirements (max 1MB, 800px width)
+  
   private async resizeImage(imageUri: string): Promise<string> {
     try {
 
       const manipulatorResult = await ImageManipulator.manipulateAsync(
         imageUri,
-        [{ resize: { width: 600 } }], // Smaller size to ensure it fits
+        [{ resize: { width: 600 } }],  
         {
-          compress: 0.7, // 70% quality
+          compress: 0.7,  
           format: ImageManipulator.SaveFormat.JPEG,
         }
       );
 
-      // Check file size
       const fileInfo = await FileSystem.getInfoAsync(manipulatorResult.uri);
       if (!fileInfo.exists || typeof fileInfo.size !== "number") {
         throw new Error("Resized image file not found or size unknown");
@@ -46,10 +44,9 @@ class SimpleFaceVerification {
     }
   }
 
-  // Convert image to base64
   private async imageToBase64(imageUri: string): Promise<string> {
     try {
-      // First resize the image
+      
       const resizedUri = await this.resizeImage(imageUri);
 
       const base64 = await FileSystem.readAsStringAsync(resizedUri, {
@@ -57,7 +54,7 @@ class SimpleFaceVerification {
       });
 
       if (base64.length > 10485760) {
-        // 10MB limit
+        
         throw new Error("Image too large even after compression");
       }
 
@@ -68,11 +65,10 @@ class SimpleFaceVerification {
     }
   }
 
-  // Download remote image if needed
   private async downloadRemoteImage(url: string): Promise<string> {
     try {
       if (!url.startsWith("http")) {
-        return url; // Already local
+        return url;  
       }
 
       const filename = `temp_${Date.now()}.jpg`;
@@ -91,13 +87,11 @@ class SimpleFaceVerification {
     }
   }
 
-  // Get face token from Face++ API
   private async getFaceToken(imageUri: string): Promise<string> {
     try {
-      // Download if remote URL
+      
       const localUri = await this.downloadRemoteImage(imageUri);
 
-      // Convert to base64
       const base64Image = await this.imageToBase64(localUri);
 
       const formData = new FormData();
@@ -133,14 +127,13 @@ class SimpleFaceVerification {
     }
   }
 
-  // Compare two face tokens with retry logic for concurrency limits
   private async compareFaceTokens(
     token1: string,
     token2: string,
     retryCount: number = 0
   ): Promise<number> {
     const maxRetries = 3;
-    const retryDelay = 2000; // 2 seconds
+    const retryDelay = 2000;  
 
     try {
       const formData = new FormData();
@@ -158,8 +151,7 @@ class SimpleFaceVerification {
 
       if (!response.ok) {
         const errorData = JSON.parse(responseText);
-        
-        // Handle concurrency limit with retry
+
         if (errorData.error_message === "CONCURRENCY_LIMIT_EXCEEDED" && retryCount < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, retryDelay));
           return this.compareFaceTokens(token1, token2, retryCount + 1);
@@ -181,30 +173,25 @@ class SimpleFaceVerification {
     }
   }
 
-  // Main verification function
   async verifyFaces(
     capturedImageUri: string,
     referenceImageUri: string
   ): Promise<SimpleVerificationResult> {
     try {
 
-      // Validate input parameters
       if (!capturedImageUri || !referenceImageUri) {
         throw new Error("Both captured and reference images are required");
       }
 
-      // Get face tokens for both images
       const capturedToken = await this.getFaceToken(capturedImageUri);
 
       const referenceToken = await this.getFaceToken(referenceImageUri);
 
-      // Compare faces
       const confidence = await this.compareFaceTokens(
         capturedToken,
         referenceToken
       );
 
-      // Validate confidence score
       if (typeof confidence !== 'number' || confidence < 0 || confidence > 100) {
         throw new Error("Invalid confidence score received from Face++ API");
       }
@@ -231,7 +218,7 @@ class SimpleFaceVerification {
 
       if (error.message.includes("No face detected")) {
         userMessage = i18n.t("faceVerification.noFaceDetected");
-          // "No face detected. Please ensure your face is clearly visible and centered in the frame.";
+          
       } else if (error.message.includes("INVALID_IMAGE_SIZE")) {
         userMessage = "Image size issue. Please try taking a new photo with better quality.";
       } else if (error.message.includes("CONCURRENCY_LIMIT_EXCEEDED")) {
@@ -257,10 +244,8 @@ class SimpleFaceVerification {
   }
 }
 
-// Export a singleton instance
 export const simpleFaceVerification = new SimpleFaceVerification();
 
-// Export the main function for easy use
 export const compareSimpleFaces = async (
   capturedImageUri: string,
   referenceImageUri: string

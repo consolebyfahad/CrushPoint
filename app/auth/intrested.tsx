@@ -37,7 +37,7 @@ export default function Interested() {
         <View style={styles.titleSection}>
           <Text style={styles.title}>{t("common.whoAreYouInterestedIn")}</Text>
           <View style={styles.subtitleContainer}>
-            {/* <InfoIcon /> */}
+            {}
             <Text style={styles.subtitle}>
               <Octicons name="info" size={14} color={color.gray55} />{" "}
               {t("common.interestedHelpText")}
@@ -46,7 +46,7 @@ export default function Interested() {
         </View>
 
         <View style={styles.optionsContainer}>
-          {/* Men Option */}
+          {}
           <TouchableOpacity
             style={[
               styles.interestOption,
@@ -70,7 +70,7 @@ export default function Interested() {
             </Text>
           </TouchableOpacity>
 
-          {/* Women Option */}
+          {}
           <TouchableOpacity
             style={[
               styles.interestOption,
@@ -94,7 +94,7 @@ export default function Interested() {
             </Text>
           </TouchableOpacity>
 
-          {/* other Option */}
+          {}
           <TouchableOpacity
             style={[
               styles.interestOption,

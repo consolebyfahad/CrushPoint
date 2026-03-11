@@ -24,7 +24,7 @@ export default function AccessLocation({
     >
       <View style={styles.container}>
         <View style={styles.contentContainer}>
-          {/* Location Icon with Background */}
+          {}
           <View style={styles.iconContainer}>
             <SimpleLineIcons
               name="location-pin"
@@ -33,15 +33,15 @@ export default function AccessLocation({
             />
           </View>
 
-          {/* Title */}
+          {}
           <Text style={styles.title}>{t("common.enableLocationTitle")}</Text>
 
-          {/* Description */}
+          {}
           <Text style={styles.description}>
             {t("common.enableLocationDescription")}
           </Text>
 
-          {/* Allow Button */}
+          {}
           <CustomButton title={t("common.allow")} onPress={onAllow} />
         </View>
       </View>

@@ -65,7 +65,7 @@ export default function AnimatedSelectionOption({
   }, [isSelected]);
 
   const handlePress = () => {
-    // Quick press animation
+    
     pressScale.value = withSpring(
       0.95,
       {
@@ -80,11 +80,9 @@ export default function AnimatedSelectionOption({
       }
     );
 
-    // Haptic feedback (if available)
     if (typeof runOnJS === "function") {
       runOnJS(() => {
-        // You can add haptic feedback here if using expo-haptics
-        // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
       })();
     }
 

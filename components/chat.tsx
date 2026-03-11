@@ -38,7 +38,7 @@ export default function ChatList() {
   const { showToast } = useToast();
   const [searchText, setSearchText] = useState("");
   const { chats, loading, error, refetch } = useGetChats();
-  // Filter chats based on search text
+  
   const filteredChats = chats.filter(
     (chat) =>
       chat.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -84,7 +84,7 @@ export default function ChatList() {
               const response = await apiCall(formData);
               if (response && response.result) {
                 showToast(t("chat.chatDeleted"), "success");
-                refetch(); // Refresh chat list
+                refetch();  
               } else {
                 showToast(
                   response?.message || t("chat.failedToDelete"),
@@ -113,7 +113,7 @@ export default function ChatList() {
           source={{ uri: item.image }}
           style={styles.avatar}
           onError={() => {
-            // Image failed to load, will show placeholder
+            
           }}
         />
         {item.isOnline && <View style={styles.onlineIndicator} />}
@@ -156,12 +156,11 @@ export default function ChatList() {
     </View>
   );
 
-  // Calculate total unread count
   const totalUnread = chats.reduce((sum, chat) => sum + chat.unreadCount, 0);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t("chat.chats")}</Text>
         {totalUnread > 0 && (
@@ -173,7 +172,7 @@ export default function ChatList() {
         )}
       </View>
 
-      {/* Search Bar */}
+      {}
       <View style={styles.searchContainer}>
         <CustomSearchBar
           searchText={searchText}
@@ -182,7 +181,7 @@ export default function ChatList() {
         />
       </View>
 
-      {/* Chat List */}
+      {}
       {error && chats.length === 0 ? (
         renderErrorState()
       ) : loading && chats.length === 0 ? (

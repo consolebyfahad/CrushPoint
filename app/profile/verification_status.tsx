@@ -21,7 +21,6 @@ export default function VerificationStatus() {
   const { t } = useTranslation();
   const { userData } = useAppContext();
 
-  // Map status from userData to verification state
   const verificationState = useMemo(() => {
     const status = userData.status || "0";
 
@@ -96,11 +95,11 @@ export default function VerificationStatus() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <Header title={t("verification.status.title")} divider={true} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Status Card */}
+        {}
         <View
           style={[
             styles.statusCard,
@@ -118,7 +117,7 @@ export default function VerificationStatus() {
           <Text style={styles.statusDescription}>{statusInfo.description}</Text>
         </View>
 
-        {/* Why Verify Section */}
+        {}
         <TouchableOpacity
           style={styles.whyVerifySection}
           onPress={handleWhyVerify}
@@ -134,7 +133,7 @@ export default function VerificationStatus() {
           />
         </TouchableOpacity>
 
-        {/* Common Issues Section - Only show if verification failed */}
+        {}
         {verificationState.status === "failed" && (
           <View style={styles.issuesSection}>
             <Text style={styles.issuesTitle}>
@@ -150,7 +149,7 @@ export default function VerificationStatus() {
           </View>
         )}
 
-        {/* Success Message - Only show if verified */}
+        {}
         {verificationState.status === "verified" && (
           <View style={styles.successSection}>
             <Text style={styles.successTitle}>
@@ -162,7 +161,7 @@ export default function VerificationStatus() {
           </View>
         )}
 
-        {/* Pending Message - Only show if pending */}
+        {}
         {verificationState.status === "pending" && (
           <View style={styles.pendingSection}>
             <Text style={styles.pendingTitle}>
@@ -174,11 +173,11 @@ export default function VerificationStatus() {
           </View>
         )}
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Try Again Button - Only show if verification failed */}
+      {}
       {statusInfo.showTryAgain && (
         <View style={styles.tryAgainContainer}>
           <CustomButton

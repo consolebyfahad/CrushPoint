@@ -10,22 +10,21 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = () => {
   const bounceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Enhanced entrance animation
+    
     Animated.sequence([
       Animated.timing(scaleAnim, {
-        toValue: 1.2, // Slightly bigger first
+        toValue: 1.2,  
         duration: 400,
         easing: Easing.elastic(1.2),
         useNativeDriver: true,
       }),
       Animated.timing(scaleAnim, {
-        toValue: 1, // Then settle to normal size
+        toValue: 1,  
         duration: 200,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Gentle bounce animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(bounceAnim, {
@@ -43,7 +42,6 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = () => {
       ])
     ).start();
 
-    // Rotation animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(rotateAnim, {
@@ -68,7 +66,6 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = () => {
     outputRange: ["0deg", "9deg"],
   });
 
-  // Gentle vertical bounce
   const translateY = bounceAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0, -8],

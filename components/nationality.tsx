@@ -27,7 +27,6 @@ export default function Nationality({
     Array.isArray(filterData.nationality) ? filterData.nationality : []
   );
 
-  // Use base options from helper and translate labels
   const nationalities = useMemo(() => {
     return NATIONALITY_OPTIONS.map((option) => ({
       id: option.id,
@@ -36,7 +35,6 @@ export default function Nationality({
     }));
   }, [t]);
 
-  // OLD nationalities array - keeping for reference but not used
   const oldNationalities = [
     { id: "afghan", name: t("nationalities.afghan"), flag: "🇦🇫" },
     { id: "albanian", name: t("nationalities.albanian"), flag: "🇦🇱" },
@@ -267,10 +265,10 @@ export default function Nationality({
   const handleNationalitySelect = (nationalityId: string) => {
     setSelectedNationalities((prev) => {
       if (prev.includes(nationalityId)) {
-        // Remove nationality if already selected
+        
         return prev.filter((n) => n !== nationalityId);
       } else {
-        // Add nationality if not selected
+        
         return [...prev, nationalityId];
       }
     });
@@ -284,7 +282,6 @@ export default function Nationality({
     onClose();
   };
 
-  // Check if nationality is selected
   const isSelected = (nationalityId: string) => {
     return selectedNationalities.includes(nationalityId);
   };
@@ -317,7 +314,7 @@ export default function Nationality({
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
@@ -328,7 +325,7 @@ export default function Nationality({
         </TouchableOpacity>
       </View>
 
-      {/* Search Bar */}
+      {}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Ionicons
@@ -347,7 +344,7 @@ export default function Nationality({
         </View>
       </View>
 
-      {/* Nationality List */}
+      {}
       <FlatList
         data={filteredNationalities}
         renderItem={renderNationalityItem}
@@ -357,7 +354,7 @@ export default function Nationality({
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 
-      {/* Bottom Save Button */}
+      {}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={[
@@ -468,7 +465,7 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: "#F5F5F5",
-    marginLeft: 52, // Aligns with text after flag
+    marginLeft: 52,  
   },
   selectedNationalityItem: {
     backgroundColor: "#F0F9FF",

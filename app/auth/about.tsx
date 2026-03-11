@@ -35,7 +35,6 @@ const About = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [ageError, setAgeError] = useState("");
 
-  // Dismiss keyboard when date picker is closed on Android
   useEffect(() => {
     if (Platform.OS === "android" && !showDatePicker) {
       Keyboard.dismiss();
@@ -58,7 +57,7 @@ const About = () => {
   };
 
   const handleContinue = () => {
-    if (ageError) return; // Don't continue if there's an age error
+    if (ageError) return;  
 
     updateUserData({ name: name, dob: dateOfBirth, about: about });
     router.push("/auth/looking_for");
@@ -77,14 +76,13 @@ const About = () => {
       const currentDate = selectedDate;
       setDate(currentDate);
 
-      // Check if user is 18 or older
       const age = calculateAge(currentDate);
       if (age < 18) {
         setAgeError(t("about.ageValidation"));
         setDateOfBirth("");
       } else {
         setAgeError("");
-        // Format date as mm/dd/yyyy
+        
         const formattedDate = `${(currentDate.getMonth() + 1)
           .toString()
           .padStart(2, "0")}/${currentDate
@@ -98,13 +96,13 @@ const About = () => {
 
   const handleDateConfirm = () => {
     setShowDatePicker(false);
-    // Dismiss keyboard after date selection
+    
     Keyboard.dismiss();
   };
 
   const handleDateCancel = () => {
     setShowDatePicker(false);
-    // Dismiss keyboard after canceling date selection
+    
     Keyboard.dismiss();
   };
 
@@ -190,7 +188,7 @@ const About = () => {
                 <Text style={styles.characterCount}>{about.length}/100</Text>
               </View>
 
-              {/* Android Date Picker (inline) */}
+              {}
               {Platform.OS === "android" && showDatePicker && (
                 <DateTimePicker
                   testID="dateTimePicker"
@@ -207,7 +205,7 @@ const About = () => {
           </TouchableWithoutFeedback>
         </ScrollView>
       </KeyboardAvoidingView>
-      {/* iOS Date Picker Modal */}
+      {}
       {Platform.OS === "ios" && (
         <Modal
           visible={showDatePicker}
@@ -222,7 +220,7 @@ const About = () => {
               onPress={() => setShowDatePicker(false)}
             />
             <View style={styles.datePickerContainer}>
-              {/* Header */}
+              {}
               <View style={styles.datePickerHeader}>
                 <TouchableOpacity onPress={handleDateCancel}>
                   <Text style={styles.cancelButton}>{t("cancel")}</Text>
@@ -235,7 +233,7 @@ const About = () => {
                 </TouchableOpacity>
               </View>
 
-              {/* Date Picker */}
+              {}
               <DateTimePicker
                 testID="dateTimePicker"
                 value={date}
@@ -252,7 +250,7 @@ const About = () => {
         </Modal>
       )}
 
-      {/* Continue Button */}
+      {}
       <View style={styles.buttonContainer}>
         <CustomButton
           title={t("about.continue")}
@@ -367,7 +365,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderColor: color.gray95,
   },
-  // Modal styles
+  
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",

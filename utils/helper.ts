@@ -4,7 +4,10 @@ const parseMMDDYYYY = (dateStr: string): Date => {
 };
 
 // Format gender interest for display
-export const formatGenderInterest = (genderInterest: string, t?: (key: string, options?: any) => string): string => {
+export const formatGenderInterest = (
+  genderInterest: string,
+  t?: (key: string, options?: any) => string,
+): string => {
   if (!genderInterest) return t ? t("filters.both") : "Both";
 
   const normalized = genderInterest.toLowerCase().trim();
@@ -13,7 +16,11 @@ export const formatGenderInterest = (genderInterest: string, t?: (key: string, o
     return t ? t("filters.women") : "Women";
   } else if (normalized === "male" || normalized === "m") {
     return t ? t("filters.men") : "Men";
-  } else if (normalized === "both" || normalized === "all" || normalized === "other") {
+  } else if (
+    normalized === "both" ||
+    normalized === "all" ||
+    normalized === "other"
+  ) {
     return t ? t("filters.both") : "Both";
   }
 
@@ -28,43 +35,48 @@ export const capitalizeFirstLetter = (text: string): string => {
 };
 
 // Format religion with correct emoji - handles all variations
-export const formatReligion = (religion: string, t?: (key: string) => string): string => {
+export const formatReligion = (
+  religion: string,
+  t?: (key: string) => string,
+): string => {
   if (!religion || religion.trim() === "") return "";
 
   // Normalize religion string (lowercase, trim)
   const normalized = religion.toLowerCase().trim();
 
   // Comprehensive religion mapping with correct emojis
-  const religionMap: { [key: string]: { emoji: string; key: string; display: string } } = {
+  const religionMap: {
+    [key: string]: { emoji: string; key: string; display: string };
+  } = {
     // Christianity variations
-    "christian": { emoji: "✝️", key: "christianity", display: "Christianity" },
-    "christianity": { emoji: "✝️", key: "christianity", display: "Christianity" },
-    "christianism": { emoji: "✝️", key: "christianity", display: "Christianity" },
+    christian: { emoji: "✝️", key: "christianity", display: "Christianity" },
+    christianity: { emoji: "✝️", key: "christianity", display: "Christianity" },
+    christianism: { emoji: "✝️", key: "christianity", display: "Christianity" },
 
     // Islam variations
-    "islam": { emoji: "☪️", key: "islam", display: "Islam" },
-    "muslim": { emoji: "☪️", key: "islam", display: "Islam" },
-    "islamic": { emoji: "☪️", key: "islam", display: "Islam" },
+    islam: { emoji: "☪️", key: "islam", display: "Islam" },
+    muslim: { emoji: "☪️", key: "islam", display: "Islam" },
+    islamic: { emoji: "☪️", key: "islam", display: "Islam" },
 
     // Hinduism
-    "hindu": { emoji: "🕉️", key: "hinduism", display: "Hinduism" },
-    "hinduism": { emoji: "🕉️", key: "hinduism", display: "Hinduism" },
+    hindu: { emoji: "🕉️", key: "hinduism", display: "Hinduism" },
+    hinduism: { emoji: "🕉️", key: "hinduism", display: "Hinduism" },
 
     // Buddhism
-    "buddhist": { emoji: "☸️", key: "buddhism", display: "Buddhism" },
-    "buddhism": { emoji: "☸️", key: "buddhism", display: "Buddhism" },
+    buddhist: { emoji: "☸️", key: "buddhism", display: "Buddhism" },
+    buddhism: { emoji: "☸️", key: "buddhism", display: "Buddhism" },
 
     // Judaism
-    "jewish": { emoji: "✡️", key: "judaism", display: "Judaism" },
-    "judaism": { emoji: "✡️", key: "judaism", display: "Judaism" },
+    jewish: { emoji: "✡️", key: "judaism", display: "Judaism" },
+    judaism: { emoji: "✡️", key: "judaism", display: "Judaism" },
 
     // Sikhism
-    "sikh": { emoji: "☬", key: "sikhism", display: "Sikhism" },
-    "sikhism": { emoji: "☬", key: "sikhism", display: "Sikhism" },
+    sikh: { emoji: "☬", key: "sikhism", display: "Sikhism" },
+    sikhism: { emoji: "☬", key: "sikhism", display: "Sikhism" },
 
     // Other
-    "other": { emoji: "🙏", key: "others", display: "Other" },
-    "others": { emoji: "🙏", key: "others", display: "Other" },
+    other: { emoji: "🙏", key: "others", display: "Other" },
+    others: { emoji: "🙏", key: "others", display: "Other" },
   };
 
   // Find matching religion
@@ -87,7 +99,11 @@ export const formatReligion = (religion: string, t?: (key: string) => string): s
       translatedValue = t(fallbackKey);
     }
     // If translation exists and is different from the key, use it
-    if (translatedValue && translatedValue !== translationKey && translatedValue !== `religion.${religionData.key}`) {
+    if (
+      translatedValue &&
+      translatedValue !== translationKey &&
+      translatedValue !== `religion.${religionData.key}`
+    ) {
       return `${religionData.emoji} ${translatedValue}`;
     }
   }
@@ -97,49 +113,54 @@ export const formatReligion = (religion: string, t?: (key: string) => string): s
 };
 
 // Format zodiac with correct symbol - handles all variations
-export const formatZodiac = (zodiac: string, t?: (key: string) => string): string => {
+export const formatZodiac = (
+  zodiac: string,
+  t?: (key: string) => string,
+): string => {
   if (!zodiac || zodiac.trim() === "") return "";
 
   // Normalize zodiac string (lowercase, trim)
   const normalized = zodiac.toLowerCase().trim();
 
   // Comprehensive zodiac mapping with correct symbols
-  const zodiacMap: { [key: string]: { symbol: string; key: string; display: string } } = {
+  const zodiacMap: {
+    [key: string]: { symbol: string; key: string; display: string };
+  } = {
     // Aries variations
-    "aries": { symbol: "♈", key: "aries", display: "Aries" },
+    aries: { symbol: "♈", key: "aries", display: "Aries" },
 
     // Taurus variations
-    "taurus": { symbol: "♉", key: "taurus", display: "Taurus" },
+    taurus: { symbol: "♉", key: "taurus", display: "Taurus" },
 
     // Gemini variations
-    "gemini": { symbol: "♊", key: "gemini", display: "Gemini" },
+    gemini: { symbol: "♊", key: "gemini", display: "Gemini" },
 
     // Cancer variations
-    "cancer": { symbol: "♋", key: "cancer", display: "Cancer" },
+    cancer: { symbol: "♋", key: "cancer", display: "Cancer" },
 
     // Leo variations
-    "leo": { symbol: "♌", key: "leo", display: "Leo" },
+    leo: { symbol: "♌", key: "leo", display: "Leo" },
 
     // Virgo variations
-    "virgo": { symbol: "♍", key: "virgo", display: "Virgo" },
+    virgo: { symbol: "♍", key: "virgo", display: "Virgo" },
 
     // Libra variations
-    "libra": { symbol: "♎", key: "libra", display: "Libra" },
+    libra: { symbol: "♎", key: "libra", display: "Libra" },
 
     // Scorpio variations
-    "scorpio": { symbol: "♏", key: "scorpio", display: "Scorpio" },
+    scorpio: { symbol: "♏", key: "scorpio", display: "Scorpio" },
 
     // Sagittarius variations
-    "sagittarius": { symbol: "♐", key: "sagittarius", display: "Sagittarius" },
+    sagittarius: { symbol: "♐", key: "sagittarius", display: "Sagittarius" },
 
     // Capricorn variations
-    "capricorn": { symbol: "♑", key: "capricorn", display: "Capricorn" },
+    capricorn: { symbol: "♑", key: "capricorn", display: "Capricorn" },
 
     // Aquarius variations
-    "aquarius": { symbol: "♒", key: "aquarius", display: "Aquarius" },
+    aquarius: { symbol: "♒", key: "aquarius", display: "Aquarius" },
 
     // Pisces variations
-    "pisces": { symbol: "♓", key: "pisces", display: "Pisces" },
+    pisces: { symbol: "♓", key: "pisces", display: "Pisces" },
   };
 
   // Find matching zodiac
@@ -362,14 +383,19 @@ export const NATIONALITY_OPTIONS = [
 ];
 
 // Format nationality with correct flag - handles all variations
-export const formatNationality = (nationality: string, t?: (key: string) => string): string => {
+export const formatNationality = (
+  nationality: string,
+  t?: (key: string) => string,
+): string => {
   if (!nationality || nationality.trim() === "") return "";
 
   // Normalize nationality string (lowercase, trim, handle underscores)
   const normalized = nationality.toLowerCase().trim().replace(/_/g, "_");
 
   // Find matching nationality
-  const nationalityData = NATIONALITY_OPTIONS.find(opt => opt.id === normalized);
+  const nationalityData = NATIONALITY_OPTIONS.find(
+    (opt) => opt.id === normalized,
+  );
 
   if (!nationalityData) {
     // Fallback: try to capitalize and use as-is with default flag
@@ -406,7 +432,7 @@ interface ApiInterest {
 // Returns the name exactly as provided by backend (with emoji if included)
 const getLocalizedNameFromApi = (
   interest: ApiInterest,
-  currentLanguage: string = "en"
+  currentLanguage: string = "en",
 ): string => {
   if (!interest.name_languages) {
     return interest.name || "";
@@ -423,13 +449,9 @@ const getLocalizedNameFromApi = (
     // Try current language, fallback to English, then to original name
     // Return exactly as provided by backend (includes emoji if present)
     return (
-      nameLanguages[langCode] ||
-      nameLanguages["en"] ||
-      interest.name ||
-      ""
+      nameLanguages[langCode] || nameLanguages["en"] || interest.name || ""
     );
   } catch (error) {
-
     return interest.name || "";
   }
 };
@@ -439,10 +461,9 @@ const getLocalizedNameFromApi = (
 const convertInterestIdsToNames = (
   interestIds: string[],
   apiInterests: ApiInterest[],
-  currentLanguage: string = "en"
+  currentLanguage: string = "en",
 ): string[] => {
   if (!apiInterests || apiInterests.length === 0) {
-
     return [];
   }
 
@@ -452,7 +473,9 @@ const convertInterestIdsToNames = (
       const idStr = String(id).trim();
 
       // Find interest in API interests by ID (compare as strings)
-      const apiInterest = apiInterests.find((interest) => String(interest.id).trim() === idStr);
+      const apiInterest = apiInterests.find(
+        (interest) => String(interest.id).trim() === idStr,
+      );
 
       if (apiInterest) {
         // Return localized name exactly as provided by backend (includes emoji if present)
@@ -460,8 +483,10 @@ const convertInterestIdsToNames = (
       }
 
       // If interest not found in API, log warning with more details
-      console.warn(`Interest with ID ${idStr} not found in API interests. Available IDs:`,
-        apiInterests.map(i => i.id).join(", "));
+      console.warn(
+        `Interest with ID ${idStr} not found in API interests. Available IDs:`,
+        apiInterests.map((i) => i.id).join(", "),
+      );
       return null;
     })
     .filter((name): name is string => name !== null);
@@ -487,7 +512,7 @@ export const parseJsonString = (jsonString: string): string[] => {
     if (!jsonString) return [];
 
     // Check if it's a JSON array string
-    if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
+    if (jsonString.startsWith("[") && jsonString.endsWith("]")) {
       // Handle heavily escaped JSON strings like the one in the API response
       let cleanedString = jsonString;
 
@@ -501,7 +526,6 @@ export const parseJsonString = (jsonString: string): string[] => {
       if (Array.isArray(parsed)) {
         return parsed;
       } else {
-
         return [];
       }
     } else {
@@ -509,7 +533,6 @@ export const parseJsonString = (jsonString: string): string[] => {
       return [jsonString];
     }
   } catch (error) {
-
     // Fallback: try to extract values manually if JSON parsing fails
     try {
       // Extract values between quotes
@@ -518,9 +541,7 @@ export const parseJsonString = (jsonString: string): string[] => {
         const values = matches.map((match) => match.replace(/"/g, ""));
         return values;
       }
-    } catch (fallbackError) {
-
-    }
+    } catch (fallbackError) {}
     // Final fallback: return as single string
     return [jsonString];
   }
@@ -530,13 +551,13 @@ export const parseJsonString = (jsonString: string): string[] => {
 export const parseInterestsWithNames = (
   jsonString: string,
   apiInterests: ApiInterest[],
-  currentLanguage: string = "en"
+  currentLanguage: string = "en",
 ): string[] => {
   try {
     if (!jsonString) return [];
 
     // Check if it's a JSON array string
-    if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
+    if (jsonString.startsWith("[") && jsonString.endsWith("]")) {
       // Handle heavily escaped JSON strings like the one in the API response
       let cleanedString = jsonString;
 
@@ -548,25 +569,31 @@ export const parseInterestsWithNames = (
       const interestIds = JSON.parse(cleanedString);
 
       if (Array.isArray(interestIds)) {
-        return convertInterestIdsToNames(interestIds, apiInterests, currentLanguage);
+        return convertInterestIdsToNames(
+          interestIds,
+          apiInterests,
+          currentLanguage,
+        );
       } else {
-
         return [];
       }
     } else {
       // It's not a JSON array, might be a single interest ID or comma-separated values
 
       // Try to parse as comma-separated values
-      if (jsonString.includes(',')) {
-        const values = jsonString.split(',').map(v => v.trim());
+      if (jsonString.includes(",")) {
+        const values = jsonString.split(",").map((v) => v.trim());
         return convertInterestIdsToNames(values, apiInterests, currentLanguage);
       } else {
         // Single value
-        return convertInterestIdsToNames([jsonString.trim()], apiInterests, currentLanguage);
+        return convertInterestIdsToNames(
+          [jsonString.trim()],
+          apiInterests,
+          currentLanguage,
+        );
       }
     }
   } catch (error) {
-
     // Fallback: try to extract values manually if JSON parsing fails
     try {
       // Extract values between quotes
@@ -577,16 +604,18 @@ export const parseInterestsWithNames = (
       }
 
       // Try comma-separated values
-      if (jsonString.includes(',')) {
-        const values = jsonString.split(',').map(v => v.trim());
+      if (jsonString.includes(",")) {
+        const values = jsonString.split(",").map((v) => v.trim());
         return convertInterestIdsToNames(values, apiInterests, currentLanguage);
       } else {
         // Single value
-        return convertInterestIdsToNames([jsonString.trim()], apiInterests, currentLanguage);
+        return convertInterestIdsToNames(
+          [jsonString.trim()],
+          apiInterests,
+          currentLanguage,
+        );
       }
-    } catch (fallbackError) {
-
-    }
+    } catch (fallbackError) {}
     return [];
   }
 };
@@ -601,14 +630,17 @@ export const LOOKING_FOR_OPTIONS = [
 ];
 
 // Format a single looking for ID to display string (similar to formatReligion/formatZodiac)
-export const formatLookingFor = (lookingForId: string, t?: (key: string) => string): string => {
+export const formatLookingFor = (
+  lookingForId: string,
+  t?: (key: string) => string,
+): string => {
   if (!lookingForId || lookingForId.trim() === "") return "";
 
   // Normalize looking for ID (lowercase, trim)
   const normalized = lookingForId.toLowerCase().trim();
 
   // Find matching option
-  const option = LOOKING_FOR_OPTIONS.find(opt => opt.id === normalized);
+  const option = LOOKING_FOR_OPTIONS.find((opt) => opt.id === normalized);
 
   if (!option) {
     // Fallback: capitalize and return as-is
@@ -627,25 +659,31 @@ export const formatLookingFor = (lookingForId: string, t?: (key: string) => stri
 
   // Fallback to English labels
   const fallbackLabels: { [key: string]: string } = {
-    "serious": "Serious relationship",
-    "casual": "Casual dating",
-    "friendship": "Friendship",
-    "open": "Open to possibilities",
-    "prefer-not": "Prefer not to say"
+    serious: "Serious relationship",
+    casual: "Casual dating",
+    friendship: "Friendship",
+    open: "Open to possibilities",
+    "prefer-not": "Prefer not to say",
   };
 
   return `${option.emoji} ${fallbackLabels[normalized] || option.id}`;
 };
 
 // Convert array of looking for IDs to display labels
-const convertLookingForIdsToLabels = (lookingForIds: string[], t?: (key: string, options?: any) => string): string[] => {
+const convertLookingForIdsToLabels = (
+  lookingForIds: string[],
+  t?: (key: string, options?: any) => string,
+): string[] => {
   return lookingForIds
     .map((id) => formatLookingFor(id, t))
     .filter((label) => label && label.trim() !== "");
 };
 
 // Add new function specifically for looking_for
-export const parseLookingForWithLabels = (jsonString: string, t?: (key: string) => string): string[] => {
+export const parseLookingForWithLabels = (
+  jsonString: string,
+  t?: (key: string) => string,
+): string[] => {
   try {
     if (!jsonString) return [];
 
@@ -662,11 +700,9 @@ export const parseLookingForWithLabels = (jsonString: string, t?: (key: string) 
     if (Array.isArray(lookingForIds)) {
       return convertLookingForIdsToLabels(lookingForIds, t);
     } else {
-
       return [];
     }
   } catch (error) {
-
     // Fallback: try to extract values manually if JSON parsing fails
     try {
       // Extract values between quotes
@@ -675,9 +711,7 @@ export const parseLookingForWithLabels = (jsonString: string, t?: (key: string) 
         const values = matches.map((match) => match.replace(/"/g, ""));
         return convertLookingForIdsToLabels(values, t);
       }
-    } catch (fallbackError) {
-
-    }
+    } catch (fallbackError) {}
     return [];
   }
 };
@@ -689,13 +723,21 @@ export const nationalityOptions = NATIONALITY_OPTIONS.map((option) => ({
 }));
 
 // Convert array of nationality IDs to display labels
-export const convertNationalityValuesToLabels = (nationalityValues: string[], t?: (key: string) => string): string[] => {
+export const convertNationalityValuesToLabels = (
+  nationalityValues: string[],
+  t?: (key: string) => string,
+): string[] => {
   return nationalityValues
     .map((value) => formatNationality(value, t))
-    .filter((label) => label && label.trim() !== "" && label !== "Not Specified");
+    .filter(
+      (label) => label && label.trim() !== "" && label !== "Not Specified",
+    );
 };
 
-export const parseNationalityWithLabels = (jsonString: string, t?: (key: string) => string): string[] => {
+export const parseNationalityWithLabels = (
+  jsonString: string,
+  t?: (key: string) => string,
+): string[] => {
   try {
     // Handle heavily escaped JSON strings like the one in the data
     let cleanedString = jsonString;
@@ -723,7 +765,6 @@ export const parseNationalityWithLabels = (jsonString: string, t?: (key: string)
 
     return [];
   } catch (error) {
-
     return [];
   }
 };
@@ -780,12 +821,15 @@ export const formatTimeForDisplay = (time: string, locale?: string) => {
       return `${displayHours}:${displayMinutes} ${ampm}`;
     }
   } catch (error) {
-
     return time;
   }
 };
 
-export const formatTimeAgo = (date: string, time: string, t?: (key: string, options?: any) => string) => {
+export const formatTimeAgo = (
+  date: string,
+  time: string,
+  t?: (key: string, options?: any) => string,
+) => {
   try {
     // Parse the date format "Jul 22, 2025" or "Sep 12, 2025 06:31 PM"
     const monthMap: { [key: string]: number } = {
@@ -851,14 +895,22 @@ export const formatTimeAgo = (date: string, time: string, t?: (key: string, opti
     if (diffInHours < 1) {
       return t ? t("helper.time.justNow") : "Just now";
     } else if (diffInHours < 24) {
-      return t ? t(diffInHours > 1 ? "helper.time.hoursAgo_plural" : "helper.time.hoursAgo", { count: diffInHours }) : `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+      return t
+        ? t(
+            diffInHours > 1
+              ? "helper.time.hoursAgo_plural"
+              : "helper.time.hoursAgo",
+            { count: diffInHours },
+          )
+        : `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
     } else if (diffInDays === 1) {
       return t ? t("helper.time.dayAgo") : "1 day ago";
     } else {
-      return t ? t("helper.time.daysAgo", { count: diffInDays }) : `${diffInDays} days ago`;
+      return t
+        ? t("helper.time.daysAgo", { count: diffInDays })
+        : `${diffInDays} days ago`;
     }
   } catch (error) {
-
     return t ? t("helper.time.recently") : "Recently";
   }
 };
@@ -869,12 +921,22 @@ export const formatTimeAgo = (date: string, time: string, t?: (key: string, opti
  */
 export const parseCreatedAtWithOffset = (
   createdAtStr: string,
-  hoursOffset: number = 3
+  hoursOffset: number = 3,
 ): Date => {
   try {
     const monthMap: { [key: string]: number } = {
-      Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-      Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+      Jan: 0,
+      Feb: 1,
+      Mar: 2,
+      Apr: 3,
+      May: 4,
+      Jun: 5,
+      Jul: 6,
+      Aug: 7,
+      Sep: 8,
+      Oct: 9,
+      Nov: 10,
+      Dec: 11,
     };
 
     // Parse "Oct 11, 2025 10:24 PM"
@@ -901,7 +963,6 @@ export const parseCreatedAtWithOffset = (
 
     return date;
   } catch (error) {
-
     return new Date();
   }
 };
@@ -909,7 +970,10 @@ export const parseCreatedAtWithOffset = (
 /**
  * Calculate time ago from a Date object
  */
-export const calculateTimeAgo = (date: Date, t?: (key: string, options?: any) => string): string => {
+export const calculateTimeAgo = (
+  date: Date,
+  t?: (key: string, options?: any) => string,
+): string => {
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();
   const diffInSeconds = Math.floor(diffInMs / 1000);
@@ -920,27 +984,48 @@ export const calculateTimeAgo = (date: Date, t?: (key: string, options?: any) =>
   if (diffInMinutes < 1) {
     return t ? t("helper.time.justNow") : "Just now";
   } else if (diffInHours < 1) {
-    return t ? t(diffInMinutes > 1 ? "helper.time.minutesAgo_plural" : "helper.time.minutesAgo", { count: diffInMinutes }) : `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+    return t
+      ? t(
+          diffInMinutes > 1
+            ? "helper.time.minutesAgo_plural"
+            : "helper.time.minutesAgo",
+          { count: diffInMinutes },
+        )
+      : `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
   } else if (diffInHours < 24) {
-    return t ? t(diffInHours > 1 ? "helper.time.hoursAgo_plural" : "helper.time.hoursAgo", { count: diffInHours }) : `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    return t
+      ? t(
+          diffInHours > 1
+            ? "helper.time.hoursAgo_plural"
+            : "helper.time.hoursAgo",
+          { count: diffInHours },
+        )
+      : `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
   } else if (diffInDays === 1) {
     return t ? t("helper.time.dayAgo") : "1 day ago";
   } else {
-    return t ? t("helper.time.daysAgo", { count: diffInDays }) : `${diffInDays} days ago`;
+    return t
+      ? t("helper.time.daysAgo", { count: diffInDays })
+      : `${diffInDays} days ago`;
   }
 };
 
 // ==================== IMAGE PARSING UTILITIES ====================
 
 const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
-const DEFAULT_IMAGE_MALE = "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
-const DEFAULT_IMAGE_FEMALE = "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg";
+const DEFAULT_IMAGE_MALE =
+  "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
+const DEFAULT_IMAGE_FEMALE =
+  "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg";
 
 /**
  * Parse user images from API response
  * Handles the complex escaped JSON format from the API
  */
-export const parseUserImages = (imagesStr: string, gender: string = "unknown"): string[] => {
+export const parseUserImages = (
+  imagesStr: string,
+  gender: string = "unknown",
+): string[] => {
   if (!imagesStr || imagesStr.trim() === "") {
     return [getDefaultImage(gender)];
   }
@@ -969,7 +1054,6 @@ export const parseUserImages = (imagesStr: string, gender: string = "unknown"): 
 
     return [getDefaultImage(gender)];
   } catch (error) {
-
     return [getDefaultImage(gender)];
   }
 };
@@ -1004,7 +1088,6 @@ export const parseEventImage = (imageStr: string): string => {
     // Otherwise, construct URL with base path
     return `${IMAGE_BASE_URL}${imageStr}`;
   } catch (error) {
-
     return "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
   }
 };
@@ -1016,7 +1099,7 @@ export const parseEventImage = (imageStr: string): string => {
  */
 export const calculateDistance = (
   coord1: { lat: number; lng: number },
-  coord2: { lat: number; lng: number }
+  coord2: { lat: number; lng: number },
 ): string => {
   const R = 6371; // Earth's radius in kilometers
   const dLat = (coord2.lat - coord1.lat) * (Math.PI / 180);
@@ -1025,8 +1108,9 @@ export const calculateDistance = (
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(coord1.lat * (Math.PI / 180)) *
-    Math.cos(coord2.lat * (Math.PI / 180)) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      Math.cos(coord2.lat * (Math.PI / 180)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
@@ -1050,22 +1134,43 @@ export const getUserDisplayName = (name: string, age: number): string => {
 /**
  * Get user location string
  */
-export const getUserLocationString = (city: string, state: string, country: string, t?: (key: string, options?: any) => string): string => {
+export const getUserLocationString = (
+  city: string,
+  state: string,
+  country: string,
+  t?: (key: string, options?: any) => string,
+): string => {
   const parts = [city, state, country].filter(Boolean);
-  return parts.length > 0 ? parts.join(", ") : (t ? t("helper.location.notSpecified") : "Location not specified");
+  return parts.length > 0
+    ? parts.join(", ")
+    : t
+      ? t("helper.location.notSpecified")
+      : "Location not specified";
 };
 
 /**
  * Get user online status
  */
-export const getUserOnlineStatus = (status: string, t?: (key: string, options?: any) => string): string => {
-  return status === "1" ? (t ? t("helper.status.online") : "Online") : (t ? t("helper.status.offline") : "Offline");
+export const getUserOnlineStatus = (
+  status: string,
+  t?: (key: string, options?: any) => string,
+): string => {
+  return status === "1"
+    ? t
+      ? t("helper.status.online")
+      : "Online"
+    : t
+      ? t("helper.status.offline")
+      : "Offline";
 };
 
 /**
  * Format height for display
  */
-export const formatHeight = (heightStr: string, t?: (key: string, options?: any) => string): string => {
+export const formatHeight = (
+  heightStr: string,
+  t?: (key: string, options?: any) => string,
+): string => {
   if (!heightStr || heightStr === "0") return "";
 
   const height = parseFloat(heightStr);
@@ -1082,13 +1187,12 @@ export const formatMeetupDate = (dateString: string): string => {
   try {
     const date = new Date(dateString);
     const options: Intl.DateTimeFormatOptions = {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     };
-    return date.toLocaleDateString('en-US', options);
+    return date.toLocaleDateString("en-US", options);
   } catch (error) {
-
     return dateString;
   }
 };
@@ -1099,19 +1203,21 @@ export const formatMeetupDate = (dateString: string): string => {
 export const formatCardDate = (dateString: string, locale?: string): string => {
   try {
     const date = new Date(dateString);
-    const currentLocale = locale || 'en-US';
+    const currentLocale = locale || "en-US";
 
     // Use German locale for date formatting
-    const localeToUse = currentLocale.includes('de') || currentLocale === 'de' ? 'de-DE' : 'en-US';
+    const localeToUse =
+      currentLocale.includes("de") || currentLocale === "de"
+        ? "de-DE"
+        : "en-US";
 
     const options: Intl.DateTimeFormatOptions = {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     };
     return date.toLocaleDateString(localeToUse, options);
   } catch (error) {
-
     return dateString;
   }
 };
@@ -1128,7 +1234,6 @@ export const isDateInPast = (dateString: string): boolean => {
 
     return date < today;
   } catch (error) {
-
     return false;
   }
 };
@@ -1143,7 +1248,6 @@ export const sortRequestsByDate = (requests: any[]): any[] => {
       const dateB = new Date(b.date);
       return dateB.getTime() - dateA.getTime(); // Newest first
     } catch (error) {
-
       return 0;
     }
   });
@@ -1155,7 +1259,7 @@ export const sortRequestsByDate = (requests: any[]): any[] => {
  * Keep pending requests for today and future
  */
 export const filterOutPastDates = (requests: any[]): any[] => {
-  return requests.filter(request => {
+  return requests.filter((request) => {
     if (!request.date) return false;
 
     // Keep accepted requests regardless of date

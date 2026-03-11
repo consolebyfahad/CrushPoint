@@ -47,10 +47,10 @@ export default function ZodiacSign({
   const handleZodiacSelect = (zodiacId: string) => {
     setSelectedZodiacs((prev) => {
       if (prev.includes(zodiacId)) {
-        // Remove zodiac if already selected
+        
         return prev.filter((z) => z !== zodiacId);
       } else {
-        // Add zodiac if not selected
+        
         return [...prev, zodiacId];
       }
     });
@@ -64,14 +64,13 @@ export default function ZodiacSign({
     onClose();
   };
 
-  // Check if zodiac is selected
   const isSelected = (zodiacId: string) => {
     return selectedZodiacs.includes(zodiacId);
   };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
@@ -82,7 +81,7 @@ export default function ZodiacSign({
         </TouchableOpacity>
       </View>
 
-      {/* Zodiac List */}
+      {}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {zodiacSigns.map((zodiac, index) => (
           <TouchableOpacity
@@ -115,7 +114,7 @@ export default function ZodiacSign({
         ))}
       </ScrollView>
 
-      {/* Bottom Save Button */}
+      {}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={[
@@ -200,14 +199,14 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: "#F3E8FF", // Light purple background
+    backgroundColor: "#F3E8FF",  
     alignItems: "center",
     justifyContent: "center",
     marginRight: 16,
   },
   zodiacIcon: {
     fontSize: 16,
-    color: "#8B5CF6", // Purple color for the zodiac symbols
+    color: "#8B5CF6",  
   },
   zodiacText: {
     fontSize: 16,

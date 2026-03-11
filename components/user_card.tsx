@@ -33,7 +33,6 @@ export default function UserCard({
   const { userData: currentUser } = useAppContext();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
-  // Map emoji actions to SVG icons
   const getMatchEmoji = (emoji: string) => {
     const emojiMap: { [key: string]: any } = {
       like: svgIcon.Like,
@@ -46,7 +45,6 @@ export default function UserCard({
     return emojiMap[emoji] || svgIcon.Hi;
   };
 
-  // Get emoji color based on type
   const getEmojiColor = (emoji: string) => {
     const colorMap: { [key: string]: string } = {
       like: "#3B82F6",
@@ -56,39 +54,33 @@ export default function UserCard({
       friend: "#F97316",
     };
 
-    return colorMap[emoji] || "#F97316"; // Default color
+    return colorMap[emoji] || "#F97316";  
   };
 
-  // Helper function to get user coordinates from multiple possible sources
   const getUserCoordinates = (user: any) => {
-    // Try actualLocation first (preferred)
+    
     if (user?.actualLocation?.lat && user?.actualLocation?.lng) {
       const lat = parseFloat(user.actualLocation.lat.toString());
       const lng = parseFloat(user.actualLocation.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };
       }
     }
 
-    // Fallback to loc object
     if (user?.loc?.lat && user?.loc?.lng) {
       const lat = parseFloat(user.loc.lat.toString());
       const lng = parseFloat(user.loc.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };
       }
     }
 
-    // Fallback to direct lat/lng properties (for users without loc object)
     if (user?.lat && user?.lng) {
       const lat = parseFloat(user.lat.toString());
       const lng = parseFloat(user.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };
       }
@@ -97,10 +89,8 @@ export default function UserCard({
     return null;
   };
 
-  // Get target user coordinates
   const targetUserCoords = getUserCoordinates(user);
 
-  // Calculate distance between current user and target user
   const distance = targetUserCoords
     ? calculateDistance(
         {
@@ -111,7 +101,6 @@ export default function UserCard({
       )
     : "N/A";
 
-  // Get profile image source - handle both URI and local assets
   const getProfileImageSource = () => {
     if (user?.images && user.images.length > 0 && user.images[0]) {
       return { uri: user.images[0] };
@@ -121,7 +110,6 @@ export default function UserCard({
 
   const profileImageSource = getProfileImageSource();
 
-  // Handle view profile press
   const handleViewProfile = () => {
     try {
       onViewProfile(user);
@@ -137,7 +125,7 @@ export default function UserCard({
 
   const handleShowOnMap = async () => {
     try {
-      // Validate location before proceeding
+      
       if (!hasValidLocation()) {
         Alert.alert(
           t("common.locationUnavailable"),
@@ -167,14 +155,13 @@ export default function UserCard({
     return interests.slice(0, 3);
   };
 
-  // Limit looking for display to first 2 items
   const limitLookingFor = (lookingFor: string[] = []) => {
     return lookingFor.slice(0, 2);
   };
 
   return (
     <View style={styles.container}>
-      {/* Profile Image */}
+      {}
       <TouchableOpacity
         style={styles.imageContainer}
         onPress={handleViewProfile}
@@ -187,7 +174,7 @@ export default function UserCard({
           </View>
         )}
 
-        {/* Show match emoji if user has match status, otherwise show online status */}
+        {}
         {(user?.match_status === "match_sent" ||
           user?.match_status === "matched") &&
           user?.match_emoji && (
@@ -233,14 +220,14 @@ export default function UserCard({
           </View>
         </View>
 
-        {/* Looking For Section */}
+        {}
         {user?.lookingFor && user.lookingFor.length > 0 && (
           <View style={styles.lookingForSection}>
             <Text style={styles.sectionLabel}>{t("common.lookingFor")}</Text>
             <View style={styles.lookingForContainer}>
               {limitLookingFor(user.lookingFor).map(
                 (lookingForId: string, index: number) => {
-                  // Format dynamically using current language
+                  
                   const formatted = formatLookingFor(lookingForId, t);
                   return (
                     <View
@@ -263,7 +250,7 @@ export default function UserCard({
           </View>
         )}
 
-        {/* Interests Section */}
+        {}
         {user?.interests && user.interests.length > 0 && (
           <View style={styles.interestsSection}>
             <Text style={styles.sectionLabel}>{t("common.interests")}</Text>
@@ -289,7 +276,7 @@ export default function UserCard({
           </View>
         )}
 
-        {/* Show message if no interests/looking for */}
+        {}
         {(!user?.interests || user.interests.length === 0) &&
           (!user?.lookingFor || user.lookingFor.length === 0) && (
             <View style={styles.noInfoContainer}>
@@ -299,7 +286,7 @@ export default function UserCard({
             </View>
           )}
 
-        {/* Action Buttons */}
+        {}
         <View style={styles.actionButtons}>
           <CustomButton
             title={t("common.viewProfile")}
@@ -312,11 +299,11 @@ export default function UserCard({
             style={[
               styles.mapButton,
               isLoadingLocation && styles.mapButtonLoading,
-              !hasValidLocation() && styles.mapButtonDisabled, // NEW: Style for disabled state
+              !hasValidLocation() && styles.mapButtonDisabled,  
             ]}
             onPress={handleShowOnMap}
             activeOpacity={0.8}
-            disabled={isLoadingLocation || !hasValidLocation()} // NEW: Disable if no valid location
+            disabled={isLoadingLocation || !hasValidLocation()}  
           >
             {isLoadingLocation ? (
               <ActivityIndicator size="small" color={color.primary} />
@@ -324,7 +311,7 @@ export default function UserCard({
               <SimpleLineIcons
                 name="location-pin"
                 size={20}
-                color={hasValidLocation() ? color.primary : color.gray55} // NEW: Different color for disabled state
+                color={hasValidLocation() ? color.primary : color.gray55}  
               />
             )}
           </TouchableOpacity>
@@ -479,7 +466,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   lookingForTag: {
-    backgroundColor: color.primary + "15", // 15% opacity
+    backgroundColor: color.primary + "15",  
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 99,
@@ -573,7 +560,7 @@ const styles = StyleSheet.create({
   mapButtonLoading: {
     borderColor: color.gray87,
   },
-  // NEW: Style for disabled map button
+  
   mapButtonDisabled: {
     borderColor: color.gray87,
     backgroundColor: color.gray95,

@@ -27,11 +27,11 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
       onPress={handlePress}
       activeOpacity={0.8}
     >
-      {/* Event Image */}
+      {}
       <View style={styles.imageContainer}>
         <Image source={{ uri: event.image }} style={styles.eventImage} />
 
-        {/* Date Badge */}
+        {}
         <View style={styles.dateBadge}>
           <Ionicons
             name="calendar-outline"
@@ -42,14 +42,14 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           <Text style={styles.dateText}>{event.date}</Text>
         </View>
 
-        {/* Category Badge */}
+        {}
         {event.category && (
           <View style={styles.categoryBadge}>
             <Text style={styles.categoryText}>{event.category}</Text>
           </View>
         )}
 
-        {/* Going Badge - Only show if user is attending */}
+        {}
         {event.isAttending && (
           <View style={styles.goingBadge}>
             <Text style={styles.goingText}>{t("events.going")}</Text>
@@ -57,7 +57,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
         )}
       </View>
 
-      {/* Event Info */}
+      {}
       <View style={styles.eventInfo}>
         <Text style={styles.eventTitle} numberOfLines={2}>
           {event.title}
@@ -70,7 +70,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           </Text>
         </View>
 
-        {/* Time Info */}
+        {}
         <View style={styles.timeRow}>
           <Ionicons name="time-outline" size={14} color={color.gray69} />
           <Text style={styles.timeText}>
@@ -83,7 +83,7 @@ export default function EventCard({ event, onPress, onToggleAttending }: any) {
           {event.description}
         </Text>
 
-        {/* Attendees Info */}
+        {}
         <TouchableOpacity
           style={styles.attendeesRow}
           onPress={handleToggleAttending}

@@ -43,7 +43,6 @@ export default function ContactSupport() {
     t("contactSupport.subjects.other"),
   ];
 
-  // Pre-populate user data from context
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -81,7 +80,6 @@ export default function ContactSupport() {
       return false;
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email.trim())) {
       showToast(t("contactSupport.validation.validEmail"), "error");
@@ -124,20 +122,18 @@ export default function ContactSupport() {
       submissionData.append("message", formData.message.trim());
       const response = await apiCall(submissionData);
       if (response.result) {
-        // Show success confirmation message
+        
         showToast(t("contactSupport.success.messageSent"), "success");
 
-        // Reset form (keep name and email)
         setFormData((prev) => ({
           ...prev,
           subject: "",
           message: "",
         }));
 
-        // Navigate back after showing success message
         setTimeout(() => {
           router.back();
-        }, 2000); // Increased to 2000ms to give user time to see the success message
+        }, 2000);  
       } else {
         showToast(
           response.message || t("contactSupport.validation.sendFailed"),
@@ -181,7 +177,7 @@ export default function ContactSupport() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <Header title={t("contactSupport.title")} divider />
 
       <KeyboardAvoidingView
@@ -195,7 +191,7 @@ export default function ContactSupport() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header Card */}
+          {}
           <View style={styles.headerCard}>
             <View style={styles.helpIcon}>
               <Ionicons name="help-circle-outline" size={32} color="#5FB3D4" />
@@ -206,7 +202,7 @@ export default function ContactSupport() {
             </Text>
           </View>
 
-          {/* Name Field */}
+          {}
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>
               {t("contactSupport.nameLabel")}
@@ -222,7 +218,7 @@ export default function ContactSupport() {
             />
           </View>
 
-          {/* Email Field */}
+          {}
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>
               {t("contactSupport.emailLabel")}
@@ -240,7 +236,7 @@ export default function ContactSupport() {
             />
           </View>
 
-          {/* Subject Field */}
+          {}
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>
               {t("contactSupport.subjectLabel")}
@@ -250,7 +246,7 @@ export default function ContactSupport() {
             </View>
           </View>
 
-          {/* Message Field */}
+          {}
           <View style={styles.fieldContainer}>
             <Text style={styles.fieldLabel}>
               {t("contactSupport.messageLabel")}
@@ -277,7 +273,7 @@ export default function ContactSupport() {
           </View>
         </ScrollView>
 
-        {/* Send Button */}
+        {}
         <View style={styles.sendContainer}>
           <CustomButton
             title={

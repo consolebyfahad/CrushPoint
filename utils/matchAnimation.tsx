@@ -14,19 +14,18 @@ export const FloatingBubbleAnimation = ({
 
   useEffect(() => {
     if (visible) {
-      // Reset animations
+      
       scaleAnim.setValue(0);
       opacityAnim.setValue(0);
 
-      // Quick flash animation - 100ms total
       Animated.sequence([
-        // Quick scale up
+        
         Animated.timing(scaleAnim, {
           toValue: 5,
           duration: 200,
           useNativeDriver: true,
         }),
-        // Quick scale down and fade out
+        
         Animated.parallel([
           Animated.timing(scaleAnim, {
             toValue: 1,
@@ -43,7 +42,6 @@ export const FloatingBubbleAnimation = ({
         onComplete?.();
       });
 
-      // Fade in immediately
       Animated.timing(opacityAnim, {
         toValue: 5,
         duration: 50,

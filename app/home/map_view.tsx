@@ -61,7 +61,6 @@ export default function Map({
   const [locationGaveUp, setLocationGaveUp] = useState(false);
   const mapRef = useRef<MapView>(null);
 
-  // Get user's current location (prefer currentLocation, fallback to userData for Android/slow GPS)
   useEffect(() => {
     const getLocationForMap = () => {
       if (currentLocation) {
@@ -93,7 +92,6 @@ export default function Map({
     }
   }, [currentLocation, userData?.lat, userData?.lng]);
 
-  // Android: if location never arrives, show error after a delay so user can retry
   const hasLocation =
     currentLocation || (userData?.lat != null && userData?.lng != null);
   useEffect(() => {
@@ -102,27 +100,23 @@ export default function Map({
     return () => clearTimeout(timer);
   }, [hasLocation]);
 
-  // ENHANCED: Better animation to selected user location
   useEffect(() => {
     if (selectedUser && mapRef.current) {
       const userLocation = getUserCoordinates(selectedUser);
 
       if (userLocation) {
-        // Create region for selected user with appropriate zoom level
         const selectedUserRegion = {
           latitude: userLocation.latitude,
           longitude: userLocation.longitude,
-          latitudeDelta: 0.003, // UPDATED: Closer zoom for better focus
+          latitudeDelta: 0.003,
           longitudeDelta: 0.003,
         };
 
-        // Animate to the selected user's location with longer duration for smoother animation
         mapRef.current.animateToRegion(selectedUserRegion, 1500);
       }
     }
   }, [selectedUser]);
 
-  // Handle showing current user location (use displayLocation so it works with userData fallback)
   const handleShowMyLocation = () => {
     const location =
       currentLocation ||
@@ -144,36 +138,29 @@ export default function Map({
     }
   };
 
-  // ENHANCED: Helper function to get coordinates from user object with better error handling
   const getUserCoordinates = (user: any) => {
-    // Try actualLocation first (preferred)
     if (user?.actualLocation?.lat && user?.actualLocation?.lng) {
       const lat = parseFloat(user.actualLocation.lat.toString());
       const lng = parseFloat(user.actualLocation.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { latitude: lat, longitude: lng };
       }
     }
 
-    // Fallback to loc object
     if (user?.loc?.lat && user?.loc?.lng) {
       const lat = parseFloat(user.loc.lat.toString());
       const lng = parseFloat(user.loc.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { latitude: lat, longitude: lng };
       }
     }
 
-    // Fallback to direct lat/lng properties (for users without loc object)
     if (user?.lat && user?.lng) {
       const lat = parseFloat(user.lat.toString());
       const lng = parseFloat(user.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { latitude: lat, longitude: lng };
       }
@@ -182,14 +169,12 @@ export default function Map({
     return null;
   };
 
-  // Filter users that have valid coordinates and are not in private spots
   const usersWithLocation = users.filter((user) => {
     const coords = getUserCoordinates(user);
     if (!coords || coords.latitude === 0 || coords.longitude === 0) {
       return false;
     }
 
-    // Check if user has private spots and is currently in one
     if (
       user.private_spots &&
       Array.isArray(user.private_spots) &&
@@ -200,21 +185,19 @@ export default function Map({
         lng: coords.longitude,
       };
 
-      // Check if user is in any of their private spots
       const isInPrivateSpot = isUserInPrivateSpot(
         userLocation,
         user.private_spots,
       );
 
       if (isInPrivateSpot) {
-        return false; // Hide user from map
+        return false;
       }
     }
 
     return true;
   });
 
-  // Get the location to display (currentLocation or fallback to userData for Android/slow location)
   const displayLocation =
     currentLocation ||
     (userData?.lat && userData?.lng
@@ -231,7 +214,6 @@ export default function Map({
     refetch?.();
   };
 
-  // Loading state (wait for location or userData; on Android stop after timeout)
   const stillLoading =
     !displayLocation && (locationLoading || !mapRegion) && !locationGaveUp;
   if (stillLoading) {
@@ -243,7 +225,6 @@ export default function Map({
     );
   }
 
-  // Error state when no location (and we're not loading, or Android gave up)
   if (!displayLocation) {
     return (
       <View style={styles.errorContainer}>
@@ -274,7 +255,7 @@ export default function Map({
         style={styles.map}
         region={mapRegion ?? undefined}
         showsUserLocation={false}
-        showsMyLocationButton={false} // UPDATED: We'll use custom button
+        showsMyLocationButton={false}
         showsCompass={false}
         scrollEnabled={true}
         zoomEnabled={true}
@@ -285,31 +266,31 @@ export default function Map({
         loadingIndicatorColor={color.primary}
         loadingBackgroundColor={color.white}
         onPress={onUserDeselect}
-        // UPDATED: Better map styling
         mapType="standard"
         showsTraffic={false}
         showsBuildings={true}
         showsIndoors={false}
         showsScale={false}
       >
-        {/* Current user location marker (use displayLocation so map works when only userData has coords) */}
+        {}
         <Marker
           coordinate={displayLocation}
           anchor={{ x: 0.5, y: 0.5 }}
           identifier="current-user"
           title="You are here"
           description="Your current location"
+          tracksViewChanges={false}
         >
           <MarkerIcon />
         </Marker>
 
-        {/* Other users markers */}
+        {}
         {usersWithLocation.map((mapUser) => {
           const userCoords = getUserCoordinates(mapUser);
           if (!userCoords) return null;
 
           const isSelected = selectedUser?.id === mapUser.id;
-          // Android: tracksViewChanges must be true for custom marker views (images) to render
+
           const tracksChanges = Platform.OS === "android";
 
           return (
@@ -351,7 +332,7 @@ export default function Map({
                     resizeMode="cover"
                   />
                 </View>
-                {/* ENHANCED: Better selection indicator */}
+                {}
                 {isSelected && (
                   <>
                     <View style={styles.selectionRing} />
@@ -364,7 +345,7 @@ export default function Map({
         })}
       </MapView>
 
-      {/* NEW: Custom My Location Button */}
+      {}
       <TouchableOpacity
         style={styles.myLocationButton}
         onPress={handleShowMyLocation}
@@ -373,54 +354,17 @@ export default function Map({
         <MaterialIcons name="my-location" size={24} color={color.primary} />
       </TouchableOpacity>
 
-      {/* Users loading indicator */}
-      {/* {loading && (
-        <View style={styles.usersLoadingContainer}>
-          <ActivityIndicator size="small" color={color.primary} />
-          <Text style={styles.usersLoadingText}>Loading users...</Text>
-        </View>
-      )} */}
+      {}
+      {}
 
-      {/* Error indicator for users data */}
-      {/* {error && !loading && (
-        <View style={styles.errorBanner}>
-          <Text style={styles.errorBannerText}>
-            ⚠️ Unable to load users nearby
-          </Text>
-        </View>
-      )} */}
+      {}
+      {}
 
-      {/* No users indicator */}
-      {/* {!loading && !error && usersWithLocation.length === 0 && (
-        <View style={styles.noUsersContainer}>
-          <Text style={styles.noUsersText}>No users found in your area</Text>
-        </View>
-      )} */}
+      {}
+      {}
 
-      {/* NEW: Selected user info card */}
-      {/* {selectedUser && (
-        <View style={styles.selectedUserCard}>
-          <View style={styles.selectedUserInfo}>
-            <Image
-              source={{
-                uri:
-                  selectedUser.images?.[0] ||
-                  "https://via.placeholder.com/40x40.png?text=U",
-              }}
-              style={styles.selectedUserAvatar}
-            />
-            <View style={styles.selectedUserDetails}>
-              <Text style={styles.selectedUserName}>
-                {selectedUser.name || "Unknown"}, {selectedUser.age || "N/A"}
-              </Text>
-              <Text style={styles.selectedUserNote}>Selected on map</Text>
-            </View>
-          </View>
-          <TouchableOpacity onPress={onUserDeselect} style={styles.closeButton}>
-            <MaterialIcons name="close" size={20} color={color.gray55} />
-          </TouchableOpacity>
-        </View>
-      )} */}
+      {}
+      {}
     </View>
   );
 }
@@ -432,7 +376,7 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  // Loading states
+
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -446,7 +390,7 @@ const styles = StyleSheet.create({
     color: color.gray55,
     textAlign: "center",
   },
-  // Error states
+
   errorContainer: {
     flex: 1,
     justifyContent: "center",
@@ -488,7 +432,7 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     color: color.white,
   },
-  // User markers
+
   userMarker: {
     width: 60,
     height: 60,
@@ -509,7 +453,7 @@ const styles = StyleSheet.create({
   selectedUserMarker: {
     borderColor: color.primary,
     borderWidth: 3,
-    transform: [{ scale: 1.2 }], // UPDATED: Scale up selected marker
+    transform: [{ scale: 1.2 }],
   },
   userMarkerImageWrapper: {
     width: 60,
@@ -521,10 +465,8 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
   },
-  selectedUserImage: {
-    // Additional styling for selected user image if needed
-  },
-  // ENHANCED: Better selection indicators
+  selectedUserImage: {},
+
   selectionRing: {
     position: "absolute",
     top: -6,
@@ -547,10 +489,10 @@ const styles = StyleSheet.create({
     borderColor: color.primary,
     opacity: 0.4,
   },
-  // NEW: My Location Button
+
   myLocationButton: {
     position: "absolute",
-    bottom: 140, // UPDATED: Position above potential selected user card
+    bottom: 140,
     right: 20,
     width: 50,
     height: 50,
@@ -569,10 +511,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.gray87,
   },
-  // Users loading overlay
+
   usersLoadingContainer: {
     position: "absolute",
-    top: 80, // UPDATED: Position below header
+    top: 80,
     left: 20,
     right: 20,
     backgroundColor: color.white,
@@ -596,7 +538,7 @@ const styles = StyleSheet.create({
     fontFamily: font.regular,
     color: color.gray55,
   },
-  // Error banner
+
   errorBanner: {
     position: "absolute",
     top: 80,
@@ -615,7 +557,7 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
     textAlign: "center",
   },
-  // No users indicator
+
   noUsersContainer: {
     position: "absolute",
     top: 80,
@@ -640,7 +582,7 @@ const styles = StyleSheet.create({
     fontFamily: font.regular,
     textAlign: "center",
   },
-  // NEW: Selected user card
+
   selectedUserCard: {
     position: "absolute",
     bottom: 30,
@@ -661,7 +603,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
     borderWidth: 1,
-    borderColor: color.primary + "20", // 20% opacity
+    borderColor: color.primary + "20",
   },
   selectedUserInfo: {
     flexDirection: "row",

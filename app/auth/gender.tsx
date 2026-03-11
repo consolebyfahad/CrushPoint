@@ -22,16 +22,14 @@ export default function Gender() {
 
   const [selectedGender, setSelectedGender] = useState("male");
 
-  // Animated values for both options
   const maleScaleAnim = useRef(new Animated.Value(1)).current;
   const femaleScaleAnim = useRef(new Animated.Value(1)).current;
   const maleOpacityAnim = useRef(new Animated.Value(1)).current;
   const femaleOpacityAnim = useRef(new Animated.Value(0.7)).current;
 
-  // Animate selection changes
   useEffect(() => {
     if (selectedGender === "male") {
-      // Animate male to selected state
+      
       Animated.parallel([
         Animated.spring(maleScaleAnim, {
           toValue: 1.02,
@@ -44,7 +42,7 @@ export default function Gender() {
           duration: 200,
           useNativeDriver: true,
         }),
-        // Animate female to unselected state
+        
         Animated.spring(femaleScaleAnim, {
           toValue: 1,
           useNativeDriver: true,
@@ -58,7 +56,7 @@ export default function Gender() {
         }),
       ]).start();
     } else {
-      // Animate female to selected state
+      
       Animated.parallel([
         Animated.spring(femaleScaleAnim, {
           toValue: 1.02,
@@ -71,7 +69,7 @@ export default function Gender() {
           duration: 200,
           useNativeDriver: true,
         }),
-        // Animate male to unselected state
+        
         Animated.spring(maleScaleAnim, {
           toValue: 1,
           useNativeDriver: true,
@@ -88,7 +86,7 @@ export default function Gender() {
   }, [selectedGender]);
 
   const handleGenderSelect = (gender: any) => {
-    // Add a quick press animation
+    
     const scaleAnim = gender === "male" ? maleScaleAnim : femaleScaleAnim;
 
     Animated.sequence([

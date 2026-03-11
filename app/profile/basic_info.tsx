@@ -27,8 +27,6 @@ export default function BasicInfo() {
   const { showToast } = useToast();
   const params = useLocalSearchParams();
 
-  // Initialize state properly from params
-  // Normalize religion value to lowercase for consistency
   const normalizeReligionValue = (religion: string): string => {
     if (!religion) return "";
     return religion.toLowerCase().trim();
@@ -43,23 +41,20 @@ export default function BasicInfo() {
     about: userData.about || "",
   });
 
-  // Changed to array for multi-select
   const [relationshipGoals, setRelationshipGoals] = useState<string[]>(
     userData.originalLookingForIds || []
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  // Options for dropdowns
   const interestedInOptions = [
     { label: t("basicInfo.interestedIn.men"), value: "male" },
     { label: t("basicInfo.interestedIn.women"), value: "female" },
     { label: t("basicInfo.interestedIn.both"), value: "other" },
   ];
 
-  // Relationship goals options - use base options from helper and translate labels
   const relationshipGoalOptions = useMemo(() => {
     return baseLookingForOptions.map((option) => {
-      // Get translated name based on translation key
+      
       const translatedName = t(option.translationKey);
       return {
         label: `${option.emoji} ${translatedName}`,
@@ -68,12 +63,11 @@ export default function BasicInfo() {
     });
   }, [t]);
 
-  // Nationality options - use base options from helper and translate labels
   const nationalityOptions = useMemo(() => {
     return baseNationalityOptions.map((option) => {
-      // Extract flag from label (e.g., "🇺🇸 American" -> "🇺🇸")
+      
       const flag = option.label.split(" ")[0];
-      // Get translated name based on value
+      
       const translationKey = `nationalities.${option.value}`;
       const translatedName = t(translationKey);
       return {
@@ -83,12 +77,11 @@ export default function BasicInfo() {
     });
   }, [t]);
 
-  // Religion options - use base options from helper and translate labels
   const religionOptions = useMemo(() => {
     return baseReligionOptions.map((option) => {
-      // Extract emoji from label (e.g., "✝️ Christianity" -> "✝️")
+      
       const emoji = option.label.split(" ")[0];
-      // Get translated name based on value
+      
       const translationKey = `religions.${option.value}`;
       const translatedName = t(translationKey);
       return {
@@ -98,12 +91,11 @@ export default function BasicInfo() {
     });
   }, [t]);
 
-  // Zodiac options - use base options from helper and translate labels
   const zodiacOptions = useMemo(() => {
     return baseZodiacOptions.map((option) => {
-      // Extract symbol from label (e.g., "♈ Aries" -> "♈")
+      
       const symbol = option.label.split(" ")[0];
-      // Get translated name based on value
+      
       const translationKey = `zodiac.${option.value}`;
       const translatedName = t(translationKey);
       return {
@@ -119,7 +111,6 @@ export default function BasicInfo() {
       return;
     }
 
-    // Validation: require at least one relationship goal
     if (relationshipGoals.length === 0) {
       Alert.alert(
         t("common.error"),
@@ -135,13 +126,11 @@ export default function BasicInfo() {
       formData.append("id", user.user_id);
       formData.append("table_name", "users");
 
-      // Append all basic info fields
       formData.append("gender_interest", basicInfo.interestedIn);
       formData.append("looking_for", JSON.stringify(relationshipGoals));
       formData.append("height", basicInfo.height);
       formData.append("about", basicInfo.about);
 
-      // Handle nationality properly - ensure it's a clean array
       const cleanNationality = Array.isArray(basicInfo.nationality)
         ? basicInfo.nationality.filter((n) => n && n !== "Not Specified")
         : [];
@@ -185,24 +174,23 @@ export default function BasicInfo() {
     }));
   };
 
-  // Function to handle relationship goal selection
   const toggleRelationshipGoal = (value: string) => {
     setRelationshipGoals((prev: string[]) => {
-      // Check if "prefer-not" is being selected
+      
       if (value === "prefer-not") {
-        // If "prefer not to say" is selected, only keep that option
+        
         return ["prefer-not"];
       } else {
-        // If any other option is selected, remove "prefer not to say" if it exists
+        
         const filteredPrev = prev.filter(
           (goal: string) => goal !== "prefer-not"
         );
 
         if (filteredPrev.includes(value)) {
-          // Remove if already selected
+          
           return filteredPrev.filter((goal: string) => goal !== value);
         } else {
-          // Add if not selected
+          
           return [...filteredPrev, value];
         }
       }
@@ -244,12 +232,12 @@ export default function BasicInfo() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <Header title={t("profile.basicInfo")} divider />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
 
-        {/* about */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.about")}</Text>
           <TextInput
@@ -265,7 +253,7 @@ export default function BasicInfo() {
             {basicInfo?.about.length}/100 
           </Text>
         </View> 
-        {/* Interested in */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.interestedIn")}</Text>
           <Dropdown
@@ -291,7 +279,7 @@ export default function BasicInfo() {
           />
         </View>
 
-        {/* Relationship Goals - Custom Multi Select */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>
             {t("profile.relationshipGoals")}
@@ -311,7 +299,7 @@ export default function BasicInfo() {
           </View>
         </View>
 
-        {/* Height */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.height")}</Text>
           <View style={styles.heightInputContainer}>
@@ -326,7 +314,7 @@ export default function BasicInfo() {
           </View>
         </View>
 
-        {/* Nationality - Multi Select */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.nationality")}</Text>
           <Text style={styles.fieldSubLabel}>
@@ -335,7 +323,7 @@ export default function BasicInfo() {
           <MultiSelect
             style={[
               styles.dropdown,
-              // basicInfo.nationality.length === 0 && styles.errorBorder,
+              
             ]}
             placeholderStyle={styles.placeholderStyle}
             iconStyle={styles.iconStyle}
@@ -346,7 +334,7 @@ export default function BasicInfo() {
             placeholder={t("profile.selectNationalities")}
             value={basicInfo.nationality}
             onChange={(items) => {
-              // Limit to 3 nationalities
+              
               const limitedItems = items.slice(0, 3);
               setBasicInfo((prev) => ({
                 ...prev,
@@ -374,13 +362,13 @@ export default function BasicInfo() {
           />
         </View>
 
-        {/* Religion */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.religion")}</Text>
           <Dropdown
             style={[
               styles.dropdown,
-              // !basicInfo.religion && styles.errorBorder
+              
             ]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
@@ -400,13 +388,13 @@ export default function BasicInfo() {
           />
         </View>
 
-        {/* Zodiac Sign */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.zodiacSign")}</Text>
           <Dropdown
             style={[
               styles.dropdown,
-              // !basicInfo.zodiacSign && styles.errorBorder,
+              
             ]}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
@@ -426,11 +414,11 @@ export default function BasicInfo() {
           />
         </View>
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Save Button */}
+      {}
       <View style={styles.saveContainer}>
         <CustomButton
           title={isLoading ? t("profile.saving") : t("profile.saveChanges")}
@@ -506,7 +494,7 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
   },
   selectedTextStyle: {
-    // backgroundColor: color.primary,
+    
     fontSize: 16,
     color: color.black,
     fontFamily: font.medium,
@@ -516,7 +504,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
-  // Multi-select dropdown styles
+  
   selectedItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -545,7 +533,7 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     color: color.primary,
   },
-  // Text input styles
+  
   textInput: {
     borderWidth: 1,
     borderColor: color.gray600,
@@ -564,7 +552,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
-  // Relationship goal styles
+  
   relationshipGoalItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -610,7 +598,7 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: color.white,
   },
-  // Height field styles
+  
   heightInputContainer: {
     flexDirection: "row",
     alignItems: "center",

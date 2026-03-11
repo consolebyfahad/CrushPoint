@@ -1,4 +1,4 @@
-// TabsHeader for Events
+
 import { color, font } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
@@ -20,7 +20,6 @@ export default function EventsTabsHeader({ title, events }: any) {
   );
 }
 
-// TabsHeader for Notifications
 export function NotificationsTabsHeader({ title, notifications, close }: any) {
   const { t } = useTranslation();
   const unreadCount = notifications.filter(
@@ -50,7 +49,6 @@ export function NotificationsTabsHeader({ title, notifications, close }: any) {
   );
 }
 
-// TabsHeader for Matches
 export function MatchesTabsHeader({
   title,
   matches,

@@ -149,36 +149,30 @@ export default function UserProfile() {
     return paramsParsedOnce;
   }, [fetchedProfile, profileUserId, paramsParsedOnce]);
 
-  // Helper function to get user coordinates from multiple possible sources (same as user_card.tsx)
   const getUserCoordinates = (user: any) => {
-    // Try actualLocation first (preferred)
+    
     if (user?.actualLocation?.lat && user?.actualLocation?.lng) {
       const lat = parseFloat(user.actualLocation.lat.toString());
       const lng = parseFloat(user.actualLocation.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };
       }
     }
 
-    // Fallback to loc object
     if (user?.loc?.lat && user?.loc?.lng) {
       const lat = parseFloat(user.loc.lat.toString());
       const lng = parseFloat(user.loc.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };
       }
     }
 
-    // Fallback to direct lat/lng properties (for users without loc object)
     if (user?.lat && user?.lng) {
       const lat = parseFloat(user.lat.toString());
       const lng = parseFloat(user.lng.toString());
 
-      // Validate coordinates
       if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         return { lat, lng };
       }
@@ -187,7 +181,6 @@ export default function UserProfile() {
     return null;
   };
 
-  // Helper function to get gender emoji
   const getGenderEmoji = (gender: string) => {
     const normalizedGender = gender?.toLowerCase().trim();
     if (normalizedGender === "male" || normalizedGender === "m") {
@@ -198,7 +191,6 @@ export default function UserProfile() {
     return "👤";
   };
 
-  // Get target user coordinates
   const targetUserCoords = getUserCoordinates(userData);
 
   const userInfo = useMemo(() => {
@@ -378,12 +370,10 @@ export default function UserProfile() {
     setShowProfileOptions(true);
   };
 
-  // Handle page change from PagerView
   const handlePageSelected = (event: any) => {
     setCurrentImageIndex(event.nativeEvent.position);
   };
 
-  // Navigate to previous image programmatically
   const handlePreviousImage = () => {
     const prevIndex =
       currentImageIndex === 0
@@ -392,7 +382,6 @@ export default function UserProfile() {
     pagerRef.current?.setPage(prevIndex);
   };
 
-  // Navigate to next image programmatically
   const handleNextImage = () => {
     const nextIndex =
       currentImageIndex === userInfo.images.length - 1
@@ -409,7 +398,6 @@ export default function UserProfile() {
     { emoji: svgIcon.Hi, action: "friend", color: "#F97316" },
   ];
 
-  // Map emoji actions to SVG icons
   const getMatchEmoji = (emoji: string) => {
     const emojiMap: { [key: string]: any } = {
       like: svgIcon.Like,
@@ -422,7 +410,6 @@ export default function UserProfile() {
     return emojiMap[emoji] || svgIcon.Hi;
   };
 
-  // Get emoji color based on type
   const getEmojiColor = (emoji: string) => {
     const colorMap: { [key: string]: string } = {
       like: "#3B82F6",
@@ -432,7 +419,7 @@ export default function UserProfile() {
       friend: "#F97316",
     };
 
-    return colorMap[emoji] || "#F97316"; // Default color
+    return colorMap[emoji] || "#F97316";  
   };
 
   const handleEmojiAction = async (action: any) => {
@@ -450,11 +437,10 @@ export default function UserProfile() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        // Update local state immediately
+        
         setMatchStatus("match_sent");
         setMatchEmoji(action);
 
-        // Find the corresponding emoji and color for animation
         const emojiData = actionEmojis.find((item) => item.action === action);
 
         setAnimationProps({
@@ -464,7 +450,7 @@ export default function UserProfile() {
         setShowAnimation(true);
       }
     } catch (error) {
-      // Animation error handled silently
+      
     }
   };
 
@@ -495,7 +481,7 @@ export default function UserProfile() {
   };
 
   const handleConfirmBlock = async () => {
-    // Handle block logic here
+    
     try {
       const formData = new FormData();
       formData.append("type", "add_data");
@@ -505,7 +491,7 @@ export default function UserProfile() {
       const response = await apiCall(formData);
       if (response.result) {
         setShowBlockConfirmation(false);
-        // router.back();
+        
       }
     } catch (error) {}
   };
@@ -537,17 +523,14 @@ export default function UserProfile() {
     setShowProfileOptions(true);
   };
 
-  // Location validation function (same as user card)
   const hasValidLocation = () => {
     return targetUserCoords !== null;
   };
 
-  // Handle show user location on map (same logic as user card)
   const handleShowOnMap = async () => {
     try {
       setIsLoadingLocation(true);
 
-      // Validate location before proceeding
       if (!hasValidLocation()) {
         Alert.alert(
           t("errors.locationUnavailable"),
@@ -558,10 +541,8 @@ export default function UserProfile() {
         return;
       }
 
-      // Simulate a brief loading state for better UX
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Prepare user data for map view (same structure as user_card)
       const userForMap = {
         id: userInfo.id,
         name: userInfo.name,
@@ -571,11 +552,9 @@ export default function UserProfile() {
         lng: userData.lng,
         image: userInfo.images?.[0] || userData.image,
         images: userInfo.images || userData.images,
-        ...userData, // Include all user data
+        ...userData,  
       };
 
-      // Navigate to home tab with map view and user data
-      // Use replace to avoid navigation stack issues and ensure clean state
       router.replace({
         pathname: "/(tabs)",
         params: {
@@ -588,7 +567,7 @@ export default function UserProfile() {
             lat: userData.lat,
             lng: userData.lng,
           }),
-          // Add timestamp to ensure params are processed
+          
           _timestamp: Date.now().toString(),
         },
       });
@@ -624,7 +603,7 @@ export default function UserProfile() {
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Image Slider */}
+        {}
         <View style={styles.imageContainer}>
           <PagerView
             ref={pagerRef}
@@ -639,9 +618,9 @@ export default function UserProfile() {
             ))}
           </PagerView>
 
-          {/* Navigation Overlay */}
+          {}
           <View style={styles.imageOverlay}>
-            {/* Back Button */}
+            {}
             <TouchableOpacity
               style={styles.backButton}
               onPress={handleBack}
@@ -650,7 +629,7 @@ export default function UserProfile() {
               <Ionicons name="arrow-back" size={20} color={color.white} />
             </TouchableOpacity>
 
-            {/* Image Indicators */}
+            {}
             {userInfo.images.length > 1 && (
               <View style={styles.imageIndicators}>
                 {userInfo.images.map((_: any, index: number) => (
@@ -665,7 +644,7 @@ export default function UserProfile() {
               </View>
             )}
 
-            {/* Options Button */}
+            {}
             <TouchableOpacity
               style={styles.optionsButton}
               onPress={handleOptions}
@@ -679,7 +658,7 @@ export default function UserProfile() {
             </TouchableOpacity>
           </View>
 
-          {/* Image Navigation Areas (Optional - for manual navigation) */}
+          {}
           {userInfo.images.length > 1 && (
             <>
               <TouchableOpacity
@@ -695,7 +674,7 @@ export default function UserProfile() {
             </>
           )}
 
-          {/* Action Emojis - Hide when user already has a match/reaction (show only one emoji UI) */}
+          {}
           {!(matchStatus === "match_sent" || matchStatus === "matched" || matchEmoji) && (
             <View style={styles.actionEmojis}>
               {actionEmojis.map((item, index) =>
@@ -704,7 +683,7 @@ export default function UserProfile() {
             </View>
           )}
 
-          {/* Show single match emoji badge when user has a reaction (like, super_like, etc.) */}
+          {}
           {(matchStatus === "match_sent" || matchStatus === "matched" || matchEmoji) &&
             matchEmoji && (
               <View style={styles.matchEmojiContainer}>
@@ -728,7 +707,7 @@ export default function UserProfile() {
               </View>
             )}
 
-          {/* Center Emoji Animation */}
+          {}
           {showAnimation && (
             <FloatingBubbleAnimation
               visible={showAnimation}
@@ -739,9 +718,9 @@ export default function UserProfile() {
           )}
         </View>
 
-        {/* Profile Info */}
+        {}
         <View style={styles.profileInfo}>
-          {/* Name, Age, Distance */}
+          {}
           <View style={styles.nameSection}>
             <View style={styles.nameRow}>
               <Text style={styles.userName}>
@@ -781,7 +760,7 @@ export default function UserProfile() {
             </View>
           </View>
 
-          {/* Looking For */}
+          {}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("profile.lookingFor")}</Text>
             <View style={styles.lookingForContainer}>
@@ -806,7 +785,7 @@ export default function UserProfile() {
             </View>
           </View>
 
-          {/* About/Bio Section */}
+          {}
           {userInfo.about && userInfo.about.trim() !== "" && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t("profile.about")}</Text>
@@ -815,7 +794,7 @@ export default function UserProfile() {
               </View>
             </View>
           )}
-          {/* Interests */}
+          {}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("profile.interests")}</Text>
             <View style={styles.interestsContainer}>
@@ -827,7 +806,7 @@ export default function UserProfile() {
             </View>
           </View>
 
-          {/* Languages */}
+          {}
           {userInfo.languages.length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t("profile.languages")}</Text>
@@ -841,11 +820,11 @@ export default function UserProfile() {
             </View>
           )}
 
-          {/* Other Information */}
+          {}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("profile.basicInfo")}</Text>
 
-            {/* Height - only show if specified */}
+            {}
             {userInfo.height && userInfo.height.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.height")}</Text>
@@ -855,15 +834,14 @@ export default function UserProfile() {
               </View>
             )}
 
-            {/* Nationality - only show if specified */}
+            {}
             {userInfo.nationality && userInfo.nationality.length > 0 && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.nationality")}</Text>
                 <View style={styles.nationalityContainer}>
                   {userInfo.nationality.map(
                     (nationality: string, index: number) => {
-                      // Check if already formatted (contains flag emoji - Unicode range for regional indicator symbols)
-                      // Flag emojis are made of two regional indicator symbols, so check for the pattern
+
                       const isAlreadyFormatted =
                         /[\u{1F1E6}-\u{1F1FF}]{2}/u.test(nationality);
                       return (
@@ -881,7 +859,7 @@ export default function UserProfile() {
               </View>
             )}
 
-            {/* Religion - only show if specified */}
+            {}
             {userInfo.religion && userInfo.religion.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.religion")}</Text>
@@ -891,7 +869,7 @@ export default function UserProfile() {
               </View>
             )}
 
-            {/* Zodiac - only show if specified */}
+            {}
             {userInfo.zodiac && userInfo.zodiac.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.zodiac")}</Text>
@@ -901,7 +879,7 @@ export default function UserProfile() {
               </View>
             )}
 
-            {/* Gender - only show if specified */}
+            {}
             {userInfo.gender && userInfo.gender.trim() !== "" && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{t("profile.gender")}</Text>
@@ -916,7 +894,7 @@ export default function UserProfile() {
         </View>
       </ScrollView>
 
-      {/* Profile Options Modal */}
+      {}
       <ProfileOptions
         visible={showProfileOptions}
         onClose={() => setShowProfileOptions(false)}
@@ -930,7 +908,7 @@ export default function UserProfile() {
         isMatch={false}
       />
 
-      {/* Block Confirmation Modal */}
+      {}
       <BlockConfirmation
         visible={showBlockConfirmation}
         onClose={() => setShowBlockConfirmation(false)}
@@ -939,7 +917,7 @@ export default function UserProfile() {
         userName={userInfo.name}
       />
 
-      {/* Report User Modal */}
+      {}
       <ReportUser
         visible={showReportUser}
         onClose={() => setShowReportUser(false)}
@@ -1081,7 +1059,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#666",
   },
-  // Profile Info Styles
+  
   profileInfo: {
     flex: 1,
     paddingHorizontal: 20,

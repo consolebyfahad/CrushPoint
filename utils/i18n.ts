@@ -13,7 +13,6 @@ const resources = {
   de: { translation: de },
 };
 
-// Initialize i18n with a simple configuration first
 i18n.use(initReactI18next).init({
   lng: Localization.getLocales()[0]?.languageCode?.startsWith("de")
     ? "de"
@@ -25,11 +24,10 @@ i18n.use(initReactI18next).init({
     escapeValue: false,
   },
   react: {
-    useSuspense: false, // This is important for React Native
+    useSuspense: false,  
   },
 });
 
-// Load saved language preference after initialization
 const loadSavedLanguage = async () => {
   try {
     const savedLanguage = await AsyncStorage.getItem(LANGUAGE_PREFERENCE);
@@ -41,10 +39,8 @@ const loadSavedLanguage = async () => {
   }
 };
 
-// Load saved language
 loadSavedLanguage();
 
-// Function to save language preference
 export const saveLanguagePreference = async (language: string) => {
   try {
     await AsyncStorage.setItem(LANGUAGE_PREFERENCE, language);

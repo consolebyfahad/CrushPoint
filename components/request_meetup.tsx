@@ -27,7 +27,6 @@ import {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Google Maps API Key (from app.json)
 const GOOGLE_MAPS_API_KEY = "AIzaSyBpRUeweq7eCIDHavnHsheE66bHJd5nGX8";
 
 interface PlacePrediction {
@@ -66,7 +65,6 @@ export default function RequestMeetup({
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Google Places Autocomplete states
   const [placeSuggestions, setPlaceSuggestions] = useState<PlacePrediction[]>(
     []
   );
@@ -90,7 +88,6 @@ export default function RequestMeetup({
     });
   };
 
-  // Fetch Google Places Autocomplete suggestions
   const fetchPlaceSuggestions = async (input: string) => {
     if (!input || input.trim().length < 3) {
       setPlaceSuggestions([]);
@@ -101,7 +98,7 @@ export default function RequestMeetup({
     setIsSearching(true);
 
     try {
-      // Method 1: Try direct Google Places API call
+      
       const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
         input
       )}&key=${GOOGLE_MAPS_API_KEY}`;
@@ -130,7 +127,6 @@ export default function RequestMeetup({
         setShowSuggestions(false);
       } else if (data.status === "REQUEST_DENIED") {
 
-        // Fallback: Use mock suggestions for testing
         const mockSuggestions = [
           {
             place_id: "mock_1",
@@ -157,36 +153,30 @@ export default function RequestMeetup({
     }
   };
 
-  // Handle location input change with debouncing
   const handleLocationChange = (text: string) => {
     setLocation(text);
 
-    // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    // If text is empty, hide suggestions
     if (!text || text.trim().length === 0) {
       setShowSuggestions(false);
       setPlaceSuggestions([]);
       return;
     }
 
-    // Set new timeout for API call (debounce)
     searchTimeoutRef.current = setTimeout(() => {
       fetchPlaceSuggestions(text);
-    }, 300); // Reduced to 300ms for faster response
+    }, 300);  
   };
 
-  // Clear location input
   const handleClearLocation = () => {
     setLocation("");
     setPlaceSuggestions([]);
     setShowSuggestions(false);
   };
 
-  // Handle place selection
   const handlePlaceSelect = (place: PlacePrediction) => {
     setLocation(place.description);
     setShowSuggestions(false);
@@ -194,7 +184,6 @@ export default function RequestMeetup({
     Keyboard.dismiss();
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
@@ -204,17 +193,17 @@ export default function RequestMeetup({
   }, []);
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    // On iOS spinner, don't close immediately - only update the date
+    
     if (Platform.OS === "ios") {
       if (selectedDate) {
         setSelectedDate(selectedDate);
       }
-      // Only close if user dismissed (event.type === "dismissed")
+      
       if (event.type === "dismissed") {
         setShowDatePicker(false);
       }
     } else {
-      // On Android, close immediately
+      
       setShowDatePicker(false);
       if (selectedDate) {
         setSelectedDate(selectedDate);
@@ -223,17 +212,17 @@ export default function RequestMeetup({
   };
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
-    // On iOS spinner, don't close immediately - only update the time
+    
     if (Platform.OS === "ios") {
       if (selectedTime) {
         setSelectedTime(selectedTime);
       }
-      // Only close if user dismissed (event.type === "dismissed")
+      
       if (event.type === "dismissed") {
         setShowTimePicker(false);
       }
     } else {
-      // On Android, close immediately
+      
       setShowTimePicker(false);
       if (selectedTime) {
         setSelectedTime(selectedTime);
@@ -268,7 +257,7 @@ export default function RequestMeetup({
       return;
     }
     const formattedDate = selectedDate.toISOString().split("T")[0];
-    // Format time as HH:MM:00 (24-hour format)
+    
     const hours = selectedTime.getHours().toString().padStart(2, "0");
     const minutes = selectedTime.getMinutes().toString().padStart(2, "0");
     const formattedTime = `${hours}:${minutes}:00`;
@@ -289,25 +278,7 @@ export default function RequestMeetup({
 
       if (response.result) {
         onClose();
-        // Alert.alert(
-        //   t("success"),
-        //   t("meetups.meetupRequestSent", { name: matchData.name }),
-        //   [
-        //     {
-        //       text: t("common.ok"),
-        //       onPress: () => {
-        //         onSubmit({
-        //           matchId: matchData.id,
-        //           date: formattedDate,
-        //           time: formattedTime,
-        //           location: location.trim(),
-        //           message: message.trim(),
-        //         });
-        //         onClose();
-        //       },
-        //     },
-        //   ]
-        // );
+
       } else {
         Alert.alert(
           t("common.error"),
@@ -339,7 +310,7 @@ export default function RequestMeetup({
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.modalContent}>
-          {/* Header */}
+          {}
           <View style={styles.header}>
             <Text style={styles.title}>{t("meetups.requestMeetup")}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -353,13 +324,13 @@ export default function RequestMeetup({
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.scrollContent}
             onScrollBeginDrag={() => {
-              // Close suggestions when user scrolls
+              
               if (showSuggestions) {
                 setShowSuggestions(false);
               }
             }}
           >
-            {/* User Info Card */}
+            {}
             <View style={styles.userCard}>
               <View style={styles.userInfo}>
                 {imageSource ? (
@@ -393,7 +364,7 @@ export default function RequestMeetup({
               </View>
             </View>
 
-            {/* Date Field */}
+            {}
             <View style={styles.section}>
               <Text style={styles.inputLabel}>
                 {t("meetups.date")} <Text style={styles.required}>*</Text>
@@ -413,7 +384,7 @@ export default function RequestMeetup({
               </TouchableOpacity>
             </View>
 
-            {/* Time Field */}
+            {}
             <View style={styles.section}>
               <Text style={styles.inputLabel}>
                 {t("meetups.time")} <Text style={styles.required}>*</Text>
@@ -429,7 +400,7 @@ export default function RequestMeetup({
               </TouchableOpacity>
             </View>
 
-            {/* Location Field */}
+            {}
             <View style={styles.section}>
               <Text style={styles.inputLabel}>
                 {t("meetups.location")} <Text style={styles.required}>*</Text>
@@ -477,7 +448,7 @@ export default function RequestMeetup({
                   )}
                 </View>
 
-                {/* Suggestions Dropdown */}
+                {}
                 {showSuggestions && placeSuggestions.length > 0 && (
                   <View style={styles.suggestionsContainer}>
                     <View style={styles.suggestionsHeader}>
@@ -530,7 +501,7 @@ export default function RequestMeetup({
               </View>
             </View>
 
-            {/* Message Field */}
+            {}
             <View style={styles.section}>
               <Text style={styles.inputLabel}>
                 {t("meetups.message")} ({t("common.optional")})
@@ -548,7 +519,7 @@ export default function RequestMeetup({
             </View>
           </ScrollView>
 
-          {/* Submit Button */}
+          {}
           <View style={styles.bottomButton}>
             <TouchableOpacity
               style={[
@@ -571,7 +542,7 @@ export default function RequestMeetup({
         </View>
       </TouchableWithoutFeedback>
 
-      {/* Date Picker - iOS Modal */}
+      {}
       {Platform.OS === "ios" && showDatePicker && (
         <Modal
           visible={showDatePicker}
@@ -608,7 +579,7 @@ export default function RequestMeetup({
         </Modal>
       )}
 
-      {/* Date Picker - Android */}
+      {}
       {Platform.OS === "android" && showDatePicker && (
         <DateTimePicker
           value={selectedDate}
@@ -619,7 +590,7 @@ export default function RequestMeetup({
         />
       )}
 
-      {/* Time Picker - iOS Modal */}
+      {}
       {Platform.OS === "ios" && showTimePicker && (
         <Modal
           visible={showTimePicker}
@@ -655,7 +626,7 @@ export default function RequestMeetup({
         </Modal>
       )}
 
-      {/* Time Picker - Android */}
+      {}
       {Platform.OS === "android" && showTimePicker && (
         <DateTimePicker
           value={selectedTime}

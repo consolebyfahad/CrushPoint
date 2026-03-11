@@ -16,7 +16,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
-// Parse skip_timer (e.g. "00:00:10" or "00:00:05") to total seconds
 function parseSkipTimerSeconds(skipTimer: string | undefined): number {
   if (!skipTimer || typeof skipTimer !== "string") return 10;
   const trimmed = skipTimer.trim();
@@ -49,7 +48,7 @@ export default function CampaignScreen() {
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const countdownFinished = countdown <= 0;
-  // Get media URL helper function
+  
   const getMediaUrl = (campaignData: typeof campaign) => {
     if (
       !campaignData?.image ||
@@ -64,7 +63,6 @@ export default function CampaignScreen() {
       return mediaPath;
     }
 
-    // Construct full URL
     const cleanPath = mediaPath.startsWith("/")
       ? mediaPath.slice(1)
       : mediaPath;
@@ -73,7 +71,6 @@ export default function CampaignScreen() {
 
   const mediaUrl = campaign ? getMediaUrl(campaign) : null;
 
-  // No campaign or no media: go straight to tabs (we only land here when logged in)
   useEffect(() => {
     if (
       !loading &&
@@ -85,7 +82,6 @@ export default function CampaignScreen() {
     }
   }, [loading, isHydrated, campaign, mediaUrl]);
 
-  // Countdown from campaign skip_timer (e.g. 10) to 0; do not auto-navigate when 0
   useEffect(() => {
     if (
       !loading &&
@@ -105,7 +101,7 @@ export default function CampaignScreen() {
               clearInterval(countdownRef.current);
               countdownRef.current = null;
             }
-            return 0; // Stop at 0; user taps close icon to exit
+            return 0;  
           }
           return prev - 1;
         });
@@ -134,7 +130,6 @@ export default function CampaignScreen() {
       countdownRef.current = null;
     }
 
-    // We only reach campaign when logged in (from splash). Just go to tabs or verification.
     const isVerified = await checkVerificationStatus();
     if (isVerified) {
       router.replace("/(tabs)");
@@ -149,7 +144,6 @@ export default function CampaignScreen() {
     }
   };
 
-  // Show loading while fetching
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -160,12 +154,10 @@ export default function CampaignScreen() {
     );
   }
 
-  // Navigate away if no campaign or no media
   if (!campaign || !mediaUrl) {
     return null;
   }
 
-  // Determine if we should show video (if ad_type is video, or if URL ends with video extension)
   const isVideo =
     campaign.ad_type === "video" ||
     mediaUrl.match(/\.(mp4|mov|avi|webm)$/i) !== null;
@@ -177,7 +169,7 @@ export default function CampaignScreen() {
   const handlePress = () => {
     if (campaign.link) {
       Linking.openURL(campaign.link).catch(() => {
-        // Error opening link - silently fail
+        
       });
     }
   };
@@ -185,7 +177,7 @@ export default function CampaignScreen() {
   const handleDownloadNow = () => {
     if (campaign.link) {
       Linking.openURL(campaign.link).catch(() => {
-        // Error opening link - silently fail
+        
       });
     }
   };
@@ -194,7 +186,6 @@ export default function CampaignScreen() {
     setIsMuted((prev) => !prev);
   };
 
-  // Mute Icon Component
   const MuteIcon = () => (
     <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <Path
@@ -204,7 +195,6 @@ export default function CampaignScreen() {
     </Svg>
   );
 
-  // Unmute/Volume Icon Component
   const VolumeIcon = () => (
     <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <Path
@@ -214,7 +204,6 @@ export default function CampaignScreen() {
     </Svg>
   );
 
-  // Close (X) Icon - shown when countdown reaches 0
   const CloseIcon = () => (
     <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <Path
@@ -243,7 +232,7 @@ export default function CampaignScreen() {
             isMuted={isMuted}
             onLoad={handleMediaLoad}
             onError={() => {
-              // If video fails to load, treat as loaded to continue flow
+              
               setMediaLoaded(true);
             }}
           />
@@ -254,14 +243,14 @@ export default function CampaignScreen() {
             resizeMode="cover"
             onLoad={handleMediaLoad}
             onError={() => {
-              // If image fails to load, treat as loaded to continue flow
+              
               setMediaLoaded(true);
             }}
           />
         )}
       </TouchableOpacity>
 
-      {/* Mute Button - Only show for videos */}
+      {}
       {isVideo && (
         <TouchableOpacity
           style={styles.muteButton}
@@ -272,7 +261,7 @@ export default function CampaignScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Timer / Close: countdown N to 0, then close icon (no auto-skip) */}
+      {}
       {countdownFinished && (
         <TouchableOpacity
           style={[
@@ -286,7 +275,7 @@ export default function CampaignScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Download Now Button */}
+      {}
       {campaign.link && (
         <TouchableOpacity
           style={styles.downloadButton}

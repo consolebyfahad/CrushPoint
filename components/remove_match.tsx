@@ -22,7 +22,7 @@ export default function RemoveMatch({
 
   const handleCancel = () => {
     if (onBack) {
-      onBack(); // Go back to profile options
+      onBack();  
     } else {
       onClose();
     }
@@ -43,7 +43,7 @@ export default function RemoveMatch({
         />
 
         <View style={styles.modalContainer}>
-          {/* Header */}
+          {}
           <View style={styles.header}>
             <Text style={styles.title}>{t("profile.removeMatch")}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -51,14 +51,14 @@ export default function RemoveMatch({
             </TouchableOpacity>
           </View>
 
-          {/* Content */}
+          {}
           <View style={styles.content}>
-            {/* Remove Icon */}
+            {}
             <View style={styles.iconContainer}>
               <Ionicons name="close" size={48} color="#EF4444" />
             </View>
 
-            {/* Confirmation Text */}
+            {}
             <Text style={styles.confirmationTitle}>
               {t("block.areYouSure")}
             </Text>
@@ -67,7 +67,7 @@ export default function RemoveMatch({
             </Text>
           </View>
 
-          {/* Action Buttons */}
+          {}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.cancelButton}

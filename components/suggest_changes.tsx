@@ -26,7 +26,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 interface SuggestChangesProps {
   onClose: () => void;
   onSubmit?: (changes: any) => void;
-  requestId: string; // Add meetup request ID
+  requestId: string;  
   originalRequest: {
     user: {
       name: string;
@@ -48,15 +48,15 @@ export default function SuggestChanges({
 }: SuggestChangesProps) {
   const { t } = useTranslation();
   const { user } = useAppContext();
-  // Initialize date to current date or later
+  
   const [newDate, setNewDate] = useState(() => {
     const now = new Date();
     return now;
   });
-  // Initialize time to 12:00 PM (noon) as a reasonable default
+  
   const [newTime, setNewTime] = useState(() => {
     const now = new Date();
-    now.setHours(12, 0, 0, 0); // Default to 12:00 PM
+    now.setHours(12, 0, 0, 0);  
     return now;
   });
   const [newLocation, setNewLocation] = useState(originalRequest.location);
@@ -87,23 +87,21 @@ export default function SuggestChanges({
     }
 
     if (selectedDate) {
-      // Create a new Date object to ensure React detects the state change
+      
       setNewDate(new Date(selectedDate));
     }
   };
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
-    // On iOS spinner, don't close immediately - only update the time
+    
     if (Platform.OS === "ios") {
-      // Always update the time when it changes while scrolling
-      // The onChange event fires continuously as user scrolls in spinner mode
+
       if (selectedTime) {
-        setNewTime(new Date(selectedTime)); // Create new Date object to ensure state update
+        setNewTime(new Date(selectedTime));  
       }
-      // Don't close on regular changes - only close if user dismissed
-      // The picker will stay open until user taps Done or Cancel
+
     } else {
-      // On Android, close immediately
+      
       setShowTimePicker(false);
       if (selectedTime) {
         setNewTime(selectedTime);
@@ -155,10 +153,8 @@ export default function SuggestChanges({
       formData.append("id", requestId);
       formData.append("table_name", "meetup_requests");
 
-      // Format date for API (YYYY-MM-DD)
       const formattedDate = newDate.toISOString().split("T")[0];
 
-      // Format time for API (HH:MM:SS)
       const formattedTime = newTime.toTimeString().split(" ")[0];
 
       formData.append("new_date", formattedDate);
@@ -169,24 +165,7 @@ export default function SuggestChanges({
 
       if (response.result) {
         onClose();
-        // Alert.alert(
-        //   t("suggestChanges.success"),
-        //   t("suggestChanges.changesSuggestedSuccessfully"),
-        //   [
-        //     {
-        //       text: t("suggestChanges.ok"),
-        //       onPress: () => {
-        //         onSubmit({
-        //           date: formattedDate,
-        //           time: formattedTime,
-        //           location: newLocation.trim(),
-        //           message: message.trim(),
-        //         });
-        //         onClose();
-        //       },
-        //     },
-        //   ]
-        // );
+
       } else {
         Alert.alert(
           t("suggestChanges.error"),
@@ -206,7 +185,7 @@ export default function SuggestChanges({
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <Text style={styles.title}>{t("suggestChanges.title")}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -215,7 +194,7 @@ export default function SuggestChanges({
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* User Info */}
+        {}
         <View style={styles.userInfo}>
           <Image
             source={{ uri: originalRequest.user.image }}
@@ -227,7 +206,7 @@ export default function SuggestChanges({
           </View>
         </View>
 
-        {/* Original Request */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {t("suggestChanges.originalRequest")}
@@ -261,7 +240,7 @@ export default function SuggestChanges({
           </View>
         </View>
 
-        {/* New Date */}
+        {}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
             {t("suggestChanges.newDate")}{" "}
@@ -276,7 +255,7 @@ export default function SuggestChanges({
           </TouchableOpacity>
         </View>
 
-        {/* New Time */}
+        {}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
             {t("suggestChanges.newTime")}{" "}
@@ -291,7 +270,7 @@ export default function SuggestChanges({
           </TouchableOpacity>
         </View>
 
-        {/* New Location */}
+        {}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>
             {t("suggestChanges.newLocation")}{" "}
@@ -306,7 +285,7 @@ export default function SuggestChanges({
           />
         </View>
 
-        {/* Message */}
+        {}
         <View style={styles.section}>
           <Text style={styles.inputLabel}>{t("suggestChanges.message")}</Text>
           <TextInput
@@ -322,7 +301,7 @@ export default function SuggestChanges({
         </View>
       </ScrollView>
 
-      {/* Submit Button */}
+      {}
       <View style={styles.bottomButton}>
         <TouchableOpacity
           style={[
@@ -343,7 +322,7 @@ export default function SuggestChanges({
         </TouchableOpacity>
       </View>
 
-      {/* Android Date Picker */}
+      {}
       {Platform.OS === "android" && showDatePicker && (
         <DateTimePicker
           value={newDate}
@@ -354,7 +333,7 @@ export default function SuggestChanges({
         />
       )}
 
-      {/* iOS Date Picker - Custom Overlay (not Modal to avoid nested modals) */}
+      {}
       {Platform.OS === "ios" && showDatePicker && (
         <View style={styles.customModalOverlay}>
           <TouchableOpacity
@@ -390,7 +369,7 @@ export default function SuggestChanges({
         </View>
       )}
 
-      {/* Android Time Picker */}
+      {}
       {Platform.OS === "android" && showTimePicker && (
         <DateTimePicker
           value={newTime}
@@ -401,7 +380,7 @@ export default function SuggestChanges({
         />
       )}
 
-      {/* iOS Time Picker - Custom Overlay (not Modal to avoid nested modals) */}
+      {}
       {Platform.OS === "ios" && showTimePicker && (
         <View style={styles.customModalOverlay}>
           <TouchableOpacity
@@ -583,8 +562,7 @@ const styles = StyleSheet.create({
     fontFamily: font.semiBold,
     color: color.white,
   },
-  // Custom modal overlay using absolute positioning (not React Native Modal)
-  // This avoids nested modal issues on iOS
+
   customModalOverlay: {
     position: "absolute",
     top: 0,

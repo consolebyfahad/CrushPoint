@@ -36,16 +36,17 @@ interface Notification {
   user_name?: string;
   emoji?: string;
   backgroundImage?: any;
-  from?: any; // User data from notification
-  from_id?: string; // User ID from notification
-  event_id?: string; // Event ID for event_invite, event_reminder, etc.
-  event?: any; // Full event object if API sends it
+  from?: any;
+  from_id?: string;
+  event_id?: string;
+  event?: any;
+  invite_id?: string;
 }
 
 export default function Notifications({ navigation }: any) {
   const { t, i18n } = useTranslation();
   const { user, userData } = useAppContext();
-  const { rawInterests } = useGetInterests(); // Get API interests for converting IDs to names
+  const { rawInterests } = useGetInterests();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -58,10 +59,8 @@ export default function Notifications({ navigation }: any) {
   const formatTimeAgo = (dateString: string) => {
     if (!dateString) return t("notifications.recently");
 
-    // Parse the date string - format: "Nov 01, 2025 08:45 PM"
     const date = new Date(dateString);
 
-    // Check if date is valid
     if (isNaN(date.getTime())) {
       return t("notifications.recently");
     }
@@ -69,7 +68,6 @@ export default function Notifications({ navigation }: any) {
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    // If negative (future date), return recently
     if (diffInSeconds < 0) {
       return t("notifications.recently");
     }
@@ -87,19 +85,16 @@ export default function Notifications({ navigation }: any) {
         ? t("notifications.hourAgo", { count: hours })
         : t("notifications.hoursAgo", { count: hours });
     } else if (diffInSeconds < 2592000) {
-      // Less than 30 days
       const days = Math.floor(diffInSeconds / 86400);
       return days === 1
         ? t("notifications.dayAgo", { count: days })
         : t("notifications.daysAgo", { count: days });
     } else if (diffInSeconds < 31536000) {
-      // Less than 1 year (365 days)
       const months = Math.floor(diffInSeconds / 2592000);
       return months === 1
         ? t("notifications.monthAgo", { count: months })
         : t("notifications.monthsAgo", { count: months });
     } else {
-      // More than 1 year
       const years = Math.floor(diffInSeconds / 31536000);
       return years === 1
         ? t("notifications.yearAgo", { count: years })
@@ -143,7 +138,6 @@ export default function Notifications({ navigation }: any) {
   };
 
   const translateNotificationTitle = (apiTitle: string, type: string) => {
-    // If API title matches common patterns, translate it
     if (apiTitle) {
       const lowerTitle = apiTitle.toLowerCase();
       if (
@@ -184,7 +178,6 @@ export default function Notifications({ navigation }: any) {
       }
     }
 
-    // Fallback to type-based translation
     return getNotificationTitle(type);
   };
 
@@ -194,12 +187,10 @@ export default function Notifications({ navigation }: any) {
     userName: string,
   ) => {
     if (!apiMessage) return "";
-    // Translate common notification message patterns
+
     const lowerMessage = apiMessage.toLowerCase();
 
-    // If message contains user name, try to preserve it in translation
     if (userName && apiMessage.includes(userName)) {
-      // For new message: "You have a new message from {name}! Reply now."
       if (
         lowerMessage.includes("new message") &&
         lowerMessage.includes("reply now")
@@ -207,7 +198,6 @@ export default function Notifications({ navigation }: any) {
         return t("notifications.messageFromUserReply", { name: userName });
       }
 
-      // For new match: "You have a new match with {name}! Start chatting now."
       if (
         lowerMessage.includes("new match") &&
         lowerMessage.includes("start chatting")
@@ -215,7 +205,6 @@ export default function Notifications({ navigation }: any) {
         return t("notifications.matchWithUserChat", { name: userName });
       }
 
-      // For liked profile: "{name} liked your profile!"
       if (
         lowerMessage.includes("liked") &&
         lowerMessage.includes("your profile")
@@ -223,7 +212,6 @@ export default function Notifications({ navigation }: any) {
         return t("notifications.likedYourProfile", { name: userName });
       }
 
-      // For profile view: "{name} visited your profile"
       if (
         lowerMessage.includes("visited") &&
         (lowerMessage.includes("your profile") ||
@@ -234,7 +222,6 @@ export default function Notifications({ navigation }: any) {
       }
     }
 
-    // Liked your profile (without name in message)
     if (
       lowerMessage.includes("liked") &&
       lowerMessage.includes("your profile")
@@ -242,7 +229,6 @@ export default function Notifications({ navigation }: any) {
       return t("notifications.likedYourProfile", { name: userName || "" });
     }
 
-    // Visited your profile (without name in message or when message is generic)
     if (
       lowerMessage.includes("visited") &&
       (lowerMessage.includes("your profile") ||
@@ -252,7 +238,6 @@ export default function Notifications({ navigation }: any) {
       return t("notifications.visitedYourProfile", { name: userName || "" });
     }
 
-    // New message notifications
     if (
       lowerMessage.includes("new message from") ||
       lowerMessage.includes("neue nachricht von") ||
@@ -261,7 +246,6 @@ export default function Notifications({ navigation }: any) {
       return t("notifications.messageFromUser", { name: userName });
     }
 
-    // New match notifications
     if (
       lowerMessage.includes("new match with") ||
       lowerMessage.includes("neues match mit") ||
@@ -270,7 +254,6 @@ export default function Notifications({ navigation }: any) {
       return t("notifications.matchWithUser", { name: userName });
     }
 
-    // Start chatting notifications
     if (
       lowerMessage.includes("start chatting") ||
       lowerMessage.includes("beginne zu chatten")
@@ -278,7 +261,6 @@ export default function Notifications({ navigation }: any) {
       return t("notifications.startChatting");
     }
 
-    // Reply now notifications
     if (
       lowerMessage.includes("reply now") ||
       lowerMessage.includes("jetzt antworten")
@@ -286,7 +268,6 @@ export default function Notifications({ navigation }: any) {
       return t("notifications.replyNow");
     }
 
-    // Return original message if no pattern matches
     return apiMessage;
   };
 
@@ -305,16 +286,13 @@ export default function Notifications({ navigation }: any) {
 
       const response = await apiCall(formData);
       if (Array.isArray(response.data)) {
-        // Process the notifications data
         const processedNotifications = response.data.map(
           (notif: any, index: number) => {
             const notificationType = notif.type || "general";
 
-            // Get background image based on type
             const backgroundImage =
               getNotificationBackgroundImage(notificationType);
 
-            // Translate notification title and message
             const translatedTitle = translateNotificationTitle(
               notif.title,
               notificationType,
@@ -361,6 +339,7 @@ export default function Notifications({ navigation }: any) {
               from_id: notif.from_id || notif.from?.id || null,
               event_id: notif.event_id || notif.eventId || null,
               event: notif.event || null,
+              invite_id: notif.invite_id ?? notif.event_invite_id ?? null,
             };
 
             return processed;
@@ -369,7 +348,6 @@ export default function Notifications({ navigation }: any) {
         setNotifications(processedNotifications);
         setError(null);
       } else {
-        // No notifications or result is false
         setNotifications([]);
         setError(null);
       }
@@ -450,7 +428,6 @@ export default function Notifications({ navigation }: any) {
   };
 
   const handleNotificationPress = async (notification: Notification) => {
-    // Mark as read locally
     setNotifications((prevNotifications) => {
       const updated = prevNotifications.map((notif) =>
         notif.id === notification.id ? { ...notif, isRead: true } : notif,
@@ -458,21 +435,14 @@ export default function Notifications({ navigation }: any) {
       return updated;
     });
 
-    // TODO: Call API to mark as read
-    // markNotificationAsRead(notification.id);
-
     const notificationType = notification.type.toLowerCase();
-    console.log("notificationType", notificationType);
-    // Handle chat/message notifications - redirect to chat conversation
     if (
       notificationType === "message" ||
       notificationType === "chat" ||
       notificationType === "new_message"
     ) {
-      // If notification has match_id and user data, navigate to chat conversation
       if (notification.from_id && notification.from) {
         try {
-          // Try to find match record ID
           let matchRecordId: string | null = null;
           if (user?.user_id) {
             try {
@@ -491,7 +461,6 @@ export default function Notifications({ navigation }: any) {
             } catch (error) {}
           }
 
-          // Navigate to chat conversation
           router.push({
             pathname: "/chat/conversation",
             params: {
@@ -511,29 +480,24 @@ export default function Notifications({ navigation }: any) {
           });
           return;
         } catch (error) {
-          // Fallback to chat list
           router.push("/(tabs)/matches");
           return;
         }
       } else {
-        // No user data, fallback to chat list
         router.push("/(tabs)/matches");
         return;
       }
     }
 
-    // Handle new match notification - navigate to match2 screen
     if (notificationType === "new_match" || notificationType === "match") {
       if (notification.from && notification.from_id) {
         try {
-          // Parse images from JSON string to array
           const imagesString = notification.from.images || "[]";
           const parsedImages = parseUserImages(
             imagesString,
             notification.from.gender || "unknown",
           );
 
-          // Calculate age from DOB
           const calculateAge = (dob: string) => {
             if (!dob) return 0;
             try {
@@ -553,19 +517,15 @@ export default function Notifications({ navigation }: any) {
             }
           };
 
-          // Get current user image from userData
           let currentUserImage = "";
 
-          // Try to get from userData.photos (already parsed URLs)
           if (
             userData?.photos &&
             Array.isArray(userData.photos) &&
             userData.photos.length > 0
           ) {
             currentUserImage = userData.photos[0];
-          }
-          // Fallback to images array
-          else if (
+          } else if (
             userData?.images &&
             Array.isArray(userData.images) &&
             userData.images.length > 0
@@ -573,16 +533,13 @@ export default function Notifications({ navigation }: any) {
             currentUserImage = userData.images[0].startsWith("http")
               ? userData.images[0]
               : `https://api.andra-dating.com/images/${userData.images[0]}`;
-          }
-          // Final fallback based on gender
-          else {
+          } else {
             currentUserImage =
               userData?.gender === "female"
                 ? "https://i.pinimg.com/736x/8c/1f/82/8c1f82be3fbc9276db0c6431eee2aadd.jpg"
                 : "https://i.pinimg.com/736x/30/1c/30/301c3029c36d70b518325f803bba8f09.jpg";
           }
 
-          // Build match data for match2 screen
           const matchData = {
             currentUser: {
               name: userData?.name || user?.name || "You",
@@ -594,7 +551,7 @@ export default function Notifications({ navigation }: any) {
               id: notification.from.id || notification.from_id,
               name: notification.from.name || notification.user_name || "User",
               age: calculateAge(notification.from.dob),
-              distance: "0 km", // Distance not available in notification
+              distance: "0 km",
               image: parsedImages[0] || "",
               images: parsedImages,
               about: notification.from.about || "",
@@ -618,28 +575,18 @@ export default function Notifications({ navigation }: any) {
             },
           };
 
-          // router.push({
-          //   pathname: "/profile/match2",
-          //   params: {
-          //     matchData: JSON.stringify(matchData),
-          //   },
-          // });
-
           router.push("/(tabs)/matches");
           return;
         } catch (error) {
-          // Fallback to matches screen
           router.push("/(tabs)/matches");
           return;
         }
       } else {
-        // No user data, fallback to matches screen
         router.push("/(tabs)/matches");
         return;
       }
     }
 
-    // Handle event notifications - open event details
     const eventTypes = [
       "event_invite",
       "event_invite_accepted",
@@ -647,9 +594,12 @@ export default function Notifications({ navigation }: any) {
       "new_event",
     ];
     if (eventTypes.includes(notificationType)) {
+      console.log("notification data", JSON.stringify(notification));
       const eventId = (notification as Notification & { event_id?: string })
         .event_id;
       const eventObj = (notification as Notification & { event?: any }).event;
+      const inviteId = notification.invite_id ?? null;
+      console.log("inviteId", inviteId);
       if (eventId || eventObj) {
         const params: Record<string, string> = {};
         if (eventObj && typeof eventObj === "object") {
@@ -657,7 +607,10 @@ export default function Notifications({ navigation }: any) {
         } else if (eventId) {
           params.eventId = String(eventId);
         }
-        console.log("params", params);
+        if (inviteId && notificationType === "event_invite") {
+          params.inviteId = String(inviteId);
+        }
+        console.log("event details params", params);
         if (Object.keys(params).length > 0) {
           router.push({
             pathname: "/events/event_details",
@@ -666,22 +619,19 @@ export default function Notifications({ navigation }: any) {
           return;
         }
       }
-      // No event_id/event: go to events list
+
       router.push("/(tabs)/events");
       return;
     }
 
-    // Navigate to user profile if user data is available (for other notifications)
     if (notification.from && notification.from_id) {
       try {
-        // Parse images from JSON string to array
         const imagesString = notification.from.images || "[]";
         const parsedImages = parseUserImages(
           imagesString,
           notification.from.gender || "unknown",
         );
 
-        // Parse lookingFor from JSON string to array
         const lookingForString = notification.from.looking_for || "[]";
         let parsedLookingFor: string[] = [];
         try {
@@ -690,18 +640,15 @@ export default function Notifications({ navigation }: any) {
           parsedLookingFor = [];
         }
 
-        // Parse interests from JSON string to array and convert IDs to names
         const interestsString = notification.from.interests || "[]";
         let parsedInterests: string[] = [];
         try {
-          // Use parseInterestsWithNames to convert IDs to display names
           parsedInterests = parseInterestsWithNames(
             interestsString,
             rawInterests || [],
             i18n.language || "en",
           );
         } catch (error) {
-          // Fallback to parsing as regular JSON if conversion fails
           try {
             parsedInterests = parseJsonString(interestsString);
           } catch (fallbackError) {
@@ -709,7 +656,6 @@ export default function Notifications({ navigation }: any) {
           }
         }
 
-        // Parse nationality from JSON string to array
         const nationalityString = notification.from.nationality || "[]";
         let parsedNationality: string[] = [];
         try {
@@ -727,12 +673,10 @@ export default function Notifications({ navigation }: any) {
           parsedNationality = [];
         }
 
-        // Calculate age from DOB
         const userAge = notification.from.dob
           ? calculateAge(notification.from.dob)
           : 0;
 
-        // Filter out "0" or empty height values
         const userHeight =
           notification.from.height &&
           notification.from.height !== "0" &&
@@ -740,7 +684,6 @@ export default function Notifications({ navigation }: any) {
             ? notification.from.height
             : "";
 
-        // Derive match_emoji / match_status so profile shows emoji (same as map/list view)
         const notificationType = (notification.type || "").toLowerCase();
         const matchEmojiFromType =
           notificationType === "like"
@@ -759,15 +702,14 @@ export default function Notifications({ navigation }: any) {
           (notification.from as any)?.match_status ??
           (match_emoji ? "matched" : "");
 
-        // Format user data for profile navigation
         const userProfileData = {
           id: notification.from.id || notification.from_id,
           name: notification.from.name || notification.user_name || "User",
-          age: userAge, // Include calculated age
-          images: parsedImages, // Use parsed array instead of string
+          age: userAge,
+          images: parsedImages,
           about: notification.from.about || "",
-          height: userHeight, // Filter out "0" values
-          nationality: parsedNationality, // Use parsed array
+          height: userHeight,
+          nationality: parsedNationality,
           religion: notification.from.religion || "",
           zodiac: notification.from.zodiac || "",
           gender: notification.from.gender || "",
@@ -775,8 +717,8 @@ export default function Notifications({ navigation }: any) {
           state: notification.from.state || "",
           city: notification.from.city || "",
           languages: notification.from.languages || "",
-          interests: parsedInterests, // Use parsed array with names instead of IDs
-          lookingFor: parsedLookingFor, // Use parsed array
+          interests: parsedInterests,
+          lookingFor: parsedLookingFor,
           phone: notification.from.phone || "",
           dob: notification.from.dob || "",
           lat: notification.from.lat || "",
@@ -796,7 +738,6 @@ export default function Notifications({ navigation }: any) {
         });
       } catch (error) {}
     } else {
-      // Fallback navigation based on notification type if no user data
       switch (notificationType) {
         case "event":
           router.push("/(tabs)/events");
@@ -807,23 +748,18 @@ export default function Notifications({ navigation }: any) {
           router.push("/(tabs)/matches");
           break;
         default:
-          // For other types without user data, do nothing
           break;
       }
     }
   };
 
   const handleDeleteNotification = (notification: Notification) => {
-    // Remove locally
     setNotifications((prevNotifications) => {
       const filtered = prevNotifications.filter(
         (notif) => notif.id !== notification.id,
       );
       return filtered;
     });
-
-    // TODO: Call API to delete notification
-    // deleteNotification(notification.id);
   };
 
   const renderNotificationCard = ({ item }: { item: Notification }) => (
@@ -909,7 +845,7 @@ export default function Notifications({ navigation }: any) {
         close={handleClose}
       />
 
-      {/* Notifications List */}
+      {}
       <FlatList
         data={notifications}
         renderItem={renderNotificationCard}

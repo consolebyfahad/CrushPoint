@@ -23,8 +23,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
     type: ToastType = "info",
     duration = 1500
   ) => {
-    // Set toast configuration
-    // const options = { duration };
 
     switch (type) {
       case "success":

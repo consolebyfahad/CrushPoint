@@ -61,7 +61,6 @@ export default function AnimatedInterestGrid({
   const mountAnimation = useSharedValue(0);
   const searchAnimation = useSharedValue(0);
 
-  // Filter interests based on search query
   useEffect(() => {
     const filtered =
       searchQuery.trim() === ""
@@ -70,21 +69,18 @@ export default function AnimatedInterestGrid({
             interest.name.toLowerCase().includes(searchQuery.toLowerCase())
           );
 
-    // Trigger search animation
     if (searchQuery.trim() !== "") {
       setSearchTriggered(true);
       searchAnimation.value = withTiming(1, { duration: 200 }, () => {
         searchAnimation.value = withTiming(0, { duration: 200 });
       });
 
-      // Reset search trigger after animation
       setTimeout(() => setSearchTriggered(false), 400);
     }
 
     setFilteredInterests(filtered);
   }, [searchQuery, interests]);
 
-  // Mount animation
   useEffect(() => {
     if (staggerAnimation) {
       mountAnimation.value = withSpring(1, {
@@ -100,12 +96,12 @@ export default function AnimatedInterestGrid({
     let newSelection: string[];
 
     if (selectedInterests.includes(interestId)) {
-      // Remove from selection
+      
       newSelection = selectedInterests.filter((id) => id !== interestId);
     } else {
-      // Add to selection (if under max limit)
+      
       if (maxSelections && selectedInterests.length >= maxSelections) {
-        return; // Don't allow more selections
+        return;  
       }
       newSelection = [...selectedInterests, interestId];
     }
@@ -113,7 +109,6 @@ export default function AnimatedInterestGrid({
     onSelectionChange(newSelection);
   };
 
-  // Container animation for search
   const containerAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [

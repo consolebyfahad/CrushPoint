@@ -17,7 +17,7 @@ import Animated, {
 
 interface InterestOption {
   id: string;
-  name: string; // Now contains both emoji and text together
+  name: string;  
   distance: number;
   date: string;
   time: string;
@@ -74,10 +74,9 @@ export default function AnimatedInterestTag({
     });
   }, [isSelected]);
 
-  // Search animation effect
   useEffect(() => {
     if (searchTriggered) {
-      // Quick fade and slide animation when search filters change
+      
       opacity.value = withSequence(
         withTiming(0.3, { duration: 100 }),
         withSpring(1, { damping: 15, stiffness: 150 })
@@ -90,16 +89,16 @@ export default function AnimatedInterestTag({
   }, [searchTriggered]);
 
   const handlePress = () => {
-    // Selection animation - more dramatic for selection/deselection
+    
     if (isSelected) {
-      // Deselection animation
+      
       pressScale.value = withSequence(
         withSpring(1.1, { damping: 15, stiffness: 300 }),
         withSpring(0.95, { damping: 20, stiffness: 400 }),
         withSpring(1, { damping: 12, stiffness: 200 })
       );
     } else {
-      // Selection animation
+      
       pressScale.value = withSequence(
         withSpring(0.9, { damping: 20, stiffness: 400 }),
         withSpring(1.05, { damping: 15, stiffness: 300 }),

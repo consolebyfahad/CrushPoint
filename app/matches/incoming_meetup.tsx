@@ -40,7 +40,6 @@ export default function IncomingMeetup({
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Filter requests based on search text
   const filteredRequests = useMemo(() => {
     if (!searchText.trim()) return requests;
     return requests.filter(
@@ -51,7 +50,6 @@ export default function IncomingMeetup({
     );
   }, [requests, searchText]);
 
-  // Action handlers with proper API integration
   const handleAccept = useCallback(
     async (requestId: string) => {
       try {
@@ -62,7 +60,7 @@ export default function IncomingMeetup({
         formData.append("id", requestId);
         formData.append("table_name", "meetup_requests");
         formData.append("status", "accept");
-        // formData.append("user_id", user?.user_id || "");
+        
         const response = await apiCall(formData);
         if (response?.result === true) {
           onUpdateStatus?.(requestId, "accepted");
@@ -88,8 +86,7 @@ export default function IncomingMeetup({
         formData.append("id", requestId);
         formData.append("table_name", "meetup_requests");
         formData.append("status", "accept");
-        // formData.append("user_id", user?.user_id || "");
-        // formData.append("accept_changes", "1");
+
         const response = await apiCall(formData);
 
         if (response?.result === true) {
@@ -121,43 +118,6 @@ export default function IncomingMeetup({
     [requests]
   );
 
-  // const handleSuggestChanges = useCallback(
-  //   async (changes: any) => {
-  //     try {
-  //       setIsLoading(true);
-
-  //       const formData = new FormData();
-  //       formData.append("type", "update_data");
-  //       formData.append("id", selectedRequest?.id || "");
-  //       formData.append("table_name", "meetup_requests");
-  //       formData.append("status", "change");
-  //       formData.append("user_id", user?.user_id || "");
-
-  //       // Add the suggested changes
-  //       if (changes.date) formData.append("suggested_date", changes.date);
-  //       if (changes.time) formData.append("suggested_time", changes.time);
-  //       if (changes.location)
-  //         formData.append("suggested_location", changes.location);
-  //       if (changes.message) formData.append("change_message", changes.message);
-
-  //       const response = await apiCall(formData);
-
-  //       if (response?.result === true) {
-  //         onUpdateStatus?.(selectedRequest?.id, "change");
-  //         setShowSuggestChanges(false);
-  //         setSelectedRequest(null);
-  //       } else {
-  //         
-  //       }
-  //     } catch (error: any) {
-  //       
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   },
-  //   [selectedRequest, user?.user_id, onUpdateStatus]
-  // );
-
   const handleDecline = useCallback(
     async (requestId: string) => {
       try {
@@ -168,7 +128,6 @@ export default function IncomingMeetup({
         formData.append("id", requestId);
         formData.append("table_name", "meetup_requests");
         formData.append("status", "cancel");
-        // formData.append("user_id", user?.user_id || "");
 
         const response = await apiCall(formData);
 
@@ -252,7 +211,7 @@ export default function IncomingMeetup({
         windowSize={10}
       />
 
-      {/* Suggest Changes Modal */}
+      {}
       <Modal
         visible={showSuggestChanges}
         transparent={true}
@@ -271,7 +230,7 @@ export default function IncomingMeetup({
                 setShowSuggestChanges(false);
                 setSelectedRequest(null);
               }}
-              // onSubmit={handleSuggestChanges}
+              
               requestId={selectedRequest.id}
               originalRequest={{
                 user: selectedRequest.user,
@@ -286,7 +245,7 @@ export default function IncomingMeetup({
         </View>
       </Modal>
 
-      {/* Loading Overlay */}
+      {}
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingContainer}>

@@ -37,9 +37,8 @@ export default function InviteMatches({
   const [selectedMatches, setSelectedMatches] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Use the useGetMatches hook to get real matches data
   const { matches, loading, error } = useGetMatches();
-  // Filter matches based on search text
+  
   const filteredMatches = matches.filter((match) =>
     match.name.toLowerCase().includes(searchText.toLowerCase()),
   );
@@ -61,7 +60,7 @@ export default function InviteMatches({
     setIsSubmitting(true);
 
     try {
-      // Send one invite per user so backend receives invited_id as a single id per row (not JSON array)
+      
       let allSucceeded = true;
       for (const invitedId of selectedMatches) {
         const formData = new FormData();
@@ -143,7 +142,7 @@ export default function InviteMatches({
         />
 
         <View style={styles.modalContainer}>
-          {/* Header */}
+          {}
           <View style={styles.header}>
             <Text style={styles.title}>{t("invite.inviteMatches")}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -151,7 +150,7 @@ export default function InviteMatches({
             </TouchableOpacity>
           </View>
 
-          {/* Search Bar */}
+          {}
           <View style={styles.searchContainer}>
             <View style={styles.searchInputContainer}>
               <Ionicons
@@ -182,7 +181,7 @@ export default function InviteMatches({
             </View>
           </View>
 
-          {/* Matches List */}
+          {}
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={color.primary} />
@@ -222,9 +221,9 @@ export default function InviteMatches({
             />
           )}
 
-          {/* Bottom Section */}
+          {}
           <View style={styles.bottomSection}>
-            {/* Selection Count */}
+            {}
             <Text style={styles.selectionCount}>
               {selectedMatches.length} {t("invite.matchesSelected")}
             </Text>

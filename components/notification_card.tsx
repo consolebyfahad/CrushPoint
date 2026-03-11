@@ -108,14 +108,14 @@ export default function NotificationCard({
       onPress={handlePress}
       activeOpacity={0.7}
     >
-      {/* Icon or Background Image */}
+      {}
       {hasBackgroundImage ? (
         <ImageBackground
           source={notification.backgroundImage}
           style={styles.imageContainer}
           imageStyle={styles.imageStyle}
         >
-          {/* Empty overlay - image is just for background */}
+          {}
         </ImageBackground>
       ) : (
         <View
@@ -146,21 +146,15 @@ export default function NotificationCard({
         </View>
       )}
 
-      {/* Content */}
+      {}
       <View style={styles.content}>
         <Text style={styles.title}>{notification.title}</Text>
         <Text style={styles.message}>{notification.message}</Text>
         <Text style={styles.timeAgo}>{notification.timeAgo}</Text>
       </View>
 
-      {/* Delete Button */}
-      {/* <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={handleDelete}
-        activeOpacity={0.7}
-      >
-        <Feather name="trash-2" size={18} color={color.gray69} />
-      </TouchableOpacity> */}
+      {}
+      {}
     </TouchableOpacity>
   );
 }

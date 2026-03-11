@@ -47,8 +47,8 @@ export default function ChatConversation() {
   const scrollViewRef = useRef<ScrollView>(null);
   const textInputRef = useRef<TextInput>(null);
 
-  const matchId = params.matchId as string; // Match record ID (from matches table)
-  const otherUserId = params.userId as string; // Matched user's ID (should be used as to_chat_id)
+  const matchId = params.matchId as string;  
+  const otherUserId = params.userId as string;  
   const userName = params.userName as string;
   const userImage = params.userImage as string;
   const userAge =
@@ -61,7 +61,6 @@ export default function ChatConversation() {
     userAge != null && !Number.isNaN(userAge) && userAge >= 0 && userAge <= 120;
   const userTimeAgo = (params.userTimeAgo as string) ?? undefined;
 
-  // Validate required params
   useEffect(() => {
     if (!matchId || !otherUserId || !user?.user_id) {
       showToast(t("chat.invalidConversation"), "error");
@@ -81,7 +80,6 @@ export default function ChatConversation() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastMessageTimestampRef = useRef<number>(0);
 
-  // Keyboard event listeners
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -106,8 +104,6 @@ export default function ChatConversation() {
     };
   }, []);
 
-  // Fetch full chat history (getchat API)
-  // to_chat_id should be the matched user's ID (otherUserId), not the match record ID
   const fetchChatHistory = useCallback(
     async (
       currentUserId: string,
@@ -121,9 +117,7 @@ export default function ChatConversation() {
       const formData = new FormData();
       formData.append("type", "getchat");
       formData.append("user_id", userIdParam);
-      formData.append("to_chat_id", toChatId); // Should be otherUserId (matched user's ID)
-
-      // Log FormData contents (FormData doesn't serialize well, so we log the values)
+      formData.append("to_chat_id", toChatId);  
 
       try {
         const response = await apiCall(formData);
@@ -138,7 +132,6 @@ export default function ChatConversation() {
             userId: msg.sender_id,
           }));
 
-          // Update last message timestamp
           if (formattedMessages.length > 0) {
             const timestamps = formattedMessages.map(
               (m: Message) => m.timestamp
@@ -146,7 +139,6 @@ export default function ChatConversation() {
             lastMessageTimestampRef.current = Math.max(...timestamps);
           }
 
-          // Sort messages chronologically (oldest first, newest last) - don't reverse
           const sortedMessages = formattedMessages.sort(
             (a: Message, b: Message) => a.timestamp - b.timestamp
           );
@@ -165,7 +157,6 @@ export default function ChatConversation() {
     []
   );
 
-  // Check for new messages (checkmsg API)
   const checkNewMessages = useCallback(
     async (toChatId: string, userIdParam: string) => {
       try {
@@ -186,14 +177,12 @@ export default function ChatConversation() {
               userId: msg.sender_id,
             }));
 
-            // Update last message timestamp
             const timestamps = newMessages.map((m: Message) => m.timestamp);
             lastMessageTimestampRef.current = Math.max(
               lastMessageTimestampRef.current,
               ...timestamps
             );
 
-            // Append new messages to existing messages
             setMessages((prevMessages) => {
               const existingIds = new Set(
                 prevMessages.map((m: Message) => m.id)
@@ -221,19 +210,15 @@ export default function ChatConversation() {
 
       let isFocused = true;
 
-      // Initial fetch - get full chat history
-      // Use otherUserId (matched user's ID) as to_chat_id, not matchId (match record ID)
-
       fetchChatHistory(userData?.id, otherUserId, user.user_id);
 
-      // Set up interval to check for new messages every 10 seconds
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
 
       intervalRef.current = setInterval(() => {
         if (isFocused && otherUserId && user?.user_id) {
-          // Use otherUserId (matched user's ID) as to_chat_id, not matchId (match record ID)
+          
           checkNewMessages(otherUserId, user.user_id);
         }
       }, 10000) as ReturnType<typeof setInterval>;
@@ -245,7 +230,7 @@ export default function ChatConversation() {
           intervalRef.current = null;
         }
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      
     }, [otherUserId, user?.user_id])
   );
 
@@ -258,7 +243,7 @@ export default function ChatConversation() {
       const formData = new FormData();
       formData.append("type", "sendmsg");
       formData.append("user_id", user.user_id);
-      formData.append("to_chat_id", otherUserId); // Use otherUserId (matched user's ID), not matchId (match record ID)
+      formData.append("to_chat_id", otherUserId);  
       formData.append("msg", inputMessage.trim());
       formData.append("msg_type", "msg");
 
@@ -266,10 +251,7 @@ export default function ChatConversation() {
 
       if (response && response.result) {
         setInputMessage("");
-        // showToast(t("chat.messageSent"), "success");
 
-        // Refresh chat history to show the new message
-        // Use otherUserId (matched user's ID) as to_chat_id, not matchId (match record ID)
         if (otherUserId && user.user_id) {
           await fetchChatHistory(
             userData?.id,
@@ -297,7 +279,6 @@ export default function ChatConversation() {
   const formatTime = (timestamp: number) => {
     if (!timestamp || timestamp === 0) return "";
 
-    // Handle both seconds and milliseconds
     const date =
       timestamp > 1000000000000
         ? new Date(timestamp)
@@ -323,13 +304,12 @@ export default function ChatConversation() {
       .toString()
       .padStart(2, "0")} ${ampm}`;
 
-    // Show relative date if not today
     if (messageDate.getTime() === today.getTime()) {
       return timeString;
     } else if (messageDate.getTime() === yesterday.getTime()) {
       return `${t("chat.yesterday")} ${timeString}`;
     } else {
-      // Show date for older messages
+      
       const day = date.getDate();
       const month = date.toLocaleString("default", { month: "short" });
       return `${day} ${month} ${timeString}`;
@@ -348,7 +328,7 @@ export default function ChatConversation() {
     }
 
     try {
-      // Fetch user profile data
+      
       const formData = new FormData();
       formData.append("type", "get_data");
       formData.append("table_name", "users");
@@ -358,7 +338,6 @@ export default function ChatConversation() {
       if (response?.data && response.data.length > 0) {
         const userProfileData = response.data[0];
 
-        // Parse images
         let images: string[] = [];
         if (userProfileData.images) {
           try {
@@ -469,7 +448,7 @@ export default function ChatConversation() {
         if (userProfileData.languages) {
           try {
             if (typeof userProfileData.languages === "string") {
-              // Languages might be comma-separated or JSON
+              
               if (userProfileData.languages.startsWith("[")) {
                 const cleaned = userProfileData.languages
                   .replace(/\\\\/g, "\\")

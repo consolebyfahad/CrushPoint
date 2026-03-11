@@ -88,10 +88,10 @@ export default function EventsTab() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header - Always shown */}
+      {}
       <EventsTabsHeader title={t("events.events")} events={events} />
 
-      {/* City filter - Always shown */}
+      {}
       <CustomDropdown
         options={cities}
         value={selectedCity}
@@ -100,13 +100,13 @@ export default function EventsTab() {
         loading={citiesLoading}
       />
 
-      {/* Conditional Content */}
+      {}
       {error && events.length === 0 ? (
         renderErrorState()
       ) : loading && events.length === 0 ? (
         renderLoadingState()
       ) : (
-        /* Events List */
+        
         <FlatList
           data={events}
           renderItem={renderEventCard}

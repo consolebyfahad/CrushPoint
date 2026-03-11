@@ -26,7 +26,7 @@ interface MatchUser {
   status: string;
   match_id: string;
   user_id: string;
-  // Profile fields for user profile navigation
+  
   about: string;
   height: string;
   nationality: string;
@@ -52,13 +52,12 @@ const IMAGE_BASE_URL = "https://api.andra-dating.com/images/";
 const useGetMatches = () => {
   const { t, i18n } = useTranslation();
   const { user, userData } = useAppContext();
-  // Get interests from API for interest name conversion
+  
   const { rawInterests: apiInterests } = useGetInterests();
   const [matches, setMatches] = useState<MatchUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Parse images similar to useGetUsers
   const parseImages = (
     imagesStr: string,
     gender: string,
@@ -69,7 +68,7 @@ const useGetMatches = () => {
     }
 
     try {
-      // Handle double-escaped JSON string
+      
       const cleanedImagesString = imagesStr
         .replace(/\\\\/g, "\\")
         .replace(/\\\"/g, '"');
@@ -242,13 +241,13 @@ const useGetMatches = () => {
         // Don't set error for empty data - let UI show empty state
         setError(null);
       } else if (response?.status === "Error") {
-        // Actual API error
+        
         setMatches([]);
         setError(response.message || t("hooks.failedToLoadMatches"));
       } else {
-        // No data returned but no error
+        
         setMatches([]);
-        setError(null); // Don't set error - just empty data
+        setError(null);  
       }
     } catch (error: any) {
       const errorMessage =
@@ -260,14 +259,12 @@ const useGetMatches = () => {
     }
   };
 
-  // Remove match from local state
   const removeMatch = (matchId: string) => {
     setMatches((prevMatches) =>
       prevMatches.filter((match: MatchUser) => match.id !== matchId)
     );
   };
 
-  // Update match status
   const updateMatchStatus = (matchId: string, newStatus: string) => {
     setMatches((prevMatches) =>
       prevMatches.map((match: MatchUser) =>

@@ -96,7 +96,7 @@ export default function BlockedUsers({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <Header title={t("blockedUsers.title")} divider={true} />
 
-      {/* Content */}
+      {}
       {loading ? (
         renderLoadingState()
       ) : (

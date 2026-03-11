@@ -60,16 +60,6 @@
       "favicon": "./assets/images/icon.png"
     },
     "plugins": [
-      [
-        "expo-splash-screen",
-        {
-          "ios": {
-            "backgroundColor": "#49ADBE",
-            "image": "./assets/images/icon.png",
-            "resizeMode": "contain"
-          }
-        }
-      ],
       "expo-router",
       "expo-web-browser",
       "expo-apple-authentication",

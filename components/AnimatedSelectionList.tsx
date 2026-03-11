@@ -64,17 +64,17 @@ export default function AnimatedSelectionList({
 
     if (multiSelect) {
       if (selectedOptions.includes(optionId)) {
-        // Remove from selection
+        
         newSelection = selectedOptions.filter((id) => id !== optionId);
       } else {
-        // Add to selection (if under max limit)
+        
         if (maxSelections && selectedOptions.length >= maxSelections) {
-          return; // Don't allow more selections
+          return;  
         }
         newSelection = [...selectedOptions, optionId];
       }
     } else {
-      // Single select mode
+      
       newSelection = selectedOptions.includes(optionId) ? [] : [optionId];
     }
 
@@ -135,6 +135,6 @@ export default function AnimatedSelectionList({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 0, // Gap is handled by individual items
+    gap: 0,  
   },
 });

@@ -18,6 +18,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   Image,
@@ -34,12 +35,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Store URLs for users who don't have the app (replace iOS app id when published)
-const APP_STORE_URL = "https://apps.apple.com/app/andra-dating/id000000000"; // TODO: Replace with real App Store ID
+const APP_STORE_URL = "https://apps.apple.com/app/andra-dating/id000000000";
 const PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=com.dating.Andra";
 
-// Attendees Modal Component
 interface AttendeesModalProps {
   visible: boolean;
   onClose: () => void;
@@ -116,91 +115,139 @@ export default function EventDetails() {
   const { user, userData } = useAppContext();
   const { showToast } = useToast();
   const [isRSVPing, setIsRSVPing] = useState(false);
-  // Fetch a single event by ID (for deep link opens)
-  const fetchEventById = React.useCallback(async (eventId: string) => {
-    try {
-      const formData = new FormData();
-      formData.append("type", "get_data");
-      formData.append("table_name", "events");
-      formData.append("id", eventId);
-      const response = await apiCall(formData);
-      console.log("response event_details", JSON.stringify(response));
-      if (
-        response?.data &&
-        Array.isArray(response.data) &&
-        response.data.length > 0
-      ) {
-        const raw = response.data[0];
-        const imageUrl = raw.image?.startsWith("http")
-          ? raw.image
-          : raw.image
-            ? `https://api.andra-dating.com/images/${raw.image}`
-            : "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
-        // Parse going/attendees from API (same shape as parseGoingUsers so attendees show when opened via notification or deep link)
-        const defaultAvatar =
-          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
-        const going = Array.isArray(raw.going)
-          ? raw.going.map((u: any) => {
-              let img = u.image;
-              if (!img && u.images) {
-                try {
-                  const arr = JSON.parse(String(u.images).replace(/\\"/g, '"'));
-                  if (Array.isArray(arr) && arr.length > 0) {
-                    img = `https://api.andra-dating.com/images/${arr[0]}`;
-                  }
-                } catch (_) {}
-              }
-              return {
-                id: u.id || u.name,
-                name: u.name || "Unknown",
-                image: img || defaultAvatar,
-              };
-            })
-          : [];
-        const eventData = {
-          id: raw.id,
-          title: raw.title || raw.title_languages,
-          category: raw.category || "",
-          date: raw.date,
-          time: raw.time,
-          to_time: raw.to_time,
-          location: raw.address || raw.location || "",
-          address: raw.address || raw.location || "",
-          description: raw.detail || raw.description || raw.details || "",
-          image: imageUrl,
-          organizer: {
-            name: raw.organized_by || raw.org_by_languages || "Unknown",
-            image: raw.organizer_image?.startsWith("http")
-              ? raw.organizer_image
-              : raw.organizer_image
-                ? `https://api.andra-dating.com/images/${raw.organizer_image}`
-                : "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
-            verified: raw.organizer_verified === "1" || false,
-          },
-          going,
-          going_count: raw.going_count ?? going.length,
-          isAttending: raw.user_going === "1" || raw.user_going === 1,
-          user_going: raw.user_going || "0",
-          web_link: raw.web_link,
-          lat: raw.lat,
-          lng: raw.lng,
-          distance: raw.distance,
-          attendees: going,
-          totalAttendees: raw.going_count ?? going.length,
-        };
-        setEvent(eventData);
-        setIsAttending(
-          eventData.user_going === "1" || eventData.user_going === 1,
-        );
-        return true;
+  const [inviteRecordId, setInviteRecordId] = useState<string | null>(null);
+  const [isRespondingToInvite, setIsRespondingToInvite] = useState(false);
+  const [inviteResponded, setInviteResponded] = useState(false);
+
+  const fetchEventInviteForUser = React.useCallback(
+    async (eventId: string) => {
+      if (!user?.user_id) return null;
+      try {
+        const formData = new FormData();
+        formData.append("type", "get_data");
+        formData.append("table_name", "event_invites");
+        formData.append("event_id", eventId);
+        formData.append("invited_id", user.user_id);
+        const response = await apiCall(formData);
+        console.log("fetchEventInviteForUser response", response);
+        const list = response?.data;
+        if (Array.isArray(list) && list.length > 0) {
+          const pending = list.find(
+            (r: any) =>
+              !r.status ||
+              r.status === "pending" ||
+              r.status === "0" ||
+              String(r.status).toLowerCase() === "pending",
+          );
+          const record = pending || list[0];
+          return record?.id ? String(record.id) : null;
+        }
+        return null;
+      } catch {
+        return null;
       }
-    } catch (error) {
+    },
+    [user?.user_id],
+  );
+
+  const fetchEventById = React.useCallback(
+    async (eventId: string) => {
+      try {
+        const formData = new FormData();
+        formData.append("type", "get_data");
+        formData.append("table_name", "events");
+        formData.append("id", eventId);
+        const response = await apiCall(formData);
+        if (
+          response?.data &&
+          Array.isArray(response.data) &&
+          response.data.length > 0
+        ) {
+          const raw = response.data[0];
+          const imageUrl = raw.image?.startsWith("http")
+            ? raw.image
+            : raw.image
+              ? `https://api.andra-dating.com/images/${raw.image}`
+              : "https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop";
+
+          const defaultAvatar =
+            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
+          const going = Array.isArray(raw.going)
+            ? raw.going.map((u: any) => {
+                let img = u.image;
+                if (!img && u.images) {
+                  try {
+                    const arr = JSON.parse(
+                      String(u.images).replace(/\\"/g, '"'),
+                    );
+                    if (Array.isArray(arr) && arr.length > 0) {
+                      img = `https://api.andra-dating.com/images/${arr[0]}`;
+                    }
+                  } catch (_) {}
+                }
+                return {
+                  id: u.id || u.name,
+                  name: u.name || "Unknown",
+                  image: img || defaultAvatar,
+                };
+              })
+            : [];
+          const fromApiUserGoing =
+            raw.user_going === "1" || raw.user_going === 1;
+          const currentUserId = userData?.id ?? user?.user_id;
+          const isUserInGoing =
+            currentUserId != null &&
+            Array.isArray(going) &&
+            going.some((u: any) => String(u.id) === String(currentUserId));
+          const isAttendingValue = fromApiUserGoing || isUserInGoing;
+          const eventData = {
+            id: raw.id,
+            title: raw.title || raw.title_languages,
+            category: raw.category || "",
+            date: raw.date,
+            time: raw.time,
+            to_time: raw.to_time,
+            location: raw.address || raw.location || "",
+            address: raw.address || raw.location || "",
+            description: raw.detail || raw.description || raw.details || "",
+            image: imageUrl,
+            organizer: {
+              name: raw.organized_by || raw.org_by_languages || "Unknown",
+              image: raw.organizer_image?.startsWith("http")
+                ? raw.organizer_image
+                : raw.organizer_image
+                  ? `https://api.andra-dating.com/images/${raw.organizer_image}`
+                  : "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
+              verified: raw.organizer_verified === "1" || false,
+            },
+            going,
+            going_count: raw.going_count ?? going.length,
+            isAttending: isAttendingValue,
+            user_going: raw.user_going || (isAttendingValue ? "1" : "0"),
+            web_link: raw.web_link,
+            lat: raw.lat,
+            lng: raw.lng,
+            distance: raw.distance,
+            attendees: going,
+            totalAttendees: raw.going_count ?? going.length,
+          };
+          setEvent(eventData);
+          setIsAttending(isAttendingValue);
+          return true;
+        }
+      } catch (error) {
+        return false;
+      }
       return false;
-    }
-    return false;
-  }, []);
+    },
+    [userData?.id, user?.user_id],
+  );
 
   useEffect(() => {
+    const inviteIdParam =
+      typeof params.inviteId === "string" ? params.inviteId : null;
+    if (inviteIdParam) setInviteRecordId(inviteIdParam);
+
     if (params.event) {
       try {
         const eventData = JSON.parse(params.event as string);
@@ -208,18 +255,34 @@ export default function EventDetails() {
         setIsAttending(
           eventData.user_going === "1" || eventData.user_going === 1,
         );
+        if (!inviteIdParam && eventData.id && user?.user_id) {
+          fetchEventInviteForUser(String(eventData.id)).then((id) => {
+            if (id) setInviteRecordId(id);
+          });
+        }
       } catch (error) {
         router.back();
       }
     } else if (params.eventId && typeof params.eventId === "string") {
-      // Opened via deep link (e.g. andra://events/event_details?eventId=12)
       fetchEventById(params.eventId).then((ok) => {
         if (!ok) router.back();
+        else if (!inviteIdParam && user?.user_id) {
+          fetchEventInviteForUser(params.eventId as string).then((id) => {
+            if (id) setInviteRecordId(id);
+          });
+        }
       });
     } else {
       router.back();
     }
-  }, [params.event, params.eventId, fetchEventById]);
+  }, [
+    params.event,
+    params.eventId,
+    params.inviteId,
+    fetchEventById,
+    fetchEventInviteForUser,
+    user?.user_id,
+  ]);
 
   if (!event) {
     return (
@@ -253,8 +316,6 @@ export default function EventDetails() {
         "events.openEventInApp",
       )}: ${appDeepLink}\n\n${storeLinks}`;
 
-      // On Android, pass url so the share target gets a tappable link that opens the app when tapped.
-      // On iOS, passing url often makes apps show only the link and drop the message, so we omit url there.
       const shareOptions: { title: string; message: string; url?: string } = {
         title: event.title,
         message,
@@ -267,7 +328,6 @@ export default function EventDetails() {
       if (result.action === Share.sharedAction) {
         showToast(t("events.eventShared"), "success");
       } else if (result.action === Share.dismissedAction) {
-        // User dismissed the share sheet
       }
     } catch (error) {
       showToast(t("events.failedToShare"), "error");
@@ -276,17 +336,14 @@ export default function EventDetails() {
 
   const handleGetDirections = async () => {
     try {
-      // Prefer lat/lng so maps open with directions (turn-by-turn) to the event
       if (event.lat && event.lng) {
         const lat = String(event.lat).trim();
         const lng = String(event.lng).trim();
         let mapsUrl: string;
 
         if (Platform.OS === "ios") {
-          // Apple Maps: daddr = destination → opens directions to this point (from current location)
           mapsUrl = `http://maps.apple.com/?daddr=${lat},${lng}`;
         } else {
-          // Google Maps: /dir/ with destination → opens directions to this point
           mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
         }
 
@@ -297,7 +354,6 @@ export default function EventDetails() {
         }
       }
 
-      // Fallback to address if coordinates not available
       const address = event.address || event.location;
       if (!address) {
         showToast(t("events.noLocationAvailable"), "error");
@@ -325,7 +381,6 @@ export default function EventDetails() {
 
   const handleAddToCalendar = async () => {
     try {
-      // Request calendar permissions
       const { status } = await Calendar.requestCalendarPermissionsAsync();
 
       if (status !== "granted") {
@@ -337,7 +392,6 @@ export default function EventDetails() {
             {
               text: t("common.settings"),
               onPress: () => {
-                // Open device settings
                 if (Platform.OS === "ios") {
                   Linking.openURL("app-settings:");
                 } else {
@@ -350,12 +404,10 @@ export default function EventDetails() {
         return;
       }
 
-      // Get writable calendars
       const calendars = await Calendar.getCalendarsAsync(
         Calendar.EntityTypes.EVENT,
       );
 
-      // Find a writable calendar (not read-only)
       const writableCalendar =
         calendars.find(
           (cal) => cal.allowsModifications && !cal.source?.isLocalAccount,
@@ -366,34 +418,23 @@ export default function EventDetails() {
         return;
       }
 
-      // Parse event date and time
-      // event.date might be in format "Jul 22, 2025" or "2025-07-22" or ISO string
-      // event.time might be in format "10:04 PM" or "22:04" (12-hour or 24-hour)
-
       let startDate: Date;
       let endDate: Date;
 
       try {
-        // Try to parse the date
         let eventDate: Date;
         if (typeof event.date === "string") {
           const dateStr = event.date.trim();
 
-          // Check for DD-MM-YYYY format first (e.g., "25-01-2026")
-          // IMPORTANT: This must be checked BEFORE new Date() because new Date() misinterprets DD-MM-YYYY
           const ddMmYyyyMatch = dateStr.match(/^\d{2}-\d{2}-\d{4}$/);
 
           if (ddMmYyyyMatch) {
             const [day, month, year] = dateStr.split("-").map(Number);
-            eventDate = new Date(year, month - 1, day); // month is 0-indexed
-          }
-          // Check for YYYY-MM-DD format (e.g., "2026-01-25")
-          else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            eventDate = new Date(year, month - 1, day);
+          } else if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
             const [year, month, day] = dateStr.split("-").map(Number);
             eventDate = new Date(year, month - 1, day);
-          }
-          // Check for MMM DD, YYYY format (e.g., "Jul 22, 2025")
-          else if (dateStr.match(/^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}$/)) {
+          } else if (dateStr.match(/^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}$/)) {
             const monthMap: { [key: string]: number } = {
               Jan: 0,
               Feb: 1,
@@ -418,9 +459,7 @@ export default function EventDetails() {
             } else {
               throw new Error("Invalid date format");
             }
-          }
-          // Try parsing as ISO string or standard format
-          else {
+          } else {
             eventDate = new Date(dateStr);
             if (isNaN(eventDate.getTime())) {
               throw new Error(`Invalid date format: ${dateStr}`);
@@ -430,12 +469,10 @@ export default function EventDetails() {
           eventDate = new Date(event.date);
         }
 
-        // Validate the parsed date
         if (isNaN(eventDate.getTime())) {
           throw new Error(`Failed to parse date: ${event.date}`);
         }
 
-        // Additional validation: check if year is reasonable (not year 30!)
         const parsedYear = eventDate.getFullYear();
 
         if (parsedYear < 2000 || parsedYear > 2100) {
@@ -448,20 +485,17 @@ export default function EventDetails() {
           );
         }
 
-        // Parse start time (event.time)
         startDate = new Date(eventDate);
 
         if (event.time) {
           const timeStr = event.time.trim();
 
-          // Check if it's 12-hour format (contains AM/PM)
           if (timeStr.includes("AM") || timeStr.includes("PM")) {
             const timeParts = timeStr.split(" ");
             const timeValue = timeParts[0];
             const ampm = timeParts[1]?.toUpperCase();
             const [hours, minutes] = timeValue.split(":").map(Number);
 
-            // Convert to 24-hour format
             let hour24 = hours;
             if (ampm === "PM" && hours !== 12) {
               hour24 += 12;
@@ -471,27 +505,22 @@ export default function EventDetails() {
 
             startDate.setHours(hour24, minutes || 0, 0, 0);
           } else {
-            // 24-hour format (e.g., "22:04" or "22:04:00")
             const [hours, minutes] = timeStr.split(":").map(Number);
             startDate.setHours(hours || 0, minutes || 0, 0, 0);
           }
         } else {
-          // No time specified, default to 12:00 PM
           startDate.setHours(12, 0, 0, 0);
         }
 
-        // Calculate end date - use to_time if available, otherwise default to 2 hours
         if (event.to_time) {
           const toTimeStr = event.to_time.trim();
 
-          // Check if it's 12-hour format
           if (toTimeStr.includes("AM") || toTimeStr.includes("PM")) {
             const timeParts = toTimeStr.split(" ");
             const timeValue = timeParts[0];
             const ampm = timeParts[1]?.toUpperCase();
             const [hours, minutes] = timeValue.split(":").map(Number);
 
-            // Convert to 24-hour format
             let hour24 = hours;
             if (ampm === "PM" && hours !== 12) {
               hour24 += 12;
@@ -502,18 +531,15 @@ export default function EventDetails() {
             endDate = new Date(eventDate);
             endDate.setHours(hour24, minutes || 0, 0, 0);
           } else {
-            // 24-hour format
             const [hours, minutes] = toTimeStr.split(":").map(Number);
             endDate = new Date(eventDate);
             endDate.setHours(hours || 0, minutes || 0, 0, 0);
           }
 
-          // If end time is earlier than start time, assume it's next day
           if (endDate < startDate) {
             endDate.setDate(endDate.getDate() + 1);
           }
         } else {
-          // Default to 2 hours duration if to_time not available
           endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
         }
       } catch (error) {
@@ -524,7 +550,6 @@ export default function EventDetails() {
         return;
       }
 
-      // Validate dates
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         showToast(
           t("events.invalidDateTimeFormat") || "Invalid date/time format",
@@ -533,7 +558,6 @@ export default function EventDetails() {
         return;
       }
 
-      // Validate year is reasonable (should have been caught earlier, but double-check)
       const startYear = startDate.getFullYear();
       const endYear = endDate.getFullYear();
       if (
@@ -554,7 +578,6 @@ export default function EventDetails() {
         return;
       }
 
-      // Create calendar event
       const eventDetails = {
         title: event.title,
         startDate: startDate,
@@ -566,16 +589,15 @@ export default function EventDetails() {
         }\n\nEvent from Andra Dating App`,
         alarms: [
           {
-            relativeOffset: -60, // 1 hour before
+            relativeOffset: -60,
           },
           {
-            relativeOffset: -1440, // 1 day before
+            relativeOffset: -1440,
           },
         ],
         calendarId: writableCalendar.id,
       };
 
-      // Final validation before creating event
       const finalStartYear = startDate.getFullYear();
       const finalEndYear = endDate.getFullYear();
 
@@ -595,7 +617,6 @@ export default function EventDetails() {
         return;
       }
 
-      // Create the event
       const eventId = await Calendar.createEventAsync(
         writableCalendar.id,
         eventDetails,
@@ -615,10 +636,7 @@ export default function EventDetails() {
     setShowInviteMatches(true);
   };
 
-  const handleSendInvites = (selectedMatches: any) => {
-    // Handle sending invites logic here
-    // You could show a success message or navigate somewhere
-  };
+  const handleSendInvites = (selectedMatches: any) => {};
 
   const handleOrganizerWebsite = async () => {
     if (event?.web_link) {
@@ -655,9 +673,9 @@ export default function EventDetails() {
       formData.append("user_id", user.user_id);
       formData.append("table_name", "event_rsvp");
       formData.append("event_id", event.id.toString());
-
+      console.log("handleRSVP formData", formData);
       const response = await apiCall(formData);
-
+      console.log("handleRSVP response", response);
       if (response.result) {
         setIsAttending(!isAttending);
       } else {
@@ -669,6 +687,43 @@ export default function EventDetails() {
       setIsRSVPing(false);
     }
   };
+
+  const updateEventInviteStatus = async (status: "accepted" | "rejected") => {
+    if (!event?.id || !user?.user_id) return;
+    setIsRespondingToInvite(true);
+    try {
+      const formData = new FormData();
+      formData.append("type", "update_data");
+      formData.append("table_name", "event_invites");
+      formData.append("id", String(event.id));
+      formData.append("status", status);
+      console.log("updateEventInviteStatus formData", formData);
+      const response = await apiCall(formData);
+      console.log("updateEventInviteStatus response", response);
+      if (response?.result) {
+        setInviteResponded(true);
+        setInviteRecordId(null);
+        if (status === "accepted") {
+          showToast(t("events.inviteAccepted"), "success");
+          setIsAttending(true);
+        } else {
+          showToast(t("events.inviteRejected"), "info");
+        }
+      } else {
+        showToast(
+          response?.message || t("events.somethingWentWrongTryAgain"),
+          "error",
+        );
+      }
+    } catch (error) {
+      showToast(t("events.somethingWentWrongTryAgain"), "error");
+    } finally {
+      setIsRespondingToInvite(false);
+    }
+  };
+
+  const handleAcceptInvite = () => updateEventInviteStatus("accepted");
+  const handleRejectInvite = () => updateEventInviteStatus("rejected");
 
   const handleViewAllAttendees = () => {
     setShowAttendeesModal(true);
@@ -697,17 +752,14 @@ export default function EventDetails() {
     });
   };
 
-  // Parse going users data
   const parseGoingUsers = () => {
     if (!event?.going || !Array.isArray(event.going)) {
       return [];
     }
 
     const parsedUsers = event.going.map((user: any) => {
-      // Check if user already has a complete image URL
       let imageUrl = user.image;
 
-      // If no direct image URL, try to parse from images array
       if (!imageUrl && user.images) {
         try {
           const images = JSON.parse(user.images.replace(/\\"/g, '"'));
@@ -891,7 +943,45 @@ export default function EventDetails() {
           </View>
         </View>
 
-        {/* Action Buttons */}
+        {console.log("isAttending", isAttending)}
+        {inviteRecordId && !inviteResponded && !isAttending && (
+          <View style={styles.inviteResponseSection}>
+            <Text style={styles.inviteResponseTitle}>
+              {t("events.youAreInvited")}
+            </Text>
+            {isRespondingToInvite && (
+              <View style={styles.inviteResponseLoading}>
+                <ActivityIndicator size="small" color={color.primary} />
+                <Text style={styles.inviteResponseLoadingText}>
+                  {t("events.processing")}
+                </Text>
+              </View>
+            )}
+            <View style={styles.inviteResponseButtons}>
+              <TouchableOpacity
+                style={[styles.inviteResponseButton, styles.rejectButton]}
+                onPress={handleRejectInvite}
+                disabled={isRespondingToInvite}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.inviteResponseButtonText}>
+                  {t("events.rejectInvite")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.inviteResponseButton, styles.acceptButton]}
+                onPress={handleAcceptInvite}
+                disabled={isRespondingToInvite}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.inviteResponseButtonText}>
+                  {t("events.acceptInvite")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         <View style={styles.actionButtons}>
           <CustomButton
             title={t("events.addToCalendar")}
@@ -913,28 +1003,27 @@ export default function EventDetails() {
           />
         </View>
 
-        {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* RSVP Button */}
       <View style={styles.rsvpContainer}>
-        <CustomButton
-          title={
-            isRSVPing
-              ? t("events.processing")
-              : isAttending
-                ? t("events.going")
-                : t("events.rsvpNow")
-          }
-          icon={<Calender />}
-          onPress={handleRSVP}
-          isDisabled={isRSVPing || isAttending}
-          isLoading={isRSVPing}
-        />
+        {inviteRecordId && !inviteResponded && !isAttending ? null : (
+          <CustomButton
+            title={
+              isRSVPing
+                ? t("events.processing")
+                : isAttending
+                  ? t("events.going")
+                  : t("events.rsvpNow")
+            }
+            icon={<Calender />}
+            onPress={handleRSVP}
+            isDisabled={isRSVPing || isAttending}
+            isLoading={isRSVPing}
+          />
+        )}
       </View>
 
-      {/* Invite Matches Modal */}
       <InviteMatches
         visible={showInviteMatches}
         onClose={() => setShowInviteMatches(false)}
@@ -943,7 +1032,6 @@ export default function EventDetails() {
         eventId={event.id}
       />
 
-      {/* Attendees Modal */}
       <AttendeesModal
         visible={showAttendeesModal}
         onClose={() => setShowAttendeesModal(false)}
@@ -1166,6 +1254,55 @@ const styles = StyleSheet.create({
     fontFamily: font.medium,
     color: color.primary,
   },
+  inviteResponseSection: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 16,
+    backgroundColor: color.primary100,
+    borderRadius: 16,
+  },
+  inviteResponseTitle: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.black,
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  inviteResponseLoading: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  inviteResponseLoadingText: {
+    fontSize: 14,
+    fontFamily: font.regular,
+    color: color.gray55,
+  },
+  inviteResponseButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  inviteResponseButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 48,
+  },
+  rejectButton: {
+    backgroundColor: color.gray55,
+  },
+  acceptButton: {
+    backgroundColor: color.primary,
+  },
+  inviteResponseButtonText: {
+    fontSize: 16,
+    fontFamily: font.semiBold,
+    color: color.white,
+  },
   actionButtons: {
     flexDirection: "row",
     paddingHorizontal: 20,
@@ -1223,7 +1360,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Modal Styles
 const modalStyles = StyleSheet.create({
   overlay: {
     position: "absolute",

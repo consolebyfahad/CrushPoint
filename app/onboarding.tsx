@@ -20,8 +20,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// This will be moved inside the component to use translations
-
 export default function Onboarding() {
   const { t, i18n } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -64,23 +62,20 @@ export default function Onboarding() {
   const isLastScreen = currentIndex === onboardingData.length - 1;
 
   const animateContentIn = () => {
-    // Reset values
+    
     iconScale.value = 0;
     iconOpacity.value = 0;
     titleOpacity.value = 0;
     descriptionOpacity.value = 0;
 
-    // Animate icon
     iconScale.value = withSpring(1, {
       damping: 15,
       stiffness: 150,
     });
     iconOpacity.value = withTiming(1, { duration: 300 });
 
-    // Animate title with delay
     titleOpacity.value = withDelay(200, withTiming(1, { duration: 400 }));
 
-    // Animate description with more delay
     descriptionOpacity.value = withDelay(400, withTiming(1, { duration: 400 }));
   };
 
@@ -100,11 +95,10 @@ export default function Onboarding() {
     return () => clearTimeout(timer);
   }, [currentIndex]);
 
-  // Show language modal on first load
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowLanguageModal(true);
-    }, 1000); // Show after 1 second
+    }, 1000);  
 
     return () => clearTimeout(timer);
   }, []);
@@ -113,7 +107,7 @@ export default function Onboarding() {
     try {
       await AsyncStorage.setItem("@onboarding_completed", "true");
     } catch (error) {
-      // Error marking onboarding as completed
+      
     }
   };
 
@@ -147,7 +141,6 @@ export default function Onboarding() {
     router.push("/welcome");
   };
 
-  // Animated styles
   const iconAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: iconScale.value }],
     opacity: iconOpacity.value,

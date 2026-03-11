@@ -66,14 +66,13 @@ interface UserFilters {
 }
 
 export default function Index() {
-  // Get interests from API for interest name conversion
+  
   const { interests: apiInterests } = useGetInterests();
   const { t } = useTranslation();
   const { user, updateUserData, userData } = useAppContext();
   const params = useLocalSearchParams();
   const navigation = useNavigation();
 
-  // Disable swipe back gesture on iOS
   useEffect(() => {
     if (navigation) {
       navigation.setOptions({
@@ -82,7 +81,6 @@ export default function Index() {
     }
   }, [navigation]);
 
-  // Filter data state - memoized to prevent unnecessary re-renders
   const initialFilterData = useMemo(
     () => ({
       gender:
@@ -102,7 +100,6 @@ export default function Index() {
   const [filterData, setFilterData] = useState<UserFilters>(initialFilterData);
   const filtersHydratedRef = useRef(false);
 
-  // Load persisted filters on mount
   useEffect(() => {
     let isMounted = true;
     AsyncStorage.getItem(DISCOVER_FILTERS_KEY)
@@ -136,13 +133,11 @@ export default function Index() {
     };
   }, []);
 
-  // Persist filters whenever they change (after initial load from storage)
   useEffect(() => {
     if (!filtersHydratedRef.current) return;
     AsyncStorage.setItem(DISCOVER_FILTERS_KEY, JSON.stringify(filterData));
   }, [filterData]);
 
-  // Update filter data when userData changes (gender from profile)
   useEffect(() => {
     if (userData?.gender_interest) {
       const updatedGender = formatGenderInterest(userData.gender_interest, t);
@@ -157,7 +152,7 @@ export default function Index() {
   const { users, loading, error, refetch } = useGetUsers(filterData);
   const [viewType, setViewType] = useState(t("common.mapView"));
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  // Modal states
+  
   const [showFilters, setShowFilters] = useState(false);
   const [showLookingFor, setShowLookingFor] = useState(false);
   const [showHeight, setShowHeight] = useState(false);
@@ -165,7 +160,6 @@ export default function Index() {
   const [showReligion, setShowReligion] = useState(false);
   const [showZodiac, setShowZodiac] = useState(false);
 
-  // Location states
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -174,7 +168,6 @@ export default function Index() {
     longitude: number;
   } | null>(null);
 
-  // Prevent going back to auth screens
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -186,7 +179,6 @@ export default function Index() {
     return () => backHandler.remove();
   }, []);
 
-  // Update location every time user comes to this screen
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -220,7 +212,6 @@ export default function Index() {
     }, []),
   );
 
-  // Update location in database
   const updateLocationInDatabase = async (location: any) => {
     if (!user?.user_id || !location) return;
 
@@ -252,10 +243,8 @@ export default function Index() {
     } catch (error) {}
   }, [user?.user_id]);
 
-  // Track if notification has been handled to prevent duplicates
   const notificationHandledRef = useRef<Set<string>>(new Set());
 
-  // Notification setup
   useEffect(() => {
     requestNotificationPermissions();
 
@@ -263,29 +252,24 @@ export default function Index() {
       data: any,
       notificationBody?: string,
     ) => {
-      // Check if this is a match notification by checking the notification body
+      
       const isMatchNotification =
         notificationBody?.toLowerCase().includes("match") ||
         notificationBody?.toLowerCase().includes("new match");
 
-      // Only handle match notifications - navigate to match2 screen
-      // For all other notifications (chat, message, etc.), just show the push notification without navigation
       if (data?.date_id && isMatchNotification) {
-        // Create unique key for this notification
+        
         const notificationKey = `${data.date_id}_${Date.now()}`;
 
-        // Check if this notification was already handled recently (within 2 seconds)
         const recentKeys = Array.from(notificationHandledRef.current).filter(
           (key) => {
             const timestamp = parseInt(key.split("_")[1]);
-            return Date.now() - timestamp < 2000; // 2 seconds
+            return Date.now() - timestamp < 2000;  
           },
         );
 
-        // Clean up old keys
         notificationHandledRef.current = new Set(recentKeys);
 
-        // Check if we already have a recent notification for this date_id
         const alreadyHandled = recentKeys.some((key) =>
           key.startsWith(`${data.date_id}_`),
         );
@@ -294,7 +278,6 @@ export default function Index() {
           return;
         }
 
-        // Mark as handled
         notificationHandledRef.current.add(notificationKey);
 
         try {
@@ -316,17 +299,14 @@ export default function Index() {
     return () => {
       unsubscribe();
     };
-  }, []); // Empty deps is fine - we use ref for state
+  }, []);  
 
-  // Ref to track processed params to prevent re-processing
   const processedParamsRef = useRef<Set<string>>(new Set());
 
-  // Handle navigation parameters from user profile
   useEffect(() => {
-    // Create a unique key for these params
+    
     const paramKey = `${params.selectedUserId}_${params._timestamp || ""}`;
 
-    // Skip if we've already processed these params
     if (processedParamsRef.current.has(paramKey)) {
       return;
     }
@@ -344,26 +324,20 @@ export default function Index() {
           ...locationData,
         };
 
-        // Mark these params as processed
         processedParamsRef.current.add(paramKey);
 
-        // Switch to map view first
         setViewType(t("common.mapView"));
 
-        // Longer delay to ensure map is fully loaded and ready
-        // This prevents the map from freezing
         setTimeout(() => {
           setSelectedUser(selectedUserData);
 
-          // Auto-clear selection after 10 seconds for better UX
           setTimeout(() => {
             setSelectedUser(null);
           }, 10000);
-        }, 500); // Increased from 100ms to 500ms to ensure map is ready
+        }, 500);  
       } catch (error) {}
     }
 
-    // Clean up old param keys (keep only last 10)
     if (processedParamsRef.current.size > 10) {
       const keysArray = Array.from(processedParamsRef.current);
       processedParamsRef.current.clear();
@@ -382,16 +356,15 @@ export default function Index() {
 
       const response = await apiCall(formData);
       if (response) {
-        // Check if response.data is an array (as shown in your terminal logs)
+        
         const matchedUserData = Array.isArray(response.data)
           ? response.data[0]
           : response.data;
 
-        // Parse the images array from the API response
         let parsedImages = [];
         try {
           if (matchedUserData?.images) {
-            // Clean up the escaped quotes in the JSON string
+            
             const cleanedImagesString = matchedUserData.images.replace(
               /\\"/g,
               '"',
@@ -511,10 +484,9 @@ export default function Index() {
           return "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face";
         };
 
-        // Parse and translate user data
         const parseUserData = (data: any) => {
           try {
-            // Parse looking_for to get raw IDs for dynamic formatting
+            
             let lookingForIds: string[] = [];
             try {
               const rawIds = parseJsonString(data?.looking_for || "[]");
@@ -526,7 +498,7 @@ export default function Index() {
                 data?.interests || "[]",
                 apiInterests,
               ),
-              lookingFor: lookingForIds, // Store raw IDs for dynamic formatting
+              lookingFor: lookingForIds,  
               nationality: parseNationalityWithLabels(
                 data?.nationality || "[]",
                 t,
@@ -560,7 +532,7 @@ export default function Index() {
             distance: formatDistance(matchedUserData?.distance),
             image: getProfileImage(),
             id: matchedUserData?.id,
-            // Additional user data for profile
+            
             about: matchedUserData?.about || "",
             city: matchedUserData?.city || "",
             country: matchedUserData?.country || "",
@@ -611,7 +583,7 @@ export default function Index() {
       const permissionGranted = await requestFCMPermission();
 
       if (permissionGranted) {
-        // Small delay for iOS to complete APNS registration
+        
         if (Platform.OS === "ios") {
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
@@ -670,7 +642,6 @@ export default function Index() {
     }
   };
 
-  // Header handlers
   const handleNotifications = () => {
     router.push("/notifications");
   };
@@ -679,7 +650,6 @@ export default function Index() {
     setShowFilters(true);
   };
 
-  // Modal close handlers
   const closeAllModals = () => {
     setShowFilters(false);
     setShowLookingFor(false);
@@ -689,7 +659,6 @@ export default function Index() {
     setShowZodiac(false);
   };
 
-  // Navigation handlers
   const handleNavigateToLookingFor = () => {
     setShowFilters(false);
     setShowLookingFor(true);
@@ -720,7 +689,6 @@ export default function Index() {
     setShowFilters(true);
   };
 
-  // User interaction handlers
   const handleViewProfile = (userData: any) => {
     router.push({
       pathname: "/profile/user_profile",
@@ -731,31 +699,26 @@ export default function Index() {
     });
   };
 
-  // UPDATED: Enhanced function to show user on map
   const handleShowUserOnMap = (selectedUser: any) => {
-    // Switch to map view first
+    
     setViewType(t("common.mapView"));
 
-    // Small delay to ensure map tab is active before setting selected user
     setTimeout(() => {
       setSelectedUser(selectedUser);
 
-      // Auto-clear selection after 10 seconds for better UX
       setTimeout(() => {
         setSelectedUser(null);
       }, 10000);
     }, 100);
   };
 
-  // Handle manual user deselection
   const handleUserDeselect = () => {
     setSelectedUser(null);
   };
 
-  // NEW: Handle show my location
   const handleShowMyLocation = () => {
-    setSelectedUser(null); // Clear any selected user
-    // The map will automatically center on current location
+    setSelectedUser(null);  
+    
   };
 
   const handleClose = () => {
@@ -769,7 +732,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      {/* Main Content */}
+      {}
       {viewType === t("common.listView") ? (
         <ListView
           onViewProfile={handleViewProfile}
@@ -800,10 +763,10 @@ export default function Index() {
         pointerEvents="none"
       />
 
-      {/* Top Header */}
+      {}
       <SafeAreaView style={styles.topHeader}>
         <View style={styles.headerContent}>
-          {/* Notification Icon */}
+          {}
           <TouchableOpacity
             style={styles.iconButton}
             onPress={handleNotifications}
@@ -812,7 +775,7 @@ export default function Index() {
             <BellIcon />
           </TouchableOpacity>
 
-          {/* Map/List Toggle */}
+          {}
           <View style={styles.toggleContainer}>
             <TouchableOpacity
               style={[
@@ -863,7 +826,7 @@ export default function Index() {
             </TouchableOpacity>
           </View>
 
-          {/* Filter Icon */}
+          {}
           <TouchableOpacity
             style={styles.iconButton}
             onPress={handleFilters}
@@ -874,7 +837,7 @@ export default function Index() {
         </View>
       </SafeAreaView>
 
-      {/* All Modals remain the same */}
+      {}
       <Modal
         visible={showFilters}
         transparent={true}

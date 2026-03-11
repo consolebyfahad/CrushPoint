@@ -387,7 +387,12 @@
     "invalidDateTimeFormat": "Invalid date/time format",
     "invalidDateCheck": "Invalid date format. Please check the event date: {{date}}",
     "invalidYearRange": "Invalid date format. Year must be between 2000-2100. Got: {{year}}",
-    "cannotAddEventContactSupport": "Cannot add event: Invalid date format (year: {{year}}). Please contact support."
+    "cannotAddEventContactSupport": "Cannot add event: Invalid date format (year: {{year}}). Please contact support.",
+    "youAreInvited": "You're invited to this event",
+    "acceptInvite": "Accept",
+    "rejectInvite": "Reject",
+    "inviteAccepted": "You accepted the event invitation",
+    "inviteRejected": "You declined the event invitation"
   },
   "users": {
     "userIdNotAvailable": "User ID not available",

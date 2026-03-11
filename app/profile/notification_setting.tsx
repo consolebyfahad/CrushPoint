@@ -44,7 +44,6 @@ export default function NotificationSettings({ navigation }: any) {
   const [isChanged, setIsChanged] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load existing notification settings when component mounts
   useEffect(() => {
     if (userData?.notification_settings) {
       try {
@@ -91,7 +90,7 @@ export default function NotificationSettings({ navigation }: any) {
 
     setIsLoading(true);
     try {
-      // Convert to array format for API (keys match backend: event_invite, new_match, etc.)
+      
       const notificationArray = NOTIFICATION_KEYS.map((key) => ({
         key,
         enabled: notificationSettings[key],
@@ -110,14 +109,13 @@ export default function NotificationSettings({ navigation }: any) {
       const response = await apiCall(formData);
 
       if (response.result) {
-        // Update context with new notification settings
+        
         updateUserData({
           notification_settings: notificationArray,
         });
 
         setIsChanged(false);
 
-        // Navigate back without success message
         if (navigation) {
           navigation.goBack();
         } else {
@@ -154,8 +152,7 @@ export default function NotificationSettings({ navigation }: any) {
         onValueChange={() => toggleNotification(item.key)}
         trackColor={{ false: "#DFDFDF", true: color.primary }}
         thumbColor={item.enabled ? "#FFFFFF" : "#FFFFFF"}
-        // ios_backgroundColor="#DFDFDF"
-        // style={[styles.switch]}
+
         disabled={isLoading}
       />
     </View>
@@ -163,18 +160,18 @@ export default function NotificationSettings({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <Header title={t("common.notifications")} divider={true} />
 
-      {/* Content */}
+      {}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {notificationOptions.map(renderNotificationItem)}
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Save Button */}
+      {}
       <View style={styles.buttonContainer}>
         <CustomButton
           title={isLoading ? t("common.saving") : t("common.saveChanges")}

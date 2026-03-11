@@ -16,7 +16,6 @@ export default function LookingFor() {
   const { updateUserData } = useAppContext();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  // Use base options from helper and translate labels
   const options = useMemo(() => {
     return LOOKING_FOR_OPTIONS.map((option) => ({
       id: option.id,

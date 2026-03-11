@@ -113,7 +113,7 @@ export default function PrivacyPolicy() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -131,7 +131,7 @@ export default function PrivacyPolicy() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Introduction */}
+        {}
         <View style={styles.introSection}>
           <View style={styles.introHeader}>
             <Ionicons name="shield" size={32} color={color.primary} />
@@ -141,7 +141,7 @@ export default function PrivacyPolicy() {
           <Text style={styles.introText}>{t("privacy.intro.content")}</Text>
         </View>
 
-        {/* Data We Collect */}
+        {}
         <View style={styles.dataSection}>
           <Text style={styles.sectionMainTitle}>
             {t("privacy.dataCollect.title")}
@@ -153,7 +153,7 @@ export default function PrivacyPolicy() {
           </View>
         </View>
 
-        {/* Privacy Sections */}
+        {}
         <View style={styles.privacyContainer}>
           <Text style={styles.sectionMainTitle}>
             {t("privacy.protection.title")}
@@ -161,7 +161,7 @@ export default function PrivacyPolicy() {
           {sections.map((section, index) => renderSection(section, index))}
         </View>
 
-        {/* Key Principles */}
+        {}
         <View style={styles.principlesSection}>
           <Text style={styles.sectionMainTitle}>
             {t("privacy.principles.title")}
@@ -198,7 +198,7 @@ export default function PrivacyPolicy() {
           </View>
         </View>
 
-        {/* Contact Section */}
+        {}
         <View style={styles.contactSection}>
           <View style={styles.contactHeader}>
             <Ionicons name="mail" size={24} color={color.primary} />
@@ -209,7 +209,7 @@ export default function PrivacyPolicy() {
           <Text style={styles.contactText}>{t("privacy.contact.content")}</Text>
         </View>
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
     </SafeAreaView>

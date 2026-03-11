@@ -37,50 +37,44 @@ export default function AccountSettings() {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Get change dates from userData
   const nameChangeDate = (userData as any)?.name_change_date || null;
   const dobChangeDate = (userData as any)?.dob_change_date || null;
 
-  // Check if 60 days have passed since last change
   const canEditNameOrDob = (
     changeDate: string | null,
     fieldType: "name" | "dob"
   ) => {
-    // Get today's date
+    
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    today.setHours(0, 0, 0, 0);  
 
     if (!changeDate) {
-      // If no change date, allow editing (first time or never changed)
+      
       return true;
     }
 
     try {
-      // Parse the change date (assuming YYYY-MM-DD format)
+      
       const lastChangeDate = new Date(changeDate);
-      lastChangeDate.setHours(0, 0, 0, 0); // Reset time to start of day
+      lastChangeDate.setHours(0, 0, 0, 0);  
 
-      // Check if date is valid
       if (isNaN(lastChangeDate.getTime())) {
-        return true; // If invalid date, allow editing
+        return true;  
       }
 
-      // Calculate difference in days
       const diffTime = today.getTime() - lastChangeDate.getTime();
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-      // Check if less than 60 days
       return diffDays >= 60;
     } catch (error) {
 
-      return true; // On error, allow editing
+      return true;  
     }
   };
 
   const canEditName = canEditNameOrDob(nameChangeDate, "name");
   const canEditDob = canEditNameOrDob(dobChangeDate, "dob");
 
-  // Load existing user data when component mounts
   useEffect(() => {
     if (userData) {
 
@@ -94,10 +88,9 @@ export default function AccountSettings() {
           email: userData.email || "",
         });
 
-        // Set date picker date if DOB exists
         if (userProfile.dob) {
           try {
-            // Assuming DOB is in mm/dd/yyyy format
+            
             const [month, day, year] = userProfile.dob.split("/");
             const dateObj = new Date(
               parseInt(year),
@@ -121,12 +114,11 @@ export default function AccountSettings() {
   };
 
   const validatePhoneNumber = (phone: string) => {
-    // Basic phone validation - should contain numbers and can have +, -, spaces, parentheses
+    
     const phoneRegex = /^[\+]?[1-9][\d\-\s\(\)]{7,15}$/;
     return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""));
   };
 
-  // Check if field can be edited (only if empty)
   const canEditField = (field: string) => {
     if (field === "phoneNumber") {
       return !userData?.phone || userData.phone.trim() === "";
@@ -154,7 +146,6 @@ export default function AccountSettings() {
       return false;
     }
 
-    // Only validate phone number if it can be edited (empty) or if it has a value
     if (canEditField("phoneNumber")) {
       if (!accountData.phoneNumber.trim()) {
         Alert.alert(
@@ -173,7 +164,6 @@ export default function AccountSettings() {
       }
     }
 
-    // Only validate email if it can be edited (empty) or if it has a value
     if (canEditField("email")) {
       if (!accountData.email.trim()) {
         Alert.alert(
@@ -196,7 +186,7 @@ export default function AccountSettings() {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    // Prevent editing if field already has a value
+    
     if (field === "phoneNumber" && !canEditField(field)) {
       return;
     }
@@ -225,12 +215,11 @@ export default function AccountSettings() {
 
     setIsLoading(true);
     try {
-      // Check if name or DOB changed
+      
       const nameChanged =
         accountData.fullName.trim() !== (userData?.name || "");
       const dobChanged = accountData.dateOfBirth !== (userData?.dob || "");
 
-      // Get current date in YYYY-MM-DD format
       const today = new Date();
       const currentDate = `${today.getFullYear()}-${String(
         today.getMonth() + 1
@@ -244,22 +233,18 @@ export default function AccountSettings() {
       formData.append("dob", accountData.dateOfBirth);
       formData.append("date", currentDate);
 
-      // Only send name_change_count if name was changed
       if (nameChanged) {
         formData.append("name_change_count", nameChangeCount);
       }
 
-      // Only send dob_change_count if DOB was changed
       if (dobChanged) {
         formData.append("dob_change_count", dobChangeCount);
       }
 
-      // Only update phone if it can be edited
       if (canEditField("phoneNumber")) {
         formData.append("phone", accountData.phoneNumber.trim());
       }
 
-      // Only update email if it can be edited
       if (canEditField("email")) {
         formData.append("email", accountData.email.trim().toLowerCase());
       }
@@ -267,7 +252,7 @@ export default function AccountSettings() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        // Update context with new data (only editable fields)
+        
         const updatedData: any = {
           name: accountData.fullName.trim(),
           dob: accountData.dateOfBirth,
@@ -330,7 +315,6 @@ export default function AccountSettings() {
               if (response.result) {
                 showToast(t("account.accountDeletedSuccessfully"), "success");
 
-                // Clear user data and logout
                 setTimeout(async () => {
                   await logout();
                   router.replace("/auth/login");
@@ -362,7 +346,6 @@ export default function AccountSettings() {
     setShowDatePicker(Platform.OS === "ios");
     setDate(currentDate);
 
-    // Format date as mm/dd/yyyy
     const formattedDate = `${(currentDate.getMonth() + 1)
       .toString()
       .padStart(2, "0")}/${currentDate
@@ -375,11 +358,11 @@ export default function AccountSettings() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <Header title={t("profile.accountSettings")} divider={true} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Full Name */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.fullName")}</Text>
           <TextInput
@@ -395,7 +378,7 @@ export default function AccountSettings() {
           </Text>
         </View>
 
-        {/* Date of Birth */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.dateOfBirth")}</Text>
           <TouchableOpacity
@@ -437,7 +420,7 @@ export default function AccountSettings() {
           </Text>
         </View>
 
-        {/* Phone Number */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.phoneNumber")}</Text>
           <TextInput
@@ -454,7 +437,7 @@ export default function AccountSettings() {
           />
         </View>
 
-        {/* Email */}
+        {}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>{t("profile.email")}</Text>
           <TextInput
@@ -472,11 +455,11 @@ export default function AccountSettings() {
           />
         </View>
 
-        {/* Bottom Spacing */}
+        {}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Action Buttons */}
+      {}
       <View style={styles.actionContainer}>
         <CustomButton
           title={t("account.deleteMyAccount")}

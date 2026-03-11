@@ -49,10 +49,9 @@ const useGetRequests = () => {
     }
 
     try {
-      // Clean the escaped JSON string
+      
       let cleanedImagesString = imagesStr;
 
-      // Handle various escape patterns
       if (cleanedImagesString.includes('\\"')) {
         cleanedImagesString = cleanedImagesString.replace(/\\"/g, '"');
       }
@@ -147,27 +146,24 @@ const useGetRequests = () => {
             // Get the other user's information
             let otherUser;
             if (isIncoming) {
-              // For incoming requests, the other user is the sender (user object)
+              
               otherUser = request.user || {};
             } else {
-              // For outgoing requests, the other user is the recipient (date object)
+              
               otherUser = request.date || {};
             }
 
-            // Safely get user data with fallbacks
             const userId = otherUser.id || otherUser.user_id || "unknown";
             const userName = otherUser.name || "Unknown User";
             const userGender = otherUser.gender || "unknown";
             const userImages = otherUser.images || "";
 
-            // Parse and get the user's image
             const userImage = parseImages(
               userImages,
               userGender,
               request.image_url
             );
 
-            // Create the formatted request
             const formattedRequest: MeetupRequest = {
               id: String(request.id || request.request_id || ""),
               user: {
@@ -202,14 +198,12 @@ const useGetRequests = () => {
               type: isIncoming ? "incoming" : "outgoing",
             };
 
-            // Add response message for outgoing requests
             if (!isIncoming) {
               formattedRequest.responseMessage = String(
                 getResponseMessage(request.status)
               );
             }
 
-            // Add to appropriate list
             if (isIncoming) {
               incomingList.push(formattedRequest);
 
@@ -222,7 +216,6 @@ const useGetRequests = () => {
           }
         });
 
-        // Filter out past dates and sort by date
         const filteredIncomingList = filterOutPastDates(incomingList);
         const filteredOutgoingList = filterOutPastDates(outgoingList);
 
@@ -231,13 +224,13 @@ const useGetRequests = () => {
 
         setIncomingRequests(sortedIncomingList);
         setOutgoingRequests(sortedOutgoingList);
-        // Don't set error for empty data - let UI show empty state
+        
         setError(null);
       } else {
-        // No data returned but no error
+        
         setIncomingRequests([]);
         setOutgoingRequests([]);
-        setError(null); // Don't set error - just empty data
+        setError(null);  
       }
     } catch (error: any) {
       const errorMessage =
@@ -251,7 +244,6 @@ const useGetRequests = () => {
     }
   };
 
-  // Remove request from local state
   const removeRequest = (requestId: string, type: "incoming" | "outgoing") => {
     if (type === "incoming") {
       setIncomingRequests((prevRequests) =>
@@ -264,7 +256,6 @@ const useGetRequests = () => {
     }
   };
 
-  // Update request status
   const updateRequestStatus = (
     requestId: string,
     newStatus: string,

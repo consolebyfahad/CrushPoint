@@ -47,11 +47,10 @@ export default function Interests() {
 
   const counterProgress = useSharedValue(0);
 
-  // Load existing interests when in edit mode
   useEffect(() => {
     if (params.isEdit && userData?.originalInterestIds) {
       try {
-        // Use the already parsed interest IDs from the profile
+        
         const interestIds = userData.originalInterestIds;
 
         const finalInterests = Array.isArray(interestIds)
@@ -107,11 +106,11 @@ export default function Interests() {
       const response = await apiCall(formData);
 
       if (response.result) {
-        // Update user data with new interests and trigger profile refetch
+        
         updateUserData({ 
           interests: selectedInterests,
           originalInterestIds: selectedInterests,
-          parsedInterests: [] // Clear parsedInterests so they get re-parsed with correct data
+          parsedInterests: []  
         });
         setTimeout(() => {
           router.back();
@@ -354,7 +353,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: color.gray55,
   },
-  // Loading states
+  
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -366,7 +365,7 @@ const styles = StyleSheet.create({
     fontFamily: font.regular,
     color: color.gray55,
   },
-  // Error states
+  
   errorContainer: {
     flex: 1,
     justifyContent: "center",

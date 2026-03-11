@@ -26,7 +26,7 @@ export async function requestUserLocation() {
               if (Platform.OS === "ios") {
                 Linking.openURL("app-settings:");
               } else {
-                Linking.openSettings(); // Android
+                Linking.openSettings();  
               }
             },
           },
@@ -54,11 +54,10 @@ export async function searchLocations(
 
     const results = await Location.geocodeAsync(query);
 
-    // Enhanced results with better location names
     const enhancedResults = await Promise.all(
       results.map(async (location, index) => {
         try {
-          // Get a more detailed address using reverse geocoding
+          
           const reverseResults = await Location.reverseGeocodeAsync({
             latitude: location.latitude,
             longitude: location.longitude,
@@ -69,14 +68,12 @@ export async function searchLocations(
 
           if (reverseResults.length > 0) {
             const reverseLocation = reverseResults[0];
-            
-            // Create a more meaningful name
+
             const street = reverseLocation.street || '';
             const city = reverseLocation.city || '';
             const region = reverseLocation.region || '';
             const country = reverseLocation.country || '';
-            
-            // Use street name as primary name if available
+
             if (street) {
               locationName = street;
               address = `${city ? city + ', ' : ''}${region ? region + ', ' : ''}${country}`.replace(/,\s*$/, '');
@@ -98,7 +95,6 @@ export async function searchLocations(
           };
         } catch (reverseError) {
 
-          // Fallback to basic result
           return {
             id: `location_${index}`,
             name: query,
@@ -143,9 +139,8 @@ export async function reverseGeocodeLocation(
   }
 }
 
-// Get popular/common locations for suggestions
 export function getPopularLocations(): LocationSuggestion[] {
-  // You can customize these based on your app's target audience
+  
   return [
     {
       id: 'popular_1',
@@ -190,7 +185,6 @@ export function getPopularLocations(): LocationSuggestion[] {
   ];
 }
 
-// Get user's current location as a suggestion
 export async function getCurrentLocationSuggestion(): Promise<LocationSuggestion | null> {
   try {
     const location = await requestUserLocation();

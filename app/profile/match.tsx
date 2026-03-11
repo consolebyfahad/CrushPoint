@@ -47,22 +47,6 @@ export default function MatchScreen({ route, navigation }: any) {
     },
   };
 
-  // const matchData = route?.params?.matchData || {
-  //   currentUser: {
-  //     name: "You",
-  //     image:
-  //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
-  //   },
-  //   matchedUser: {
-  //     name: "Julia",
-  //     age: 24,
-  //     distance: "1.2 km away",
-  //     image:
-  //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
-  //   },
-  // };
-
-  // Animation values
   const blurOpacity = useRef(new Animated.Value(0)).current;
   const leftImageAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const rightImageAnim = useRef(new Animated.Value(SCREEN_WIDTH)).current;
@@ -76,12 +60,11 @@ export default function MatchScreen({ route, navigation }: any) {
   const contentOpacity = useRef(new Animated.Value(0)).current;
   const sparkleAnim = useRef(new Animated.Value(0)).current;
 
-  // Background hearts state with individual animations
   const [backgroundHearts, setBackgroundHearts] = useState([]);
   const heartAnimations = useRef({}).current;
 
   useEffect(() => {
-    // Generate random background hearts with different groups
+    
     const hearts = Array.from({ length: 20 }, (_, i) => {
       const animValue = new Animated.Value(0);
       heartAnimations[i] = animValue;
@@ -92,31 +75,28 @@ export default function MatchScreen({ route, navigation }: any) {
         startY: SCREEN_HEIGHT + Math.random() * 300,
         size: 15 + Math.random() * 35,
         opacity: 0.1 + Math.random() * 0.4,
-        duration: 5000 + Math.random() * 5000, // 5-10 seconds
-        delay: Math.random() * 4000, // Start within first 4 seconds
-        group: Math.floor(Math.random() * 5), // Groups 0-4
+        duration: 5000 + Math.random() * 5000,  
+        delay: Math.random() * 4000,  
+        group: Math.floor(Math.random() * 5),  
       };
     });
     setBackgroundHearts(hearts);
 
-    // Start the animation sequence
     startAnimationSequence();
 
-    // Start background hearts animations in groups
     startBackgroundHeartsAnimation(hearts);
   }, []);
 
   const startBackgroundHeartsAnimation = (hearts) => {
-    // Group hearts and start animations
+    
     const groups = {};
     hearts.forEach((heart) => {
       if (!groups[heart.group]) groups[heart.group] = [];
       groups[heart.group].push(heart);
     });
 
-    // Start each group with different delays
     Object.keys(groups).forEach((groupKey, index) => {
-      const groupDelay = index * 800; // Stagger groups by 800ms
+      const groupDelay = index * 800;  
 
       groups[groupKey].forEach((heart) => {
         setTimeout(() => {
@@ -141,7 +121,7 @@ export default function MatchScreen({ route, navigation }: any) {
   };
 
   const startAnimationSequence = () => {
-    // 1. Blur layer appears
+    
     setTimeout(() => {
       Animated.timing(blurOpacity, {
         toValue: 1,
@@ -150,33 +130,32 @@ export default function MatchScreen({ route, navigation }: any) {
       }).start();
     }, 300);
 
-    // 2. Images slide in from sides with rotation
     setTimeout(() => {
       Animated.parallel([
-        // Left image slide
+        
         Animated.spring(leftImageAnim, {
           toValue: SCREEN_WIDTH * 0.15,
           tension: 100,
           friction: 8,
           useNativeDriver: true,
         }),
-        // Left image rotation
+        
         Animated.spring(leftImageRotate, {
-          toValue: -8, // -8 degrees rotation
+          toValue: -8,  
           tension: 100,
           friction: 8,
           useNativeDriver: true,
         }),
-        // Right image slide
+        
         Animated.spring(rightImageAnim, {
           toValue: -SCREEN_WIDTH * 0.15,
           tension: 100,
           friction: 8,
           useNativeDriver: true,
         }),
-        // Right image rotation
+        
         Animated.spring(rightImageRotate, {
-          toValue: 8, // 8 degrees rotation
+          toValue: 8,  
           tension: 100,
           friction: 8,
           useNativeDriver: true,
@@ -184,7 +163,6 @@ export default function MatchScreen({ route, navigation }: any) {
       ]).start();
     }, 800);
 
-    // 3. Heart appears with special effect
     setTimeout(() => {
       Animated.parallel([
         Animated.spring(heartScale, {
@@ -199,7 +177,7 @@ export default function MatchScreen({ route, navigation }: any) {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        // Start continuous pulse animation after heart appears
+        
         Animated.loop(
           Animated.sequence([
             Animated.timing(heartPulse, {
@@ -218,7 +196,6 @@ export default function MatchScreen({ route, navigation }: any) {
         ).start();
       });
 
-      // Sparkle effect
       Animated.loop(
         Animated.sequence([
           Animated.timing(sparkleAnim, {
@@ -235,7 +212,6 @@ export default function MatchScreen({ route, navigation }: any) {
       ).start();
     }, 1500);
 
-    // 4. "It's a Match" text appears and moves up
     setTimeout(() => {
       Animated.sequence([
         Animated.spring(matchTextScale, {
@@ -253,7 +229,6 @@ export default function MatchScreen({ route, navigation }: any) {
       ]).start();
     }, 2000);
 
-    // 5. Content appears
     setTimeout(() => {
       Animated.timing(contentOpacity, {
         toValue: 1,
@@ -299,7 +274,7 @@ export default function MatchScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Background Hearts */}
+      {}
       <View style={styles.backgroundContainer}>
         {backgroundHearts.map((heart) => (
           <Animated.View
@@ -344,7 +319,7 @@ export default function MatchScreen({ route, navigation }: any) {
         ))}
       </View>
 
-      {/* Blur Layer */}
+      {}
       <Animated.View
         style={[
           styles.blurLayer,
@@ -354,7 +329,7 @@ export default function MatchScreen({ route, navigation }: any) {
         ]}
       />
 
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color={color.black} />
@@ -365,9 +340,9 @@ export default function MatchScreen({ route, navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* Match Animation Container */}
+      {}
       <View style={styles.matchContainer}>
-        {/* "It's a Match" Text */}
+        {}
         <Animated.View
           style={[
             styles.matchTextContainer,
@@ -384,9 +359,9 @@ export default function MatchScreen({ route, navigation }: any) {
           </View>
         </Animated.View>
 
-        {/* Images Container */}
+        {}
         <View style={styles.imagesContainer}>
-          {/* Left Image (Current User) */}
+          {}
           <Animated.View
             style={[
               styles.imageWrapper,
@@ -431,7 +406,7 @@ export default function MatchScreen({ route, navigation }: any) {
             </View>
           </Animated.View>
 
-          {/* Center Heart */}
+          {}
           <Animated.View
             style={[
               styles.centerHeart,
@@ -446,7 +421,7 @@ export default function MatchScreen({ route, navigation }: any) {
             {svgIcon.Heart}
           </Animated.View>
 
-          {/* Right Image (Matched User) */}
+          {}
           <Animated.View
             style={[
               styles.imageWrapper,
@@ -493,7 +468,7 @@ export default function MatchScreen({ route, navigation }: any) {
         </View>
       </View>
 
-      {/* Content */}
+      {}
       <Animated.View
         style={[
           styles.content,

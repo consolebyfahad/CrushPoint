@@ -43,11 +43,9 @@ export default function PrivateSpot() {
   const { showToast } = useToast();
   const params = useLocalSearchParams();
 
-  // Determine mode - check for spot data to determine if editing
   const isEdit = params?.fromEdit === "true";
   const isEditingExistingSpot = params?.mode === "edit" && params?.spotData;
 
-  // Parse existing spot data if editing
   const existingSpotData: PrivateSpotData | null = React.useMemo(() => {
     if (
       isEditingExistingSpot &&
@@ -93,13 +91,11 @@ export default function PrivateSpot() {
     useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Search functionality state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
@@ -110,7 +106,7 @@ export default function PrivateSpot() {
 
   useEffect(() => {
     if (existingSpotData) {
-      // Editing existing spot - use provided data
+      
       const lat = parseFloat(existingSpotData.lat);
       const lng = parseFloat(existingSpotData.lng);
 
@@ -124,7 +120,7 @@ export default function PrivateSpot() {
       setLocationPermissionGranted(true);
       setIsLoadingLocation(false);
     } else if (isEdit) {
-      // Edit mode but using user's current data
+      
       const paramLat = params?.latitude
         ? parseFloat(params.latitude as string)
         : null;
@@ -159,7 +155,7 @@ export default function PrivateSpot() {
         setSelectedRadius(radius === 100 ? "100m" : "200m");
       }
     } else {
-      // Adding new spot - get user's current location
+      
       getUserLocation();
     }
   }, [
@@ -197,7 +193,6 @@ export default function PrivateSpot() {
   const handleRadiusSelect = (radius: string) => {
     setSelectedRadius(radius);
 
-    // Adjust map zoom based on radius for better visualization
     const newDelta = radius === "100m" ? 0.005 : 0.008;
     setMapRegion((prev) => ({
       ...prev,
@@ -215,7 +210,6 @@ export default function PrivateSpot() {
     });
   };
 
-  // Search functionality
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -236,10 +230,9 @@ export default function PrivateSpot() {
     }
   };
 
-  // Show initial suggestions when search field is focused
   const handleSearchFocus = async () => {
     if (searchQuery.trim().length === 0) {
-      // Show popular locations and current location
+      
       const popularLocations = getPopularLocations();
       const currentLocation = await getCurrentLocationSuggestion();
 
@@ -265,7 +258,6 @@ export default function PrivateSpot() {
     setSearchResults([]);
   };
 
-  // Debounce timer reference
   const searchTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
@@ -273,13 +265,12 @@ export default function PrivateSpot() {
   const handleSearchInputChange = (text: string) => {
     setSearchQuery(text);
 
-    // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
     if (text.trim().length >= 2) {
-      // Debounce search - only search after user stops typing for 500ms
+      
       searchTimeoutRef.current = setTimeout(() => {
         handleSearch(text);
       }, 500);
@@ -290,7 +281,7 @@ export default function PrivateSpot() {
   };
 
   const handleSaveAndContinue = async () => {
-    // Get user's real current location and save to userData
+    
     try {
       const realLocation = await requestUserLocation();
       if (realLocation) {
@@ -328,7 +319,7 @@ export default function PrivateSpot() {
         : t("privateSpot.title");
 
       if (existingSpotData?.id) {
-        // Update existing private spot
+        
         formData.append("type", "update_data");
         formData.append("user_id", user.user_id);
         formData.append("table_name", "private_spots");
@@ -341,7 +332,7 @@ export default function PrivateSpot() {
         );
         formData.append("id", existingSpotData.id);
       } else {
-        // Add new private spot
+        
         formData.append("type", "add_data");
         formData.append("table_name", "private_spots");
         formData.append("user_id", user.user_id);
@@ -422,11 +413,9 @@ export default function PrivateSpot() {
   };
 
   const handleButtonPress = () => {
-    // if (existingSpotData?.id || isEdit) {
+    
     handleSaveChanges();
-    // } else {
-    //   handleSaveAndContinue();
-    // }
+
   };
 
   if (isLoadingLocation && !isEdit && !existingSpotData) {
@@ -455,7 +444,7 @@ export default function PrivateSpot() {
           </View>
         </View>
 
-        {/* Search Field */}
+        {}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
             <Ionicons
@@ -481,7 +470,7 @@ export default function PrivateSpot() {
             )}
           </View>
 
-          {/* Search Results */}
+          {}
           {showSearchResults && searchResults.length > 0 && (
             <View style={styles.searchResultsContainer}>
               <FlatList
@@ -545,7 +534,7 @@ export default function PrivateSpot() {
             )}
         </View>
 
-        {/* Map Container */}
+        {}
         <View style={styles.mapContainer}>
           <MapView
             style={styles.map}
@@ -560,7 +549,7 @@ export default function PrivateSpot() {
             rotateEnabled={false}
             pitchEnabled={false}
           >
-            {/* Privacy Circle - always centered on current map region */}
+            {}
             <Circle
               center={{
                 latitude: parseFloat(mapRegion.latitude.toString()),
@@ -572,7 +561,7 @@ export default function PrivateSpot() {
               strokeWidth={2}
             />
 
-            {/* Center Marker - always at map center (tracksViewChanges=false to prevent Android flicker) */}
+            {}
             <Marker
               coordinate={{
                 latitude: parseFloat(mapRegion.latitude.toString()),
@@ -796,7 +785,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: color.gray87,
   },
-  // Search styles
+  
   searchContainer: {
     paddingHorizontal: 16,
     marginBottom: 16,

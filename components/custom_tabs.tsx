@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: "center",
-    // paddingHorizontal: screenWidth > 400 ? 70 : screenWidth * 0.15,
+    
   },
   tabBar: {
     flexDirection: "row",
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
     backgroundColor: color.white,
-    // height: 64,
+    
     borderRadius: 99,
     elevation: 10,
     shadowColor: color.gray55,
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     padding: 10,
-    // minWidth: 330,
+    
   },
   tabItem: {
     borderRadius: 99,

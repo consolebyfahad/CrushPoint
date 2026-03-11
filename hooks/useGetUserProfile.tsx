@@ -12,10 +12,6 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-/**
- * Fetches another user's profile for the user_profile screen.
- * API: type: get_data, table_name: users, id: (profile user id), user_id: (logged-in user id)
- */
 export default function useGetUserProfile(profileUserId: string | undefined) {
   const { rawInterests: apiInterests } = useGetInterests();
   const { i18n } = useTranslation();

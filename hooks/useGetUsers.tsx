@@ -54,7 +54,7 @@ interface ApiUserData {
     lat: string | number;
     lng: string | number;
     radius: string | number;
-  }>; // Optional: private spots array
+  }>;  
 }
 
 interface TransformedUser {
@@ -90,12 +90,12 @@ interface TransformedUser {
     lat: number | string;
     lng: number | string;
     radius: number | string;
-  }>; // Array of private spots
+  }>;  
   dob: string;
   match_status: string;
   match_emoji: string;
   loc: LocationData | null;
-  // Add direct lat/lng properties for map display
+  
   lat: string;
   lng: string;
 }
@@ -109,15 +109,15 @@ interface UserFilters {
   ageFrom?: string;
   ageTo?: string;
   distance?: number;
-  lookingFor?: string | string[]; // Accept both string and array
+  lookingFor?: string | string[];  
   height?: { from?: string; to?: string };
-  nationality?: string | string[]; // Accept both string and array
-  religion?: string | string[]; // Accept both string and array
-  zodiacSign?: string | string[]; // Accept both string and array
+  nationality?: string | string[];  
+  religion?: string | string[];  
+  zodiacSign?: string | string[];  
 }
 
 export default function useGetUsers(filters: UserFilters = {}) {
-  // Get interests from API for interest name conversion
+  
   const { rawInterests: apiInterests } = useGetInterests();
   const { user, userData } = useAppContext();
   const { t, i18n } = useTranslation();
@@ -127,55 +127,47 @@ export default function useGetUsers(filters: UserFilters = {}) {
 
   const filtersString = useMemo(() => JSON.stringify(filters), [filters]);
 
-  // Convert translated gender values to backend API values (male/female/both)
   const normalizeGenderToEnglish = (gender: string): string => {
     if (!gender) return "";
 
     const normalized = gender.toLowerCase().trim();
 
-    // Map UI values to backend API values
     const genderMap: { [key: string]: string } = {
-      // English UI values
+      
       both: "both",
       men: "male",
       male: "male",
       women: "female",
       female: "female",
-      // German UI values
+      
       beide: "both",
       männer: "male",
       frauen: "female",
-      // Add other languages as needed
+      
     };
 
-    // Check exact match first
     if (genderMap[normalized]) {
       return genderMap[normalized];
     }
 
-    // Check if it contains any of the map keys
     for (const [key, value] of Object.entries(genderMap)) {
       if (normalized.includes(key)) {
         return value;
       }
     }
 
-    // Default to both if we can't determine
     return "both";
   };
 
-  // Normalize looking_for values to English IDs
   const normalizeLookingForToEnglish = (
     lookingFor: string | string[]
   ): string => {
     if (!lookingFor) return "";
 
-    // If it's already an array of IDs, join them
     if (Array.isArray(lookingFor)) {
-      // Return empty string for empty array
+      
       if (lookingFor.length === 0) return "";
 
-      // Check if first element is already an ID (not translated)
       const validIds = [
         "serious",
         "casual",
@@ -190,12 +182,11 @@ export default function useGetUsers(filters: UserFilters = {}) {
         return lookingFor.join(",");
       }
 
-      // Otherwise, it might be translated values - normalize each
       return lookingFor
         .map((item) => {
           const normalized = item.toLowerCase().trim();
           const lookingForMap: { [key: string]: string } = {
-            // English
+            
             serious: "serious",
             "serious relationship": "serious",
             casual: "casual",
@@ -205,7 +196,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
             "open to possibilities": "open",
             "prefer-not": "prefer-not",
             "prefer not to say": "prefer-not",
-            // German
+            
             "ernsthafte beziehung": "serious",
             "lockeres dating": "casual",
             freundschaft: "friendship",
@@ -217,20 +208,16 @@ export default function useGetUsers(filters: UserFilters = {}) {
         .join(",");
     }
 
-    // If it's a string, return as is (should already be IDs)
     return lookingFor;
   };
 
-  // Normalize religion values to English IDs
   const normalizeReligionToEnglish = (religion: string | string[]): string => {
     if (!religion) return "";
 
-    // If it's already an array of IDs, join them
     if (Array.isArray(religion)) {
-      // Return empty string for empty array
+      
       if (religion.length === 0) return "";
 
-      // Check if first element is already an ID
       const validIds = [
         "christianity",
         "islam",
@@ -244,12 +231,11 @@ export default function useGetUsers(filters: UserFilters = {}) {
         return religion.join(",");
       }
 
-      // Otherwise, normalize each
       return religion
         .map((item) => {
           const normalized = item.toLowerCase().trim();
           const religionMap: { [key: string]: string } = {
-            // English
+            
             christianity: "christianity",
             christian: "christianity",
             islam: "islam",
@@ -264,7 +250,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
             sikh: "sikhism",
             others: "others",
             other: "others",
-            // German
+            
             christentum: "christianity",
             muslimisch: "islam",
             hinduistisch: "hinduism",
@@ -281,19 +267,15 @@ export default function useGetUsers(filters: UserFilters = {}) {
     return religion;
   };
 
-  // Normalize nationality values to English IDs
   const normalizeNationalityToEnglish = (
     nationality: string | string[]
   ): string => {
     if (!nationality) return "";
 
-    // If it's already an array of IDs, join them
     if (Array.isArray(nationality)) {
-      // Return empty string for empty array
+      
       if (nationality.length === 0) return "";
 
-      // IDs are lowercase like "american", "british", etc.
-      // If already IDs (all lowercase, no spaces), return as is
       if (
         nationality.length > 0 &&
         nationality[0].toLowerCase() === nationality[0] &&
@@ -302,10 +284,9 @@ export default function useGetUsers(filters: UserFilters = {}) {
         return nationality.join(",");
       }
 
-      // Otherwise, normalize each (translated names to IDs)
       return nationality
         .map((item) => {
-          // Convert to lowercase and replace spaces with underscores for ID format
+          
           return item.toLowerCase().replace(/\s+/g, "_");
         })
         .join(",");
@@ -314,16 +295,13 @@ export default function useGetUsers(filters: UserFilters = {}) {
     return nationality;
   };
 
-  // Normalize zodiac values to English IDs
   const normalizeZodiacToEnglish = (zodiac: string | string[]): string => {
     if (!zodiac) return "";
 
-    // If it's already an array of IDs, join them
     if (Array.isArray(zodiac)) {
-      // Return empty string for empty array
+      
       if (zodiac.length === 0) return "";
 
-      // Check if first element is already an ID
       const validIds = [
         "aries",
         "taurus",
@@ -342,12 +320,11 @@ export default function useGetUsers(filters: UserFilters = {}) {
         return zodiac.join(",");
       }
 
-      // Otherwise, normalize each
       return zodiac
         .map((item) => {
           const normalized = item.toLowerCase().trim();
           const zodiacMap: { [key: string]: string } = {
-            // English
+            
             aries: "aries",
             taurus: "taurus",
             gemini: "gemini",
@@ -360,7 +337,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
             capricorn: "capricorn",
             aquarius: "aquarius",
             pisces: "pisces",
-            // German
+            
             widder: "aries",
             stier: "taurus",
             zwillinge: "gemini",
@@ -396,13 +373,11 @@ export default function useGetUsers(filters: UserFilters = {}) {
       formData.append("type", "get_map_users");
       formData.append("user_id", user.user_id);
 
-      // Build payload with only required fields
       const payload: any = {
         type: "get_map_users",
         user_id: user.user_id,
       };
 
-      // Add current user's location for distance calculation (only if valid)
       if (
         userData?.lat &&
         userData?.lng &&
@@ -415,41 +390,37 @@ export default function useGetUsers(filters: UserFilters = {}) {
         payload.lng = userData.lng;
       }
 
-      // Normalize gender to English before sending
       if (filters.gender) {
         const normalizedGender = normalizeGenderToEnglish(filters.gender);
-        // Only send if not empty
+        
         if (normalizedGender && normalizedGender.trim() !== "") {
           formData.append("gender", normalizedGender);
           payload.gender = normalizedGender;
         }
       }
 
-      // Only send age_from if it has a value
       if (filters.ageFrom && filters.ageFrom.trim() !== "") {
         formData.append("age_from", filters.ageFrom);
         payload.age_from = filters.ageFrom;
       }
 
-      // Only send age_to if it has a value
       if (filters.ageTo && filters.ageTo.trim() !== "") {
         formData.append("age_to", filters.ageTo);
         payload.age_to = filters.ageTo;
       }
 
-      // Only send distance if it has a valid value
       if (filters.distance && filters.distance > 0) {
         formData.append("distance", filters.distance.toString());
         payload.distance = filters.distance.toString();
       }
-      // Normalize looking_for to English IDs before sending
+      
       if (filters.lookingFor) {
         const normalizedLookingFor = normalizeLookingForToEnglish(
           filters.lookingFor
         );
-        // Only send if not empty
+        
         if (normalizedLookingFor && normalizedLookingFor.trim() !== "") {
-          // Convert comma-separated string to array
+          
           const lookingForArray = normalizedLookingFor
             .split(",")
             .map((item) => item.trim());
@@ -457,7 +428,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
           payload.looking_for = lookingForArray;
         }
       }
-      // Only send height filters if they have values
+      
       if (filters.height) {
         if (filters.height.from && filters.height.from.trim() !== "") {
           formData.append("height_from", filters.height.from);
@@ -468,14 +439,14 @@ export default function useGetUsers(filters: UserFilters = {}) {
           payload.height_to = filters.height.to;
         }
       }
-      // Normalize nationality to English IDs before sending
+      
       if (filters.nationality) {
         const normalizedNationality = normalizeNationalityToEnglish(
           filters.nationality
         );
-        // Only send if not empty
+        
         if (normalizedNationality && normalizedNationality.trim() !== "") {
-          // Convert comma-separated string to array
+          
           const nationalityArray = normalizedNationality
             .split(",")
             .map((item) => item.trim());
@@ -483,12 +454,12 @@ export default function useGetUsers(filters: UserFilters = {}) {
           payload.nationality = nationalityArray;
         }
       }
-      // Normalize religion to English IDs before sending
+      
       if (filters.religion) {
         const normalizedReligion = normalizeReligionToEnglish(filters.religion);
-        // Only send if not empty
+        
         if (normalizedReligion && normalizedReligion.trim() !== "") {
-          // Convert comma-separated string to array
+          
           const religionArray = normalizedReligion
             .split(",")
             .map((item) => item.trim());
@@ -496,12 +467,12 @@ export default function useGetUsers(filters: UserFilters = {}) {
           payload.religion = religionArray;
         }
       }
-      // Normalize zodiac to English IDs before sending
+      
       if (filters.zodiacSign) {
         const normalizedZodiac = normalizeZodiacToEnglish(filters.zodiacSign);
-        // Only send if not empty
+        
         if (normalizedZodiac && normalizedZodiac.trim() !== "") {
-          // Convert comma-separated string to array
+          
           const zodiacArray = normalizedZodiac
             .split(",")
             .map((item) => item.trim());
@@ -514,10 +485,10 @@ export default function useGetUsers(filters: UserFilters = {}) {
 
       if (response.result && response.data && Array.isArray(response.data)) {
         setRawUserData(response.data);
-        // Always clear error on successful response (even if empty)
+        
         setError(null);
       } else {
-        // API returned error or invalid response
+        
         setRawUserData([]);
         setError(t("users.noUsersFoundOrServerError"));
       }
@@ -530,7 +501,6 @@ export default function useGetUsers(filters: UserFilters = {}) {
     }
   };
 
-  // Safe transformation function with comprehensive error handling
   const transformUser = (userData: ApiUserData): TransformedUser => {
     if (!userData || !userData.id) {
       throw new Error(t("hooks.invalidUserData"));
@@ -554,7 +524,7 @@ export default function useGetUsers(filters: UserFilters = {}) {
       languages: safeString(userData.languages),
       match_status: safeString(userData.match_staus),
       match_emoji: safeString(userData.match_emoji),
-      // Fixed: Use proper parsing functions for interests and looking_for with translation
+      
       interests: parseUserInterests(userData.interests, t),
       lookingFor: parseUserLookingFor(userData.looking_for, t),
       religion: safeString(userData.religion),
@@ -568,16 +538,15 @@ export default function useGetUsers(filters: UserFilters = {}) {
         userData.lng,
         userData.radius
       ),
-      // Include private_spots array if available from API
+      
       private_spots: userData.private_spots || undefined,
       loc: userData.loc,
-      // Add direct lat/lng properties for map display
+      
       lat: userData.lat,
       lng: userData.lng,
     };
   };
 
-  // Fixed: Parse interests using the same utility function as profile
   const parseUserInterests = (
     interestsStr: string,
     t?: (key: string) => string
@@ -585,7 +554,6 @@ export default function useGetUsers(filters: UserFilters = {}) {
     try {
       if (!interestsStr) return [];
 
-      // Use the same utility function that works in profile, with API interests
       const currentLanguage = i18n.language || "en";
       const parsedInterests = parseInterestsWithNames(
         interestsStr,
@@ -599,7 +567,6 @@ export default function useGetUsers(filters: UserFilters = {}) {
     }
   };
 
-  // Parse looking_for to get raw IDs (not formatted strings) for dynamic formatting
   const parseUserLookingFor = (
     lookingForStr: string,
     t?: (key: string) => string
@@ -607,7 +574,6 @@ export default function useGetUsers(filters: UserFilters = {}) {
     try {
       if (!lookingForStr) return [];
 
-      // Parse to get raw IDs, not formatted strings
       const rawIds = parseJsonString(lookingForStr);
       return Array.isArray(rawIds) ? rawIds : [];
     } catch (error) {
@@ -616,7 +582,6 @@ export default function useGetUsers(filters: UserFilters = {}) {
     }
   };
 
-  // Parse nationality using the same utility function as profile
   const parseUserNationality = (
     nationalityStr: string,
     t?: (key: string) => string
@@ -624,7 +589,6 @@ export default function useGetUsers(filters: UserFilters = {}) {
     try {
       if (!nationalityStr) return [];
 
-      // Use the same utility function that works in profile
       const parsedNationality = parseNationalityWithLabels(nationalityStr, t);
       return Array.isArray(parsedNationality) ? parsedNationality : [];
     } catch (error) {

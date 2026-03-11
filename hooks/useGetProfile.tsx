@@ -13,7 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export default function useGetProfile() {
-  // Get interests from API for interest name conversion
+  
   const { rawInterests: apiInterests } = useGetInterests();
   const { i18n } = useTranslation();
   const { t } = useTranslation();
@@ -21,7 +21,7 @@ export default function useGetProfile() {
   const [userProfile, setUserProfile] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const hasReparsedRef = useRef(false); // Track if we've already re-parsed interests
+  const hasReparsedRef = useRef(false);  
   const defaultPhoto =
     "https://img.freepik.com/vecteurs-libre/homme-affaires-caractere-avatar-isole_24877-60111.jpg?semt=ais_hybrid&w=740";
 
@@ -34,7 +34,6 @@ export default function useGetProfile() {
     setLoading(true);
     setError(null);
 
-    // Capture contextUserData at the start of the callback to avoid linter issues
     const currentContextData = contextUserData;
 
     try {
@@ -111,20 +110,20 @@ export default function useGetProfile() {
             } else {
               // API interests not loaded yet - preserve previous parsedInterests if IDs haven't changed
               if (!idsChanged && previousParsedInterests.length > 0) {
-                // IDs are the same, safe to keep previous parsedInterests
+                
                 parsedInterests = previousParsedInterests;
               } else if (idsChanged) {
-                // IDs changed, clear parsedInterests and reset flag to allow re-parsing when API interests load
+                
                 parsedInterests = [];
                 hasReparsedRef.current = false;
               } else {
-                // No previous data, clear parsedInterests
+                
                 parsedInterests = [];
                 hasReparsedRef.current = false;
               }
             }
           } catch (error) {
-            // On error, preserve previous parsedInterests if IDs haven't changed
+            
             const previousIds =
               currentContextData?.originalInterestIds ||
               userProfile?.originalInterestIds ||
@@ -149,11 +148,10 @@ export default function useGetProfile() {
             }
           }
         } else {
-          // No interests in userData - clear everything
+          
           parsedInterests = [];
           originalInterestIds = [];
         }
-        // Debug looking_for data
 
         let parsedLookingFor: string[] = [];
         let originalLookingForIds: string[] = [];
@@ -171,18 +169,17 @@ export default function useGetProfile() {
           }
         }
 
-        // Handle nationality parsing more carefully
         let parsedNationality: string[] = [];
         let originalNationalityValues: string[] = [];
 
         if (userData.nationality) {
-          // Check if it's a JSON string first
+          
           if (
             userData.nationality.startsWith("[") &&
             userData.nationality.endsWith("]")
           ) {
             try {
-              // Try to parse as JSON
+              
               const parsed = parseJsonString(userData.nationality);
               if (Array.isArray(parsed) && parsed.length > 0) {
                 originalNationalityValues = parsed;
@@ -191,7 +188,7 @@ export default function useGetProfile() {
                   t,
                 );
               } else {
-                // If parsing fails, try to extract values manually
+                
                 const matches = userData.nationality.match(/"([^"]+)"/g);
                 if (matches) {
                   const values = matches.map((match: string) =>
@@ -207,7 +204,7 @@ export default function useGetProfile() {
                 }
               }
             } catch (error) {
-              // Fallback to simple string handling
+              
               if (
                 typeof userData.nationality === "string" &&
                 userData.nationality !== "Not Specified" &&
@@ -221,7 +218,7 @@ export default function useGetProfile() {
               }
             }
           } else {
-            // It's a simple string, not JSON
+            
             if (
               userData.nationality !== "Not Specified" &&
               userData.nationality.trim() !== ""
@@ -235,15 +232,14 @@ export default function useGetProfile() {
           }
         }
 
-        // Create data for local state (using types/userData.d.ts interface)
         const profileId =
           userData.id ?? (userData as any).user_id ?? user?.user_id ?? "";
         const localUserData: any = {
           ...userData,
-          id: profileId, // Ensure profile id is always stored
-          images: userData.images, // Keep original format for local state
+          id: profileId,  
+          images: userData.images,  
           age,
-          photos, // This now contains full URLs
+          photos,  
           parsedInterests,
           parsedLookingFor,
           originalLookingForIds,
@@ -264,22 +260,21 @@ export default function useGetProfile() {
           about: userData.about || "",
           phone: userData.phone || "",
           status: userData.status || "",
-          // Include change dates from API
+          
           name_change_date: (userData as any)?.name_change_date || "2025-11-01",
           dob_change_date: (userData as any)?.dob_change_date || "2025-11-01",
         };
 
-        // Create data for context (using context/app_context.tsx interface)
         const contextUserData = {
           ...userData,
-          id: profileId, // Ensure profile id is always stored in userData
-          images: userData.images ? [userData.images] : [], // Convert to array format expected by context
+          id: profileId,  
+          images: userData.images ? [userData.images] : [],  
           looking_for: userData.looking_for
             ? parseJsonString(userData.looking_for)
-            : [], // Convert to array
-          radius: parseInt(userData.radius) || 100, // Convert string to number
+            : [],  
+          radius: parseInt(userData.radius) || 100,  
           age,
-          photos, // This now contains full URLs
+          photos,  
           parsedInterests:
             parsedInterests.length > 0
               ? parsedInterests
@@ -309,7 +304,7 @@ export default function useGetProfile() {
           about: userData.about || "",
           phone: userData.phone || "",
           status: userData.status || "",
-          // Include change dates from API
+          
           name_change_date: (userData as any)?.name_change_date || "2025-11-01",
           dob_change_date: (userData as any)?.dob_change_date || "2025-11-01",
         };
@@ -330,10 +325,8 @@ export default function useGetProfile() {
     getUserData();
   }, [getUserData]);
 
-  // Re-parse interests when apiInterests become available after they were missing
-  // Only trigger when apiInterests change from empty to non-empty AND we have unparsed interests
   useEffect(() => {
-    // Check if we need to re-parse: API interests are loaded, we have interest IDs, but no parsed interests
+    
     const needsReparse =
       apiInterests &&
       apiInterests.length > 0 &&
@@ -345,11 +338,11 @@ export default function useGetProfile() {
         contextUserData.parsedInterests.length === 0);
 
     if (needsReparse && !hasReparsedRef.current) {
-      hasReparsedRef.current = true; // Mark as re-parsed to prevent loop
-      // Use a timeout to avoid calling during render
+      hasReparsedRef.current = true;  
+      
       setTimeout(() => {
         getUserData();
-        // Reset flag after a delay to allow re-parsing if interests change again
+        
         setTimeout(() => {
           hasReparsedRef.current = false;
         }, 2000);

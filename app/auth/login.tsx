@@ -73,7 +73,7 @@ export default function Login() {
       setPhoneNumber("+");
       setEmail("");
     } catch (error) {
-      // Error handled by UI
+      
     } finally {
       setLoginLoading(false);
     }
@@ -88,32 +88,27 @@ export default function Login() {
     }
   };
 
-  // Handle successful social authentication
   const handleSocialAuthSuccess = async (
     userData: any,
     provider: "apple" | "google"
   ) => {
     setOtherMethodsLoading(true);
 
-    // Use loginUser to properly set both user and isLoggedIn state
-    // This ensures the session persists when the app is closed and reopened
     await loginUser(userData);
 
-    // Skip OTP for social auth - go directly to appropriate screen
     if (userData.new) {
-      // New user - go to profile setup
+      
       router.replace("/auth/gender");
     } else {
-      // Existing user - go to tabs
+      
       router.replace("/(tabs)");
     }
 
     setOtherMethodsLoading(false);
   };
 
-  // Handle social authentication errors
   const handleSocialAuthError = (message: string) => {
-    // showToast(message, "error");
+    
   };
 
   return (
@@ -133,7 +128,7 @@ export default function Login() {
           </Text>
         </View>
 
-        {/* Tab Buttons */}
+        {}
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[
@@ -158,7 +153,7 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-        {/* Input Section */}
+        {}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>
             {activeTab === "phone"
@@ -210,7 +205,7 @@ export default function Login() {
           </View>
         </View>
 
-        {/* Continue Button */}
+        {}
         <CustomButton
           title={t("continue")}
           onPress={handleContinue}

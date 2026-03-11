@@ -16,7 +16,7 @@ export default function MatchesMain() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <MatchesTabsHeader
         title={t("matches.matches")}
         matches="matches"
@@ -25,7 +25,7 @@ export default function MatchesMain() {
         activeTab="matches"
       />
 
-      {/* Matches Content */}
+      {}
       <View style={styles.tabContent}>
         <Matches />
       </View>

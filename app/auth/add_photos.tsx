@@ -40,14 +40,11 @@ export default function AddPhotos() {
   const params = useLocalSearchParams();
   const photosParam = params.photos;
 
-  // Convert photos parameter to array
   const photos = React.useMemo(() => {
     if (!photosParam) return [];
 
-    // If it's already an array, return it
     if (Array.isArray(photosParam)) return photosParam;
 
-    // If it's a string, split by comma and filter out empty strings
     if (typeof photosParam === "string") {
       return photosParam.split(",").filter((url) => url.trim().length > 0);
     }
@@ -58,22 +55,20 @@ export default function AddPhotos() {
   const [selectedPhotos, setSelectedPhotos] = useState<UploadedPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if coming from profile edit
   const isEditMode = params.fromEdit === "true";
   const maxPhotos = 6;
   const minPhotos = 2;
 
-  // Load existing images when in edit mode
   useEffect(() => {
     if (isEditMode && photos && photos.length > 0) {
       const existingPhotos: UploadedPhoto[] = photos.map((photoUrl, index) => {
-        // Extract filename from URL for fileName field
+        
         const urlParts = photoUrl.split("/");
         const fileName = urlParts[urlParts.length - 1];
 
         return {
           id: `existing_${index}`,
-          uri: photoUrl, // Use the full URL directly since it's already provided
+          uri: photoUrl,  
           width: 300,
           height: 400,
           fileName: fileName,
@@ -103,7 +98,7 @@ export default function AddPhotos() {
     }
 
     try {
-      // Mark photo as uploading
+      
       setSelectedPhotos((prev) =>
         prev.map((photo) =>
           photo.id === photoId ? { ...photo, isUploading: true } : photo
@@ -121,7 +116,7 @@ export default function AddPhotos() {
       const response = await apiCall(formData);
 
       if (response.result && response.file_name) {
-        // Only add to context if not in edit mode (edit mode handles this in save)
+        
         if (!isEditMode) {
           addUserImage(response.file_name);
         }
@@ -179,12 +174,10 @@ export default function AddPhotos() {
           })
         );
 
-        // Add photos to state first
         setSelectedPhotos((prev) =>
           [...prev, ...newPhotos].slice(0, maxPhotos)
         );
 
-        // Upload each photo to server sequentially to maintain order
         for (const photo of newPhotos) {
           await uploadImageToServer(photo.uri, photo.id);
         }
@@ -197,12 +190,10 @@ export default function AddPhotos() {
   const removePhoto = (photoId: string) => {
     const photoToRemove = selectedPhotos.find((photo) => photo.id === photoId);
 
-    // Remove from server/context if it was uploaded and not in edit mode
     if (photoToRemove?.fileName && !isEditMode) {
       removeUserImage(photoToRemove.fileName);
     }
 
-    // Remove from local state
     setSelectedPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
   };
 
@@ -240,7 +231,7 @@ export default function AddPhotos() {
     const response = await apiCall(formData);
 
     if (response.result) {
-      // Remove old photos and add new ones to context
+      
       if (photos && Array.isArray(photos)) {
         photos.forEach((photoUrl) => {
           const urlParts = photoUrl.split("/");
@@ -260,19 +251,15 @@ export default function AddPhotos() {
       (photo) => photo.fileName && !photo.isUploading
     );
 
-    // In edit mode, count both existing photos (from params) and new photos
     let totalPhotoCount = uploadedPhotos.length;
 
-    // If in edit mode and we have existing photos in params, ensure we count them
-    // This handles cases where state might not be perfectly synced after navigation
     if (isEditMode && photos && Array.isArray(photos) && photos.length > 0) {
-      // Get existing photo filenames from params
+      
       const existingPhotoFileNames = photos.map((photoUrl) => {
         const urlParts = photoUrl.split("/");
         return urlParts[urlParts.length - 1];
       });
 
-      // Count unique photos (existing + new)
       const allPhotoFileNames = new Set([
         ...existingPhotoFileNames,
         ...uploadedPhotos.map((p) => p.fileName).filter(Boolean),
@@ -294,14 +281,12 @@ export default function AddPhotos() {
       return;
     }
 
-    // If in edit mode and user added any new photos, require verification first
     if (isEditMode) {
       const hasNewPhotos = selectedPhotos.some(
         (p) => p.fileName && !p.isExisting
       );
       if (hasNewPhotos) {
-        // Don't save photos yet - wait for verification success
-        // Prepare photo file names to pass to verification screen
+
         const newPhotoFileNames = selectedPhotos
           .filter((p) => p.fileName && !p.isExisting)
           .map((p) => p.fileName!);
@@ -310,10 +295,8 @@ export default function AddPhotos() {
           .filter((p) => p.isExisting && p.fileName)
           .map((p) => p.fileName!);
 
-        // Combine all photo file names (existing + new)
         const allPhotoFileNames = [...existingPhotoFileNames, ...newPhotoFileNames];
 
-        // Prepare refs for verification (use first 3 photos)
         const refs: string[] = selectedPhotos
           .filter((p) => p.fileName)
           .slice(0, 3)
@@ -340,7 +323,6 @@ export default function AddPhotos() {
       }
     }
 
-    // Regular save flow
     setIsLoading(true);
     try {
       await savePhotosToServer();
@@ -369,14 +351,14 @@ export default function AddPhotos() {
         <View key={index} style={styles.photoSlot}>
           <Image source={{ uri: photo.uri }} style={styles.uploadedPhoto} />
 
-          {/* Loading indicator for uploading photos */}
+          {}
           {photo.isUploading && (
             <View style={styles.uploadingOverlay}>
               <ActivityIndicator size="small" color={color.white} />
             </View>
           )}
 
-          {/* Success indicator for uploaded photos */}
+          {}
           {photo.fileName && !photo.isUploading && (
             <View style={styles.successIndicator}>
               <Feather name="check" size={16} color={color.white} />
@@ -435,7 +417,7 @@ export default function AddPhotos() {
             </View>
           </View>
 
-          {/* Main Upload Area */}
+          {}
           <TouchableOpacity
             style={styles.mainUploadArea}
             onPress={pickImage}
@@ -452,7 +434,7 @@ export default function AddPhotos() {
             </View>
           </TouchableOpacity>
 
-          {/* Photo Grid */}
+          {}
           <View style={styles.photoGrid}>
             <View style={styles.photoRow}>
               {renderPhotoSlot(0)}
@@ -466,7 +448,7 @@ export default function AddPhotos() {
             </View>
           </View>
 
-          {/* Photo Count */}
+          {}
           <Text style={styles.photoCount}>
             {t("profile.photosUploaded", {
               count: uploadedCount,
@@ -479,7 +461,7 @@ export default function AddPhotos() {
         </View>
       </ScrollView>
 
-      {/* Action Button */}
+      {}
       <View style={styles.buttonContainer}>
         <CustomButton
           title={

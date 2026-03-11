@@ -386,7 +386,12 @@
     "invalidDateTimeFormat": "Ungültiges Datums-/Zeitformat",
     "invalidDateCheck": "Ungültiges Datumsformat. Bitte überprüfe das Veranstaltungsdatum: {{date}}",
     "invalidYearRange": "Ungültiges Datumsformat. Das Jahr muss zwischen 2000-2100 liegen. Erhalten: {{year}}",
-    "cannotAddEventContactSupport": "Veranstaltung kann nicht hinzugefügt werden: Ungültiges Datumsformat (Jahr: {{year}}). Bitte kontaktiere den Support."
+    "cannotAddEventContactSupport": "Veranstaltung kann nicht hinzugefügt werden: Ungültiges Datumsformat (Jahr: {{year}}). Bitte kontaktiere den Support.",
+    "youAreInvited": "Du bist zu dieser Veranstaltung eingeladen",
+    "acceptInvite": "Annehmen",
+    "rejectInvite": "Ablehnen",
+    "inviteAccepted": "Du hast die Einladung angenommen",
+    "inviteRejected": "Du hast die Einladung abgelehnt"
   },
   "users": {
     "userIdNotAvailable": "Benutzer-ID nicht verfügbar",

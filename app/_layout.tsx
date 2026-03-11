@@ -7,7 +7,6 @@ import { StatusBar } from "react-native";
 import { ToastProvider } from "../components/toast_provider";
 import i18n from "../utils/i18n";
 
-// Native splash removed on Android; hide on iOS if present. In-app splash (index) shows immediately.
 SplashScreen.hideAsync().catch(() => {});
 
 export default function RootLayout() {
