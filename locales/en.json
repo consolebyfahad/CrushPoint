@@ -325,6 +325,7 @@
   "events": {
     "events": "Events",
     "selectCity": "Select city",
+    "allCities": "All cities",
     "upcoming": "Upcoming",
     "past": "Past",
     "createEvent": "Create Event",

@@ -200,10 +200,10 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 28,
     position: "absolute",
-    bottom: 80,
+    bottom: 100,
     color: color.white,
     fontFamily: font.bold,
-    paddingVertical: 20,
+    padding: 20,
     textAlign: "center",
   },
 });

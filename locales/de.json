@@ -324,6 +324,7 @@
   "events": {
     "events": "Events",
     "selectCity": "Stadt auswählen",
+    "allCities": "Alle Städte",
     "upcoming": "Bevorstehend",
     "past": "Vergangen",
     "createEvent": "Veranstaltung erstellen",

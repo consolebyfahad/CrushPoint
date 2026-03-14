@@ -15,6 +15,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -91,14 +92,28 @@ export default function EventsTab() {
       {}
       <EventsTabsHeader title={t("events.events")} events={events} />
 
-      {}
-      <CustomDropdown
-        options={cities}
-        value={selectedCity}
-        onSelect={setSelectedCity}
-        placeholder={t("events.selectCity")}
-        loading={citiesLoading}
-      />
+      <View style={styles.dropdownRow}>
+        <CustomDropdown
+          options={[
+            { label: t("events.allCities"), value: "" },
+            ...cities,
+          ]}
+          value={selectedCity}
+          onSelect={setSelectedCity}
+          placeholder={t("events.selectCity")}
+          loading={citiesLoading}
+          containerStyle={styles.dropdownContainer}
+        />
+        {selectedCity ? (
+          <TouchableOpacity
+            style={styles.clearButton}
+            onPress={() => setSelectedCity("")}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Ionicons name="close-circle" size={24} color={color.gray55} />
+          </TouchableOpacity>
+        ) : null}
+      </View>
 
       {}
       {error && events.length === 0 ? (
@@ -132,6 +147,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.white,
+  },
+  dropdownRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 16,
+    marginVertical: 8,
+  },
+  dropdownContainer: {
+    flex: 1,
+    marginHorizontal: 0,
+    marginVertical: 0,
+  },
+  clearButton: {
+    marginLeft: 8,
+    padding: 4,
   },
   listContainer: {
     paddingTop: 16,
