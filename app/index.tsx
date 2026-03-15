@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   fallbackText: {
     fontSize: 24,
-    fontFamily: font.bold,
+    fontFamily: font.playfairDisplayBold,
     color: color.white,
   },
   appName: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 100,
     color: color.white,
-    fontFamily: font.bold,
+    fontFamily: font.playfairDisplayBold,
     padding: 20,
     textAlign: "center",
   },

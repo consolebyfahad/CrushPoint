@@ -16,6 +16,7 @@ export default function RootLayout() {
     "Inter-SemiBold": require("../assets/fonts/Inter_24pt-SemiBold.ttf"),
     "Inter-Bold": require("../assets/fonts/Inter_24pt-Bold.ttf"),
     "Inter-ExtraBold": require("../assets/fonts/Inter_24pt-ExtraBold.ttf"),
+    "PlayfairDisplay-Bold": require("../assets/fonts/PlayfairDisplay-Bold.ttf"),
   });
 
   return (

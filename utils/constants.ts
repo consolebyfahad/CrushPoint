@@ -30,6 +30,7 @@ export const font = {
   semiBold: "Inter-SemiBold",
   bold: "Inter-Bold",
   extrabold: "Inter-ExtraBold",
+  playfairDisplayBold: "PlayfairDisplay-Bold",
 };
 
 export const image = {
