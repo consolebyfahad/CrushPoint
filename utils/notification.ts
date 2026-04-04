@@ -1,6 +1,8 @@
 import messaging from "@react-native-firebase/messaging";
 import { PermissionsAndroid, Platform } from "react-native";
 
+import { bumpAppIconBadge } from "./appBadge";
+
 export const requestFCMPermission = async (): Promise<boolean> => {
   try {
     if (Platform.OS === "ios") {
@@ -79,8 +81,12 @@ export const setupNotificationListeners = (
   
   const handleWithDuplicateCheck = (remoteMessage: any, source: string) => {
     if (remoteMessage?.data) {
-      
-      const notificationId = remoteMessage.messageId || remoteMessage.data.match_id || remoteMessage.data.to_id || remoteMessage.data.date_id || JSON.stringify(remoteMessage.data);
+      const notificationId =
+        remoteMessage.messageId ||
+        remoteMessage.data.match_id ||
+        remoteMessage.data.to_id ||
+        remoteMessage.data.date_id ||
+        JSON.stringify(remoteMessage.data);
 
       if (handledNotifications.has(notificationId)) {
         return;
@@ -91,9 +97,22 @@ export const setupNotificationListeners = (
       setTimeout(() => {
         handledNotifications.delete(notificationId);
       }, 5000);
-      
+
+      void bumpAppIconBadge();
+
       const notificationBody = remoteMessage?.notification?.body || "";
       handleNotificationPress(remoteMessage.data, notificationBody);
+      return;
+    }
+
+    if (remoteMessage?.notification) {
+      const id = remoteMessage.messageId || remoteMessage.notification.title;
+      if (id && handledNotifications.has(id)) return;
+      if (id) {
+        handledNotifications.add(id);
+        setTimeout(() => handledNotifications.delete(id), 5000);
+      }
+      void bumpAppIconBadge();
     }
   };
 

@@ -534,8 +534,9 @@ export default function ChatConversation() {
       const response = await apiCall(formData);
       if (response?.result) {
         setShowBlockConfirmation(false);
-        showToast(t("profile.userBlocked") || "User blocked", "success");
-        await deleteChatAndGoToMapView();
+        setShowProfileOptions(false);
+        await deleteChatOnServer();
+        router.back();
       }
     } catch (error) {
       showToast(t("chat.errorLoading") || "Failed to block", "error");
@@ -573,12 +574,8 @@ export default function ChatConversation() {
     setShowProfileOptions(true);
   };
 
-  // Delete chat via API and redirect to map view (used after block, report, remove match)
-  const deleteChatAndGoToMapView = useCallback(async () => {
-    if (!user?.user_id || !otherUserId) {
-      router.replace("/(tabs)" as any);
-      return;
-    }
+  const deleteChatOnServer = useCallback(async () => {
+    if (!user?.user_id || !otherUserId) return;
     try {
       const formData = new FormData();
       formData.append("type", "chat_delete");
@@ -586,8 +583,17 @@ export default function ChatConversation() {
       formData.append("to_chat_id", otherUserId);
       await apiCall(formData);
     } catch (_) {
-      // Continue to redirect even if delete fails
+      // Continue navigation even if delete fails
     }
+  }, [user?.user_id, otherUserId]);
+
+  // Delete chat via API and redirect to map view (used after report, remove match)
+  const deleteChatAndGoToMapView = useCallback(async () => {
+    if (!user?.user_id || !otherUserId) {
+      router.replace("/(tabs)" as any);
+      return;
+    }
+    await deleteChatOnServer();
     setShowProfileOptions(false);
     setShowBlockConfirmation(false);
     setShowReportUser(false);
@@ -595,7 +601,7 @@ export default function ChatConversation() {
       pathname: "/(tabs)",
       params: { viewType: t("common.mapView") },
     });
-  }, [user?.user_id, otherUserId, t]);
+  }, [user?.user_id, otherUserId, t, deleteChatOnServer]);
 
   const handleRemoveMatch = useCallback(async () => {
     if (!user?.user_id || !matchId) return;

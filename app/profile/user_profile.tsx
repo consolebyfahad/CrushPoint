@@ -481,7 +481,6 @@ export default function UserProfile() {
   };
 
   const handleConfirmBlock = async () => {
-    
     try {
       const formData = new FormData();
       formData.append("type", "add_data");
@@ -491,7 +490,8 @@ export default function UserProfile() {
       const response = await apiCall(formData);
       if (response.result) {
         setShowBlockConfirmation(false);
-        
+        setShowProfileOptions(false);
+        router.back();
       }
     } catch (error) {}
   };

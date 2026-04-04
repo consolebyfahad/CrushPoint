@@ -9,8 +9,8 @@ import useGetChats from "@/hooks/useGetChats";
 import useGetMatches from "@/hooks/useGetMatches";
 import { apiCall } from "@/utils/api";
 import { color, font } from "@/utils/constants";
-import { router } from "expo-router";
-import React, { useCallback, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -68,6 +68,18 @@ export default function Matches() {
     error: chatsError,
     refetch: refetchChats,
   } = useGetChats();
+
+  const refetchMatchesRef = useRef(refetch);
+  const refetchChatsRef = useRef(refetchChats);
+  refetchMatchesRef.current = refetch;
+  refetchChatsRef.current = refetchChats;
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchMatchesRef.current();
+      refetchChatsRef.current();
+    }, []),
+  );
 
   const filteredMatches = matches.filter((match) =>
     match.name.toLowerCase().includes(searchText.toLowerCase())
@@ -166,22 +178,32 @@ export default function Matches() {
   const handleConfirmBlock = useCallback(async () => {
     try {
       if (selectedMatch) {
-        
         const blockFormData = new FormData();
         blockFormData.append("type", "add_data");
         blockFormData.append("user_id", user?.user_id || "");
         blockFormData.append("table_name", "blocked_users");
         blockFormData.append("block_id", selectedMatch.match_id);
-        
+
         const blockResponse = await apiCall(blockFormData);
 
+        if (blockResponse?.result) {
+          removeMatch(selectedMatch.match_id);
+          await refetchChats();
+          await refetch();
+        }
       }
     } catch (error) {
     } finally {
       setShowBlockConfirmation(false);
       setSelectedMatch(null);
     }
-  }, [selectedMatch, user?.user_id, removeMatch]);
+  }, [
+    selectedMatch,
+    user?.user_id,
+    removeMatch,
+    refetch,
+    refetchChats,
+  ]);
 
   const handleSubmitReport = useCallback(
     async (reportData: any) => {

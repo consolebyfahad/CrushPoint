@@ -259,9 +259,13 @@ const useGetMatches = () => {
     }
   };
 
-  const removeMatch = (matchId: string) => {
+  const removeMatch = (idOrMatchId: string) => {
+    const sid = String(idOrMatchId);
     setMatches((prevMatches) =>
-      prevMatches.filter((match: MatchUser) => match.id !== matchId)
+      prevMatches.filter(
+        (match: MatchUser) =>
+          String(match.id) !== sid && String(match.match_id) !== sid,
+      ),
     );
   };
 

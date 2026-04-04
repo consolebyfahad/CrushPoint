@@ -3,6 +3,10 @@ import { NotificationsTabsHeader } from "@/components/tabs_header";
 import { useAppContext } from "@/context/app_context";
 import useGetInterests from "@/hooks/useGetInterests";
 import { apiCall } from "@/utils/api";
+import {
+  countUnreadNotifications,
+  setAppIconBadgeCount,
+} from "@/utils/appBadge";
 import { color, font, image } from "@/utils/constants";
 import {
   calculateAge,
@@ -11,8 +15,8 @@ import {
   parseUserImages,
 } from "@/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -52,9 +56,17 @@ export default function Notifications({ navigation }: any) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!user?.user_id) return;
+      fetchNotifications();
+    }, [user?.user_id]),
+  );
+
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    const unread = countUnreadNotifications(notifications);
+    void setAppIconBadgeCount(unread);
+  }, [notifications]);
 
   const formatTimeAgo = (dateString: string) => {
     if (!dateString) return t("notifications.recently");
