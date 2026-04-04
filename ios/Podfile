@@ -2,6 +2,7 @@ require File.join(File.dirname(`node --print "require.resolve('expo/package.json
 require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
 
 require 'json'
+require 'fileutils'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
 ENV['RCT_NEW_ARCH_ENABLED'] = '0' if podfile_properties['newArchEnabled'] == 'false'
@@ -52,6 +53,49 @@ target 'Andra' do
       :mac_catalyst_enabled => false,
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
+
+    # Xcode 16.4+ / Apple Clang: fmt 11.0.2 enables consteval via __cpp_consteval but Apple Clang
+    # then fails ("call to consteval function ... is not a constant expression"). Force consteval off
+    # on Apple platforms (see facebook/react-native#55601, fmt bump in RN 0.79+).
+    # CocoaPods often leaves checked-out pod sources read-only; chmod before patching.
+    fmt_base = File.expand_path('Pods/fmt/include/fmt/base.h', __dir__)
+    if File.exist?(fmt_base)
+      contents = File.read(fmt_base)
+      marker = 'FMT_APPLE_CLANG_CONSTEVAL_OFF'
+      unless contents.include?(marker)
+        old = "#elif defined(__cpp_consteval)\n#  define FMT_USE_CONSTEVAL 1"
+        new = <<~PATCH
+          #elif defined(__APPLE__) && defined(__clang__) && defined(__cpp_consteval)
+          #  define FMT_USE_CONSTEVAL 0  // #{marker}: Apple Clang consteval + FMT_STRING breaks on newer Xcode
+          #elif defined(__cpp_consteval)
+          #  define FMT_USE_CONSTEVAL 1
+        PATCH
+        if contents.include?(old)
+          begin
+            fmt_root = File.expand_path('Pods/fmt', __dir__)
+            fmt_dir = File.dirname(fmt_base)
+            FileUtils.chmod('u+w', fmt_dir) if File.directory?(fmt_dir)
+            s = File.stat(fmt_base)
+            File.chmod(s.mode | 0200, fmt_base)
+            unless File.writable?(fmt_base)
+              system('chmod', '-R', 'u+w', fmt_root)
+            end
+          rescue StandardError => e
+            Pod::UI.warn("[Podfile] fmt chmod: #{e.message}")
+          end
+          begin
+            File.write(fmt_base, contents.sub(old, new))
+          rescue Errno::EACCES, Errno::EPERM => e
+            Pod::UI.warn(<<~MSG)
+              [Podfile] Could not patch fmt for Xcode: #{e.message}
+              Fix permissions, then run pod install again:
+                chmod -R u+w "#{File.expand_path('Pods/fmt', __dir__)}"
+            MSG
+            raise
+          end
+        end
+      end
+    end
 
     # This is necessary for Xcode 14, because it signs resource bundles by default
     # when building for devices.
